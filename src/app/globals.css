@@ -19,8 +19,8 @@
 }
 
 .dark {
-  --background: #020617;
-  /* slate-950 */
+  --background: transparent;
+  /* global background handled by Background.tsx */
   --foreground: #f8fafc;
   /* slate-50 */
 }

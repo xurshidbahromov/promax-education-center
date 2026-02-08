@@ -1,6 +1,7 @@
 "use client";
 
 import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 import Image from 'next/image';
 import { useLanguage } from '@/context/LanguageContext';
 import { cn } from '@/lib/utils';
@@ -12,7 +13,13 @@ import { motion, AnimatePresence } from 'framer-motion';
 const Navbar = () => {
     const { language, setLanguage, t } = useLanguage();
     const { theme, setTheme } = useTheme();
+    const pathname = usePathname();
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
+    const isActive = (path: string) => {
+        if (path === 'home') return pathname === '/';
+        return pathname.startsWith(`/${path}`);
+    };
     const [themeOpen, setThemeOpen] = useState(false);
     const [langOpen, setLangOpen] = useState(false);
     const [mounted, setMounted] = useState(false);
@@ -61,11 +68,13 @@ const Navbar = () => {
                                     alt="Logo"
                                     width={256}
                                     height={256}
-                                    className="w-full h-full object-contain"
+                                    className="w-full h-full object-contain dark:filter-none invert hue-rotate-180"
                                 />
                             </div>
                         </Link>
                     </div>
+
+
 
                     {/* Desktop Navigation */}
                     <div className="hidden lg:flex items-center gap-8">
@@ -73,10 +82,18 @@ const Navbar = () => {
                             <Link
                                 key={item}
                                 href={item === 'home' ? '/' : `/${item}`}
-                                className="text-sm font-medium text-gray-600 dark:text-gray-300 hover:text-brand-blue dark:hover:text-blue-400 transition-colors relative group"
+                                className={cn(
+                                    "text-sm font-medium transition-colors relative group",
+                                    isActive(item)
+                                        ? "text-brand-blue dark:text-blue-400 font-bold"
+                                        : "text-gray-600 dark:text-gray-300 hover:text-brand-blue dark:hover:text-blue-400"
+                                )}
                             >
                                 {t(`nav.${item}`)}
-                                <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-brand-blue transition-all group-hover:w-full opacity-0 group-hover:opacity-100"></span>
+                                <span className={cn(
+                                    "absolute -bottom-1 left-0 h-0.5 bg-brand-blue transition-all duration-300",
+                                    isActive(item) ? "w-full" : "w-0 group-hover:w-full"
+                                )}></span>
                             </Link>
                         ))}
                     </div>
@@ -208,7 +225,12 @@ const Navbar = () => {
                                 <Link
                                     key={item}
                                     href={item === 'home' ? '/' : `/${item}`}
-                                    className="text-base font-medium text-gray-800 dark:text-gray-200 hover:text-brand-blue py-2 border-b border-gray-50 dark:border-slate-900"
+                                    className={cn(
+                                        "text-base font-medium py-2 border-b border-gray-50 dark:border-slate-900",
+                                        isActive(item)
+                                            ? "text-brand-blue dark:text-blue-400 font-bold"
+                                            : "text-gray-800 dark:text-gray-200 hover:text-brand-blue"
+                                    )}
                                     onClick={() => setMobileMenuOpen(false)}
                                 >
                                     {t(`nav.${item}`)}

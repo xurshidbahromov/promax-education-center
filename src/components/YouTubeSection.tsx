@@ -20,19 +20,19 @@ const YouTubeSection = () => {
             titleKey: 'youtube.playlist.2',
             thumbnail: 'bg-orange-100 dark:bg-orange-900',
             url: 'https://youtube.com/playlist?list=PLZkj58ihUphTUtF59RLxhDSdHjEj0gYpa&si=-vrQS9W7rhKWEeR9',
-            count: '50+'
+            count: '10+'
         },
         {
             id: 3,
             titleKey: 'youtube.playlist.3',
             thumbnail: 'bg-purple-100 dark:bg-purple-900',
             url: 'https://youtube.com/playlist?list=PLZkj58ihUphRGyEIpjzV9b8bHrMASourQ&si=WpFuG4iGbhsPX_ms',
-            count: '15+'
+            count: '25+'
         }
     ];
 
     return (
-        <section className="py-20 bg-gray-50 dark:bg-slate-900 transition-colors duration-300">
+        <section className="py-20 bg-transparent transition-colors duration-300">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
 
                 {/* Header */}
@@ -120,7 +120,7 @@ const YouTubeSection = () => {
                         initial={{ opacity: 0, y: 20 }}
                         whileInView={{ opacity: 1, y: 0 }}
                         viewport={{ once: true }}
-                        className="group inline-flex items-center gap-2 bg-red-600 text-white px-10 py-5 rounded-2xl font-bold text-lg hover:bg-red-700 transition-all shadow-xl shadow-red-100 dark:shadow-none hover:shadow-2xl hover:shadow-red-200 active:scale-95"
+                        className="group inline-flex items-center gap-2 bg-brand-orange text-white px-10 py-5 rounded-2xl font-bold text-lg hover:bg-orange-600 transition-all shadow-xl shadow-orange-100 dark:shadow-none hover:shadow-2xl hover:shadow-orange-200 active:scale-95"
                     >
                         {t('home.youtube.view_channel')}
                         <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />

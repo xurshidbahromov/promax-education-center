@@ -2,7 +2,7 @@
 
 import { useLanguage } from '@/context/LanguageContext';
 import { motion } from 'framer-motion';
-import { BookOpen, Calculator, Atom, Globe, ArrowRight, GraduationCap, Languages, ScrollText } from 'lucide-react';
+import { BookOpen, Calculator, Atom, Globe, ArrowRight, GraduationCap, Languages, ScrollText, Dna } from 'lucide-react';
 import { useState } from 'react';
 import { TeacherModal } from '@/components/TeacherModal';
 
@@ -13,10 +13,12 @@ export default function CoursesPage() {
     const generalCourses = [
         { id: 'math', icon: Calculator, color: 'text-blue-600', bg: 'bg-blue-50 dark:bg-blue-900/20' },
         { id: 'english', icon: Globe, color: 'text-orange-600', bg: 'bg-orange-50 dark:bg-orange-900/20' },
+        { id: 'physics', icon: Atom, color: 'text-indigo-600', bg: 'bg-indigo-50 dark:bg-indigo-900/20' },
+        { id: 'korean', icon: Languages, color: 'text-rose-600', bg: 'bg-rose-50 dark:bg-rose-900/20' },
         { id: 'native', icon: BookOpen, color: 'text-emerald-600', bg: 'bg-emerald-50 dark:bg-emerald-900/20' },
         { id: 'russian', icon: Languages, color: 'text-cyan-600', bg: 'bg-cyan-50 dark:bg-cyan-900/20' },
         { id: 'history', icon: ScrollText, color: 'text-amber-600', bg: 'bg-amber-50 dark:bg-amber-900/20' },
-        { id: 'biology', icon: Atom, color: 'text-green-600', bg: 'bg-green-50 dark:bg-green-900/20' },
+        { id: 'biology', icon: Dna, color: 'text-green-600', bg: 'bg-green-50 dark:bg-green-900/20' },
     ];
 
     const prepCourses = [

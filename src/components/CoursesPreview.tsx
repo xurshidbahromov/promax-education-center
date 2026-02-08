@@ -2,40 +2,35 @@
 
 import { useLanguage } from '@/context/LanguageContext';
 import { motion } from 'framer-motion';
-import { BookOpen, Calculator, Atom, Globe, ArrowRight, ScrollText, Feather } from 'lucide-react';
+import { BookOpen, Calculator, Atom, Globe, Dna, ScrollText } from 'lucide-react';
 import Link from 'next/link';
+import { ArrowRight } from 'lucide-react';
 
 const CoursesPreview = () => {
     const { t } = useLanguage();
 
-    const courses = [
+    const categories = [
         {
-            id: 'math',
+            id: 'exact',
             icon: Calculator,
             color: 'text-blue-600 dark:text-blue-400',
             bg: 'bg-blue-50 dark:bg-blue-900/20'
         },
         {
-            id: 'english',
+            id: 'languages',
             icon: Globe,
             color: 'text-orange-600 dark:text-orange-400',
             bg: 'bg-orange-50 dark:bg-orange-900/20'
         },
         {
-            id: 'native',
-            icon: Feather,
-            color: 'text-emerald-600 dark:text-emerald-400',
-            bg: 'bg-emerald-50 dark:bg-emerald-900/20'
-        },
-        {
-            id: 'history',
+            id: 'humanities',
             icon: ScrollText,
             color: 'text-amber-600 dark:text-amber-400',
             bg: 'bg-amber-50 dark:bg-amber-900/20'
         },
         {
-            id: 'biology',
-            icon: Atom,
+            id: 'science',
+            icon: Dna,
             color: 'text-green-600 dark:text-green-400',
             bg: 'bg-green-50 dark:bg-green-900/20'
         }
@@ -61,7 +56,7 @@ const CoursesPreview = () => {
     };
 
     return (
-        <section className="py-24 bg-gray-50 dark:bg-slate-900/50 relative overflow-hidden transition-colors duration-300">
+        <section className="py-24 bg-transparent relative overflow-hidden transition-colors duration-300">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
 
                 {/* Section Header */}
@@ -86,30 +81,30 @@ const CoursesPreview = () => {
                     </motion.p>
                 </div>
 
-                {/* Courses Grid */}
+                {/* Categories Grid */}
                 <motion.div
                     variants={containerVariants}
                     initial="hidden"
                     whileInView="visible"
                     viewport={{ once: true }}
-                    className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6"
+                    className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6"
                 >
-                    {courses.map((course) => (
+                    {categories.map((cat) => (
                         <motion.div
-                            key={course.id}
+                            key={cat.id}
                             variants={itemVariants}
                             className="group bg-white/80 dark:bg-black/20 backdrop-blur-md rounded-2xl p-6 shadow-sm hover:shadow-xl transition-all duration-300 border border-gray-100 dark:border-white/10 hover:-translate-y-1 relative flex flex-col h-full"
                         >
-                            <div className={`w-12 h-12 rounded-xl ${course.bg} flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300`}>
-                                <course.icon className={`w-6 h-6 ${course.color}`} />
+                            <div className={`w-12 h-12 rounded-xl ${cat.bg} flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300`}>
+                                <cat.icon className={`w-6 h-6 ${cat.color}`} />
                             </div>
 
-                            <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-2 line-clamp-1">
-                                {t(`courses.${course.id}`)}
+                            <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2">
+                                {t(`courses.cat.${cat.id}`)}
                             </h3>
 
-                            <p className="text-sm text-gray-600 dark:text-gray-400 mb-4 leading-relaxed line-clamp-3 flex-grow">
-                                {t(`courses.${course.id}.desc`)}
+                            <p className="text-sm text-gray-600 dark:text-gray-400 mb-4 leading-relaxed line-clamp-3">
+                                {t(`courses.cat.${cat.id}.desc`)}
                             </p>
 
                             <Link
