@@ -78,7 +78,7 @@ const Navbar = () => {
 
                     {/* Desktop Navigation */}
                     <div className="hidden lg:flex items-center gap-8">
-                        {['home', 'courses', 'results', 'about'].map((item) => (
+                        {['home', 'courses', 'methodology', 'results', 'about'].map((item) => (
                             <Link
                                 key={item}
                                 href={item === 'home' ? '/' : `/${item}`}
@@ -221,7 +221,7 @@ const Navbar = () => {
                         className="lg:hidden bg-white dark:bg-slate-950 border-t border-gray-100 dark:border-slate-800 overflow-hidden shadow-xl"
                     >
                         <div className="flex flex-col gap-4 p-4">
-                            {['home', 'courses', 'results', 'about'].map((item) => (
+                            {['home', 'courses', 'methodology', 'results', 'about'].map((item) => (
                                 <Link
                                     key={item}
                                     href={item === 'home' ? '/' : `/${item}`}

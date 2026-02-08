@@ -41,27 +41,29 @@ export default function AboutPage() {
     return (
         <div className="pt-24 min-h-screen">
             {/* Header */}
-            <section className="text-center py-16 px-4">
-                <motion.h1
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    className="text-4xl md:text-6xl font-extrabold text-gray-900 dark:text-white mb-6"
-                >
-                    {t('nav.about')}
-                </motion.h1>
-                <motion.p
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.1 }}
-                    className="text-xl text-gray-600 dark:text-gray-400 max-w-2xl mx-auto"
-                >
-                    {t('footer.about.desc')}
-                </motion.p>
+            <section className="text-center py-16">
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                    <motion.h1
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        className="text-4xl md:text-6xl font-extrabold text-gray-900 dark:text-white mb-6"
+                    >
+                        {t('nav.about')}
+                    </motion.h1>
+                    <motion.p
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: 0.1 }}
+                        className="text-xl text-gray-600 dark:text-gray-400 max-w-2xl mx-auto"
+                    >
+                        {t('footer.about.desc')}
+                    </motion.p>
+                </div>
             </section>
 
             {/* Video Section */}
-            <section className="py-8 px-4">
-                <div className="max-w-5xl mx-auto">
+            <section className="py-8">
+                <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
                     <motion.div
                         initial={{ opacity: 0, scale: 0.95 }}
                         whileInView={{ opacity: 1, scale: 1 }}
@@ -83,8 +85,8 @@ export default function AboutPage() {
             </section>
 
             {/* Our Mission */}
-            <section className="py-20 px-4">
-                <div className="max-w-4xl mx-auto text-center">
+            <section className="py-20">
+                <div className="max-w-4xl mx-auto text-center px-4 sm:px-6 lg:px-8">
                     <motion.h2
                         initial={{ opacity: 0, y: 20 }}
                         whileInView={{ opacity: 1, y: 0 }}
@@ -106,8 +108,8 @@ export default function AboutPage() {
             </section>
 
             {/* Why Choose Us (Features) */}
-            <section className="py-20 px-4">
-                <div className="max-w-7xl mx-auto">
+            <section className="py-20">
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
                         {features.map((feature, index) => (
                             <motion.div
@@ -132,8 +134,8 @@ export default function AboutPage() {
             </section>
 
             {/* Contact & Map Section */}
-            <section className="py-20 px-4">
-                <div className="max-w-7xl mx-auto">
+            <section className="py-20">
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-start">
 
                         {/* Contact Info (Enhanced) */}
