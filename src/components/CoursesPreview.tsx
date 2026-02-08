@@ -80,7 +80,7 @@ const CoursesPreview = () => {
                         whileInView={{ opacity: 1, y: 0 }}
                         viewport={{ once: true }}
                         transition={{ duration: 0.5, delay: 0.2 }}
-                        className="text-lg text-gray-600 dark:text-gray-400 max-w-2xl mx-auto"
+                        className="text-lg text-gray-600 dark:text-gray-200 max-w-2xl mx-auto"
                     >
                         {t('courses.subtitle')}
                     </motion.p>
@@ -98,7 +98,7 @@ const CoursesPreview = () => {
                         <motion.div
                             key={course.id}
                             variants={itemVariants}
-                            className="group bg-white dark:bg-slate-800 rounded-2xl p-6 shadow-sm hover:shadow-xl transition-all duration-300 border border-gray-100 dark:border-slate-700 hover:-translate-y-1 relative"
+                            className="group bg-white/80 dark:bg-black/20 backdrop-blur-md rounded-2xl p-6 shadow-sm hover:shadow-xl transition-all duration-300 border border-gray-100 dark:border-white/10 hover:-translate-y-1 relative flex flex-col h-full"
                         >
                             <div className={`w-12 h-12 rounded-xl ${course.bg} flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300`}>
                                 <course.icon className={`w-6 h-6 ${course.color}`} />
@@ -108,13 +108,13 @@ const CoursesPreview = () => {
                                 {t(`courses.${course.id}`)}
                             </h3>
 
-                            <p className="text-sm text-gray-600 dark:text-gray-400 mb-4 leading-relaxed line-clamp-2">
+                            <p className="text-sm text-gray-600 dark:text-gray-400 mb-4 leading-relaxed line-clamp-3 flex-grow">
                                 {t(`courses.${course.id}.desc`)}
                             </p>
 
                             <Link
                                 href="/courses"
-                                className="inline-flex items-center text-sm font-semibold text-brand-blue group-hover:text-blue-600 dark:text-blue-400 transition-colors"
+                                className="inline-flex items-center text-sm font-semibold text-brand-blue group-hover:text-blue-600 dark:text-blue-400 transition-colors mt-auto"
                             >
                                 {t('courses.more')}
                                 <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />

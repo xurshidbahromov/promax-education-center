@@ -50,7 +50,7 @@ const YouTubeSection = () => {
                         whileInView={{ opacity: 1, y: 0 }}
                         viewport={{ once: true }}
                         transition={{ delay: 0.1 }}
-                        className="text-xl text-gray-600 dark:text-gray-400 max-w-2xl mx-auto"
+                        className="text-xl text-gray-600 dark:text-gray-200 max-w-2xl mx-auto"
                     >
                         {t('home.youtube.subtitle')}
                     </motion.p>
@@ -68,16 +68,16 @@ const YouTubeSection = () => {
                             whileInView={{ opacity: 1, y: 0 }}
                             viewport={{ once: true }}
                             transition={{ delay: index * 0.1 }}
-                            className="group block relative"
+                            className="group block relative h-full"
                         >
                             {/* Playlist Stack Effect */}
-                            <div className="absolute top-0 inset-x-4 -mt-2 h-4 bg-gray-200 dark:bg-slate-700 rounded-t-xl opacity-50 transform scale-90 group-hover:scale-95 group-hover:-mt-5 transition-all duration-500 ease-out" />
-                            <div className="absolute top-0 inset-x-2 -mt-1 h-4 bg-gray-300 dark:bg-slate-600 rounded-t-xl opacity-70 transform scale-95 group-hover:scale-100 group-hover:-mt-3 transition-all duration-500 ease-out" />
+                            <div className="absolute top-0 inset-x-4 -mt-2 h-4 bg-gray-200/50 dark:bg-white/5 rounded-t-xl opacity-50 transform scale-90 group-hover:scale-95 group-hover:-mt-5 transition-all duration-500 ease-out" />
+                            <div className="absolute top-0 inset-x-2 -mt-1 h-4 bg-gray-300/50 dark:bg-white/10 rounded-t-xl opacity-70 transform scale-95 group-hover:scale-100 group-hover:-mt-3 transition-all duration-500 ease-out" />
 
                             {/* Main Card */}
-                            <div className="relative bg-white dark:bg-slate-800 rounded-2xl overflow-hidden shadow-lg group-hover:shadow-2xl transition-all duration-500 ease-out transform group-hover:-translate-y-2">
+                            <div className="relative bg-white/80 dark:bg-black/20 backdrop-blur-md rounded-2xl overflow-hidden shadow-lg group-hover:shadow-2xl transition-all duration-500 ease-out transform group-hover:-translate-y-2 border border-white/20 dark:border-white/10 h-full flex flex-col">
                                 {/* Thumbnail Container */}
-                                <div className={`relative aspect-video bg-gray-100 dark:bg-slate-900 flex items-center justify-center overflow-hidden`}>
+                                <div className={`relative aspect-video bg-gray-100 dark:bg-slate-900 flex items-center justify-center overflow-hidden flex-shrink-0`}>
                                     <div className="absolute inset-0 bg-black/5 group-hover:bg-black/20 transition-colors duration-500" />
 
                                     {/* Playlist Overlay (Right Side) */}
@@ -96,11 +96,11 @@ const YouTubeSection = () => {
                                 </div>
 
                                 {/* Content */}
-                                <div className="p-6">
+                                <div className="p-6 flex flex-col flex-grow">
                                     <h3 className="text-lg font-bold text-gray-900 dark:text-white group-hover:text-brand-blue transition-colors mb-2 line-clamp-2 uppercase">
                                         {t(playlist.titleKey)}
                                     </h3>
-                                    <div className="flex items-center text-sm text-gray-500 dark:text-gray-400 font-medium">
+                                    <div className="flex items-center text-sm text-gray-500 dark:text-gray-400 font-medium mt-auto">
                                         <span className="flex items-center group-hover:text-brand-orange transition-colors">
                                             View Playlist <ExternalLink className="w-3 h-3 ml-1" />
                                         </span>

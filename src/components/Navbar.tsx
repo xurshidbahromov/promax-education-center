@@ -1,6 +1,7 @@
 "use client";
 
 import Link from 'next/link';
+import Image from 'next/image';
 import { useLanguage } from '@/context/LanguageContext';
 import { cn } from '@/lib/utils';
 import { useState, useEffect, useRef } from 'react';
@@ -54,10 +55,15 @@ const Navbar = () => {
                     {/* Logo Area */}
                     <div className="flex items-center gap-2">
                         <Link href="/" className="flex items-center gap-2 group">
-                            <div className="w-8 h-8 bg-brand-blue rounded-lg flex items-center justify-center text-white font-bold text-xl shadow-sm group-hover:scale-105 transition-transform">
-                                P
+                            <div className="w-24 h-24">
+                                <Image
+                                    src="/logo.png"
+                                    alt="Logo"
+                                    width={256}
+                                    height={256}
+                                    className="w-full h-full object-contain"
+                                />
                             </div>
-                            <span className="text-xl font-bold text-gray-900 dark:text-white tracking-tight">PROMAX</span>
                         </Link>
                     </div>
 

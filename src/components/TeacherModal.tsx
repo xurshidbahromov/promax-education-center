@@ -34,7 +34,7 @@ export const TeacherModal = ({ isOpen, onClose, courseTitle, teacherName, teache
                         initial={{ opacity: 0, scale: 0.95, y: 20 }}
                         animate={{ opacity: 1, scale: 1, y: 0 }}
                         exit={{ opacity: 0, scale: 0.95, y: 20 }}
-                        className="relative w-full max-w-sm bg-white dark:bg-slate-900 rounded-2xl shadow-2xl p-6 border border-gray-100 dark:border-slate-800 flex flex-col items-center text-center"
+                        className="relative w-full max-w-sm bg-white/90 dark:bg-slate-900/60 backdrop-blur-2xl rounded-2xl shadow-2xl p-6 border border-white/20 dark:border-white/10 flex flex-col items-center text-center"
                     >
                         {/* Close Button */}
                         <button
