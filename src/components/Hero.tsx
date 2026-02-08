@@ -11,11 +11,7 @@ const Hero = () => {
     return (
         <section className="relative min-h-[100vh] flex flex-col items-center justify-center text-center overflow-hidden bg-white dark:bg-slate-950 transition-colors duration-300 pt-8 pb-16">
 
-            {/* Abstract Background Element (Subtle Gradient Mesh) */}
-            <div className="absolute inset-0 pointer-events-none overflow-hidden">
-                <div className="absolute top-[-20%] left-[-10%] w-[600px] h-[600px] bg-brand-blue/5 dark:bg-brand-blue/10 rounded-full blur-[120px]" />
-                <div className="absolute bottom-[0%] right-[-5%] w-[500px] h-[500px] bg-brand-orange/5 dark:bg-brand-orange/10 rounded-full blur-[100px]" />
-            </div>
+            {/* Abstract Background Element (Removed - moved to global layout) */}
 
             <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 flex flex-col items-center">
 
