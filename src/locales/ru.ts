@@ -7,6 +7,7 @@ export const ru = {
     "nav.methodology": "Методика",
     "nav.login": "Войти",
     "hero.headline": "Точное Обучение. Стратегический Успех.",
+    "hero.slogan": "Знай Свои Главные Цели",
     "hero.subheadline": "Профессиональная учебный центр подготовки к ВУЗам, IELTS и SAT.",
     "hero.cta.primary": "Начать",
     "hero.cta.secondary": "Результаты",

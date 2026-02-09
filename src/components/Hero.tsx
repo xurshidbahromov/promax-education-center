@@ -47,6 +47,16 @@ const Hero = () => {
                     ))}
                 </motion.h1>
 
+                {/* Slogan */}
+                <motion.p
+                    className="text-xl sm:text-2xl md:text-3xl font-bold text-brand-orange dark:text-orange-400 mb-2 uppercase tracking-wide"
+                    initial={{ opacity: 0, scale: 0.9 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    transition={{ duration: 0.5, delay: 0.2 }}
+                >
+                    "{t('hero.slogan')}"
+                </motion.p>
+
                 {/* Subheadline */}
                 <motion.p
                     className="mt-6 text-lg sm:text-xl md:text-2xl text-gray-500 dark:text-gray-400 max-w-2xl font-medium leading-relaxed px-4"

@@ -7,6 +7,7 @@ export const en = {
     "nav.methodology": "Methodology",
     "nav.login": "Login",
     "hero.headline": "Precision Learning. Strategic Success.",
+    "hero.slogan": "Know Your Most Important Goals",
     "hero.subheadline": "Professional coaching center for University Exams, IELTS, and SAT preparation.",
     "hero.cta.primary": "Get Started",
     "hero.cta.secondary": "View Results",
