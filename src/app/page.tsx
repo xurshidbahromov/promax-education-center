@@ -3,6 +3,7 @@ import CoursesPreview from "@/components/CoursesPreview";
 import YouTubeSection from "@/components/YouTubeSection";
 import ResultsStats from "@/components/ResultsStats";
 import Methodology from '@/components/Methodology';
+import CallToAction from "@/components/CallToAction";
 
 export default function Home() {
   return (
@@ -12,6 +13,7 @@ export default function Home() {
       <Methodology />
       <ResultsStats />
       <YouTubeSection />
+      <CallToAction />
     </main>
   );
 }

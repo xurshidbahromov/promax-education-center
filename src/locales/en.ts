@@ -1,5 +1,10 @@
 export const en = {
     "nav.home": "Home",
+    "contact.form.success": "Your message has been sent successfully!",
+    "cta.title": "Build Your Future With Us",
+    "cta.subtitle": "Register now and sign up for your first free lesson!",
+    "cta.button.primary": "Get Started",
+    "cta.button.secondary": "Learn More",
     "nav.courses": "Courses",
     "nav.results": "Results",
     "nav.about": "About Us",
