@@ -7,9 +7,9 @@ export const Background = () => {
         <div className="fixed inset-0 z-[-1] overflow-hidden pointer-events-none">
             {/* Base Gradient - Vivid Colors */}
             <div
-                className="absolute inset-0 opacity-40 dark:opacity-30"
+                className="absolute inset-0"
                 style={{
-                    background: 'linear-gradient(90deg, rgba(235, 124, 14, 1) 0%, rgba(25, 110, 230, 1) 100%, rgba(5, 60, 240, 1) 100%)'
+                    background: 'linear-gradient(100deg, rgba(235, 124, 14, 0.7) 0%, rgba(219, 222, 255, 0.7) 50%, rgba(3, 44, 128, 0.7) 100%)'
                 }}
             />
 

@@ -5,6 +5,7 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { LanguageProvider } from "@/context/LanguageContext";
 import { ThemeProvider } from "@/components/ThemeProvider";
+import { Background } from "@/components/Background";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -38,6 +39,7 @@ export default function RootLayout({
           disableTransitionOnChange
         >
           <LanguageProvider>
+            <Background />
             <Navbar />
             <main className="flex-grow pt-16">
               {children}

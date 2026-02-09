@@ -9,13 +9,13 @@ export default function ResultsPage() {
 
     const videos = [
         { id: "tizWzSm-N7k", title: "Universitetga kirishimdan asosiy maqsadim... | Kamronbek" },
-        { id: "wDNc76Q-oZ2gdA6k", title: "Rossiya oliygohlari talabasi bo'lish!" },
+        { id: "Wm5tVfWyRww", title: "Rossiya oliygohlari talabasi bo'lish!" },
         { id: "z7ren1yoAZ0", title: "Shifokor bo'lishimdan asosiy maqsadim..." },
         { id: "6P9K5f5A1Ts", title: "Harakat qilsa, hamma maqsadga erishish mumkin!" }, // Fixed ID from user list
-        { id: "pMCSYjwF8ZFkmsae", title: "5 ta universitet talabasi bo'ldim..." },
+        { id: "YRHaFfvfRxw", title: "5 ta universitet talabasi bo'ldim..." },
         { id: "LfQEIwzTnng", title: "Maqsadim -- yetuk shifokor bo'lish!" }, // Fixed ID from user list
         { id: "5OfZzxbYN4Q", title: "Endi universitetga imtihonsiz kira olaman!" }, // Fixed ID from user list
-        { id: "9R687WSaE97HnN1s", title: "AJOU talabasi bo'lishga muvaffaq bo'ldim! | Munira" },
+        { id: "5U2KAiNEBRQ", title: "AJOU talabasi bo'lishga muvaffaq bo'ldim! | Munira" },
         { id: "AIlOwPHliNA", title: "Grant asosida o'qib, 2 ta universitet talabasi bo'ldim!" }, // Fixed ID
         { id: "3qv0QED_0k8", title: "Yutuqlarimda ustozlarim mehnati katta! | Xusnora" }, // Fixed ID
         { id: "ZiomV95lkLQ", title: "Albatta, barcha maqsadlarimga erishaman! | Shahzoda" }, // Fixed ID

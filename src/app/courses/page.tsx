@@ -27,7 +27,7 @@ export default function CoursesPage() {
     ];
 
     return (
-        <div className="min-h-screen pt-24 pb-20 bg-white dark:bg-slate-950 transition-colors duration-300">
+        <div className="min-h-screen pt-24 pb-20 transition-colors duration-300">
             <TeacherModal
                 isOpen={!!selectedCourse}
                 onClose={() => setSelectedCourse(null)}

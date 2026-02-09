@@ -44,7 +44,7 @@ const MethodologyPage = () => {
     ];
 
     return (
-        <main className="min-h-screen pt-24 pb-20 bg-white dark:bg-slate-950 transition-colors duration-300">
+        <main className="min-h-screen pt-24 pb-20 bg-transparent transition-colors duration-300">
             {/* Hero Section */}
             <section className="relative px-4 sm:px-6 lg:px-8 mb-20 md:mb-32">
                 <div className="max-w-4xl mx-auto text-center">
