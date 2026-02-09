@@ -44,7 +44,7 @@ const Methodology = () => {
     ];
 
     return (
-        <section className="py-20 relative z-10 bg-transparent transition-colors duration-300">
+        <section className="py-20 relative z-10 bg-white/50 dark:bg-black/30 backdrop-blur-lg border-y border-gray-200 dark:border-white/10 transition-colors duration-300">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
 
                 <div className="flex flex-col lg:flex-row items-center justify-between gap-12">
@@ -100,7 +100,7 @@ const Methodology = () => {
                                     transition={{ delay: 0.2 + (index * 0.1) }}
                                     className="relative z-10 flex flex-col items-center text-center group"
                                 >
-                                    <div className={`w-16 h-16 rounded-full ${step.bg} ${step.color} border-4 border-white dark:border-slate-900 flex items-center justify-center mb-4 transition-transform group-hover:scale-110 shadow-sm`}>
+                                    <div className={`w-16 h-16 rounded-full ${step.bg} ${step.color} border-4 border-white dark:border-slate-800 flex items-center justify-center mb-4 transition-transform group-hover:scale-110 shadow-lg`}>
                                         <step.icon size={24} strokeWidth={2.5} />
                                     </div>
                                     <h3 className="text-sm font-bold text-gray-900 dark:text-white uppercase tracking-wider">
