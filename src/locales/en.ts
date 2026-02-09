@@ -104,5 +104,77 @@ export const en = {
     "methodology.step3.desc": "Weekly monitoring and analysis of student progress.",
     "methodology.step4.title": "Exam Simulation",
     "methodology.step4.num": "04",
-    "methodology.step4.desc": "Final real-world exam practice to ensure readiness."
+    "methodology.step4.desc": "Final real-world exam practice to ensure readiness.",
+
+    // Course Detail Page Keys
+    "course.materials": "Study Materials",
+    "course.teacher": "About the Teacher",
+    "course.methodology": "Teaching Methodology",
+    "course.methodology.desc": "Our curriculum focuses on reinforcing theoretical knowledge with practical skills.",
+
+    // Specific Course Details
+    "courses.math.long_desc": "The mathematics course focuses on developing logical thinking and problem-solving skills. Our program covers all topics from school textbooks to university entrance exams.",
+    "courses.math.materials": "Skavi, Uzoqov collections, 1996-2003 test sets.",
+    "courses.math.teacher_name": "Azizbek Rahimov",
+    "courses.math.teacher_bio": "Top-category mathematics teacher with 10 years of experience. Many students accepted to prestigious universities on grants.",
+
+    "courses.english.long_desc": "The English course focuses on developing 4 key skills (Listening, Reading, Writing, Speaking). Lessons are conducted interactively.",
+    "courses.english.materials": "Headway, English File, Cambridge IELTS books (1-18).",
+    "courses.english.teacher_name": "Madina Karimova",
+    "courses.english.teacher_bio": "Holder of IELTS 8.5 and TESOL certificates. International teaching experience.",
+
+    "courses.physics.long_desc": "In-depth study of physical laws and solving real-life problems.",
+    "courses.physics.materials": "Rimkevich, Usmonov problem sets.",
+    "courses.physics.teacher_name": "Jasur Aliyev",
+    "courses.physics.teacher_bio": "PhD in Physics, 15 years of pedagogical experience.",
+
+    "courses.history.long_desc": "Analysis of historical events and studying chronological order.",
+    "courses.history.materials": "History of Uzbekistan, World History textbooks.",
+    "courses.history.teacher_name": "Dilshodbek Ergashev",
+    "courses.history.teacher_bio": "History expert, author of DTM tests.",
+
+    "courses.biology.long_desc": "Study of living organisms and their structure.",
+    "courses.biology.materials": "Biology Grade 6-11 textbooks, Green collection.",
+    "courses.biology.teacher_name": "Ms. Nargiza",
+    "courses.biology.teacher_bio": "Top-category biology teacher.",
+
+    "courses.native.long_desc": "Deep knowledge of Native language grammar and literature.",
+    "courses.native.materials": "Native language and literature textbooks, DTM tests.",
+    "courses.native.teacher_name": "Ms. Feruza",
+    "courses.native.teacher_bio": "PhD in Philology.",
+
+    "courses.russian.long_desc": "Fluency in Russian and grammar study.",
+    "courses.russian.materials": "Poexali, Russian grammar.",
+    "courses.russian.teacher_name": "Elena Vladimirovna",
+    "courses.russian.teacher_bio": "Russian language and literature teacher.",
+
+    "courses.korean.long_desc": "Learning Korean from scratch to TOPIK level.",
+    "courses.korean.materials": "Sejong Korean, TOPIK tests.",
+    "courses.korean.teacher_name": "Kim Min-ji",
+    "courses.korean.teacher_bio": "Studied in Korea, 5 years of experience.",
+
+    "courses.cert.national.long_desc": "Special preparation course for the National Certificate exam.",
+    "courses.cert.national.materials": "Official DTM tests.",
+    "courses.cert.national.teacher_name": "Expert Team",
+    "courses.cert.national.teacher_bio": "Group of experts on National Certificate.",
+
+    "courses.cert.ielts.long_desc": "Intensive preparation for the IELTS exam (Academic & General).",
+    "courses.cert.ielts.materials": "Cambridge 10-18, Makkar IELTS.",
+    "courses.cert.ielts.teacher_name": "Mr. John",
+    "courses.cert.ielts.teacher_bio": "IELTS Examiner experience.",
+
+    "courses.cert.sat.long_desc": "Perfect preparation for SAT Math and English sections.",
+    "courses.cert.sat.materials": "College Board, Khan Academy, Princeton Review.",
+    "courses.cert.sat.teacher_name": "Mr. Sarvar",
+    "courses.cert.sat.teacher_bio": "Scored 1500+ on SAT.",
+
+    "courses.prep.inha.long_desc": "Targeted preparation for Inha University entrance exams (Math & Physics).",
+    "courses.prep.inha.materials": "Inha past papers, Calculus books.",
+    "courses.prep.inha.teacher_name": "Inha Team",
+    "courses.prep.inha.teacher_bio": "Students and alumni of Inha University.",
+
+    "courses.prep.west.long_desc": "Preparation for WIUT entrance exam (Math) and IELTS.",
+    "courses.prep.west.materials": "WIUT math exams, IELTS materials.",
+    "courses.prep.west.teacher_name": "West Team",
+    "courses.prep.west.teacher_bio": "WIUT alumni."
 };

@@ -104,5 +104,83 @@ export const uz = {
     "methodology.step3.desc": "O'zlashtirish ko'rsatkichlarini doimiy monitoring qilish va tahlil.",
     "methodology.step4.title": "Imtihon Simulyatsiyasi",
     "methodology.step4.num": "04",
-    "methodology.step4.desc": "Haqiqiy kirish imtihonlariga tayyorlanish uchun yakuniy sinovlar."
+    "methodology.step4.desc": "Haqiqiy kirish imtihonlariga tayyorlanish uchun yakuniy sinovlar.",
+
+    // Course Detail Page Keys
+    "course.materials": "O'quv qo'llanmalari",
+    "course.teacher": "O'qituvchi haqida",
+    "course.methodology": "O'qitish metodikasi",
+    "course.methodology.desc": "Bizning o'quv dasturimiz nazariy bilimlarni amaliy ko'nikmalar bilan mustahkamlashga qaratilgan.",
+
+    // Specific Course Details (Examples)
+    "courses.math.long_desc": "Matematika kursi mantiqiy fikrlashni rivojlantirish va murakkab masalalarni yechish ko'nikmalarini shakllantirishga qaratilgan. Bizning dastur maktab darsliklaridan tortib, oliy o'quv yurtlariga kirish imtihonlarigacha bo'lgan barcha mavzularni qamrab oladi.",
+    "courses.math.materials": "Skavi, Uzoqov to'plamlari, 1996-2003 testlar to'plami.",
+    "courses.math.teacher_name": "Azizbek Rahimov",
+    "courses.math.teacher_bio": "10 yillik tajribaga ega oliy toifali matematika o'qituvchisi. Ko'plab o'quvchilari nufuzli oliygohlarga grant asosida qabul qilingan.",
+
+    "courses.english.long_desc": "Ingliz tili kursi 4 ta asosiy ko'nikmani (Listening, Reading, Writing, Speaking) rivojlantirishga qaratilgan. Darslar interaktiv usulda olib boriladi.",
+    "courses.english.materials": "Headway, English File, Cambridge IELTS books (1-18).",
+    "courses.english.teacher_name": "Madina Karimova",
+    "courses.english.teacher_bio": "IELTS 8.5 sertifikatiga ega, TESOL sertifikati sohibasi. Xalqaro ta'lim tajribasiga ega.",
+
+    // Placeholder for others to avoid errors, can be filled properly later
+    "courses.physics.long_desc": "Fizika qonunlarini chuqur o'rganish va hayotiy masalalarni yechish.",
+    "courses.physics.materials": "Rimkevich, Usmonov masalalar to'plami.",
+    "courses.physics.teacher_name": "Jasur Aliyev",
+    "courses.physics.teacher_bio": "Fizika fanlari nomzodi, 15 yillik pedagogik staj.",
+
+    "courses.history.long_desc": "Tarixiy voqealarni tahlil qilish va xronologik ketma-ketlikni o'rganish.",
+    "courses.history.materials": "O'zbekiston tarixi, Jahon tarixi darsliklari.",
+    "courses.history.teacher_name": "Dilshodbek Ergashev",
+    "courses.history.teacher_bio": "Tarix fani bo'yicha ekspert, DTM testlari muallifi.",
+
+    "courses.biology.long_desc": "Tirik organizmlar va ularning tuzilishini o'rganish.",
+    "courses.biology.materials": "Biologiya 6-11 sinf darsliklari, Green to'plami.",
+    "courses.biology.teacher_name": "Nargiza opa",
+    "courses.biology.teacher_bio": "Biologiya fanidan oliy toifali o'qituvchi.",
+
+    "courses.chemistry.long_desc": "Kimyoviy elementlar va reaksiyalarni o'rganish.",
+    "courses.chemistry.materials": "Kimyo masalalar to'plami, Homchenko.",
+    "courses.chemistry.teacher_name": "Rustam aka",
+    "courses.chemistry.teacher_bio": "Kimyo fanidan olimpiada g'oliblarini tayyorlagan ustoz.",
+
+    "courses.native.long_desc": "Ona tili grammatikasi va adabiyoti bo'yicha chuqur bilimlar.",
+    "courses.native.materials": "Ona tili va adabiyot darsliklari, DTM testlari.",
+    "courses.native.teacher_name": "Feruza opa",
+    "courses.native.teacher_bio": "Filologiya fanlari nomzodi.",
+
+    "courses.russian.long_desc": "Rus tilida erkin so'zlashish va grammatikani o'rganish.",
+    "courses.russian.materials": "Poexali, Rus tili grammatikasi.",
+    "courses.russian.teacher_name": "Elena Vladimirovna",
+    "courses.russian.teacher_bio": "Rus tili va adabiyoti o'qituvchisi.",
+
+    "courses.korean.long_desc": "Koreys tilini noldan TOPIK darajasigacha o'rganish.",
+    "courses.korean.materials": "Sejong Korean, TOPIK testlari.",
+    "courses.korean.teacher_name": "Kim Min-ji",
+    "courses.korean.teacher_bio": "Koreyada tahsil olgan va 5 yillik tajribaga ega.",
+
+    "courses.cert.national.long_desc": "Milliy sertifikat imtihoniga maxsus tayyorgarlik kursi.",
+    "courses.cert.national.materials": "DTM rasmiy testlari.",
+    "courses.cert.national.teacher_name": "Expert Team",
+    "courses.cert.national.teacher_bio": "Milliy sertifikat bo'yicha mutaxassislar guruhi.",
+
+    "courses.cert.ielts.long_desc": "IELTS imtihoniga intensiv tayyorgarlik (Academic & General).",
+    "courses.cert.ielts.materials": "Cambridge 10-18, Makkar IELTS.",
+    "courses.cert.ielts.teacher_name": "Mr. John",
+    "courses.cert.ielts.teacher_bio": "IELTS Examiner experience.",
+
+    "courses.cert.sat.long_desc": "SAT Math va English qismlariga mukammal tayyorgarlik.",
+    "courses.cert.sat.materials": "College Board, Khan Academy, Princeton Review.",
+    "courses.cert.sat.teacher_name": "Sarvar aka",
+    "courses.cert.sat.teacher_bio": "SAT 1500+ natija sohibi.",
+
+    "courses.prep.inha.long_desc": "Inha universiteti kirish imtihonlariga (Math & Physics) maqsadli tayyorgarlik.",
+    "courses.prep.inha.materials": "Inha past papers, Calculus books.",
+    "courses.prep.inha.teacher_name": "Inha Team",
+    "courses.prep.inha.teacher_bio": "Inha universiteti talabalari va bitiruvchilari.",
+
+    "courses.prep.west.long_desc": "WIUT kirish imtihoni (Math) va IELTS ga tayyorgarlik.",
+    "courses.prep.west.materials": "WIUT math exams, IELTS materials.",
+    "courses.prep.west.teacher_name": "West Team",
+    "courses.prep.west.teacher_bio": "WIUT bitiruvchilari."
 };

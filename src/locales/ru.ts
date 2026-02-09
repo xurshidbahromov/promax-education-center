@@ -104,5 +104,77 @@ export const ru = {
     "methodology.step3.desc": "Еженедельный мониторинг и анализ успеваемости.",
     "methodology.step4.title": "Симуляция Экзамена",
     "methodology.step4.num": "04",
-    "methodology.step4.desc": "Финальная подготовка в условиях реального экзамена."
+    "methodology.step4.desc": "Финальная подготовка в условиях реального экзамена.",
+
+    // Course Detail Page Keys
+    "course.materials": "Учебные материалы",
+    "course.teacher": "Об учителе",
+    "course.methodology": "Методика обучения",
+    "course.methodology.desc": "Наша учебная программа направлена на закрепление теоретических знаний практическими навыками.",
+
+    // Specific Course Details
+    "courses.math.long_desc": "Курс математики направлен на развитие логического мышления и навыков решения сложных задач. Наша программа охватывает все темы от школьных учебников до вступительных экзаменов в ВУЗы.",
+    "courses.math.materials": "Сборники Скави, Узокова, тесты 1996-2003.",
+    "courses.math.teacher_name": "Азизбек Рахимов",
+    "courses.math.teacher_bio": "Учитель математики высшей категории с 10-летним стажем. Многие ученики поступили в престижные вузы на грант.",
+
+    "courses.english.long_desc": "Курс английского языка направлен на развитие 4 ключевых навыков (Listening, Reading, Writing, Speaking). Уроки проводятся интерактивным методом.",
+    "courses.english.materials": "Headway, English File, книги Cambridge IELTS (1-18).",
+    "courses.english.teacher_name": "Мадина Каримова",
+    "courses.english.teacher_bio": "Обладатель сертификата IELTS 8.5 и TESOL. Имеет опыт международного обучения.",
+
+    "courses.physics.long_desc": "Углубленное изучение законов физики и решение жизненных задач.",
+    "courses.physics.materials": "Сборник задач Рымкевича, Усмонова.",
+    "courses.physics.teacher_name": "Жасур Алиев",
+    "courses.physics.teacher_bio": "Кандидат физико-математических наук, 15 лет педагогического стажа.",
+
+    "courses.history.long_desc": "Анализ исторических событий и изучение хронологического порядка.",
+    "courses.history.materials": "История Узбекистана, Всемирная история.",
+    "courses.history.teacher_name": "Дилшодбек Эргашев",
+    "courses.history.teacher_bio": "Эксперт по истории, автор тестов DTM.",
+
+    "courses.biology.long_desc": "Изучение живых организмов и их строения.",
+    "courses.biology.materials": "Учебники биологии 6-11 классов, сборник Грина.",
+    "courses.biology.teacher_name": "Наргиза опа",
+    "courses.biology.teacher_bio": "Учитель биологии высшей категории.",
+
+    "courses.native.long_desc": "Глубокие знания грамматики и литературы родного языка.",
+    "courses.native.materials": "Учебники родного языка и литературы, тесты DTM.",
+    "courses.native.teacher_name": "Феруза опа",
+    "courses.native.teacher_bio": "Кандидат филологических наук.",
+
+    "courses.russian.long_desc": "Свободное владение русским языком и изучение грамматики.",
+    "courses.russian.materials": "Поехали, Грамматика русского языка.",
+    "courses.russian.teacher_name": "Елена Владимировна",
+    "courses.russian.teacher_bio": "Учитель русского языка и литературы.",
+
+    "courses.korean.long_desc": "Изучение корейского языка с нуля до уровня TOPIK.",
+    "courses.korean.materials": "Sejong Korean, тесты TOPIK.",
+    "courses.korean.teacher_name": "Ким Мин-джи",
+    "courses.korean.teacher_bio": "Обучалась в Корее, 5 лет опыта.",
+
+    "courses.cert.national.long_desc": "Специальный курс подготовки к экзамену на Национальный сертификат.",
+    "courses.cert.national.materials": "Официальные тесты DTM.",
+    "courses.cert.national.teacher_name": "Команда Экспертов",
+    "courses.cert.national.teacher_bio": "Группа экспертов по Национальному сертификату.",
+
+    "courses.cert.ielts.long_desc": "Интенсивная подготовка к экзамену IELTS (Academic & General).",
+    "courses.cert.ielts.materials": "Cambridge 10-18, Makkar IELTS.",
+    "courses.cert.ielts.teacher_name": "Мистер Джон",
+    "courses.cert.ielts.teacher_bio": "Опыт экзаменатора IELTS.",
+
+    "courses.cert.sat.long_desc": "Идеальная подготовка к секциям SAT Math и English.",
+    "courses.cert.sat.materials": "College Board, Khan Academy, Princeton Review.",
+    "courses.cert.sat.teacher_name": "Сарвар ака",
+    "courses.cert.sat.teacher_bio": "Результат SAT 1500+.",
+
+    "courses.prep.inha.long_desc": "Целевая подготовка к вступительным экзаменам Университета Инха (Math & Physics).",
+    "courses.prep.inha.materials": "Inha past papers, книги по Calculus.",
+    "courses.prep.inha.teacher_name": "Команда Inha",
+    "courses.prep.inha.teacher_bio": "Студенты и выпускники Университета Инха.",
+
+    "courses.prep.west.long_desc": "Подготовка к вступительному экзамену WIUT (Math) и IELTS.",
+    "courses.prep.west.materials": "Экзамены по математике WIUT, материалы IELTS.",
+    "courses.prep.west.teacher_name": "Команда West",
+    "courses.prep.west.teacher_bio": "Выпускники WIUT."
 };
