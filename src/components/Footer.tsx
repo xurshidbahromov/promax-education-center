@@ -80,7 +80,7 @@ const Footer = () => {
                                 <div className="w-10 h-10 rounded-lg bg-blue-50 dark:bg-blue-900/20 flex items-center justify-center flex-shrink-0 group-hover:rotate-12 transition-transform">
                                     <Phone className="w-5 h-5 text-brand-blue" />
                                 </div>
-                                <a href="tel:+998901234567" className="text-sm hover:text-brand-blue transition-colors font-medium">+998 90 123 45 67</a>
+                                <a href="tel:+998955137776" className="text-sm hover:text-brand-blue transition-colors font-medium">+998 95 513 77 76</a>
                             </li>
                             <li className="flex items-center gap-4 group">
                                 <div className="w-10 h-10 rounded-lg bg-purple-50 dark:bg-purple-900/20 flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform">
