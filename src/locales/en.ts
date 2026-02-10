@@ -209,5 +209,57 @@ export const en = {
     "setup.future.subtitle": "Register on Promax Education platform and sign up for free trial lessons.",
     "stats.students": "Successful Students",
     "stats.success_rate": "University Admission Rate",
-    "quote.education": "\"Education is the best investment for the future.\""
+    "quote.education": "\"Education is the best investment for the future.\"",
+
+    // Dashboard Keys
+    "sidebar.dashboard": "Dashboard",
+    "sidebar.onlinetests": "Online Tests",
+    "sidebar.results": "Results",
+    "sidebar.games": "Game Zone",
+    "sidebar.settings": "Settings",
+    "sidebar.logout": "Logout",
+
+    "dashboard.welcome": "Welcome Back",
+    "dashboard.game_zone": "Game Zone",
+
+    "dashboard.stats.coins": "Promax Coins",
+    "dashboard.stats.coins.trend": "+50 this week",
+    "dashboard.stats.average_score": "Avg Mock Score",
+    "dashboard.stats.average_score.trend": "Top 10%",
+    "dashboard.stats.exams_count": "Mocks Taken",
+    "dashboard.stats.exams_count.trend": "Promising",
+    "dashboard.stats.next_exam": "Next Mock",
+    "dashboard.stats.next_exam.value": "Sunday",
+    "dashboard.stats.next_exam.trend": "at 09:00",
+
+    "dashboard.announcements.title": "Announcements",
+    "dashboard.leaderboard.title": "Top Students",
+    "dashboard.leaderboard.view_all": "View All",
+    "dashboard.leaderboard.you": "You",
+
+    "dashboard.onlinetests.title": "Online Tests",
+    "dashboard.onlinetests.desc": "Test your knowledge and earn coins!",
+    "dashboard.onlinetests.button": "Start Test",
+    "dashboard.chart.title": "Weekly Mock Results",
+    "dashboard.chart.week": "Week",
+
+    // Settings Page Keys
+    "settings.title": "Settings",
+    "settings.appearance.title": "Appearance",
+    "settings.appearance.subtitle": "Theme Preference",
+    "settings.appearance.light": "Light",
+    "settings.appearance.dark": "Dark",
+    "settings.appearance.system": "System",
+    "settings.language.title": "Language",
+    "settings.notifications.title": "Notifications",
+    "settings.notifications.email": "Email Notifications",
+    "settings.notifications.email.desc": "Exam results, weekly reports",
+    "settings.notifications.push": "Push Notifications",
+    "settings.notifications.push.desc": "Mock reminders, new assignments",
+    "settings.language.uz": "O'zbekcha",
+    "settings.language.uz.desc": "Latin script",
+    "settings.language.en": "English",
+    "settings.language.en.desc": "United Kingdom",
+    "settings.language.ru": "Русский",
+    "settings.language.ru.desc": "Cyrillic script"
 };

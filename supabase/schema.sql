@@ -6,6 +6,8 @@ create table public.profiles (
   id uuid references auth.users on delete cascade not null primary key,
   full_name text,
   phone text,
+  full_name text,
+  phone text,
   role text check (role in ('student', 'teacher', 'admin')) default 'student',
   avatar_url text,
   created_at timestamp with time zone default timezone('utc'::text, now()) not null
@@ -33,24 +35,52 @@ create table public.enrollments (
   unique(student_id, course_id)
 );
 
--- EXAMS (Mock Exams, Quizzes)
-create table public.exams (
+-- SUBJECTS (e.g., Matematika, Fizika, Ona tili)
+create table public.subjects (
   id uuid default uuid_generate_v4() primary key,
-  course_id uuid references public.courses(id),
-  title text not null, -- e.g., "IELTS Mock #4"
-  date date not null,
-  max_score integer default 100,
-  type text check (type in ('mock', 'quiz', 'midterm', 'final')) default 'mock',
+  name text not null unique,
   created_at timestamp with time zone default timezone('utc'::text, now()) not null
 );
 
--- RESULTS (Student Scores)
-create table public.results (
+-- DIRECTIONS (Yo'nalishlar - e.g., Axborot tizimlari)
+create table public.directions (
+  id uuid default uuid_generate_v4() primary key,
+  code text not null unique, -- 60610400
+  title text not null,
+  subject_1_id uuid references public.subjects(id),
+  subject_2_id uuid references public.subjects(id),
+  created_at timestamp with time zone default timezone('utc'::text, now()) not null
+);
+
+-- EXAMS (Mock Exams, Quizzes)
+create table public.exams (
+  id uuid default uuid_generate_v4() primary key,
+  title text not null, -- e.g., "DTM Mock #1"
+  date date not null,
+  max_score decimal(5, 2) default 189.0,
+  type text check (type in ('dtm', 'quiz', 'topic')) default 'dtm',
+  status text check (status in ('upcoming', 'active', 'finished')) default 'upcoming',
+  correct_answers jsonb, -- e.g. {"1": "A", "2": "B", ...}
+  created_at timestamp with time zone default timezone('utc'::text, now()) not null
+);
+
+-- RESULTS (Detailed Scores)
   id uuid default uuid_generate_v4() primary key,
   exam_id uuid references public.exams(id) not null,
   student_id uuid references public.profiles(id) not null,
-  score decimal(5, 2) not null,
-  feedback text,
+  direction_id uuid references public.directions(id), -- Specific direction for this result
+  
+  -- Scores Breakdown (DTM 2025)
+  total_score decimal(5, 2) not null,
+  
+  compulsory_math_score decimal(4, 2), -- Majburiy Matematika (max 11)
+  compulsory_history_score decimal(4, 2), -- Majburiy Tarix (max 11)
+  compulsory_lang_score decimal(4, 2), -- Majburiy Ona tili (max 11)
+  
+  subject_1_score decimal(5, 2), -- Fan 1 (max 93)
+  subject_2_score decimal(5, 2), -- Fan 2 (max 63)
+  
+  student_answers jsonb, -- e.g. {"1": "A", "2": "C", ...}
   created_at timestamp with time zone default timezone('utc'::text, now()) not null,
   unique(exam_id, student_id)
 );
@@ -59,8 +89,15 @@ create table public.results (
 alter table public.profiles enable row level security;
 alter table public.courses enable row level security;
 alter table public.enrollments enable row level security;
+alter table public.subjects enable row level security;
+alter table public.directions enable row level security;
 alter table public.exams enable row level security;
 alter table public.results enable row level security;
+
+-- Public Read Policies
+create policy "Public read" on public.subjects for select using (true);
+create policy "Public read" on public.directions for select using (true);
+create policy "Public read" on public.exams for select using (true);
 
 -- Profiles: Public read, User update own
 create policy "Public profiles are viewable by everyone." on public.profiles for select using (true);

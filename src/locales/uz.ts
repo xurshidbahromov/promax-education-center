@@ -215,5 +215,57 @@ export const uz = {
     "setup.future.subtitle": "Promax Education platformasida ro'yxatdan o'ting va bepul sinov darslariga yoziling.",
     "stats.students": "Muvaffaqiyatli talabalar",
     "stats.success_rate": "O'qishga kirish ko'rsatkichi",
-    "quote.education": "\"Ta'lim — bu kelajakka qo'yilgan eng katta sarmoya.\""
+    "quote.education": "\"Ta'lim — bu kelajakka qo'yilgan eng katta sarmoya.\"",
+
+    // Dashboard Keys
+    "sidebar.dashboard": "Kabinet",
+    "sidebar.onlinetests": "Online Testlar",
+    "sidebar.results": "Natijalar",
+    "sidebar.games": "O'yinlar",
+    "sidebar.settings": "Sozlamalar",
+    "sidebar.logout": "Chiqish",
+
+    "dashboard.welcome": "Xush kelibsiz",
+    "dashboard.game_zone": "O'yin Zonasi",
+
+    "dashboard.stats.coins": "Promax Coins",
+    "dashboard.stats.coins.trend": "+50 bu hafta",
+    "dashboard.stats.average_score": "O'rtacha Mock Balli",
+    "dashboard.stats.average_score.trend": "Top 10%",
+    "dashboard.stats.exams_count": "Topshirilgan Mocklar",
+    "dashboard.stats.exams_count.trend": "Istiqbolli",
+    "dashboard.stats.next_exam": "Keyingi Mock",
+    "dashboard.stats.next_exam.value": "Yakshanba",
+    "dashboard.stats.next_exam.trend": "09:00 da",
+
+    "dashboard.announcements.title": "Muhim E'lonlar",
+    "dashboard.leaderboard.title": "Top O'quvchilar",
+    "dashboard.leaderboard.view_all": "Barchasini ko'rish",
+    "dashboard.leaderboard.you": "Siz",
+
+    "dashboard.onlinetests.title": "Online Testlar",
+    "dashboard.onlinetests.desc": "O'z bilimingizni sinab ko'ring va coin ishlang!",
+    "dashboard.onlinetests.button": "Testni boshlash",
+    "dashboard.chart.title": "Mock Exam Natijalari (Haftalik)",
+    "dashboard.chart.week": "Hafta",
+
+    // Settings Page Keys
+    "settings.title": "Sozlamalar",
+    "settings.appearance.title": "Tashqi Ko'rinish",
+    "settings.appearance.subtitle": "Mavzu Tanlovi",
+    "settings.appearance.light": "Yorug'",
+    "settings.appearance.dark": "Tungi",
+    "settings.appearance.system": "Tizim",
+    "settings.language.title": "Til Sozlamalari",
+    "settings.notifications.title": "Bildirishnomalar",
+    "settings.notifications.email": "Email Xabarlar",
+    "settings.notifications.email.desc": "Imtihon natijalari, haftalik hisobotlar",
+    "settings.notifications.push": "Push Xabarlar",
+    "settings.notifications.push.desc": "Mock eslatmalari, yangi topshiriqlar",
+    "settings.language.uz": "O'zbekcha",
+    "settings.language.uz.desc": "Lotin yozuvi",
+    "settings.language.en": "English",
+    "settings.language.en.desc": "United Kingdom",
+    "settings.language.ru": "Русский",
+    "settings.language.ru.desc": "Kirill yozuvi"
 };

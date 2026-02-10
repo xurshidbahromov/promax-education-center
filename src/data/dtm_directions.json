@@ -1,0 +1,164 @@
+[
+    {
+        "code": "60110100",
+        "name": "Pedagogika",
+        "subject_1": "Tarix",
+        "subject_2": "Ona tili va adabiyoti"
+    },
+    {
+        "code": "60110200",
+        "name": "Maktabgacha taʼlim",
+        "subject_1": "Biologiya",
+        "subject_2": "Ona tili va adabiyoti"
+    },
+    {
+        "code": "60110300",
+        "name": "Maxsus pedagogika: logopediya",
+        "subject_1": "Biologiya",
+        "subject_2": "Ona tili va adabiyoti"
+    },
+    {
+        "code": "60110400",
+        "name": "Boshlangʻich taʼlim",
+        "subject_1": "Ona tili va adabiyoti",
+        "subject_2": "Matematika"
+    },
+    {
+        "code": "60110700",
+        "name": "Oʻzbek tili va adabiyoti",
+        "subject_1": "Oʻzbek tili va adabiyoti",
+        "subject_2": "Chet tili"
+    },
+    {
+        "code": "60110800",
+        "name": "Ona tili va adabiyoti: rus tili",
+        "subject_1": "Rus tili va adabiyoti",
+        "subject_2": "Tarix"
+    },
+    {
+        "code": "60110900",
+        "name": "Xorijiy til va adabiyoti: ingliz tili",
+        "subject_1": "Ingliz tili",
+        "subject_2": "Ona tili va adabiyoti"
+    },
+    {
+        "code": "60111300",
+        "name": "Texnologik taʼlim",
+        "subject_1": "Fizika",
+        "subject_2": "Matematika"
+    },
+    {
+        "code": "60220300",
+        "name": "Tarix",
+        "subject_1": "Tarix",
+        "subject_2": "Geografiya"
+    },
+    {
+        "code": "60230100",
+        "name": "Filologiya (Ingliz tili)",
+        "subject_1": "Ingliz tili",
+        "subject_2": "Ona tili va adabiyoti"
+    },
+    {
+        "code": "60310100",
+        "name": "Siyosatshunoslik",
+        "subject_1": "Tarix",
+        "subject_2": "Chet tili"
+    },
+    {
+        "code": "60310200",
+        "name": "Xalqaro munosabatlar",
+        "subject_1": "Tarix",
+        "subject_2": "Chet tili"
+    },
+    {
+        "code": "60310300",
+        "name": "Psixologiya",
+        "subject_1": "Biologiya",
+        "subject_2": "Ona tili va adabiyoti"
+    },
+    {
+        "code": "60410100",
+        "name": "Iqtisodiyot",
+        "subject_1": "Matematika",
+        "subject_2": "Chet tili"
+    },
+    {
+        "code": "60410200",
+        "name": "Buxgalteriya hisobi",
+        "subject_1": "Matematika",
+        "subject_2": "Chet tili"
+    },
+    {
+        "code": "60410500",
+        "name": "Moliya",
+        "subject_1": "Matematika",
+        "subject_2": "Chet tili"
+    },
+    {
+        "code": "60420100",
+        "name": "Yurisprudensiya",
+        "subject_1": "Huquqshunoslik",
+        "subject_2": "Chet tili"
+    },
+    {
+        "code": "60510100",
+        "name": "Biologiya",
+        "subject_1": "Biologiya",
+        "subject_2": "Kimyo"
+    },
+    {
+        "code": "60530100",
+        "name": "Kimyo",
+        "subject_1": "Kimyo",
+        "subject_2": "Matematika"
+    },
+    {
+        "code": "60530500",
+        "name": "Fizika",
+        "subject_1": "Fizika",
+        "subject_2": "Matematika"
+    },
+    {
+        "code": "60540100",
+        "name": "Matematika",
+        "subject_1": "Matematika",
+        "subject_2": "Fizika"
+    },
+    {
+        "code": "60610100",
+        "name": "Axborot tizimlari va texnologiyalari",
+        "subject_1": "Matematika",
+        "subject_2": "Fizika"
+    },
+    {
+        "code": "60610300",
+        "name": "Kompyuter injiniringi",
+        "subject_1": "Matematika",
+        "subject_2": "Fizika"
+    },
+    {
+        "code": "60610400",
+        "name": "Dasturiy injiniring",
+        "subject_1": "Matematika",
+        "subject_2": "Fizika"
+    },
+    {
+        "code": "60610500",
+        "name": "Sunʼiy intellekt",
+        "subject_1": "Matematika",
+        "subject_2": "Fizika"
+    },
+    {
+        "code": "60910200",
+        "name": "Davolash ishi",
+        "subject_1": "Biologiya",
+        "subject_2": "Kimyo"
+    },
+    {
+        "code": "60910300",
+        "name": "Pediatriya ishi",
+        "subject_1": "Biologiya",
+        "subject_2": "Kimyo"
+    }
+]

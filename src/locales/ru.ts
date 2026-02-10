@@ -209,5 +209,57 @@ export const ru = {
     "setup.future.subtitle": "Зарегистрируйтесь на платформе Promax Education и запишитесь на бесплатные пробные уроки.",
     "stats.students": "Успешных студентов",
     "stats.success_rate": "Показатель поступления",
-    "quote.education": "\"Образование — это лучшая инвестиция в будущее.\""
+    "quote.education": "\"Образование — это лучшая инвестиция в будущее.\"",
+
+    // Dashboard Keys
+    "sidebar.dashboard": "Кабинет",
+    "sidebar.onlinetests": "Онлайн Тесты",
+    "sidebar.results": "Результаты",
+    "sidebar.games": "Игры",
+    "sidebar.settings": "Настройки",
+    "sidebar.logout": "Выйти",
+
+    "dashboard.welcome": "С возвращением",
+    "dashboard.game_zone": "Игровая Зона",
+
+    "dashboard.stats.coins": "Promax Coins",
+    "dashboard.stats.coins.trend": "+50 на неделе",
+    "dashboard.stats.average_score": "Средний Балл",
+    "dashboard.stats.average_score.trend": "Топ 10%",
+    "dashboard.stats.exams_count": "Сдано Тестов",
+    "dashboard.stats.exams_count.trend": "Перспективно",
+    "dashboard.stats.next_exam": "Следующий Мок",
+    "dashboard.stats.next_exam.value": "Воскресенье",
+    "dashboard.stats.next_exam.trend": "в 09:00",
+
+    "dashboard.announcements.title": "Объявления",
+    "dashboard.leaderboard.title": "Топ Студенты",
+    "dashboard.leaderboard.view_all": "Смотреть Все",
+    "dashboard.leaderboard.you": "Вы",
+
+    "dashboard.onlinetests.title": "Онлайн Тесты",
+    "dashboard.onlinetests.desc": "Проверьте знания и заработайте коины!",
+    "dashboard.onlinetests.button": "Начать Тест",
+    "dashboard.chart.title": "Результаты Мок Экзаменов",
+    "dashboard.chart.week": "Неделя",
+
+    // Settings Page Keys
+    "settings.title": "Настройки",
+    "settings.appearance.title": "Внешний Вид",
+    "settings.appearance.subtitle": "Тема Оформления",
+    "settings.appearance.light": "Светлая",
+    "settings.appearance.dark": "Тёмная",
+    "settings.appearance.system": "Системная",
+    "settings.language.title": "Язык",
+    "settings.notifications.title": "Уведомления",
+    "settings.notifications.email": "Email Уведомления",
+    "settings.notifications.email.desc": "Результаты экзаменов, отчеты",
+    "settings.notifications.push": "Push Уведомления",
+    "settings.notifications.push.desc": "Напоминания о тестах, задания",
+    "settings.language.uz": "O'zbekcha",
+    "settings.language.uz.desc": "Латиница",
+    "settings.language.en": "English",
+    "settings.language.en.desc": "Английский",
+    "settings.language.ru": "Русский",
+    "settings.language.ru.desc": "Кириллица"
 };

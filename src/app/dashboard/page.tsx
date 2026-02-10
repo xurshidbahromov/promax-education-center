@@ -25,14 +25,15 @@ export default function DashboardPage() {
     // const userRank = "Silver"; // Removed per user request
 
     const stats = [
-        { title: "Promax Coins", value: `${userPoints}`, icon: Trophy, color: "bg-brand-orange", textColor: "text-brand-orange", trend: "+50 this week" },
-        { title: "O'rtacha Mock Balli", value: "86%", icon: Target, color: "bg-brand-blue", textColor: "text-brand-blue", trend: "Top 10%" },
-        { title: "Topshirilgan Mocklar", value: "12", icon: BookOpen, color: "bg-indigo-500", textColor: "text-indigo-500", trend: "Istiqbolli" },
-        { title: "Keyingi Mock", value: "Yakshanba", icon: Calendar, color: "bg-green-500", textColor: "text-green-500", trend: "09:00 da" },
+        { title: t('dashboard.stats.coins'), value: `${userPoints}`, icon: Trophy, color: "bg-brand-orange", textColor: "text-brand-orange", trend: t('dashboard.stats.coins.trend') },
+        { title: t('dashboard.stats.average_score'), value: "86%", icon: Target, color: "bg-brand-blue", textColor: "text-brand-blue", trend: t('dashboard.stats.average_score.trend') },
+        { title: t('dashboard.stats.exams_count'), value: "12", icon: BookOpen, color: "bg-indigo-500", textColor: "text-indigo-500", trend: t('dashboard.stats.exams_count.trend') },
+        { title: t('dashboard.stats.next_exam'), value: t('dashboard.stats.next_exam.value'), icon: Calendar, color: "bg-green-500", textColor: "text-green-500", trend: t('dashboard.stats.next_exam.trend') },
     ];
 
     const announcements = [
         { title: "Katta Mock Imtihon!", date: "Ertaga, 09:00", type: "urgent", message: "Barcha o'quvchilar pasport nusxasi bilan kelishi shart." },
+        // TODO: We can localize mock announcements later or keep them dynamic from DB
         { title: "Speaking Club", date: "Shanba, 14:00", type: "info", message: "Mr. John bilan bepul speaking darsi." },
         { title: "Yangi 'Game Zone' ochildi", date: "Bugun", type: "success", message: "Tanaffusda stol tennisi o'ynashingiz mumkin." },
     ];
@@ -40,7 +41,7 @@ export default function DashboardPage() {
     const leaderboard = [
         { name: "Aziz Rahimov", points: 2400, rank: 1, avatar: "🥇" },
         { name: "Malika Karimova", points: 2150, rank: 2, avatar: "🥈" },
-        { name: "Siz", points: 1250, rank: 15, avatar: "👤" },
+        { name: t('dashboard.leaderboard.you'), points: 1250, rank: 15, avatar: "👤" },
     ];
 
     return (
@@ -52,13 +53,13 @@ export default function DashboardPage() {
                         {t('auth.welcome')} 👋
                     </h1>
                     <p className="text-gray-500 dark:text-gray-400 mt-1">
-                        Bugun: {new Date().toLocaleDateString('uz-UZ', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
+                        {new Date().toLocaleDateString(t('locale') === 'uz' ? 'uz-UZ' : 'en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
                     </p>
                 </div>
                 <div className="flex gap-3">
                     <button className="px-4 py-2 bg-gradient-to-r from-brand-blue to-indigo-600 text-white rounded-xl text-sm font-medium hover:opacity-90 transition-opacity shadow-lg shadow-brand-blue/30 flex items-center gap-2">
                         <Gamepad2 size={18} />
-                        Game Zone
+                        {t('dashboard.game_zone')}
                     </button>
                 </div>
             </div>
@@ -102,7 +103,7 @@ export default function DashboardPage() {
                         <div className="flex items-center justify-between mb-4">
                             <h3 className="text-lg font-bold text-gray-900 dark:text-white flex items-center gap-2">
                                 <Megaphone className="text-brand-blue" size={20} />
-                                Muhim E'lonlar
+                                {t('dashboard.announcements.title')}
                             </h3>
                         </div>
                         <div className="space-y-3">
@@ -123,7 +124,7 @@ export default function DashboardPage() {
 
                     {/* Mock Progress Chart (Keep existing placeholder logic but rename) */}
                     <div className="bg-white dark:bg-slate-900 p-6 rounded-2xl border border-gray-200 dark:border-slate-800 shadow-sm">
-                        <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-6">Mock Exam Natijalari (Haftalik)</h3>
+                        <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-6">{t('dashboard.chart.title')}</h3>
                         <div className="h-64 flex items-end justify-between gap-2">
                             {[40, 65, 50, 80, 55, 90, 70].map((h, i) => (
                                 <div key={i} className="w-full bg-gray-50 dark:bg-slate-800 rounded-t-lg relative group h-full flex flex-col justify-end">
@@ -137,7 +138,7 @@ export default function DashboardPage() {
                                             {h}%
                                         </div>
                                     </motion.div>
-                                    <span className="text-xs text-gray-400 text-center mt-2">Week {i + 1}</span>
+                                    <span className="text-xs text-gray-400 text-center mt-2">{t('dashboard.chart.week')} {i + 1}</span>
                                 </div>
                             ))}
                         </div>
@@ -151,9 +152,9 @@ export default function DashboardPage() {
                         <div className="flex items-center justify-between mb-4">
                             <h3 className="text-lg font-bold text-gray-900 dark:text-white flex items-center gap-2">
                                 <Medal className="text-yellow-500" size={20} />
-                                Top O'quvchilar
+                                {t('dashboard.leaderboard.title')}
                             </h3>
-                            <button className="text-sm text-brand-blue hover:underline">View All</button>
+                            <button className="text-sm text-brand-blue hover:underline">{t('dashboard.leaderboard.view_all')}</button>
                         </div>
                         <div className="space-y-4">
                             {leaderboard.map((user, i) => (
@@ -174,10 +175,10 @@ export default function DashboardPage() {
                     {/* Online Tests CTA */}
                     <div className="bg-gradient-to-br from-purple-600 to-indigo-700 p-6 rounded-2xl text-white relative overflow-hidden">
                         <div className="relative z-10">
-                            <h3 className="font-bold text-lg mb-2">Online Testlar</h3>
-                            <p className="text-purple-100 text-sm mb-4">O'z bilimingizni sinab ko'ring va coin ishlang!</p>
+                            <h3 className="font-bold text-lg mb-2">{t('dashboard.onlinetests.title')}</h3>
+                            <p className="text-purple-100 text-sm mb-4">{t('dashboard.onlinetests.desc')}</p>
                             <button className="w-full py-2 bg-white text-purple-600 rounded-lg font-semibold text-sm hover:bg-purple-50 transition-colors">
-                                Testni boshlash
+                                {t('dashboard.onlinetests.button')}
                             </button>
                         </div>
                         <Gamepad2 className="absolute -bottom-4 -right-4 text-white opacity-10" size={120} />

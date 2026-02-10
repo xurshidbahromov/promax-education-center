@@ -64,11 +64,11 @@ export default function DashboardLayout({
     }
 
     const menuItems = [
-        { icon: LayoutDashboard, label: "Dashboard", href: "/dashboard" },
-        { icon: BookOpen, label: "Online Tests", href: "/dashboard/tests" },
-        { icon: GraduationCap, label: "Mock Results", href: "/dashboard/results" },
-        { icon: Gamepad2, label: "Game Zone", href: "/dashboard/games" },
-        { icon: Settings, label: "Settings", href: "/dashboard/settings" },
+        { icon: LayoutDashboard, label: t('sidebar.dashboard'), href: "/dashboard" },
+        { icon: BookOpen, label: t('sidebar.onlinetests'), href: "/dashboard/tests" },
+        { icon: GraduationCap, label: t('sidebar.results'), href: "/dashboard/results" },
+        { icon: Gamepad2, label: t('sidebar.games'), href: "/dashboard/games" },
+        { icon: Settings, label: t('sidebar.settings'), href: "/dashboard/settings" },
     ];
 
     return (
@@ -138,7 +138,7 @@ export default function DashboardLayout({
                             className="flex items-center gap-3 px-4 py-3 text-red-500 hover:bg-red-50 dark:hover:bg-red-900/10 rounded-xl w-full transition-colors"
                         >
                             <LogOut size={20} />
-                            <span className="font-medium">Chiqish</span>
+                            <span className="font-medium">{t('sidebar.logout')}</span>
                         </button>
                     </div>
                 </div>
