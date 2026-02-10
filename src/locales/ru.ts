@@ -261,5 +261,12 @@ export const ru = {
     "settings.language.en": "English",
     "settings.language.en.desc": "Английский",
     "settings.language.ru": "Русский",
-    "settings.language.ru.desc": "Кириллица"
+    "settings.language.ru.desc": "Кириллица",
+
+    // Online Tests Page
+    "tests.title": "Онлайн Тесты",
+    "tests.subtitle": "Практикуйтесь в любое время и в любом месте.",
+
+    // Results Page
+    "results.export": "Экспорт Всех Результатов"
 };

@@ -63,7 +63,7 @@ export default function ResultsPage() {
                 </div>
                 <button className="px-4 py-2 bg-gradient-to-r from-brand-blue to-indigo-600 text-white rounded-xl text-sm font-medium hover:opacity-90 transition-opacity shadow-lg shadow-brand-blue/30 flex items-center gap-2">
                     <Download size={18} />
-                    Export All Results
+                    {t('results.export')}
                 </button>
             </div>
 

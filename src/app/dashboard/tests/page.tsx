@@ -93,10 +93,10 @@ export default function OnlineTestsPage() {
                 <div>
                     <h1 className="text-3xl font-bold text-gray-900 dark:text-white flex items-center gap-3">
                         <Zap className="text-brand-blue" size={32} />
-                        Online Tests
+                        {t('tests.title')}
                     </h1>
                     <p className="text-gray-500 dark:text-gray-400 mt-1">
-                        Practice anytime, anywhere.
+                        {t('tests.subtitle')}
                     </p>
                 </div>
 

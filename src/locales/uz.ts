@@ -267,5 +267,12 @@ export const uz = {
     "settings.language.en": "English",
     "settings.language.en.desc": "United Kingdom",
     "settings.language.ru": "Русский",
-    "settings.language.ru.desc": "Kirill yozuvi"
+    "settings.language.ru.desc": "Kirill yozuvi",
+
+    // Online Tests Page
+    "tests.title": "Online Testlar",
+    "tests.subtitle": "Istalgan vaqtda, istalgan joyda shug'ullaning.",
+
+    // Results Page
+    "results.export": "Natijalarni Yuklab Olish"
 };
