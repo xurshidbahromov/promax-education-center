@@ -131,10 +131,10 @@ export default function GameZonePage() {
                 <div>
                     <h1 className="text-3xl font-bold text-gray-900 dark:text-white flex items-center gap-3">
                         <Gamepad2 className="text-brand-blue" size={32} />
-                        Game Zone
+                        {t('games.title')}
                     </h1>
                     <p className="text-gray-500 dark:text-gray-400 mt-1">
-                        O'ynang, o'rganing va coin yig'ing!
+                        {t('games.subtitle')}
                     </p>
                 </div>
                 <div className="flex items-center gap-2 bg-brand-orange/10 px-4 py-2 rounded-2xl border border-brand-orange/20 text-brand-orange font-bold text-xl shadow-sm">

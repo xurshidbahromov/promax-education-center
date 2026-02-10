@@ -268,5 +268,11 @@ export const en = {
     "tests.subtitle": "Practice anytime, anywhere.",
 
     // Results Page
-    "results.export": "Export All Results"
+    "results.title": "Exam Results",
+    "results.subtitle": "History of all taken mocks and tests",
+    "results.export": "Export All Results",
+
+    // Game Zone Page
+    "games.title": "Game Zone",
+    "games.subtitle": "Play, learn, and earn coins!"
 };

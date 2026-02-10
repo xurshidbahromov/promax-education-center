@@ -268,5 +268,11 @@ export const ru = {
     "tests.subtitle": "Практикуйтесь в любое время и в любом месте.",
 
     // Results Page
-    "results.export": "Экспорт Всех Результатов"
+    "results.title": "Результаты Экзаменов",
+    "results.subtitle": "История всех пройденных моков и тестов",
+    "results.export": "Экспорт Всех Результатов",
+
+    // Game Zone Page
+    "games.title": "Игровая Зона",
+    "games.subtitle": "Играйте, учитесь и зарабатывайте коины!"
 };

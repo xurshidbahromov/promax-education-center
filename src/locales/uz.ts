@@ -274,5 +274,11 @@ export const uz = {
     "tests.subtitle": "Istalgan vaqtda, istalgan joyda shug'ullaning.",
 
     // Results Page
-    "results.export": "Natijalarni Yuklab Olish"
+    "results.title": "Imtihon Natijalari",
+    "results.subtitle": "Barcha topshirilgan mock va testlar tarixi",
+    "results.export": "Natijalarni Yuklab Olish",
+
+    // Game Zone Page
+    "games.title": "O'yin Zonasi",
+    "games.subtitle": "O'ynang, o'rganing va coin yig'ing!"
 };

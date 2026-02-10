@@ -55,10 +55,10 @@ export default function ResultsPage() {
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <div>
                     <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
-                        Imtihon Natijalari
+                        {t('results.title')}
                     </h1>
                     <p className="text-gray-500 dark:text-gray-400 mt-1">
-                        Barcha topshirilgan mock va testlar tarixi
+                        {t('results.subtitle')}
                     </p>
                 </div>
                 <button className="px-4 py-2 bg-gradient-to-r from-brand-blue to-indigo-600 text-white rounded-xl text-sm font-medium hover:opacity-90 transition-opacity shadow-lg shadow-brand-blue/30 flex items-center gap-2">
