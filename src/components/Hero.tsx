@@ -76,7 +76,7 @@ const Hero = () => {
                 >
                     <Link
                         href="/register"
-                        className="group bg-brand-orange text-white px-8 py-4 rounded-xl font-bold text-lg hover:bg-orange-600 transition-all shadow-xl shadow-orange-100 dark:shadow-none hover:shadow-2xl hover:shadow-orange-200 active:scale-95 flex items-center justify-center gap-2 w-full sm:w-auto"
+                        className="group bg-brand-orange text-white px-8 py-4 rounded-xl font-bold text-lg hover:bg-orange-600 transition-all shadow-lg hover:shadow-xl active:scale-95 flex items-center justify-center gap-2 w-full sm:w-auto"
                     >
                         {t('hero.cta.primary')}
                         <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />

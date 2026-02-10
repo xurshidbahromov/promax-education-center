@@ -23,7 +23,7 @@ const CallToAction = () => {
                         <div className="absolute -bottom-[50%] -right-[20%] w-[80%] h-[150%] bg-gradient-to-tl from-brand-orange/20 to-transparent -rotate-12 blur-3xl"></div>
 
                         {/* Grid Pattern */}
-                        <div className="absolute inset-0 bg-[url('/grid.svg')] opacity-10"></div>
+                        <div className="absolute inset-0 bg-[url('/grid.png')] opacity-10"></div>
                     </div>
 
                     <div className="relative z-10 max-w-3xl mx-auto space-y-8">
@@ -43,7 +43,7 @@ const CallToAction = () => {
                         <div className="flex flex-col sm:flex-row gap-4 justify-center pt-4">
                             <Link
                                 href="/register"
-                                className="px-8 py-4 bg-white text-brand-blue font-bold rounded-xl text-lg shadow-lg hover:shadow-xl hover:bg-gray-50 hover:scale-105 transition-all duration-300 flex items-center justify-center gap-2 group"
+                                className="px-8 py-4 bg-white text-brand-blue font-bold rounded-xl text-lg shadow-lg hover:shadow-xl hover:bg-gray-50 hover:transition-all duration-300 flex items-center justify-center gap-2 group"
                             >
                                 {t('cta.button.primary')}
                                 <ArrowRight className="group-hover:translate-x-1 transition-transform" />

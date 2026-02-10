@@ -120,7 +120,7 @@ const YouTubeSection = () => {
                         initial={{ opacity: 0, y: 20 }}
                         whileInView={{ opacity: 1, y: 0 }}
                         viewport={{ once: true }}
-                        className="group inline-flex items-center gap-2 bg-brand-orange text-white px-10 py-5 rounded-2xl font-bold text-lg hover:bg-orange-600 transition-all shadow-xl shadow-orange-100 dark:shadow-none hover:shadow-2xl hover:shadow-orange-200 active:scale-95"
+                        className="group inline-flex items-center gap-2 bg-brand-orange text-white px-10 py-5 rounded-2xl font-bold text-lg hover:bg-orange-600 transition-all shadow-lg hover:shadow-xl active:scale-95"
                     >
                         {t('home.youtube.view_channel')}
                         <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />

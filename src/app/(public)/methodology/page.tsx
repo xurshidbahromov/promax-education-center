@@ -113,23 +113,7 @@ const MethodologyPage = () => {
                 ))}
             </section>
 
-            {/* CTA Section */}
-            <section className="mt-32 px-4 sm:px-6 lg:px-8">
-                <div className="max-w-5xl mx-auto text-center bg-brand-blue/5 dark:bg-brand-blue/10 rounded-3xl p-12 md:p-20 border border-brand-blue/10">
-                    <h2 className="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-6">
-                        {t('courses.subtitle')}
-                    </h2>
-                    <div className="flex justify-center gap-4">
-                        <Link
-                            href="/register"
-                            className="bg-brand-blue text-white px-8 py-4 rounded-xl font-bold text-lg hover:bg-blue-700 transition-all shadow-lg hover:shadow-xl active:scale-95 flex items-center gap-2"
-                        >
-                            {t('hero.cta.primary')}
-                            <ArrowRight size={20} />
-                        </Link>
-                    </div>
-                </div>
-            </section>
+
         </main>
     );
 };
