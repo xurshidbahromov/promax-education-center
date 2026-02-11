@@ -3,7 +3,7 @@
 import { useLanguage } from "@/context/LanguageContext";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
     LayoutDashboard,
     Users,
@@ -24,8 +24,19 @@ export default function AdminLayout({
     children: React.ReactNode;
 }) {
     const [sidebarOpen, setSidebarOpen] = useState(false);
+    const [currentDate, setCurrentDate] = useState("");
     const pathname = usePathname();
     const { t } = useLanguage();
+
+    // Render date only on client to avoid hydration mismatch
+    useEffect(() => {
+        setCurrentDate(new Date().toLocaleDateString('uz-UZ', {
+            weekday: 'long',
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric'
+        }));
+    }, []);
 
     const menuItems = [
         { icon: LayoutDashboard, label: "Dashboard", href: "/admin" },
@@ -125,7 +136,7 @@ export default function AdminLayout({
 
                     <div className="flex items-center gap-4 ml-auto">
                         <span className="hidden md:block text-sm font-medium text-gray-500 dark:text-gray-400">
-                            {new Date().toLocaleDateString('uz-UZ', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
+                            {currentDate}
                         </span>
                         <div className="h-6 w-px bg-gray-200 dark:bg-slate-800 hidden md:block" />
                         <button className="p-2 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-slate-800 rounded-full relative">

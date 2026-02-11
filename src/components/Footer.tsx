@@ -28,6 +28,7 @@ const Footer = () => {
                                         src="/logo.png"
                                         alt="Promax Education Logo"
                                         fill
+                                        sizes="96px"
                                         className="object-contain dark:filter-none invert hue-rotate-180"
                                     />
                                 </div>

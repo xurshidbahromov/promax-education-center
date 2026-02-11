@@ -6,8 +6,6 @@ create table public.profiles (
   id uuid references auth.users on delete cascade not null primary key,
   full_name text,
   phone text,
-  full_name text,
-  phone text,
   role text check (role in ('student', 'teacher', 'admin')) default 'student',
   avatar_url text,
   created_at timestamp with time zone default timezone('utc'::text, now()) not null
@@ -65,6 +63,7 @@ create table public.exams (
 );
 
 -- RESULTS (Detailed Scores)
+create table public.results (
   id uuid default uuid_generate_v4() primary key,
   exam_id uuid references public.exams(id) not null,
   student_id uuid references public.profiles(id) not null,
@@ -111,8 +110,13 @@ create policy "Courses are viewable by everyone." on public.courses for select u
 create or replace function public.handle_new_user() 
 returns trigger as $$
 begin
-  insert into public.profiles (id, full_name, role)
-  values (new.id, new.raw_user_meta_data->>'full_name', coalesce(new.raw_user_meta_data->>'role', 'student'));
+  insert into public.profiles (id, full_name, phone, role)
+  values (
+    new.id, 
+    new.raw_user_meta_data->>'full_name', 
+    new.raw_user_meta_data->>'phone',
+    coalesce(new.raw_user_meta_data->>'role', 'student')
+  );
   return new;
 end;
 $$ language plpgsql security definer;

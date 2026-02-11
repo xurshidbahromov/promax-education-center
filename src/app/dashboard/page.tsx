@@ -16,19 +16,85 @@ import {
     Gamepad2,
     Crown
 } from "lucide-react";
+import { useEffect, useState } from "react";
+import { createClient } from "@/utils/supabase/client";
+import { getDashboardStats, getRecentResultsForChart } from "@/lib/supabase-queries";
 
 export default function DashboardPage() {
     const { t } = useLanguage();
-    // import { useAuth } from "@/hooks/useAuth"; // Assuming hook exists or use context
-    // For now using mock user data
-    const userPoints = 1250;
-    // const userRank = "Silver"; // Removed per user request
+    const [loading, setLoading] = useState(true);
+    const [userFullName, setUserFullName] = useState<string>("Student");
+    const [dashboardStats, setDashboardStats] = useState({
+        totalTests: 0,
+        averageScore: 0,
+        bestScore: 0,
+        totalCoins: 0
+    });
+    const [chartData, setChartData] = useState<any[]>([]);
 
+    // Fetch user and dashboard data
+    useEffect(() => {
+        async function fetchDashboardData() {
+            const supabase = createClient();
+
+            // Get current user
+            const { data: { user } } = await supabase.auth.getUser();
+
+            if (!user) {
+                setLoading(false);
+                return;
+            }
+
+            setUserFullName(user.user_metadata?.full_name || "Student");
+
+            // Get dashboard stats
+            const stats = await getDashboardStats(user.id);
+            setDashboardStats(stats);
+
+            // Get recent results for chart
+            const recentResults = await getRecentResultsForChart(user.id);
+            setChartData(recentResults);
+
+            setLoading(false);
+        }
+
+        fetchDashboardData();
+    }, []);
+
+    // Stats cards with real data
     const stats = [
-        { title: t('dashboard.stats.coins'), value: `${userPoints}`, icon: Trophy, color: "bg-brand-orange", textColor: "text-brand-orange", trend: t('dashboard.stats.coins.trend') },
-        { title: t('dashboard.stats.average_score'), value: "86%", icon: Target, color: "bg-brand-blue", textColor: "text-brand-blue", trend: t('dashboard.stats.average_score.trend') },
-        { title: t('dashboard.stats.exams_count'), value: "12", icon: BookOpen, color: "bg-indigo-500", textColor: "text-indigo-500", trend: t('dashboard.stats.exams_count.trend') },
-        { title: t('dashboard.stats.next_exam'), value: t('dashboard.stats.next_exam.value'), icon: Calendar, color: "bg-green-500", textColor: "text-green-500", trend: t('dashboard.stats.next_exam.trend') },
+        {
+            title: t('dashboard.stats.coins'),
+            value: loading ? "..." : `${dashboardStats.totalCoins}`,
+            icon: Trophy,
+            color: "bg-brand-orange",
+            textColor: "text-brand-orange",
+            trend: loading ? "" : `+${Math.floor(dashboardStats.totalCoins / 10)} ${t('dashboard.stats.coins.trend')}`
+        },
+        {
+            title: t('dashboard.stats.average_score'),
+            value: loading ? "..." : `${dashboardStats.averageScore.toFixed(1)}`,
+            icon: Target,
+            color: "bg-brand-blue",
+            textColor: "text-brand-blue",
+            trend: loading ? "" : t('dashboard.stats.average_score.trend')
+        },
+        {
+            title: t('dashboard.stats.exams_count'),
+            value: loading ? "..." : `${dashboardStats.totalTests}`,
+            icon: BookOpen,
+            color: "bg-indigo-500",
+            textColor: "text-indigo-500",
+            trend: loading ? "" : t('dashboard.stats.exams_count.trend')
+        },
+        {
+            title: t('dashboard.stats.next_exam'),
+            value: loading ? "..." : t('dashboard.stats.next_exam.value'),
+            icon: Calendar,
+            color: "bg-green-500",
+            textColor: "text-green-500",
+            trend: t('dashboard.stats.next_exam.trend')
+        },
     ];
 
     const announcements = [
@@ -122,26 +188,40 @@ export default function DashboardPage() {
                         </div>
                     </div>
 
-                    {/* Mock Progress Chart (Keep existing placeholder logic but rename) */}
+                    {/* Mock Progress Chart - Now with Real Data */}
                     <div className="bg-white dark:bg-slate-900 p-6 rounded-2xl border border-gray-200 dark:border-slate-800 shadow-sm">
                         <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-6">{t('dashboard.chart.title')}</h3>
-                        <div className="h-64 flex items-end justify-between gap-2">
-                            {[40, 65, 50, 80, 55, 90, 70].map((h, i) => (
-                                <div key={i} className="w-full bg-gray-50 dark:bg-slate-800 rounded-t-lg relative group h-full flex flex-col justify-end">
-                                    <motion.div
-                                        className="w-full bg-brand-blue rounded-t-lg relative"
-                                        initial={{ height: 0 }}
-                                        animate={{ height: `${h}%` }}
-                                        transition={{ duration: 1, type: "spring" }}
-                                    >
-                                        <div className="absolute -top-8 left-1/2 -translate-x-1/2 bg-gray-900 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity">
-                                            {h}%
+                        {loading ? (
+                            <div className="h-64 flex items-center justify-center">
+                                <p className="text-gray-400">Loading...</p>
+                            </div>
+                        ) : chartData.length === 0 ? (
+                            <div className="h-64 flex items-center justify-center">
+                                <p className="text-gray-400">{t('dashboard.no_results')}</p>
+                            </div>
+                        ) : (
+                            <div className="h-64 flex items-end justify-between gap-2">
+                                {chartData.map((result, i) => {
+                                    // Calculate percentage (out of 189 max score)
+                                    const percentage = Math.round((result.score / 189) * 100);
+                                    return (
+                                        <div key={i} className="w-full bg-gray-50 dark:bg-slate-800 rounded-t-lg relative group h-full flex flex-col justify-end" title={result.examTitle}>
+                                            <motion.div
+                                                className="w-full bg-brand-blue rounded-t-lg relative"
+                                                initial={{ height: 0 }}
+                                                animate={{ height: `${percentage}%` }}
+                                                transition={{ duration: 1, type: "spring", delay: i * 0.1 }}
+                                            >
+                                                <div className="absolute -top-10 left-1/2 -translate-x-1/2 bg-gray-900 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
+                                                    {result.score} / 189
+                                                </div>
+                                            </motion.div>
+                                            <span className="text-xs text-gray-400 text-center mt-2 truncate">{result.week}</span>
                                         </div>
-                                    </motion.div>
-                                    <span className="text-xs text-gray-400 text-center mt-2">{t('dashboard.chart.week')} {i + 1}</span>
-                                </div>
-                            ))}
-                        </div>
+                                    );
+                                })}
+                            </div>
+                        )}
                     </div>
                 </div>
 

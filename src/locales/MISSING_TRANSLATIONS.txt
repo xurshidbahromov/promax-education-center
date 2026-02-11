@@ -1,0 +1,45 @@
+// Missing Auth Translations to Add
+
+// UZ - Uzbek
+"auth.error_wrong_portal": "Noto'g'ri portal! O'quvchi yoki o'qituvchi portalidan foydalaning.",
+"auth.error_invalid_credentials": "Email yoki parol noto'g'ri",
+"auth.error_email_not_confirmed": "Email tasdiqlanmagan. Emailingizni tekshiring.",
+"auth.error_login_failed": "Kirish muvaffaqiyatsiz",
+"auth.error_fill_all_fields": "Barcha maydonlarni to'ldiring",
+"auth.error_invalid_phone": "Telefon raqam noto'g'ri formatda",
+"auth.error_password_too_short": "P
+
+arol kamida 6 belgidan iborat bo'lishi kerak",
+"auth.error_email_invalid": "Email noto'g'ri formatda",
+"auth.error_already_registered": "Bu email allaqachon ro'yxatdan o'tgan",
+"auth.error_registration_failed": "Ro'yxatdan o'tish muvaffaqiyatsiz",
+"stats.students": "Muvaffaqiyatli o'quvchilar",
+"stats.success_rate": "Muvaffaqiyat ko'rsatkichi",
+
+// RU - Russian
+"auth.error_wrong_portal": "Неправильный портал! Используйте студенческий или педагогический портал.",
+"auth.error_invalid_credentials": "Неверный email или пароль",
+"auth.error_email_not_confirmed": "Email не подтвержден. Проверьте вашу почту.",
+"auth.error_login_failed": "Вход не удался",
+"auth.error_fill_all_fields": "Заполните все поля",
+"auth.error_invalid_phone": "Неверный формат телефона",
+"auth.error_password_too_short": "Пароль должен содержать минимум 6 символов",
+"auth.error_email_invalid": "Неверный формат email",
+"auth.error_already_registered": "Этот email уже зарегистрирован",
+"auth.error_registration_failed": "Регистрация не удалась",
+"stats.students": "Успешных студентов",
+"stats.success_rate": "Показатель успеха",
+
+// EN - English
+"auth.error_wrong_portal": "Wrong portal! Please use student or teacher portal.",
+"auth.error_invalid_credentials": "Invalid email or password",
+"auth.error_email_not_confirmed": "Email not confirmed. Check your inbox.",
+"auth.error_login_failed": "Login failed",
+"auth.error_fill_all_fields": "Please fill all fields",
+"auth.error_invalid_phone": "Invalid phone format",
+"auth.error_password_too_short": "Password must be at least 6 characters",
+"auth.error_email_invalid": "Invalid email format",
+"auth.error_already_registered": "This email is already registered",
+"auth.error_registration_failed": "Registration failed",
+"stats.students": "Successful Students",
+"stats.success_rate": "Success Rate",

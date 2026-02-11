@@ -1,7 +1,7 @@
 "use client";
 
 import { useLanguage } from "@/context/LanguageContext";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
     FileText,
     Clock,
@@ -12,80 +12,36 @@ import {
     Search,
     Filter
 } from "lucide-react";
+import { getAvailableExams, type Exam } from "@/lib/supabase-queries";
 
 export default function OnlineTestsPage() {
     const { t } = useLanguage();
     const [selectedCategory, setSelectedCategory] = useState("all");
+    const [loading, setLoading] = useState(true);
+    const [exams, setExams] = useState<Exam[]>([]);
+
+    // Fetch available exams from Supabase
+    useEffect(() => {
+        async function fetchExams() {
+            const availableExams = await getAvailableExams();
+            setExams(availableExams);
+            setLoading(false);
+        }
+
+        fetchExams();
+    }, []);
+
+    // Filter by exam type (category)
+    const filteredTests = selectedCategory === "all"
+        ? exams
+        : exams.filter(exam => exam.type === selectedCategory);
 
     const categories = [
-        { id: "all", label: "All Tests" },
-        { id: "ielts", label: "IELTS Mock" },
-        { id: "math", label: "Mathematics" },
-        { id: "english", label: "General English" },
-        { id: "logic", label: "Logic / IQ" },
+        { id: "all", label: t('tests.categories.all') || "All Tests" },
+        { id: "dtm", label: "DTM" },
+        { id: "quiz", label: t('tests.categories.quiz') || "Quiz" },
+        { id: "topic", label: t('tests.categories.topic') || "Topic Test" },
     ];
-
-    const tests = [
-        {
-            id: 1,
-            title: "IELTS Listening Full Mock",
-            category: "ielts",
-            duration: "40 mins",
-            questions: 40,
-            difficulty: "Hard",
-            color: "text-red-500",
-            bg: "bg-red-50 dark:bg-red-900/20",
-            status: "New"
-        },
-        {
-            id: 2,
-            title: "Algebra Basics Quiz",
-            category: "math",
-            duration: "20 mins",
-            questions: 15,
-            difficulty: "Medium",
-            color: "text-blue-500",
-            bg: "bg-blue-50 dark:bg-blue-900/20",
-            status: "Popular"
-        },
-        {
-            id: 3,
-            title: "English Grammar: Tenses",
-            category: "english",
-            duration: "25 mins",
-            questions: 30,
-            difficulty: "Easy",
-            color: "text-green-500",
-            bg: "bg-green-50 dark:bg-green-900/20",
-            status: ""
-        },
-        {
-            id: 4,
-            title: "Logic & Patterns Vol. 1",
-            category: "logic",
-            duration: "15 mins",
-            questions: 10,
-            difficulty: "Medium",
-            color: "text-purple-500",
-            bg: "bg-purple-50 dark:bg-purple-900/20",
-            status: ""
-        },
-        {
-            id: 5,
-            title: "IELTS Reading: Academic",
-            category: "ielts",
-            duration: "60 mins",
-            questions: 40,
-            difficulty: "Hard",
-            color: "text-red-500",
-            bg: "bg-red-50 dark:bg-red-900/20",
-            status: "New"
-        }
-    ];
-
-    const filteredTests = selectedCategory === "all"
-        ? tests
-        : tests.filter(test => test.category === selectedCategory);
 
     return (
         <div className="space-y-8 pb-8">
@@ -129,45 +85,85 @@ export default function OnlineTestsPage() {
                 ))}
             </div>
 
-            {/* Tests Grid */}
+            {/* Tests Cards */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {filteredTests.map((test) => (
-                    <div key={test.id} className="bg-white dark:bg-slate-900 rounded-3xl p-6 border border-gray-200 dark:border-slate-800 shadow-sm hover:shadow-md transition-all group">
-                        <div className="flex justify-between items-start mb-4">
-                            <div className={`p-3 rounded-2xl ${test.bg} ${test.color}`}>
-                                <FileText size={24} />
-                            </div>
-                            {test.status && (
-                                <span className="px-3 py-1 bg-brand-orange/10 text-brand-orange text-xs font-bold rounded-full uppercase tracking-wider">
-                                    {test.status}
-                                </span>
-                            )}
-                        </div>
-
-                        <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2 group-hover:text-brand-blue transition-colors">
-                            {test.title}
-                        </h3>
-
-                        <div className="flex items-center gap-4 text-sm text-gray-500 dark:text-gray-400 mb-6">
-                            <div className="flex items-center gap-1">
-                                <Clock size={16} />
-                                {test.duration}
-                            </div>
-                            <div className="flex items-center gap-1">
-                                <BookOpen size={16} />
-                                {test.questions} Qs
-                            </div>
-                            <div className="flex items-center gap-1">
-                                <BarChart size={16} />
-                                {test.difficulty}
-                            </div>
-                        </div>
-
-                        <button className="w-full py-3 rounded-xl bg-gray-50 dark:bg-slate-800 text-gray-900 dark:text-white font-bold group-hover:bg-brand-blue group-hover:text-white transition-all flex items-center justify-center gap-2">
-                            Start Test <CheckCircle2 size={18} />
-                        </button>
+                {loading ? (
+                    <div className="col-span-full text-center py-12">
+                        <p className="text-gray-400">Loading tests...</p>
                     </div>
-                ))}
+                ) : filteredTests.length === 0 ? (
+                    <div className="col-span-full text-center py-12">
+                        <p className="text-gray-400">{t('dashboard.no_results')}</p>
+                    </div>
+                ) : (
+                    filteredTests.map((exam) => {
+                        // Determine colors based on exam type
+                        const getColors = (type: string) => {
+                            switch (type) {
+                                case 'dtm':
+                                    return { bg: 'bg-red-50 dark:bg-red-900/20', color: 'text-red-500' };
+                                case 'quiz':
+                                    return { bg: 'bg-blue-50 dark:bg-blue-900/20', color: 'text-blue-500' };
+                                default:
+                                    return { bg: 'bg-purple-50 dark:bg-purple-900/20', color: 'text-purple-500' };
+                            }
+                        };
+
+                        const { bg, color } = getColors(exam.type);
+                        const examDate = new Date(exam.created_at).toLocaleDateString('uz-UZ', {
+                            month: 'short',
+                            day: 'numeric',
+                            hour: '2-digit',
+                            minute: '2-digit'
+                        });
+
+                        // Status badge
+                        const isUpcoming = exam.status === 'upcoming';
+                        const isActive = exam.status === 'active';
+
+                        return (
+                            <div key={exam.id} className={`${bg} rounded-3xl p-6 border border-gray-200/50 dark:border-slate-700/50 cursor-pointer hover:shadow-lg transition-all group`}>
+                                <div className="flex items-start justify-between mb-4">
+                                    <FileText className={color} size={28} />
+                                    {isActive && (
+                                        <span className="px-2 py-1 bg-green-500 text-white text-xs font-bold rounded-full">
+                                            Active
+                                        </span>
+                                    )}
+                                    {isUpcoming && (
+                                        <span className="px-2 py-1 bg-blue-500 text-white text-xs font-bold rounded-full">
+                                            Upcoming
+                                        </span>
+                                    )}
+                                </div>
+
+                                <h3 className={`text-lg font-bold ${color} mb-3`}>{exam.title}</h3>
+
+                                <div className="space-y-2 text-sm text-gray-600 dark:text-gray-400 mb-4">
+                                    <div className="flex items-center gap-1">
+                                        <Clock size={16} />
+                                        {examDate}
+                                    </div>
+                                    <div className="flex items-center gap-1">
+                                        <BookOpen size={16} />
+                                        {exam.type.toUpperCase()}
+                                    </div>
+                                    <div className="flex items-center gap-1">
+                                        <BarChart size={16} />
+                                        Max: 189 ball
+                                    </div>
+                                </div>
+
+                                <button
+                                    className="w-full py-3 rounded-xl bg-gray-50 dark:bg-slate-800 text-gray-900 dark:text-white font-bold group-hover:bg-brand-blue group-hover:text-white transition-all flex items-center justify-center gap-2"
+                                    disabled={exam.status === 'finished'}
+                                >
+                                    {isActive ? 'Start Test' : 'View Details'} <CheckCircle2 size={18} />
+                                </button>
+                            </div>
+                        );
+                    })
+                )}
             </div>
         </div>
     );

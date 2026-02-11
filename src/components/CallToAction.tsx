@@ -21,9 +21,6 @@ const CallToAction = () => {
                     <div className="absolute top-0 left-0 w-full h-full overflow-hidden">
                         <div className="absolute -top-[50%] -left-[20%] w-[80%] h-[150%] bg-gradient-to-br from-white/10 to-transparent rotate-12 blur-3xl"></div>
                         <div className="absolute -bottom-[50%] -right-[20%] w-[80%] h-[150%] bg-gradient-to-tl from-brand-orange/20 to-transparent -rotate-12 blur-3xl"></div>
-
-                        {/* Grid Pattern */}
-                        <div className="absolute inset-0 bg-[url('/grid.png')] opacity-10"></div>
                     </div>
 
                     <div className="relative z-10 max-w-3xl mx-auto space-y-8">
