@@ -34,21 +34,16 @@ export default function DashboardLayout({
     const { t } = useLanguage();
 
     useEffect(() => {
-        // TEMPORARY: Bypass auth for UI testing (Rate Limit Workaround)
-        // TODO: Remove this before production
-        setLoading(false);
-        /*
         const checkUser = async () => {
-          const { data: { user }, error } = await supabase.auth.getUser();
-          if (error || !user) {
-            router.push("/login");
-          } else {
-            setLoading(false);
-          }
+            const { data: { user }, error } = await supabase.auth.getUser();
+            if (error || !user) {
+                router.push("/login");
+            } else {
+                setLoading(false);
+            }
         };
         checkUser();
-        */
-    }, [router]);
+    }, [router, supabase]);
 
     const handleLogout = async () => {
         await supabase.auth.signOut();
@@ -116,6 +111,7 @@ export default function DashboardLayout({
                                 <Link
                                     key={item.href}
                                     href={item.href}
+                                    onClick={() => setSidebarOpen(false)}
                                     className={`
                     flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 group
                     ${isActive

@@ -99,13 +99,44 @@ const MethodologyPage = () => {
 
                         {/* Visual/Image */}
                         <div className="flex-1 w-full">
-                            <div className={`relative aspect-[4/3] rounded-3xl overflow-hidden shadow-2xl ${step.border} border-4`}>
-                                {/* Abstract overlay */}
-                                <div className={`absolute inset-0 ${step.bg} mix-blend-multiply opacity-20 z-10`} />
-                                {/* Placeholder Image handling - in real app, use next/image with actual assets */}
-                                <div className={`w-full h-full bg-slate-100 dark:bg-slate-900 flex items-center justify-center text-gray-300 dark:text-slate-700`}>
-                                    {/* Simple decorative pattern instead of external image to avoid loading issues */}
-                                    <step.icon size={120} strokeWidth={1} className="opacity-10" />
+                            <div className={`relative aspect-[4/3] rounded-3xl overflow-hidden shadow-2xl ${step.border} border-4 group`}>
+                                {/* Gradient Background */}
+                                <div className={`absolute inset-0 bg-gradient-to-br ${step.id === 'step1' ? 'from-blue-400 via-blue-500 to-cyan-500' :
+                                        step.id === 'step2' ? 'from-orange-400 via-orange-500 to-amber-500' :
+                                            step.id === 'step3' ? 'from-green-400 via-emerald-500 to-teal-500' :
+                                                'from-purple-400 via-purple-500 to-pink-500'
+                                    }`} />
+
+                                {/* Decorative Circles */}
+                                <div className="absolute top-10 left-10 w-32 h-32 bg-white/10 rounded-full blur-2xl" />
+                                <div className="absolute bottom-10 right-10 w-40 h-40 bg-white/10 rounded-full blur-3xl" />
+                                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-64 h-64 bg-white/5 rounded-full blur-3xl" />
+
+                                {/* Glass Morphism Layer */}
+                                <div className="absolute inset-0 backdrop-blur-sm bg-white/10" />
+
+                                {/* Main Icon */}
+                                <div className="absolute inset-0 flex items-center justify-center">
+                                    <div className="relative">
+                                        {/* Icon Glow */}
+                                        <div className="absolute inset-0 bg-white/20 rounded-full blur-3xl scale-150" />
+                                        {/* Icon */}
+                                        <step.icon
+                                            size={140}
+                                            strokeWidth={1.5}
+                                            className="text-white drop-shadow-2xl relative z-10 group-hover:scale-110 transition-transform duration-500"
+                                        />
+                                    </div>
+                                </div>
+
+                                {/* Bottom Pattern */}
+                                <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-black/20 to-transparent" />
+
+                                {/* Step Number Watermark */}
+                                <div className="absolute bottom-4 right-4">
+                                    <span className="text-8xl font-black text-white/10">
+                                        {t(`methodology.${step.id}.num`)}
+                                    </span>
                                 </div>
                             </div>
                         </div>

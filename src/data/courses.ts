@@ -1,4 +1,4 @@
-import { Calculator, Globe, Atom, BookOpen, ScrollText, Dna, Languages, GraduationCap } from 'lucide-react';
+import { Calculator, Globe, Atom, BookOpen, ScrollText, Dna, Languages, GraduationCap, Scale } from 'lucide-react';
 
 export interface Course {
     id: string;
@@ -18,6 +18,7 @@ export const courses: Course[] = [
     { id: 'russian', icon: Languages, color: 'text-cyan-600', bg: 'bg-cyan-50 dark:bg-cyan-900/20', type: 'general' },
     { id: 'history', icon: ScrollText, color: 'text-amber-600', bg: 'bg-amber-50 dark:bg-amber-900/20', type: 'general' },
     { id: 'biology', icon: Dna, color: 'text-green-600', bg: 'bg-green-50 dark:bg-green-900/20', type: 'general' },
+    { id: 'law', icon: Scale, color: 'text-violet-600', bg: 'bg-violet-50 dark:bg-violet-900/20', type: 'general' },
 
     // Certificate Prep
     { id: 'cert.national', icon: ScrollText, color: 'text-purple-600', bg: 'bg-purple-50 dark:bg-purple-900/20', type: 'certificate' },
@@ -27,4 +28,6 @@ export const courses: Course[] = [
     // University Prep
     { id: 'prep.inha', icon: GraduationCap, color: 'text-blue-700', bg: 'bg-blue-100 dark:bg-blue-900/30', type: 'prep' },
     { id: 'prep.west', icon: GraduationCap, color: 'text-purple-700', bg: 'bg-purple-100 dark:bg-purple-900/30', type: 'prep' },
+    { id: 'prep.turin', icon: GraduationCap, color: 'text-indigo-700', bg: 'bg-indigo-100 dark:bg-indigo-900/30', type: 'prep' },
+    { id: 'prep.aut', icon: GraduationCap, color: 'text-cyan-700', bg: 'bg-cyan-100 dark:bg-cyan-900/30', type: 'prep' },
 ];

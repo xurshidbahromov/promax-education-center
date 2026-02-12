@@ -2,7 +2,7 @@
 
 import { useLanguage } from "@/context/LanguageContext";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
 import {
     LayoutDashboard,
@@ -14,9 +14,12 @@ import {
     Menu,
     X,
     ShieldCheck,
-    Bell
+    Bell,
+    Loader2,
+    AlertCircle
 } from "lucide-react";
 import Image from "next/image";
+import { createClient } from "@/utils/supabase/client";
 
 export default function AdminLayout({
     children,
@@ -25,8 +28,54 @@ export default function AdminLayout({
 }) {
     const [sidebarOpen, setSidebarOpen] = useState(false);
     const [currentDate, setCurrentDate] = useState("");
+    const [loading, setLoading] = useState(true);
+    const [authorized, setAuthorized] = useState(false);
     const pathname = usePathname();
+    const router = useRouter();
     const { t } = useLanguage();
+    const supabase = createClient();
+
+    // Check authentication and role
+    useEffect(() => {
+        const checkAccess = async () => {
+            try {
+                const { data: { user }, error: userError } = await supabase.auth.getUser();
+
+                if (userError || !user) {
+                    router.push("/login");
+                    return;
+                }
+
+                // Check user role from profiles table
+                const { data: profile, error: profileError } = await supabase
+                    .from('profiles')
+                    .select('role')
+                    .eq('id', user.id)
+                    .single();
+
+                if (profileError || !profile) {
+                    console.error("Error fetching profile:", profileError);
+                    router.push("/dashboard");
+                    return;
+                }
+
+                // Only allow admin, teacher, and staff roles
+                const allowedRoles = ['admin', 'teacher', 'staff'];
+                if (!allowedRoles.includes(profile.role)) {
+                    router.push("/dashboard");
+                    return;
+                }
+
+                setAuthorized(true);
+                setLoading(false);
+            } catch (error) {
+                console.error("Access check error:", error);
+                router.push("/login");
+            }
+        };
+
+        checkAccess();
+    }, [router, supabase]);
 
     // Render date only on client to avoid hydration mismatch
     useEffect(() => {
@@ -37,6 +86,43 @@ export default function AdminLayout({
             day: 'numeric'
         }));
     }, []);
+
+    const handleLogout = async () => {
+        await supabase.auth.signOut();
+        router.push("/login");
+    };
+
+    // Show loading state
+    if (loading) {
+        return (
+            <div className="min-h-screen flex items-center justify-center bg-gray-100 dark:bg-slate-950">
+                <div className="text-center">
+                    <Loader2 className="w-12 h-12 animate-spin text-red-600 mx-auto mb-4" />
+                    <p className="text-gray-600 dark:text-gray-400 font-medium">Verifying access...</p>
+                </div>
+            </div>
+        );
+    }
+
+    // Show unauthorized state (shouldn't reach here due to redirects, but as fallback)
+    if (!authorized) {
+        return (
+            <div className="min-h-screen flex items-center justify-center bg-gray-100 dark:bg-slate-950">
+                <div className="text-center">
+                    <AlertCircle className="w-16 h-16 text-red-600 mx-auto mb-4" />
+                    <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">Access Denied</h2>
+                    <p className="text-gray-600 dark:text-gray-400 mb-6">You don't have permission to access this area.</p>
+                    <Link
+                        href="/dashboard"
+                        className="inline-flex items-center gap-2 px-6 py-3 bg-brand-blue text-white rounded-xl font-semibold hover:bg-blue-600 transition-colors"
+                    >
+                        Return to Dashboard
+                    </Link>
+                </div>
+            </div>
+        );
+    }
+
 
     const menuItems = [
         { icon: LayoutDashboard, label: "Dashboard", href: "/admin" },
@@ -90,6 +176,7 @@ export default function AdminLayout({
                                 <Link
                                     key={item.href}
                                     href={item.href}
+                                    onClick={() => setSidebarOpen(false)}
                                     className={`
                                         flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 group
                                         ${isActive
@@ -115,7 +202,10 @@ export default function AdminLayout({
                                 <p className="text-sm font-bold text-white truncate">Administrator</p>
                                 <p className="text-xs text-slate-400 truncate">admin@promax.uz</p>
                             </div>
-                            <button className="text-slate-400 hover:text-red-500 transition-colors">
+                            <button
+                                onClick={handleLogout}
+                                className="text-slate-400 hover:text-red-500 transition-colors"
+                            >
                                 <LogOut size={18} />
                             </button>
                         </div>
