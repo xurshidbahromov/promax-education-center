@@ -154,21 +154,21 @@ export default function ResultsPage() {
                                         <ScoreInput
                                             label="Matematika"
                                             value={answers.comp_math}
-                                            onChange={(v) => handleAnswerChange('comp_math', v, 10)}
+                                            onChange={(v: string) => handleAnswerChange('comp_math', v, 10)}
                                             score={scores.comp_math}
                                         />
                                         {/* History */}
                                         <ScoreInput
                                             label="Ozbekiston Tarixi"
                                             value={answers.comp_history}
-                                            onChange={(v) => handleAnswerChange('comp_history', v, 10)}
+                                            onChange={(v: string) => handleAnswerChange('comp_history', v, 10)}
                                             score={scores.comp_history}
                                         />
                                         {/* Native Lang */}
                                         <ScoreInput
                                             label="Ona Tili"
                                             value={answers.comp_lang}
-                                            onChange={(v) => handleAnswerChange('comp_lang', v, 10)}
+                                            onChange={(v: string) => handleAnswerChange('comp_lang', v, 10)}
                                             score={scores.comp_lang}
                                         />
                                     </div>
@@ -185,7 +185,7 @@ export default function ResultsPage() {
                                             label={`1-Fan: ${currentDirection.subject_1}`}
                                             subtitle="(30 questions × 3.1 points)"
                                             value={answers.subject_1}
-                                            onChange={(v) => handleAnswerChange('subject_1', v, 30)}
+                                            onChange={(v: string) => handleAnswerChange('subject_1', v, 30)}
                                             score={scores.subject_1}
                                             max={30}
                                             isMain={true}
@@ -195,7 +195,7 @@ export default function ResultsPage() {
                                             label={`2-Fan: ${currentDirection.subject_2}`}
                                             subtitle="(30 questions × 2.1 points)"
                                             value={answers.subject_2}
-                                            onChange={(v) => handleAnswerChange('subject_2', v, 30)}
+                                            onChange={(v: string) => handleAnswerChange('subject_2', v, 30)}
                                             score={scores.subject_2}
                                             max={30}
                                             isMain={true}
