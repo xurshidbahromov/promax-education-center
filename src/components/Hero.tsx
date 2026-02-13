@@ -39,10 +39,10 @@ const Hero = () => {
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.7, delay: 0.1, ease: [0.21, 0.47, 0.32, 0.98] }}
                 >
-                    {t('hero.headline').split('.').map((part, i) => (
+                    {t('hero.headline').split(',').map((part, i) => (
                         part.trim() && (
                             <span key={i} className={`${i === 1 ? 'text-brand-blue dark:text-blue-400' : ''}`}>
-                                {part.trim()}.{' '}
+                                {part.trim()},{' '}
                             </span>
                         )
                     ))}
