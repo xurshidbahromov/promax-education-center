@@ -114,7 +114,7 @@ export default function AdminLayout({
                     <p className="text-gray-600 dark:text-gray-400 mb-6">You don't have permission to access this area.</p>
                     <Link
                         href="/dashboard"
-                        className="inline-flex items-center gap-2 px-6 py-3 bg-brand-blue text-white rounded-xl font-semibold hover:bg-blue-600 transition-colors"
+                        className="inline-flex items-center gap-2 h-10 px-6 bg-brand-blue text-white rounded-xl text-sm font-medium hover:bg-blue-600 transition-colors"
                     >
                         Return to Dashboard
                     </Link>

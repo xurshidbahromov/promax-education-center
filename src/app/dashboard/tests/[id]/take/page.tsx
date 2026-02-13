@@ -23,7 +23,7 @@ import {
     getAttemptResponses,
     type Question
 } from "@/lib/tests";
-import { supabase } from "@/lib/supabase";
+import { createClient } from "@/utils/supabase/client";
 
 export default function TakeTestPage() {
     const params = useParams();
@@ -58,6 +58,7 @@ export default function TakeTestPage() {
                 setTest(testData);
 
                 // Get questions
+                const supabase = createClient();
                 const { data: questionsData } = await supabase
                     .from('questions')
                     .select('*')
@@ -318,8 +319,8 @@ export default function TakeTestPage() {
                                             <label
                                                 key={key}
                                                 className={`flex items-start gap-4 p-4 border-2 rounded-xl cursor-pointer transition-all ${answers[currentQuestion.id] === key
-                                                        ? "border-brand-blue bg-blue-50 dark:bg-blue-900/20"
-                                                        : "border-gray-200 dark:border-slate-800 hover:border-gray-300 dark:hover:border-slate-700"
+                                                    ? "border-brand-blue bg-blue-50 dark:bg-blue-900/20"
+                                                    : "border-gray-200 dark:border-slate-800 hover:border-gray-300 dark:hover:border-slate-700"
                                                     }`}
                                             >
                                                 <input
@@ -349,8 +350,8 @@ export default function TakeTestPage() {
                                             <label
                                                 key={option}
                                                 className={`flex items-center gap-4 p-4 border-2 rounded-xl cursor-pointer transition-all ${answers[currentQuestion.id] === option
-                                                        ? "border-brand-blue bg-blue-50 dark:bg-blue-900/20"
-                                                        : "border-gray-200 dark:border-slate-800 hover:border-gray-300 dark:hover:border-slate-700"
+                                                    ? "border-brand-blue bg-blue-50 dark:bg-blue-900/20"
+                                                    : "border-gray-200 dark:border-slate-800 hover:border-gray-300 dark:hover:border-slate-700"
                                                     }`}
                                             >
                                                 <input
@@ -385,8 +386,8 @@ export default function TakeTestPage() {
                                 <button
                                     onClick={() => handleMarkForReview(currentQuestion.id)}
                                     className={`flex items-center gap-2 px-4 py-2 rounded-xl font-medium transition-all ${markedForReview.has(currentQuestion.id)
-                                            ? "bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400"
-                                            : "bg-gray-100 text-gray-600 dark:bg-slate-800 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-slate-700"
+                                        ? "bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400"
+                                        : "bg-gray-100 text-gray-600 dark:bg-slate-800 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-slate-700"
                                         }`}
                                 >
                                     <Flag size={18} />
@@ -442,12 +443,12 @@ export default function TakeTestPage() {
                                             key={q.id}
                                             onClick={() => setCurrentQuestionIndex(index)}
                                             className={`aspect-square rounded-lg font-semibold text-sm transition-all ${isCurrent
-                                                    ? "bg-brand-blue text-white ring-2 ring-brand-blue ring-offset-2 dark:ring-offset-slate-900"
-                                                    : isMarked
-                                                        ? "bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400"
-                                                        : isAnswered
-                                                            ? "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400"
-                                                            : "bg-gray-100 text-gray-600 dark:bg-slate-800 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-slate-700"
+                                                ? "bg-brand-blue text-white ring-2 ring-brand-blue ring-offset-2 dark:ring-offset-slate-900"
+                                                : isMarked
+                                                    ? "bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400"
+                                                    : isAnswered
+                                                        ? "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400"
+                                                        : "bg-gray-100 text-gray-600 dark:bg-slate-800 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-slate-700"
                                                 }`}
                                         >
                                             {index + 1}

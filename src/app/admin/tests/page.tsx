@@ -84,9 +84,9 @@ export default function AdminTestsPage() {
 
                 <Link
                     href="/admin/tests/create"
-                    className="px-6 py-3 bg-gradient-to-r from-brand-blue to-cyan-500 text-white rounded-xl font-semibold flex items-center gap-2 hover:shadow-lg transition-all"
+                    className="h-10 px-4 bg-brand-blue text-white rounded-xl text-sm font-medium flex items-center gap-2 hover:bg-blue-600 transition-colors shadow-sm"
                 >
-                    <Plus size={20} />
+                    <Plus size={18} />
                     Yangi Test
                 </Link>
             </div>
@@ -112,8 +112,8 @@ export default function AdminTestsPage() {
                             <button
                                 key={filter}
                                 onClick={() => setFilterPublished(filter as any)}
-                                className={`px-4 py-2 rounded-xl text-sm font-medium transition-all ${filterPublished === filter
-                                    ? "bg-brand-blue text-white shadow-md"
+                                className={`h-10 px-4 rounded-xl text-sm font-medium transition-all ${filterPublished === filter
+                                    ? "bg-brand-blue text-white shadow-sm"
                                     : "bg-gray-100 dark:bg-slate-800 text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-slate-700"
                                     }`}
                             >
@@ -142,9 +142,9 @@ export default function AdminTestsPage() {
                         </p>
                         <Link
                             href="/admin/tests/create"
-                            className="inline-flex items-center gap-2 px-6 py-3 bg-brand-blue text-white rounded-xl font-semibold hover:shadow-lg transition-all"
+                            className="inline-flex items-center gap-2 h-10 px-6 bg-brand-blue text-white rounded-xl text-sm font-medium hover:bg-blue-600 transition-colors shadow-sm"
                         >
-                            <Plus size={20} />
+                            <Plus size={18} />
                             Yangi Test Yaratish
                         </Link>
                     </div>
@@ -199,27 +199,27 @@ export default function AdminTestsPage() {
                                             <div className="flex items-center justify-end gap-2">
                                                 <Link
                                                     href={`/admin/tests/${test.id}/analytics`}
-                                                    className="p-2 text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-lg transition-colors"
+                                                    className="h-8 w-8 flex items-center justify-center text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-lg transition-colors"
                                                     title="Analytics"
                                                 >
                                                     <BarChart3 size={18} />
                                                 </Link>
                                                 <Link
                                                     href={`/admin/tests/${test.id}`}
-                                                    className="p-2 text-gray-600 hover:bg-gray-100 dark:hover:bg-slate-700 rounded-lg transition-colors"
+                                                    className="h-8 w-8 flex items-center justify-center text-gray-600 hover:bg-gray-100 dark:hover:bg-slate-700 rounded-lg transition-colors"
                                                     title="Ko'rish"
                                                 >
                                                     <Eye size={18} />
                                                 </Link>
                                                 <Link
                                                     href={`/admin/tests/${test.id}/edit`}
-                                                    className="p-2 text-green-600 hover:bg-green-50 dark:hover:bg-green-900/20 rounded-lg transition-colors"
+                                                    className="h-8 w-8 flex items-center justify-center text-green-600 hover:bg-green-50 dark:hover:bg-green-900/20 rounded-lg transition-colors"
                                                     title="Tahrirlash"
                                                 >
                                                     <Edit size={18} />
                                                 </Link>
                                                 <button
-                                                    className="p-2 text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"
+                                                    className="h-8 w-8 flex items-center justify-center text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"
                                                     title="O'chirish"
                                                 >
                                                     <Trash2 size={18} />

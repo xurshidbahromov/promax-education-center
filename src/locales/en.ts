@@ -314,5 +314,27 @@ export const en = {
 
     // Game Zone Page
     "games.title": "Game Zone",
-    "games.subtitle": "Play, learn, and earn coins!"
+    "games.subtitle": "Play, learn, and earn coins!",
+    // Profile Page
+    "profile.title": "My Profile",
+    "profile.personal_info": "Personal Information",
+    "profile.save": "Save Changes",
+    "profile.saving": "Saving...",
+    "profile.first_name": "First Name",
+    "profile.last_name": "Last Name",
+    "profile.email": "Email Address",
+    "profile.phone": "Phone Number",
+    "profile.location": "Location",
+    "profile.location_placeholder": "City, Country",
+    "profile.bio": "About Me",
+    "profile.bio_placeholder": "Tell us about yourself...",
+    "profile.security": "Security",
+    "profile.password": "Password",
+    "profile.password_managed": "Managed via auth provider",
+    "profile.change_password": "Change Password (Coming Soon)",
+    "profile.student_status": "Student Status",
+    "profile.student_desc": "You are a registered student at Promax Education.",
+    "profile.level": "Level",
+    "profile.success_update": "Profile updated successfully!",
+    "profile.error_update": "Error updating profile"
 };

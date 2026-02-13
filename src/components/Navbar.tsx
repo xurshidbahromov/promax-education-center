@@ -56,7 +56,7 @@ const Navbar = () => {
     };
 
     return (
-        <nav className="fixed w-full z-50 top-0 left-0 bg-white/90 dark:bg-slate-950/90 backdrop-blur-md border-b border-gray-100 dark:border-slate-800 transition-all duration-300">
+        <nav className="fixed w-full z-50 top-0 left-0 bg-white/50 dark:bg-slate-950/50 backdrop-blur-xl border-b border-gray-100/10 dark:border-slate-800/10 transition-all duration-300">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div className="flex justify-between h-16 items-center">
                     {/* Logo Area */}
@@ -218,7 +218,7 @@ const Navbar = () => {
                         animate={{ opacity: 1, height: 'auto' }}
                         exit={{ opacity: 0, height: 0 }}
                         transition={{ duration: 0.3, ease: "easeInOut" }}
-                        className="lg:hidden bg-white dark:bg-slate-950 border-t border-gray-100 dark:border-slate-800 overflow-hidden shadow-xl"
+                        className="lg:hidden bg-white/50 dark:bg-slate-950/50 backdrop-blur-xl border-t border-gray-100/10 dark:border-slate-800/10 overflow-hidden shadow-xl"
                     >
                         <div className="flex flex-col gap-4 p-4">
                             {['home', 'courses', 'methodology', 'results', 'about'].map((item) => (

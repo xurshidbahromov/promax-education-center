@@ -315,5 +315,27 @@ export const ru = {
 
     // Game Zone Page
     "games.title": "Игровая Зона",
-    "games.subtitle": "Играйте, учитесь и зарабатывайте коины!"
+    "games.subtitle": "Играйте, учитесь и зарабатывайте коины!",
+    // Profile Page
+    "profile.title": "Мой Профиль",
+    "profile.personal_info": "Личная Информация",
+    "profile.save": "Сохранить",
+    "profile.saving": "Сохранение...",
+    "profile.first_name": "Имя",
+    "profile.last_name": "Фамилия",
+    "profile.email": "Email Адрес",
+    "profile.phone": "Номер Телефона",
+    "profile.location": "Адрес",
+    "profile.location_placeholder": "Город, Страна",
+    "profile.bio": "О Себе",
+    "profile.bio_placeholder": "Немалова о себе...",
+    "profile.security": "Безопасность",
+    "profile.password": "Пароль",
+    "profile.password_managed": "Управляется через провайдера",
+    "profile.change_password": "Сменить Пароль (Скоро)",
+    "profile.student_status": "Статус Студента",
+    "profile.student_desc": "Вы зарегистрированный студент Promax Education.",
+    "profile.level": "Уровень",
+    "profile.success_update": "Профиль успешно обновлен!",
+    "profile.error_update": "Ошибка при обновлении профиля"
 };

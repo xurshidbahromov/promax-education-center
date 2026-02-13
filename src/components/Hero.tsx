@@ -34,15 +34,15 @@ const Hero = () => {
 
                 {/* Headline */}
                 <motion.h1
-                    className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-extrabold tracking-tight text-gray-900 dark:text-white leading-[1.1] mb-4 sm:mb-6 max-w-4xl"
+                    className="text-lg sm:text-xl md:text-2xl lg:text-3xl xl:text-4xl font-extrabold tracking-tight text-gray-900 dark:text-white leading-[1.1] mb-4 sm:mb-6 max-w-6xl truncate-none whitespace-nowrap"
                     initial={{ opacity: 0, y: 30 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.7, delay: 0.1, ease: [0.21, 0.47, 0.32, 0.98] }}
                 >
                     {t('hero.headline').split('.').map((part, i) => (
                         part.trim() && (
-                            <span key={i} className={`block ${i === 1 ? 'text-brand-blue dark:text-blue-400' : ''}`}>
-                                {part.trim()}.
+                            <span key={i} className={`${i === 1 ? 'text-brand-blue dark:text-blue-400' : ''}`}>
+                                {part.trim()}.{' '}
                             </span>
                         )
                     ))}

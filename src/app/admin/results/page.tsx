@@ -205,7 +205,7 @@ export default function ResultsPage() {
                             </div>
 
                             {/* Submit */}
-                            <button type="button" className="w-full py-4 bg-brand-blue text-white rounded-xl font-bold hover:bg-blue-600 transition-colors shadow-lg shadow-blue-500/30 flex items-center justify-center gap-2 text-lg active:scale-[0.98]">
+                            <button type="button" className="w-full h-12 bg-brand-blue text-white rounded-xl font-medium hover:bg-blue-600 transition-colors shadow-lg shadow-blue-500/30 flex items-center justify-center gap-2 active:scale-[0.98]">
                                 <Save size={20} />
                                 Save Result
                             </button>

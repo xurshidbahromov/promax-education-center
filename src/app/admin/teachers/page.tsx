@@ -79,9 +79,9 @@ export default function AdminTeachersPage() {
 
                 <Link
                     href="/admin/teachers/create"
-                    className="px-6 py-3 bg-gradient-to-r from-brand-blue to-cyan-500 text-white rounded-xl font-semibold flex items-center gap-2 hover:shadow-lg transition-all"
+                    className="h-10 px-4 bg-brand-blue text-white rounded-xl text-sm font-medium flex items-center gap-2 hover:bg-blue-600 transition-colors shadow-sm"
                 >
-                    <UserPlus size={20} />
+                    <UserPlus size={18} />
                     Yangi O'qituvchi
                 </Link>
             </div>
@@ -121,9 +121,9 @@ export default function AdminTeachersPage() {
                     {teachers.length === 0 && (
                         <Link
                             href="/admin/teachers/create"
-                            className="inline-flex items-center gap-2 px-6 py-3 bg-brand-blue text-white rounded-xl font-semibold hover:shadow-lg transition-all"
+                            className="inline-flex items-center gap-2 h-10 px-6 bg-brand-blue text-white rounded-xl text-sm font-medium hover:bg-blue-600 transition-colors shadow-sm"
                         >
-                            <UserPlus size={20} />
+                            <UserPlus size={18} />
                             Yangi O'qituvchi Qo'shish
                         </Link>
                     )}
@@ -152,11 +152,11 @@ export default function AdminTeachersPage() {
                                 <div className="flex items-center gap-1">
                                     <Link
                                         href={`/admin/teachers/${teacher.id}/edit`}
-                                        className="p-2 text-gray-400 hover:text-brand-blue hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-lg transition-colors"
+                                        className="h-8 w-8 flex items-center justify-center text-gray-400 hover:text-brand-blue hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-lg transition-colors"
                                     >
                                         <Edit size={16} />
                                     </Link>
-                                    <button className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors">
+                                    <button className="h-8 w-8 flex items-center justify-center text-gray-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors">
                                         <Trash2 size={16} />
                                     </button>
                                 </div>

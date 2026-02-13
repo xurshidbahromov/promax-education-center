@@ -321,5 +321,27 @@ export const uz = {
 
     // Game Zone Page
     "games.title": "O'yin Zonasi",
-    "games.subtitle": "O'ynang, o'rganing va coin yig'ing!"
+    "games.subtitle": "O'ynang, o'rganing va coin yig'ing!",
+    // Profile Page
+    "profile.title": "Mening Profilim",
+    "profile.personal_info": "Shaxsiy Ma'lumotlar",
+    "profile.save": "Saqlash",
+    "profile.saving": "Saqlanmoqda...",
+    "profile.first_name": "Ism",
+    "profile.last_name": "Familiya",
+    "profile.email": "Email Manzil",
+    "profile.phone": "Telefon Raqam",
+    "profile.location": "Manzil",
+    "profile.location_placeholder": "Shahar, Davlat",
+    "profile.bio": "O'zingiz haqida",
+    "profile.bio_placeholder": "O'zingiz haqingizda qisqacha...",
+    "profile.security": "Xavfsizlik",
+    "profile.password": "Parol",
+    "profile.password_managed": "Auth provider orqali boshqariladi",
+    "profile.change_password": "Parolni O'zgartirish (Tez orada)",
+    "profile.student_status": "O'quvchi Statusi",
+    "profile.student_desc": "Siz Promax Education ro'yxatdan o'tgan o'quvchisiz.",
+    "profile.level": "Daraja",
+    "profile.success_update": "Profil muvaffaqiyatli yangilandi!",
+    "profile.error_update": "Profilni yangilashda xatolik yuz berdi"
 };
