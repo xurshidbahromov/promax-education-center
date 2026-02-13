@@ -25,7 +25,7 @@ const Footer = () => {
                             <div className="flex items-center gap-3">
                                 <div className="relative w-24 h-24">
                                     <Image
-                                        src="/logo_without_sentence.png"
+                                        src="/favicon.ico"
                                         alt="Promax Education Logo"
                                         fill
                                         sizes="96px"
