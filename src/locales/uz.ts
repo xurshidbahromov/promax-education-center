@@ -6,7 +6,7 @@ export const uz = {
     "nav.contact": "Aloqa",
     "nav.methodology": "Metodika",
     "nav.login": "Kirish",
-    "hero.headline": "Aniq Ta'lim. Strategik Muvaffaqiyat.",
+    "hero.headline": "Aniq Ta'lim, Strategik Muvaffaqiyat.",
     "hero.slogan": "Eng Muhim Maqsadlaringizni Biling",
     "hero.subheadline": "Xalqaro va Mahalliy Universitet imtihonlari, IELTS va SAT ga tayyorlash bo'yicha professional o'quv markazi.",
     "hero.cta.primary": "Ro'yxatdan o'tish",
