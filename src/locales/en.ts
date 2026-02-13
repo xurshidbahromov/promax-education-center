@@ -58,6 +58,8 @@ export const en = {
     "nav.methodology": "Methodology",
     "nav.login": "Login",
     "hero.headline": "Precision Learning, Strategic Success.",
+    "hero.welcome": "WELCOME TO PROMAX EDUCATION LC PLATFORM!",
+    "hero.welcome_short": "WELCOME!",
     "hero.slogan": "Know Your Most Important Goals",
     "hero.subheadline": "Professional coaching center for University Exams, IELTS, and SAT preparation.",
     "hero.cta.primary": "Register Now",

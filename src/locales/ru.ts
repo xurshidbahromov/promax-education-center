@@ -7,6 +7,8 @@ export const ru = {
     "nav.methodology": "Методика",
     "nav.login": "Войти",
     "hero.headline": "Точное Обучение, Стратегический Успех.",
+    "hero.welcome": "ДОБРО ПОЖАЛОВАТЬ НА ПЛАТФОРМУ PROMAX EDUCATION LC!",
+    "hero.welcome_short": "ДОБРО ПОЖАЛОВАТЬ!",
     "hero.slogan": "Знай Свои Главные Цели",
     "hero.subheadline": "Профессиональная учебный центр подготовки к ВУЗам, IELTS и SAT.",
     "hero.cta.primary": "Регистрация",

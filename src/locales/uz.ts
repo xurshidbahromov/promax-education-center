@@ -7,6 +7,8 @@ export const uz = {
     "nav.methodology": "Metodika",
     "nav.login": "Kirish",
     "hero.headline": "Aniq Ta'lim, Strategik Muvaffaqiyat.",
+    "hero.welcome": "PROMAX EDUCATION LC PLATFORMASIGA XUSH KELIBSIZ!",
+    "hero.welcome_short": "XUSH KELIBSIZ!",
     "hero.slogan": "Eng Muhim Maqsadlaringizni Biling",
     "hero.subheadline": "Xalqaro va Mahalliy Universitet imtihonlari, IELTS va SAT ga tayyorlash bo'yicha professional o'quv markazi.",
     "hero.cta.primary": "Ro'yxatdan o'tish",
