@@ -42,7 +42,7 @@ const Hero = () => {
                     {t('hero.headline').split(',').map((part, i) => (
                         part.trim() && (
                             <span key={i} className={`${i === 1 ? 'text-brand-blue dark:text-blue-400' : ''}`}>
-                                {part.trim()},{' '}
+                                {part.trim()}{i === 1 ? '' : ', '}
                             </span>
                         )
                     ))}
