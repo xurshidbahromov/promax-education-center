@@ -91,16 +91,17 @@ export default function TakeTestPage() {
                     }
                 } else {
                     // Start new attempt
-                    const newAttemptId = await startTestAttempt(testId);
-                    if (!newAttemptId) {
-                        alert("Test boshlashda xatolik!");
+                    const attemptData = await startTestAttempt(testId);
+                    if (!attemptData) {
+                        alert(t('tests.take.error.start'));
                         router.push('/dashboard/tests');
                         return;
                     }
-                    setAttemptId(newAttemptId);
+                    setAttemptId(attemptData.id);
 
                     // Set initial time
                     if (testData.duration_minutes) {
+                        // For a brand new attempt, full duration is available
                         setTimeRemaining(testData.duration_minutes * 60);
                     }
                 }
@@ -193,7 +194,7 @@ export default function TakeTestPage() {
         const unanswered = questions.filter(q => !answers[q.id]);
         if (unanswered.length > 0) {
             const confirm = window.confirm(
-                `${unanswered.length} ta savolga javob bermagansingiz. Testni yakunlaysizmi?`
+                t('tests.take.confirm_finish', { count: unanswered.length })
             );
             if (!confirm) return;
         }
@@ -225,7 +226,7 @@ export default function TakeTestPage() {
             <div className="flex items-center justify-center min-h-screen">
                 <div className="text-center">
                     <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-brand-blue mx-auto mb-4"></div>
-                    <p className="text-gray-600 dark:text-gray-400">Test yuklanmoqda...</p>
+                    <p className="text-gray-600 dark:text-gray-400">{t('tests.take.loading')}</p>
                 </div>
             </div>
         );
@@ -235,9 +236,9 @@ export default function TakeTestPage() {
         return (
             <div className="text-center py-12">
                 <AlertCircle className="mx-auto text-red-500 mb-4" size={64} />
-                <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">Xatolik yuz berdi</h2>
+                <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">{t('tests.take.error.title')}</h2>
                 <Link href="/dashboard/tests" className="text-brand-blue hover:underline">
-                    Testlar ro'yxatiga qaytish
+                    {t('tests.take.back_to_list')}
                 </Link>
             </div>
         );
@@ -257,7 +258,7 @@ export default function TakeTestPage() {
                                 {test.title}
                             </h1>
                             <p className="text-sm text-gray-500 dark:text-gray-400">
-                                Savol {currentQuestionIndex + 1} / {questions.length}
+                                {t('tests.take.question_progress', { current: currentQuestionIndex + 1, total: questions.length })}
                             </p>
                         </div>
 
@@ -265,7 +266,7 @@ export default function TakeTestPage() {
                             {autoSaving && (
                                 <div className="flex items-center gap-2 text-sm text-gray-500">
                                     <Save size={16} className="animate-pulse" />
-                                    Saqlanmoqda...
+                                    {t('tests.take.saving')}
                                 </div>
                             )}
 
@@ -300,7 +301,7 @@ export default function TakeTestPage() {
                                     {currentQuestionIndex + 1}
                                 </span>
                                 <span className="px-3 py-1 bg-gray-100 dark:bg-slate-800 text-gray-700 dark:text-gray-300 rounded-lg text-sm font-medium">
-                                    {currentQuestion.points} ball
+                                    {t('tests.take.points', { points: currentQuestion.points })}
                                 </span>
                             </div>
 
@@ -363,7 +364,7 @@ export default function TakeTestPage() {
                                                     className="w-5 h-5 text-brand-blue"
                                                 />
                                                 <span className="text-gray-900 dark:text-white font-medium">
-                                                    {option === "true" ? "To'g'ri" : "Noto'g'ri"}
+                                                    {option === "true" ? t('tests.take.true') : t('tests.take.false')}
                                                 </span>
                                             </label>
                                         ))}
@@ -374,7 +375,7 @@ export default function TakeTestPage() {
                                     <textarea
                                         value={answers[currentQuestion.id] || ""}
                                         onChange={(e) => handleAnswerChange(currentQuestion.id, e.target.value)}
-                                        placeholder="Javobingizni kiriting..."
+                                        placeholder={t('tests.take.placeholder')}
                                         rows={4}
                                         className="w-full px-4 py-3 border-2 border-gray-200 dark:border-slate-800 rounded-xl bg-white dark:bg-slate-800 text-gray-900 dark:text-white focus:border-brand-blue focus:ring-2 focus:ring-brand-blue/20"
                                     />
@@ -391,7 +392,7 @@ export default function TakeTestPage() {
                                         }`}
                                 >
                                     <Flag size={18} />
-                                    {markedForReview.has(currentQuestion.id) ? "Ko'rib chiqish uchun belgilandi" : "Ko'rib chiqish uchun belgilash"}
+                                    {markedForReview.has(currentQuestion.id) ? t('tests.take.marked') : t('tests.take.mark')}
                                 </button>
                             </div>
                         </div>
@@ -404,7 +405,7 @@ export default function TakeTestPage() {
                                 className="px-6 py-3 bg-gray-200 dark:bg-slate-800 text-gray-700 dark:text-gray-300 rounded-xl font-semibold flex items-center gap-2 hover:bg-gray-300 dark:hover:bg-slate-700 disabled:opacity-50 disabled:cursor-not-allowed"
                             >
                                 <ArrowLeft size={20} />
-                                Oldingi
+                                {t('tests.take.prev')}
                             </button>
 
                             {currentQuestionIndex === questions.length - 1 ? (
@@ -414,14 +415,14 @@ export default function TakeTestPage() {
                                     className="px-8 py-3 bg-gradient-to-r from-green-500 to-emerald-500 text-white rounded-xl font-bold flex items-center gap-2 hover:shadow-xl transition-all disabled:opacity-50"
                                 >
                                     <Send size={20} />
-                                    {submitting ? "Yuborilmoqda..." : "Testni Yakunlash"}
+                                    {submitting ? t('tests.take.submitting') : t('tests.take.finish')}
                                 </button>
                             ) : (
                                 <button
                                     onClick={() => setCurrentQuestionIndex(prev => Math.min(questions.length - 1, prev + 1))}
                                     className="px-6 py-3 bg-brand-blue text-white rounded-xl font-semibold flex items-center gap-2 hover:shadow-lg"
                                 >
-                                    Keyingi
+                                    {t('tests.take.next')}
                                     <ArrowRight size={20} />
                                 </button>
                             )}
@@ -431,7 +432,7 @@ export default function TakeTestPage() {
                     {/* Question Navigator Sidebar */}
                     <div className="lg:col-span-1">
                         <div className="bg-white dark:bg-slate-900 rounded-2xl border border-gray-200 dark:border-slate-800 p-4 sticky top-24">
-                            <h3 className="font-bold text-gray-900 dark:text-white mb-4">Savollar</h3>
+                            <h3 className="font-bold text-gray-900 dark:text-white mb-4">{t('tests.take.questions_list')}</h3>
                             <div className="grid grid-cols-5 lg:grid-cols-4 gap-2">
                                 {questions.map((q, index) => {
                                     const isAnswered = !!answers[q.id];
@@ -461,15 +462,15 @@ export default function TakeTestPage() {
                             <div className="mt-4 pt-4 border-t border-gray-200 dark:border-slate-800 space-y-2 text-xs">
                                 <div className="flex items-center gap-2">
                                     <div className="w-4 h-4 bg-green-100 dark:bg-green-900/30 rounded"></div>
-                                    <span className="text-gray-600 dark:text-gray-400">Javob berilgan</span>
+                                    <span className="text-gray-600 dark:text-gray-400">{t('tests.take.status.answered')}</span>
                                 </div>
                                 <div className="flex items-center gap-2">
                                     <div className="w-4 h-4 bg-yellow-100 dark:bg-yellow-900/30 rounded"></div>
-                                    <span className="text-gray-600 dark:text-gray-400">Belgilangan</span>
+                                    <span className="text-gray-600 dark:text-gray-400">{t('tests.take.status.marked')}</span>
                                 </div>
                                 <div className="flex items-center gap-2">
                                     <div className="w-4 h-4 bg-gray-100 dark:bg-slate-800 rounded"></div>
-                                    <span className="text-gray-600 dark:text-gray-400">Javob yo'q</span>
+                                    <span className="text-gray-600 dark:text-gray-400">{t('tests.take.status.no_answer')}</span>
                                 </div>
                             </div>
                         </div>

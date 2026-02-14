@@ -18,7 +18,7 @@ import {
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { createClient } from "@/utils/supabase/client";
-import { getDashboardStats, getRecentResultsForChart } from "@/lib/supabase-queries";
+import { getDashboardStats, getRecentResultsForChart, getStudentActivity, getLeaderboard, getAvailableExams, getUserRank } from "@/lib/supabase-queries";
 
 export default function DashboardPage() {
     const { t } = useLanguage();
@@ -31,6 +31,11 @@ export default function DashboardPage() {
         totalCoins: 0
     });
     const [chartData, setChartData] = useState<any[]>([]);
+    const [activityFeed, setActivityFeed] = useState<any[]>([]);
+    const [leaderboard, setLeaderboard] = useState<any[]>([]);
+    const [upcomingTests, setUpcomingTests] = useState<any[]>([]);
+    const [currentUserId, setCurrentUserId] = useState<string | null>(null);
+    const [userRank, setUserRank] = useState<any>(null);
 
     // Fetch user and dashboard data
     useEffect(() => {
@@ -45,6 +50,7 @@ export default function DashboardPage() {
                 return;
             }
 
+            setCurrentUserId(user.id);
             setUserFullName(user.user_metadata?.full_name || "Student");
 
             // Get dashboard stats
@@ -54,6 +60,22 @@ export default function DashboardPage() {
             // Get recent results for chart
             const recentResults = await getRecentResultsForChart(user.id);
             setChartData(recentResults);
+
+            // Get activity feed
+            const activity = await getStudentActivity(user.id);
+            setActivityFeed(activity);
+
+            // Get leaderboard
+            const leaderboardData = await getLeaderboard();
+            setLeaderboard(leaderboardData);
+
+            // Get specific user rank (in case they are not in visible list or for sticky footer)
+            const rankData = await getUserRank(user.id);
+            setUserRank(rankData);
+
+            // Get available exams (upcoming tests)
+            const exams = await getAvailableExams();
+            setUpcomingTests(exams);
 
             setLoading(false);
         }
@@ -104,11 +126,11 @@ export default function DashboardPage() {
         { title: "Yangi 'Game Zone' ochildi", date: "Bugun", type: "success", message: "Tanaffusda stol tennisi o'ynashingiz mumkin." },
     ];
 
-    const leaderboard = [
-        { name: "Aziz Rahimov", points: 2400, rank: 1, avatar: "🥇" },
-        { name: "Malika Karimova", points: 2150, rank: 2, avatar: "🥈" },
-        { name: t('dashboard.leaderboard.you'), points: 1250, rank: 15, avatar: "👤" },
-    ];
+    // const leaderboard = [
+    //     { name: "Aziz Rahimov", points: 2400, rank: 1, avatar: "🥇" },
+    //     { name: "Malika Karimova", points: 2150, rank: 2, avatar: "🥈" },
+    //     { name: t('dashboard.leaderboard.you'), points: 1250, rank: 15, avatar: "👤" },
+    // ];
 
     return (
         <div className="space-y-8">
@@ -138,16 +160,19 @@ export default function DashboardPage() {
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: index * 0.1 }}
-                        className="relative group"
+                        className="relative group h-full"
                     >
                         {/* Soft Glow Behind Box */}
                         <div className={`absolute inset-0 bg-gradient-to-r ${stat.color.replace('bg-', 'from-')} to-transparent opacity-0 group-hover:opacity-10 blur-xl transition-opacity duration-500 rounded-2xl`} />
 
-                        <div className="bg-white dark:bg-slate-900 p-6 rounded-2xl border border-gray-200 dark:border-slate-800 shadow-sm hover:shadow-md transition-all relative z-10 overflow-hidden">
+                        <div className="bg-white dark:bg-slate-900 p-5 rounded-2xl border border-gray-200 dark:border-slate-800 shadow-sm hover:shadow-md transition-all relative z-10 overflow-hidden h-full flex flex-col justify-between">
                             <div className="relative z-10">
                                 <p className="text-gray-500 dark:text-gray-400 text-sm font-medium">{stat.title}</p>
-                                <h3 className="text-3xl font-bold text-gray-900 dark:text-white mt-2">{stat.value}</h3>
-                                <p className="text-xs text-brand-blue font-medium mt-2 flex items-center gap-1">
+                                <h3 className="text-4xl font-bold text-gray-900 dark:text-white mt-3 mb-1">{stat.value}</h3>
+                            </div>
+
+                            <div className="relative z-10">
+                                <p className="text-xs text-brand-blue font-medium flex items-center gap-1">
                                     <TrendingUp size={12} /> {stat.trend}
                                 </p>
                             </div>
@@ -163,7 +188,7 @@ export default function DashboardPage() {
 
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
                 {/* Main Content: Announcements & Mock Chart */}
-                <div className="lg:col-span-2 space-y-8">
+                <div className="lg:col-span-2 flex flex-col gap-8 h-full">
                     {/* Announcements */}
                     <div className="bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-slate-900 dark:to-slate-800 p-6 rounded-2xl border border-blue-100 dark:border-slate-700">
                         <div className="flex items-center justify-between mb-4">
@@ -189,18 +214,18 @@ export default function DashboardPage() {
                     </div>
 
                     {/* Mock Progress Chart - Now with Real Data */}
-                    <div className="bg-white dark:bg-slate-900 p-6 rounded-2xl border border-gray-200 dark:border-slate-800 shadow-sm">
+                    <div className="bg-white dark:bg-slate-900 p-6 rounded-2xl border border-gray-200 dark:border-slate-800 shadow-sm flex-1 flex flex-col">
                         <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-6">{t('dashboard.chart.title')}</h3>
                         {loading ? (
-                            <div className="h-64 flex items-center justify-center">
+                            <div className="flex-1 flex items-center justify-center min-h-[250px]">
                                 <p className="text-gray-400">Loading...</p>
                             </div>
                         ) : chartData.length === 0 ? (
-                            <div className="h-64 flex items-center justify-center">
+                            <div className="flex-1 flex items-center justify-center min-h-[250px]">
                                 <p className="text-gray-400">{t('dashboard.no_results')}</p>
                             </div>
                         ) : (
-                            <div className="h-64 flex items-end justify-between gap-2">
+                            <div className="flex-1 w-full min-h-[250px] flex items-end justify-between gap-2">
                                 {chartData.map((result, i) => {
                                     // Calculate percentage (out of 189 max score)
                                     const percentage = Math.round((result.score / 189) * 100);
@@ -216,7 +241,7 @@ export default function DashboardPage() {
                                                     {result.score} / 189
                                                 </div>
                                             </motion.div>
-                                            <span className="text-xs text-gray-400 text-center mt-2 truncate">{result.week}</span>
+                                            <span className="text-xs text-gray-400 text-center mt-2 truncate">{result.date}</span>
                                         </div>
                                     );
                                 })}
@@ -225,44 +250,85 @@ export default function DashboardPage() {
                     </div>
                 </div>
 
-                {/* Right Column: Leaderboard & Online Tests */}
-                <div className="space-y-8">
-                    {/* Leaderboard */}
+                {/* Right Column: Activity, Leaderboard & CTA */}
+                <div className="flex flex-col gap-8 h-full">
+                    {/* Recent Activity */}
                     <div className="bg-white dark:bg-slate-900 p-6 rounded-2xl border border-gray-200 dark:border-slate-800 shadow-sm">
+                        <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
+                            <Clock className="text-brand-blue" size={20} />
+                            {t('dashboard.activity.title')}
+                        </h3>
+                        <div className="space-y-4">
+                            {activityFeed.length === 0 ? (
+                                <p className="text-sm text-gray-500 text-center py-4">{t('dashboard.activity.empty')}</p>
+                            ) : (
+                                activityFeed.map((item, i) => (
+                                    <div key={i} className="flex gap-3 items-start">
+                                        <div className="mt-1">
+                                            <CheckCircle2 size={16} className="text-green-500" />
+                                        </div>
+                                        <div>
+                                            <h4 className="text-sm font-semibold text-gray-900 dark:text-white line-clamp-1">{item.title}</h4>
+                                            <p className="text-xs text-gray-500 dark:text-gray-400">
+                                                {t('dashboard.activity.scored')}: <span className="font-medium text-brand-blue">{item.score}/{item.maxScore}</span>
+                                            </p>
+                                            <span className="text-[10px] text-gray-400">
+                                                {new Date(item.date).toLocaleDateString(t('locale') === 'uz' ? 'uz-UZ' : t('locale') === 'ru' ? 'ru-RU' : 'en-US', {
+                                                    day: 'numeric',
+                                                    month: 'short',
+                                                    hour: '2-digit',
+                                                    minute: '2-digit'
+                                                })}
+                                            </span>
+                                        </div>
+                                    </div>
+                                ))
+                            )}
+                        </div>
+                    </div>
+
+                    {/* Leaderboard */}
+                    <div className="bg-white dark:bg-slate-900 p-6 rounded-2xl border border-gray-200 dark:border-slate-800 shadow-sm flex-1 flex flex-col min-h-[300px] relative overflow-hidden">
                         <div className="flex items-center justify-between mb-4">
                             <h3 className="text-lg font-bold text-gray-900 dark:text-white flex items-center gap-2">
                                 <Medal className="text-yellow-500" size={20} />
                                 {t('dashboard.leaderboard.title')}
                             </h3>
-                            <button className="text-sm text-brand-blue hover:underline">{t('dashboard.leaderboard.view_all')}</button>
                         </div>
-                        <div className="space-y-4">
+
+                        <div className="space-y-4 overflow-y-auto flex-1 custom-scrollbar pr-2 mb-2">
                             {leaderboard.map((user, i) => (
-                                <div key={i} className={`flex items-center justify-between p-3 rounded-xl ${user.rank === 15 ? 'bg-brand-blue/10 border border-brand-blue/20' : 'hover:bg-gray-50 dark:hover:bg-slate-800'}`}>
+                                <div key={i} className={`flex items-center justify-between p-3 rounded-xl ${user.id === currentUserId ? 'bg-brand-blue/10 border border-brand-blue/20' : 'hover:bg-gray-50 dark:hover:bg-slate-800'}`}>
                                     <div className="flex items-center gap-3">
                                         <span className={`font-bold w-6 text-center ${user.rank <= 3 ? 'text-yellow-500' : 'text-gray-400'}`}>#{user.rank}</span>
                                         <span className="text-xl">{user.avatar}</span>
                                         <div>
-                                            <h4 className="font-semibold text-gray-900 dark:text-white text-sm">{user.name}</h4>
+                                            <h4 className="font-semibold text-gray-900 dark:text-white text-sm">{user.name} {user.id === currentUserId && '(Siz)'}</h4>
                                             <p className="text-xs text-gray-500">{user.points} coins</p>
                                         </div>
                                     </div>
                                 </div>
                             ))}
                         </div>
+
+                        {/* Sticky User Rank at Bottom */}
+                        {userRank && (
+                            <div className="pt-3 mt-auto border-t border-gray-100 dark:border-slate-800 bg-white dark:bg-slate-900 z-10">
+                                <div className="flex items-center justify-between p-3 rounded-xl bg-brand-blue/10 border border-brand-blue/20">
+                                    <div className="flex items-center gap-3">
+                                        <span className="font-bold w-6 text-center text-brand-blue">#{userRank.rank}</span>
+                                        <span className="text-xl">{userRank.avatar}</span>
+                                        <div>
+                                            <h4 className="font-semibold text-gray-900 dark:text-white text-sm">{userRank.name} (Siz)</h4>
+                                            <p className="text-xs text-gray-500">{userRank.points} coins</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        )}
                     </div>
 
-                    {/* Online Tests CTA */}
-                    <div className="bg-gradient-to-br from-purple-600 to-indigo-700 p-6 rounded-2xl text-white relative overflow-hidden">
-                        <div className="relative z-10">
-                            <h3 className="font-bold text-lg mb-2">{t('dashboard.onlinetests.title')}</h3>
-                            <p className="text-purple-100 text-sm mb-4">{t('dashboard.onlinetests.desc')}</p>
-                            <button className="w-full py-2 bg-white text-purple-600 rounded-lg font-semibold text-sm hover:bg-purple-50 transition-colors">
-                                {t('dashboard.onlinetests.button')}
-                            </button>
-                        </div>
-                        <Gamepad2 className="absolute -bottom-4 -right-4 text-white opacity-10" size={120} />
-                    </div>
+
                 </div>
             </div>
         </div>

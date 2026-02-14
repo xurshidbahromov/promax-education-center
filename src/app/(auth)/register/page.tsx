@@ -17,7 +17,6 @@ export default function RegisterPage() {
     // Students only - no role selection needed
     const [name, setName] = useState('');
     const [phone, setPhone] = useState('');
-    const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [showPassword, setShowPassword] = useState(false);
     const [loading, setLoading] = useState(false);
@@ -60,13 +59,13 @@ export default function RegisterPage() {
         setError(null);
         setSuccess(null);
 
-        if (!name || !email || !password) {
+        if (!name || !phone || !password) {
             setError(t('auth.error_fill_all_fields'));
             setLoading(false);
             return;
         }
 
-        if (phone && !validatePhone(phone)) {
+        if (!validatePhone(phone)) {
             setError(t('auth.error_invalid_phone'));
             setLoading(false);
             return;
@@ -78,9 +77,14 @@ export default function RegisterPage() {
             return;
         }
 
+        // AUTO-GENERATE EMAIL FROM PHONE
+        // Example: +998 90 123 45 67 -> 998901234567@promax.uz
+        const cleanPhone = phone.replace(/\D/g, '');
+        const generatedEmail = `${cleanPhone}@promax.uz`;
+
         try {
             const { data, error } = await supabase.auth.signUp({
-                email,
+                email: generatedEmail,
                 password,
                 options: {
                     data: {
@@ -94,7 +98,7 @@ export default function RegisterPage() {
 
             if (error) {
                 if (error.message.includes('Email address')) {
-                    throw new Error(t('auth.error_email_invalid'));
+                    throw new Error(t('auth.error_email_invalid')); // Should not happen usually
                 }
                 if (error.message.includes('User already registered')) {
                     throw new Error(t('auth.error_already_registered'));
@@ -251,24 +255,7 @@ export default function RegisterPage() {
                                 </div>
                             </div>
 
-                            <div className="space-y-2">
-                                <label className="text-sm font-medium text-gray-700 dark:text-gray-300 ml-1">
-                                    {t('auth.register.email')}
-                                </label>
-                                <div className="relative group">
-                                    <div className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-brand-blue transition-colors">
-                                        <Mail size={20} />
-                                    </div>
-                                    <input
-                                        type="email"
-                                        value={email}
-                                        onChange={(e) => setEmail(e.target.value)}
-                                        placeholder="your@email.com"
-                                        className="w-full pl-12 pr-4 py-3 border-2 border-gray-200 dark:border-slate-700 rounded-xl focus:outline-none focus:border-brand-blue bg-white dark:bg-slate-900 text-gray-900 dark:text-white placeholder-gray-400 transition-colors"
-                                        required
-                                    />
-                                </div>
-                            </div>
+
 
                             <div className="space-y-2">
                                 <label className="text-sm font-medium text-gray-700 dark:text-gray-300 ml-1">

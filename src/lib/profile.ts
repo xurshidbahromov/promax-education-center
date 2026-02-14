@@ -10,6 +10,15 @@ export interface UserProfile {
     email?: string; // From auth.users
     bio?: string | null;
     location?: string | null;
+    coins?: number;
+    settings?: {
+        theme?: string;
+        language?: string;
+        notifications?: {
+            email: boolean;
+            push: boolean;
+        };
+    };
 }
 
 export interface UpdateProfileData {
@@ -18,6 +27,7 @@ export interface UpdateProfileData {
     bio?: string;
     location?: string;
     avatar_url?: string;
+    settings?: any;
 }
 
 /**
@@ -49,7 +59,9 @@ export async function getUserProfile(): Promise<UserProfile | null> {
             phone: user.phone || '',
             avatar_url: user.user_metadata?.avatar_url || '',
             bio: '',
-            location: ''
+            location: '',
+            coins: 0,
+            settings: {}
         };
     }
 
@@ -57,7 +69,9 @@ export async function getUserProfile(): Promise<UserProfile | null> {
         ...profile,
         email: user.email,
         bio: profile.bio || '',
-        location: profile.location || ''
+        location: profile.location || '',
+        coins: profile.coins || 0,
+        settings: profile.settings || {}
     };
 }
 
@@ -82,6 +96,13 @@ export async function updateUserProfile(data: UpdateProfileData): Promise<{ succ
     }
 
     return { success: true };
+}
+
+/**
+ * Update specific settings
+ */
+export async function updateUserSettings(settings: any): Promise<{ success: boolean; error?: any }> {
+    return updateUserProfile({ settings });
 }
 
 /**

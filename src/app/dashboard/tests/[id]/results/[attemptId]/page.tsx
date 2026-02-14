@@ -49,7 +49,7 @@ export default function TestResultsPage() {
             <div className="flex items-center justify-center min-h-screen">
                 <div className="text-center">
                     <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-brand-blue mx-auto mb-4"></div>
-                    <p className="text-gray-600 dark:text-gray-400">Natijalar yuklanmoqda...</p>
+                    <p className="text-gray-600 dark:text-gray-400">{t('tests.result.loading')}</p>
                 </div>
             </div>
         );
@@ -59,9 +59,9 @@ export default function TestResultsPage() {
         return (
             <div className="text-center py-12">
                 <AlertCircle className="mx-auto text-red-500 mb-4" size={64} />
-                <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">Natijalar topilmadi</h2>
+                <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">{t('tests.result.not_found')}</h2>
                 <Link href="/dashboard/tests" className="text-brand-blue hover:underline">
-                    Testlar ro'yxatiga qaytish
+                    {t('tests.result.back')}
                 </Link>
             </div>
         );
@@ -73,10 +73,10 @@ export default function TestResultsPage() {
     const totalQuestions = responses.length;
 
     const getPerformanceMessage = () => {
-        if (percentage >= 90) return { text: "Ajoyib!", color: "text-green-600", emoji: "🎉" };
-        if (percentage >= 75) return { text: "Yaxshi natija!", color: "text-blue-600", emoji: "👏" };
-        if (percentage >= 60) return { text: "Yaxshi!", color: "text-yellow-600", emoji: "👍" };
-        return { text: "Mashq qiling!", color: "text-orange-600", emoji: "💪" };
+        if (percentage >= 90) return { text: t('tests.result.msg.excellent'), color: "text-green-600", emoji: "🎉" };
+        if (percentage >= 75) return { text: t('tests.result.msg.very_good'), color: "text-blue-600", emoji: "👏" };
+        if (percentage >= 60) return { text: t('tests.result.msg.good'), color: "text-yellow-600", emoji: "👍" };
+        return { text: t('tests.result.msg.practice'), color: "text-orange-600", emoji: "💪" };
     };
 
     const performance = getPerformanceMessage();
@@ -89,7 +89,7 @@ export default function TestResultsPage() {
                 className="flex items-center gap-2 text-gray-600 dark:text-gray-400 hover:text-brand-blue mb-6"
             >
                 <ArrowLeft size={20} />
-                Testlar ro'yxatiga qaytish
+                {t('tests.result.back')}
             </Link>
 
             {/* Results Summary */}
@@ -101,23 +101,23 @@ export default function TestResultsPage() {
                     <h1 className="text-4xl font-bold mb-2">
                         {performance.emoji} {performance.text}
                     </h1>
-                    <p className="text-white/90 text-lg">Test yakunlandi</p>
+                    <p className="text-white/90 text-lg">{t('tests.result.finished')}</p>
                 </div>
 
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                     <div className="bg-white/10 backdrop-blur rounded-2xl p-4 text-center">
                         <div className="text-3xl font-bold mb-1">{percentage.toFixed(0)}%</div>
-                        <div className="text-sm opacity-90">Natija</div>
+                        <div className="text-sm opacity-90">{t('tests.result.stat.score')}</div>
                     </div>
 
                     <div className="bg-white/10 backdrop-blur rounded-2xl p-4 text-center">
                         <div className="text-3xl font-bold mb-1">{attempt.score}/{attempt.max_score}</div>
-                        <div className="text-sm opacity-90">Ball</div>
+                        <div className="text-sm opacity-90">{t('tests.result.stat.points')}</div>
                     </div>
 
                     <div className="bg-white/10 backdrop-blur rounded-2xl p-4 text-center">
                         <div className="text-3xl font-bold mb-1">{correctCount}/{totalQuestions}</div>
-                        <div className="text-sm opacity-90">To'g'ri</div>
+                        <div className="text-sm opacity-90">{t('tests.result.stat.correct')}</div>
                     </div>
 
                     {attempt.time_spent_seconds && (
@@ -125,7 +125,7 @@ export default function TestResultsPage() {
                             <div className="text-3xl font-bold mb-1">
                                 {Math.floor(attempt.time_spent_seconds / 60)}:{(attempt.time_spent_seconds % 60).toString().padStart(2, '0')}
                             </div>
-                            <div className="text-sm opacity-90">Vaqt</div>
+                            <div className="text-sm opacity-90">{t('tests.result.stat.time')}</div>
                         </div>
                     )}
                 </div>
@@ -138,7 +138,7 @@ export default function TestResultsPage() {
                     className="flex items-center justify-center gap-2 px-6 py-4 bg-gradient-to-r from-brand-blue to-cyan-500 text-white rounded-xl font-semibold hover:shadow-xl transition-all"
                 >
                     <RotateCcw size={20} />
-                    Qayta Urinish
+                    {t('tests.result.retry')}
                 </Link>
 
                 <button
@@ -146,14 +146,14 @@ export default function TestResultsPage() {
                     className="flex items-center justify-center gap-2 px-6 py-4 bg-white dark:bg-slate-900 border-2 border-gray-200 dark:border-slate-800 text-gray-700 dark:text-gray-300 rounded-xl font-semibold hover:border-brand-blue transition-all"
                 >
                     <CheckCircle size={20} />
-                    {showReview ? "Javoblarni Yashirish" : "Javoblarni Ko'rish"}
+                    {showReview ? t('tests.result.hide_answers') : t('tests.result.show_answers')}
                 </button>
 
                 <Link
                     href="/dashboard/tests"
                     className="flex items-center justify-center gap-2 px-6 py-4 bg-gray-100 dark:bg-slate-800 text-gray-700 dark:text-gray-300 rounded-xl font-semibold hover:bg-gray-200 dark:hover:bg-slate-700 transition-all"
                 >
-                    Testlar Ro'yxati
+                    {t('tests.result.list')}
                 </Link>
             </div>
 
@@ -161,13 +161,13 @@ export default function TestResultsPage() {
             <div className="bg-white dark:bg-slate-900 rounded-2xl border border-gray-200 dark:border-slate-800 p-6 mb-8">
                 <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
                     <TrendingUp size={24} className="text-brand-blue" />
-                    Natijalar Tahlili
+                    {t('tests.result.analysis')}
                 </h2>
 
                 <div className="space-y-4">
                     <div>
                         <div className="flex items-center justify-between mb-2">
-                            <span className="text-sm font-medium text-gray-700 dark:text-gray-300">To'g'ri javoblar</span>
+                            <span className="text-sm font-medium text-gray-700 dark:text-gray-300">{t('tests.result.correct_answers')}</span>
                             <span className="text-sm font-bold text-green-600 dark:text-green-400">{correctCount} / {totalQuestions}</span>
                         </div>
                         <div className="w-full bg-gray-200 dark:bg-slate-800 rounded-full h-3">
@@ -180,7 +180,7 @@ export default function TestResultsPage() {
 
                     <div>
                         <div className="flex items-center justify-between mb-2">
-                            <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Noto'g'ri javoblar</span>
+                            <span className="text-sm font-medium text-gray-700 dark:text-gray-300">{t('tests.result.incorrect_answers')}</span>
                             <span className="text-sm font-bold text-red-600 dark:text-red-400">{totalQuestions - correctCount} / {totalQuestions}</span>
                         </div>
                         <div className="w-full bg-gray-200 dark:bg-slate-800 rounded-full h-3">
@@ -197,7 +197,7 @@ export default function TestResultsPage() {
             {showReview && (
                 <div className="space-y-4">
                     <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">
-                        Savollar Ko'rib Chiqish
+                        {t('tests.result.review')}
                     </h2>
 
                     {responses.map((response: any, index: number) => {
@@ -208,8 +208,8 @@ export default function TestResultsPage() {
                             <div
                                 key={response.id}
                                 className={`bg-white dark:bg-slate-900 rounded-2xl border-2 p-6 ${isCorrect
-                                        ? "border-green-200 dark:border-green-900/30"
-                                        : "border-red-200 dark:border-red-900/30"
+                                    ? "border-green-200 dark:border-green-900/30"
+                                    : "border-red-200 dark:border-red-900/30"
                                     }`}
                             >
                                 {/* Question Header */}
@@ -220,16 +220,16 @@ export default function TestResultsPage() {
                                     {isCorrect ? (
                                         <div className="flex items-center gap-2 px-3 py-1 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 rounded-lg text-sm font-semibold">
                                             <CheckCircle size={16} />
-                                            To'g'ri
+                                            {t('tests.take.true')}
                                         </div>
                                     ) : (
                                         <div className="flex items-center gap-2 px-3 py-1 bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400 rounded-lg text-sm font-semibold">
                                             <XCircle size={16} />
-                                            Noto'g'ri
+                                            {t('tests.take.false')}
                                         </div>
                                     )}
                                     <span className="px-3 py-1 bg-gray-100 dark:bg-slate-800 text-gray-600 dark:text-gray-400 rounded-lg text-sm">
-                                        {response.points_earned}/{question.points} ball
+                                        {t('tests.take.points', { points: `${response.points_earned}/${question.points}` })}
                                     </span>
                                 </div>
 
@@ -241,13 +241,13 @@ export default function TestResultsPage() {
                                 {/* Your Answer */}
                                 <div className="mb-3">
                                     <div className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-1">
-                                        Sizning javobingiz:
+                                        {t('tests.result.your_answer')}
                                     </div>
                                     <div className={`px-4 py-2 rounded-lg ${isCorrect
-                                            ? "bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-400"
-                                            : "bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-400"
+                                        ? "bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-400"
+                                        : "bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-400"
                                         }`}>
-                                        {response.student_answer || "Javob berilmagan"}
+                                        {response.student_answer || t('tests.result.no_answer')}
                                     </div>
                                 </div>
 
@@ -255,7 +255,7 @@ export default function TestResultsPage() {
                                 {!isCorrect && (
                                     <div className="mb-3">
                                         <div className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-1">
-                                            To'g'ri javob:
+                                            {t('tests.result.correct_answer')}
                                         </div>
                                         <div className="px-4 py-2 bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-400 rounded-lg">
                                             {question.correct_answer}
@@ -267,7 +267,7 @@ export default function TestResultsPage() {
                                 {question.explanation && (
                                     <div className="mt-4 p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-xl">
                                         <div className="text-sm font-semibold text-blue-700 dark:text-blue-400 mb-1">
-                                            💡 Tushuntirish:
+                                            💡 {t('tests.result.explanation')}
                                         </div>
                                         <p className="text-sm text-blue-600 dark:text-blue-300">
                                             {question.explanation}
@@ -282,10 +282,10 @@ export default function TestResultsPage() {
                                             <div
                                                 key={key}
                                                 className={`p-3 rounded-lg border ${key === question.correct_answer
-                                                        ? "border-green-300 bg-green-50 dark:bg-green-900/20 dark:border-green-700"
-                                                        : key === response.student_answer
-                                                            ? "border-red-300 bg-red-50 dark:bg-red-900/20 dark:border-red-700"
-                                                            : "border-gray-200 dark:border-slate-800"
+                                                    ? "border-green-300 bg-green-50 dark:bg-green-900/20 dark:border-green-700"
+                                                    : key === response.student_answer
+                                                        ? "border-red-300 bg-red-50 dark:bg-red-900/20 dark:border-red-700"
+                                                        : "border-gray-200 dark:border-slate-800"
                                                     }`}
                                             >
                                                 <span className="font-semibold mr-2">{key}.</span>
@@ -310,12 +310,12 @@ export default function TestResultsPage() {
             <div className="mt-8 bg-gradient-to-r from-purple-50 to-pink-50 dark:from-purple-900/20 dark:to-pink-900/20 border border-purple-200 dark:border-purple-800 rounded-2xl p-6 text-center">
                 <Star className="mx-auto text-purple-600 dark:text-purple-400 mb-2" size={32} />
                 <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-1">
-                    {percentage >= 80 ? "Davom eting!" : "Mashq muhim!"}
+                    {percentage >= 80 ? t('tests.result.motivation.keep_going') : t('tests.result.motivation.practice')}
                 </h3>
                 <p className="text-gray-600 dark:text-gray-400">
                     {percentage >= 80
-                        ? "Siz zo'r natijalarga erishdingiz. Bilimlaringizni yanada mustahkamlang!"
-                        : "Mashq qilish orqali natijalarni yaxshilashingiz mumkin. Qayta urinib ko'ring!"}
+                        ? t('tests.result.motivation.high_desc')
+                        : t('tests.result.motivation.low_desc')}
                 </p>
             </div>
         </div>

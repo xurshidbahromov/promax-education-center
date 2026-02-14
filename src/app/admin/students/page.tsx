@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Link from "next/link";
 import {
     Search,
     Plus,
@@ -9,9 +10,12 @@ import {
     Download,
     User,
     Mail,
-    Phone
+    Phone,
+    Edit,
+    Trash2,
+    FileText
 } from "lucide-react";
-import { getStudents, Student } from "@/lib/admin-queries";
+import { getStudents, deleteStudent, Student } from "@/lib/admin-queries";
 
 export default function StudentsPage() {
     const [students, setStudents] = useState<Student[]>([]);
@@ -34,6 +38,24 @@ export default function StudentsPage() {
             setStudents(data);
         } catch (error) {
             console.error("Error fetching students:", error);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const handleDelete = async (id: string) => {
+        if (!confirm("Haqiqatan ham bu o'quvchini o'chirmoqchimisiz?")) return;
+
+        setLoading(true);
+        try {
+            const result = await deleteStudent(id);
+            if (result.success) {
+                fetchStudents();
+            } else {
+                alert("Xatolik: " + result.error);
+            }
+        } catch (error) {
+            console.error("Delete error:", error);
         } finally {
             setLoading(false);
         }
@@ -148,9 +170,29 @@ export default function StudentsPage() {
                                             </span>
                                         </td>
                                         <td className="px-6 py-4">
-                                            <button className="h-8 w-8 flex items-center justify-center text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 rounded-lg hover:bg-gray-100 dark:hover:bg-slate-800 transition-colors">
-                                                <MoreVertical size={18} />
-                                            </button>
+                                            <div className="flex items-center gap-2">
+                                                <Link
+                                                    href={`/admin/students/${student.id}`}
+                                                    title="Natijalarni ko'rish"
+                                                    className="h-8 w-8 flex items-center justify-center text-gray-400 hover:text-green-600 hover:bg-green-50 dark:hover:bg-green-900/20 rounded-lg transition-colors"
+                                                >
+                                                    <FileText size={16} />
+                                                </Link>
+                                                <Link
+                                                    href={`/admin/students/${student.id}/edit`}
+                                                    title="Tahrirlash"
+                                                    className="h-8 w-8 flex items-center justify-center text-gray-400 hover:text-brand-blue hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-lg transition-colors"
+                                                >
+                                                    <Edit size={16} />
+                                                </Link>
+                                                <button
+                                                    onClick={() => handleDelete(student.id)}
+                                                    title="O'chirib yuborish"
+                                                    className="h-8 w-8 flex items-center justify-center text-gray-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"
+                                                >
+                                                    <Trash2 size={16} />
+                                                </button>
+                                            </div>
                                         </td>
                                     </tr>
                                 ))

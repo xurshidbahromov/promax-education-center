@@ -215,10 +215,10 @@ export default function TestDetailsPage() {
                             >
                                 <div className="flex items-center gap-4">
                                     <div className={`w-12 h-12 rounded-xl flex items-center justify-center font-bold text-lg ${(attempt.percentage || 0) >= 80
-                                            ? "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400"
-                                            : (attempt.percentage || 0) >= 60
-                                                ? "bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400"
-                                                : "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400"
+                                        ? "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400"
+                                        : (attempt.percentage || 0) >= 60
+                                            ? "bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400"
+                                            : "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400"
                                         }`}>
                                         {attempt.percentage?.toFixed(0) || 0}%
                                     </div>
@@ -245,7 +245,7 @@ export default function TestDetailsPage() {
                                     </div>
                                     {attempt.status === 'completed' && (
                                         <Link
-                                            href={`/dashboard/tests/${test.id}/results/${attempt.id}`}
+                                            href={`/dashboard/results/${attempt.id}`}
                                             className="px-4 py-2 bg-gray-200 dark:bg-slate-700 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-300 dark:hover:bg-slate-600 text-sm font-medium"
                                         >
                                             Ko'rish

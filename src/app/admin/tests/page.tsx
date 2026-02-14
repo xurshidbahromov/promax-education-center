@@ -18,7 +18,7 @@ import {
     Filter
 } from "lucide-react";
 import { supabase } from "@/lib/supabase";
-import { type Test } from "@/lib/tests";
+import { type Test, deleteTest, toggleTestPublish } from "@/lib/tests";
 
 export default function AdminTestsPage() {
     const { t } = useLanguage();
@@ -46,6 +46,39 @@ export default function AdminTestsPage() {
             setLoading(false);
         }
     }
+
+    const handleDelete = async (id: string) => {
+        if (!confirm("Haqiqatan ham bu testni o'chirmoqchimisiz? Barcha bog'liq ma'lumotlar o'chib ketadi.")) {
+            return;
+        }
+
+        try {
+            const success = await deleteTest(id);
+            if (success) {
+                setTests(tests.filter(t => t.id !== id));
+            } else {
+                alert("Xatolik yuz berdi");
+            }
+        } catch (error) {
+            console.error("Error deleting test:", error);
+        }
+    };
+
+    const handleTogglePublish = async (id: string) => {
+        try {
+            const success = await toggleTestPublish(id);
+            if (success) {
+                // Update local state
+                setTests(tests.map(t =>
+                    t.id === id ? { ...t, is_published: !t.is_published } : t
+                ));
+            } else {
+                alert("Xatolik yuz berdi");
+            }
+        } catch (error) {
+            console.error("Error toggling publish status:", error);
+        }
+    };
 
     const filteredTests = tests.filter(test => {
         const matchesSearch = test.title.toLowerCase().includes(searchQuery.toLowerCase());
@@ -211,6 +244,20 @@ export default function AdminTestsPage() {
                                                 >
                                                     <Eye size={18} />
                                                 </Link>
+                                                <button
+                                                    onClick={() => handleTogglePublish(test.id)}
+                                                    className={`h-8 w-8 flex items-center justify-center rounded-lg transition-colors ${test.is_published
+                                                            ? "text-yellow-600 hover:bg-yellow-50 dark:hover:bg-yellow-900/20"
+                                                            : "text-green-600 hover:bg-green-50 dark:hover:bg-green-900/20"
+                                                        }`}
+                                                    title={test.is_published ? "Noshir qilish" : "Nashr qilish"}
+                                                >
+                                                    {test.is_published ? (
+                                                        <XCircle size={18} />
+                                                    ) : (
+                                                        <CheckCircle size={18} />
+                                                    )}
+                                                </button>
                                                 <Link
                                                     href={`/admin/tests/${test.id}/edit`}
                                                     className="h-8 w-8 flex items-center justify-center text-green-600 hover:bg-green-50 dark:hover:bg-green-900/20 rounded-lg transition-colors"
@@ -219,6 +266,7 @@ export default function AdminTestsPage() {
                                                     <Edit size={18} />
                                                 </Link>
                                                 <button
+                                                    onClick={() => handleDelete(test.id)}
                                                     className="h-8 w-8 flex items-center justify-center text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"
                                                     title="O'chirish"
                                                 >

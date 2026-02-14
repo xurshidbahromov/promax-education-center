@@ -18,32 +18,54 @@ import {
     BarChart3
 } from "lucide-react";
 
-// This will be replaced with actual Supabase query
-interface Teacher {
-    id: string;
-    full_name: string;
-    email: string;
-    phone: string | null;
-    subjects: string[];
-    joined_date: string;
-    total_tests: number;
-}
+// Supabase queries
+import { getTeachers, demoteTeacher } from "@/lib/admin-queries";
+
 
 export default function AdminTeachersPage() {
     const { t } = useLanguage();
-    const [teachers, setTeachers] = useState<Teacher[]>([]);
+    const [teachers, setTeachers] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
     const [searchQuery, setSearchQuery] = useState("");
 
     useEffect(() => {
-        // TODO: Fetch teachers from Supabase
-        // For now, show empty state
-        setLoading(false);
+        fetchTeachers();
     }, []);
 
+    const fetchTeachers = async () => {
+        setLoading(true);
+        try {
+            const data = await getTeachers();
+            setTeachers(data);
+        } catch (error) {
+            console.error("Error fetching teachers:", error);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const handleDelete = async (id: string) => {
+        if (!confirm("Haqiqatan ham bu o'qituvchini o'chirmoqchimisiz? U 'Student' rolilega qaytariladi.")) return;
+
+        setLoading(true);
+        try {
+            const result = await demoteTeacher(id);
+            if (result.success) {
+                // Refresh list
+                fetchTeachers();
+            } else {
+                alert("Xatolik: " + result.error);
+            }
+        } catch (error) {
+            console.error("Delete error:", error);
+        } finally {
+            setLoading(false);
+        }
+    };
+
     const filteredTeachers = teachers.filter(teacher =>
-        teacher.full_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        teacher.email.toLowerCase().includes(searchQuery.toLowerCase())
+        (teacher.full_name || "").toLowerCase().includes(searchQuery.toLowerCase()) ||
+        (teacher.email || "").toLowerCase().includes(searchQuery.toLowerCase())
     );
 
     const getSubjectBadges = (subjects: string[]) => {
@@ -53,9 +75,9 @@ export default function AdminTeachersPage() {
             "Fizika": "bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400",
         };
 
-        return subjects.map(subject => (
+        return subjects.map((subject, index) => (
             <span
-                key={subject}
+                key={index}
                 className={`px-2 py-1 rounded-lg text-xs font-semibold ${colors[subject] || "bg-gray-100 text-gray-700 dark:bg-gray-900/30 dark:text-gray-400"}`}
             >
                 {subject}
@@ -156,7 +178,10 @@ export default function AdminTeachersPage() {
                                     >
                                         <Edit size={16} />
                                     </Link>
-                                    <button className="h-8 w-8 flex items-center justify-center text-gray-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors">
+                                    <button
+                                        onClick={() => handleDelete(teacher.id)}
+                                        className="h-8 w-8 flex items-center justify-center text-gray-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"
+                                    >
                                         <Trash2 size={16} />
                                     </button>
                                 </div>

@@ -9,7 +9,7 @@ const Hero = () => {
     const { t } = useLanguage();
 
     return (
-        <section className="relative min-h-[100vh] flex flex-col items-center justify-start text-center overflow-hidden transition-colors duration-300 pt-10 sm:pt-10 md:pt-10 pb-16 px-4">
+        <section className="relative min-h-[100vh] flex flex-col items-center justify-start text-center overflow-hidden transition-colors duration-300 pt-16 sm:pt-18 md:pt-18 pb-16 px-4">
 
             {/* Abstract Background Element (Removed - moved to global layout) */}
 

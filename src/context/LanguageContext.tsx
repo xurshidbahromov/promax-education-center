@@ -20,7 +20,7 @@ const translations: Translations = {
 interface LanguageContextType {
     language: Language;
     setLanguage: (lang: Language) => void;
-    t: (key: string) => string;
+    t: (key: string, params?: Record<string, string | number>) => string;
 }
 
 const LanguageContext = createContext<LanguageContextType | undefined>(undefined);
@@ -41,8 +41,14 @@ export const LanguageProvider = ({ children }: { children: ReactNode }) => {
         localStorage.setItem('promax-lang', lang);
     };
 
-    const t = (key: string): string => {
-        return translations[language][key] || key;
+    const t = (key: string, params?: Record<string, string | number>): string => {
+        let text = translations[language][key] || key;
+        if (params) {
+            Object.entries(params).forEach(([key, value]) => {
+                text = text.replace(new RegExp(`{${key}}`, 'g'), String(value));
+            });
+        }
+        return text;
     };
 
     return (

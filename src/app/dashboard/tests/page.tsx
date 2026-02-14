@@ -51,20 +51,20 @@ export default function OnlineTestsPage() {
     }, [selectedSubject, selectedType, searchQuery]);
 
     const subjects = [
-        { id: "all", label: t('tests.subjects.all') || "All Subjects", color: "bg-gray-500" },
-        { id: "math", label: t('tests.subjects.math') || "Mathematics", color: "bg-blue-500" },
-        { id: "english", label: t('tests.subjects.english') || "English", color: "bg-green-500" },
-        { id: "physics", label: t('tests.subjects.physics') || "Physics", color: "bg-purple-500" },
-        { id: "chemistry", label: t('tests.subjects.chemistry') || "Chemistry", color: "bg-orange-500" },
-        { id: "biology", label: t('tests.subjects.biology') || "Biology", color: "bg-teal-500" },
+        { id: "all", label: t('tests.subjects.all'), color: "bg-gray-500" },
+        { id: "math", label: t('tests.subjects.math'), color: "bg-blue-500" },
+        { id: "english", label: t('tests.subjects.english'), color: "bg-green-500" },
+        { id: "physics", label: t('tests.subjects.physics'), color: "bg-purple-500" },
+        { id: "chemistry", label: t('tests.subjects.chemistry'), color: "bg-orange-500" },
+        { id: "biology", label: t('tests.subjects.biology'), color: "bg-teal-500" },
     ];
 
     const types = [
-        { id: "all", label: t('tests.types.all') || "All Types", icon: Filter },
-        { id: "subject", label: t('tests.types.subject') || "Subject Test", icon: BookOpen },
-        { id: "practice", label: t('tests.types.practice') || "Practice", icon: Target },
-        { id: "progress", label: t('tests.types.progress') || "Progress", icon: TrendingUp },
-        { id: "mock", label: t('tests.types.mock') || "Mock Exam", icon: Award },
+        { id: "all", label: t('tests.types.all'), icon: Filter },
+        { id: "subject", label: t('tests.types.subject'), icon: BookOpen },
+        { id: "practice", label: t('tests.types.practice'), icon: Target },
+        { id: "progress", label: t('tests.types.progress'), icon: TrendingUp },
+        { id: "mock", label: t('tests.types.mock'), icon: Award },
     ];
 
     const getSubjectColor = (subject: Subject) => {
@@ -86,10 +86,10 @@ export default function OnlineTestsPage() {
                 <div>
                     <h1 className="text-3xl font-bold text-gray-900 dark:text-white flex items-center gap-3">
                         <Zap className="text-brand-blue" size={32} />
-                        {t('tests.title') || 'Online Tests'}
+                        {t('tests.title')}
                     </h1>
                     <p className="text-gray-500 dark:text-gray-400 mt-1">
-                        {t('tests.subtitle') || 'Practice and improve your skills'}
+                        {t('tests.subtitle')}
                     </p>
                 </div>
 
@@ -98,7 +98,7 @@ export default function OnlineTestsPage() {
                     <Search className="text-gray-400 ml-2" size={20} />
                     <input
                         type="text"
-                        placeholder={t('tests.search_placeholder') || "Search tests..."}
+                        placeholder={t('tests.search_placeholder')}
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
                         className="bg-transparent border-none focus:ring-0 text-sm w-48 text-gray-900 dark:text-white placeholder-gray-400"
@@ -153,12 +153,12 @@ export default function OnlineTestsPage() {
                 {loading ? (
                     <div className="col-span-full text-center py-12">
                         <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-brand-blue"></div>
-                        <p className="text-gray-400 mt-4">Loading tests...</p>
+                        <p className="text-gray-400 mt-4">{t('tests.list.loading')}</p>
                     </div>
                 ) : tests.length === 0 ? (
                     <div className="col-span-full text-center py-12">
                         <FileText className="mx-auto text-gray-300 dark:text-gray-700 mb-4" size={48} />
-                        <p className="text-gray-400">{t('dashboard.no_results') || 'No tests found'}</p>
+                        <p className="text-gray-400">{t('tests.list.no_tests')}</p>
                     </div>
                 ) : (
                     tests.map((test) => {
@@ -197,13 +197,13 @@ export default function OnlineTestsPage() {
                                 <div className="space-y-2 text-sm text-gray-600 dark:text-gray-400 mb-4">
                                     <div className="flex items-center gap-2">
                                         <BookOpen size={16} className="text-brand-blue" />
-                                        <span>{test.total_questions} {t('tests.questions') || 'questions'}</span>
+                                        <span>{t('tests.list.questions_count', { count: test.total_questions })}</span>
                                     </div>
 
                                     {test.duration_minutes && (
                                         <div className="flex items-center gap-2">
                                             <Clock size={16} className="text-orange-500" />
-                                            <span>{test.duration_minutes} {t('tests.minutes') || 'min'}</span>
+                                            <span>{t('tests.list.minutes', { count: test.duration_minutes })}</span>
                                         </div>
                                     )}
 
@@ -215,7 +215,7 @@ export default function OnlineTestsPage() {
 
                                 {/* Start Button */}
                                 <button className="w-full py-3 rounded-xl bg-gray-100 dark:bg-slate-800 text-gray-900 dark:text-white font-bold group-hover:bg-gradient-to-r group-hover:from-brand-blue group-hover:to-cyan-500 group-hover:text-white transition-all flex items-center justify-center gap-2">
-                                    {t('tests.start_test') || 'Start Test'}
+                                    {t('tests.list.start')}
                                     <CheckCircle2 size={18} />
                                 </button>
                             </Link>

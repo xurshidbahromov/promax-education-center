@@ -17,6 +17,7 @@ import {
 } from "lucide-react";
 import { createClient } from "@/utils/supabase/client";
 import { getStudentResults, type ExamResult } from "@/lib/supabase-queries";
+import Link from "next/link";
 
 export default function ResultsPage() {
     const { t } = useLanguage();
@@ -181,13 +182,19 @@ export default function ResultsPage() {
                                             </div>
 
                                             <div className="flex gap-2">
-                                                <button className="px-4 py-2 bg-gray-50 dark:bg-slate-800 hover:bg-gray-100 dark:hover:bg-slate-700 text-gray-700 dark:text-gray-300 rounded-xl text-sm font-medium transition-colors flex items-center gap-2">
+                                                <Link
+                                                    href={`/dashboard/results/${result.id}`}
+                                                    className="px-4 py-2 bg-gray-50 dark:bg-slate-800 hover:bg-gray-100 dark:hover:bg-slate-700 text-gray-700 dark:text-gray-300 rounded-xl text-sm font-medium transition-colors flex items-center gap-2"
+                                                >
                                                     <Eye size={16} />
-                                                    Check Answers
-                                                </button>
-                                                <button className="px-4 py-2 bg-brand-blue/10 hover:bg-brand-blue/20 text-brand-blue rounded-xl text-sm font-bold transition-colors">
-                                                    Analysis
-                                                </button>
+                                                    Ko'rish
+                                                </Link>
+                                                <Link
+                                                    href={`/dashboard/results/${result.id}`}
+                                                    className="px-4 py-2 bg-brand-blue/10 hover:bg-brand-blue/20 text-brand-blue rounded-xl text-sm font-bold transition-colors"
+                                                >
+                                                    Tahlil
+                                                </Link>
                                             </div>
                                         </div>
                                     </div>

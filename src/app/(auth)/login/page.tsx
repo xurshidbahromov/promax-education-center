@@ -7,7 +7,7 @@ import Image from 'next/image';
 import { useLanguage } from '@/context/LanguageContext';
 import { createClient } from '@/utils/supabase/client';
 import { getUserRole, getRedirectPath } from '@/lib/auth-helpers';
-import { Mail, Lock, ArrowRight, Loader2, ArrowLeft, Eye, EyeOff, GraduationCap, Users } from 'lucide-react';
+import { Lock, ArrowRight, Loader2, ArrowLeft, Eye, EyeOff, GraduationCap, Users } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 export default function LoginPage() {
@@ -17,11 +17,36 @@ export default function LoginPage() {
 
     const [step, setStep] = useState<'role' | 'form'>('role'); // Two-step flow
     const [loginAs, setLoginAs] = useState<'student' | 'staff' | null>(null);
-    const [email, setEmail] = useState('');
+    const [phone, setPhone] = useState('');
     const [password, setPassword] = useState('');
     const [showPassword, setShowPassword] = useState(false);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
+
+    // Phone number formatting
+    const formatPhoneNumber = (value: string) => {
+        const cleaned = value.replace(/\D/g, '');
+        if (cleaned.length === 0) return '';
+
+        let digits = cleaned;
+        if (!cleaned.startsWith('998')) {
+            digits = '998' + cleaned;
+        }
+        digits = digits.slice(0, 12);
+
+        let formatted = '+998';
+        if (digits.length > 3) formatted += ' ' + digits.slice(3, 5);
+        if (digits.length > 5) formatted += ' ' + digits.slice(5, 8);
+        if (digits.length > 8) formatted += ' ' + digits.slice(8, 10);
+        if (digits.length > 10) formatted += ' ' + digits.slice(10, 12);
+
+        return formatted;
+    };
+
+    const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const formatted = formatPhoneNumber(e.target.value);
+        setPhone(formatted);
+    };
 
     const handleRoleSelect = (role: 'student' | 'staff') => {
         setLoginAs(role);
@@ -39,9 +64,13 @@ export default function LoginPage() {
         setLoading(true);
         setError(null);
 
+        // Auto-generate email from phone for login
+        const cleanPhone = phone.replace(/\D/g, '');
+        const generatedEmail = `${cleanPhone}@promax.uz`;
+
         try {
             const { data, error } = await supabase.auth.signInWithPassword({
-                email,
+                email: generatedEmail,
                 password,
             });
 
@@ -268,17 +297,17 @@ export default function LoginPage() {
                                 <div className="space-y-4">
                                     <div className="space-y-2">
                                         <label className="text-sm font-medium text-gray-700 dark:text-gray-300 ml-1">
-                                            {t('auth.login.email')}
+                                            {t('auth.register.phone')}
                                         </label>
                                         <div className="relative group">
                                             <div className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-brand-blue transition-colors">
-                                                <Mail size={20} />
+                                                <Users size={20} />
                                             </div>
                                             <input
-                                                type="email"
-                                                value={email}
-                                                onChange={(e) => setEmail(e.target.value)}
-                                                placeholder="your@email.com"
+                                                type="tel"
+                                                value={phone}
+                                                onChange={handlePhoneChange}
+                                                placeholder="+998 XX XXX XX XX"
                                                 className="w-full pl-12 pr-4 py-3 border-2 border-gray-200 dark:border-slate-700 rounded-xl focus:outline-none focus:border-brand-blue bg-white dark:bg-slate-900 text-gray-900 dark:text-white placeholder-gray-400 transition-colors"
                                                 required
                                             />

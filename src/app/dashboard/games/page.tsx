@@ -2,6 +2,8 @@
 
 import { useLanguage } from "@/context/LanguageContext";
 import { useState, useEffect } from "react";
+import { getUserProfile } from "@/lib/profile";
+import { updateUserCoins } from "@/lib/supabase-queries";
 import {
     Gamepad2,
     BrainCircuit,
@@ -17,13 +19,27 @@ import { motion, AnimatePresence } from "framer-motion";
 
 export default function GameZonePage() {
     const { t } = useLanguage();
-    const [coins, setCoins] = useState(1250); // Initial coins (mock)
+    // Start with 0 until loaded
+    const [coins, setCoins] = useState(0);
+    const [userId, setUserId] = useState<string | null>(null);
     const [activeGame, setActiveGame] = useState<string | null>(null);
     const [gameState, setGameState] = useState<'start' | 'playing' | 'end'>('start');
     const [score, setScore] = useState(0);
     const [question, setQuestion] = useState({ q: "", a: 0 });
     const [userAnswer, setUserAnswer] = useState("");
     const [feedback, setFeedback] = useState<'correct' | 'wrong' | null>(null);
+
+    // Load user coins on mount
+    useEffect(() => {
+        const loadUserData = async () => {
+            const profile = await getUserProfile();
+            if (profile) {
+                setCoins(profile.coins || 0);
+                setUserId(profile.id);
+            }
+        };
+        loadUserData();
+    }, []);
 
     // Math Game Logic
     const generateMathQuestion = () => {
@@ -71,9 +87,16 @@ export default function GameZonePage() {
         if (gameType === 'math') generateMathQuestion();
     };
 
-    const endGame = () => {
-        setCoins(c => c + score);
+    const endGame = async () => {
+        // Optimistic update
+        const earned = score;
+        setCoins(c => c + earned);
         setGameState('end');
+
+        // Persist to DB
+        if (userId && earned > 0) {
+            await updateUserCoins(userId, earned);
+        }
     };
 
     const closeGame = () => {
