@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { useToast } from "@/context/ToastContext";
 import { useLanguage } from "@/context/LanguageContext";
 import {
     ArrowLeft,
@@ -30,6 +31,7 @@ type Step = "basic" | "questions" | "preview";
 export default function CreateTestPage() {
     const router = useRouter();
     const { t } = useLanguage();
+    const { showToast } = useToast();
     const [currentStep, setCurrentStep] = useState<Step>("basic");
     const [saving, setSaving] = useState(false);
 
@@ -114,7 +116,7 @@ export default function CreateTestPage() {
             router.push("/admin/tests");
         } catch (error) {
             console.error("Error creating test:", error);
-            alert("Xatolik yuz berdi!");
+            showToast("Xatolik yuz berdi!", "error");
         } finally {
             setSaving(false);
         }

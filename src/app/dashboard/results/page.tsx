@@ -23,8 +23,12 @@ export default function ResultsPage() {
     const { t } = useLanguage();
     const [searchQuery, setSearchQuery] = useState("");
     const [filterStatus, setFilterStatus] = useState("all");
+    const [filterSubject, setFilterSubject] = useState("all");
+    const [filterTestType, setFilterTestType] = useState("all");
     const [loading, setLoading] = useState(true);
     const [results, setResults] = useState<ExamResult[]>([]);
+
+    const [exporting, setExporting] = useState(false);
 
     // Fetch results from Supabase
     useEffect(() => {
@@ -48,11 +52,83 @@ export default function ResultsPage() {
         fetchResults();
     }, []);
 
+    const handleExport = async () => {
+        try {
+            setExporting(true);
+            const { utils, writeFile } = await import("xlsx");
+
+            const exportData = filteredResults.map(result => {
+                const examType = result.exam?.type || 'quiz';
+                const isDTM = examType === 'dtm';
+                const score = result.total_score || 0;
+                const maxScore = result.exam?.max_score || (isDTM ? 189.0 : 100);
+                const percentage = (score / maxScore) * 100;
+
+                return {
+                    "Sana": new Date(result.created_at).toLocaleDateString('uz-UZ'),
+                    "Imtihon Nomi": result.exam?.title || "Noma'lum",
+                    "Fan": (result.exam as any)?.subject || "Noma'lum",
+                    "Tur": isDTM ? "DTM" : "Quiz",
+                    "To'plangan Ball": score.toFixed(1),
+                    "Maksimal Ball": maxScore,
+                    "Foiz": `${percentage.toFixed(1)}%`,
+                    "Holat": percentage >= 60 ? "O'tgan" : "O'tmagan"
+                };
+            });
+
+            const wb = utils.book_new();
+            const ws = utils.json_to_sheet(exportData);
+
+            // Auto-width columns
+            const colWidths = [
+                { wch: 12 }, // Sana
+                { wch: 30 }, // Imtihon Nomi
+                { wch: 15 }, // Fan
+                { wch: 10 }, // Tur
+                { wch: 15 }, // To'plangan Ball
+                { wch: 15 }, // Maksimal Ball
+                { wch: 10 }, // Foiz
+                { wch: 10 }  // Holat
+            ];
+            ws['!cols'] = colWidths;
+
+            utils.book_append_sheet(wb, ws, "Natijalar");
+            writeFile(wb, `Promax_Natijalar_${new Date().toISOString().split('T')[0]}.xlsx`);
+
+        } catch (error) {
+            console.error("Export error:", error);
+            alert("Export qilishda xatolik yuz berdi");
+        } finally {
+            setExporting(false);
+        }
+    };
+
+
     const filteredResults = results.filter(result => {
         const examTitle = result.exam?.title || "";
+        // @ts-ignore - subject property might be missing in type but present in data or legacy
+        const examSubject = (result.exam as any)?.subject || "";
+        const examType = result.exam?.type || "";
+        const score = result.total_score || 0;
+        const maxScore = result.exam?.max_score || 100;
+        const percentage = (score / maxScore) * 100;
+
+        // Search filter
         const matchesSearch = examTitle.toLowerCase().includes(searchQuery.toLowerCase());
-        // For now, show all results (can add status filter later)
-        return matchesSearch;
+
+        // Subject filter
+        const matchesSubject = filterSubject === "all" || examSubject === filterSubject;
+
+        // Test type filter
+        const matchesTestType = filterTestType === "all" || examType === filterTestType;
+
+        // Status filter
+        const matchesStatus =
+            filterStatus === "all" ||
+            (filterStatus === "passed" && percentage >= 60) ||
+            (filterStatus === "failed" && percentage < 60);
+
+        return matchesSearch && matchesSubject && matchesTestType && matchesStatus;
     });
 
     return (
@@ -67,9 +143,17 @@ export default function ResultsPage() {
                         {t('results.subtitle')}
                     </p>
                 </div>
-                <button className="px-4 py-2 bg-gradient-to-r from-brand-blue to-indigo-600 text-white rounded-xl text-sm font-medium hover:opacity-90 transition-opacity shadow-lg shadow-brand-blue/30 flex items-center gap-2">
-                    <Download size={18} />
-                    {t('results.export')}
+                <button
+                    onClick={handleExport}
+                    disabled={exporting || filteredResults.length === 0}
+                    className="px-4 py-2 bg-gradient-to-r from-brand-blue to-indigo-600 text-white rounded-xl text-sm font-medium hover:opacity-90 transition-opacity shadow-lg shadow-brand-blue/30 flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                    {exporting ? (
+                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                    ) : (
+                        <Download size={18} />
+                    )}
+                    {exporting ? "Yuklanmoqda..." : t('results.export')}
                 </button>
             </div>
 
@@ -87,12 +171,36 @@ export default function ResultsPage() {
                 </div>
                 <select
                     className="appearance-none px-4 py-2 bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-blue/50 transition-all cursor-pointer dark:text-white"
+                    value={filterSubject}
+                    onChange={(e) => setFilterSubject(e.target.value)}
+                >
+                    <option value="all">Barcha fanlar</option>
+                    <option value="matematika">Matematika</option>
+                    <option value="ingliz_tili">Ingliz tili</option>
+                    <option value="ona_tili">Ona tili</option>
+                    <option value="tarix">Tarix</option>
+                    <option value="biologiya">Biologiya</option>
+                    <option value="fizika">Fizika</option>
+                    <option value="kimyo">Kimyo</option>
+                </select>
+                <select
+                    className="appearance-none px-4 py-2 bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-blue/50 transition-all cursor-pointer dark:text-white"
+                    value={filterTestType}
+                    onChange={(e) => setFilterTestType(e.target.value)}
+                >
+                    <option value="all">Barcha turlar</option>
+                    <option value="dtm">DTM</option>
+                    <option value="quiz">Quiz</option>
+                    <option value="topic">Mavzu</option>
+                </select>
+                <select
+                    className="appearance-none px-4 py-2 bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-blue/50 transition-all cursor-pointer dark:text-white"
                     value={filterStatus}
                     onChange={(e) => setFilterStatus(e.target.value)}
                 >
-                    <option value="all">All Status</option>
-                    <option value="passed">Passed</option>
-                    <option value="failed">Failed</option>
+                    <option value="all">Barcha holatlar</option>
+                    <option value="passed">O'tgan</option>
+                    <option value="failed">O'tmagan</option>
                 </select>
             </div>
 

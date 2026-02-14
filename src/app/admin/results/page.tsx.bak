@@ -1,0 +1,206 @@
+"use client";
+
+import { useEffect, useState } from "react";
+import Link from "next/link";
+import {
+    Plus,
+    Search,
+    Filter,
+    FileText,
+    Download,
+    Eye,
+    Trash2,
+    Calendar,
+    GraduationCap
+} from "lucide-react";
+import { getAllResults } from "@/lib/admin-queries";
+import { exportStudentResults } from "@/lib/excel-export";
+import { useToast } from "@/context/ToastContext";
+
+export default function ResultsListPage() {
+    const [results, setResults] = useState<any[]>([]);
+    const [loading, setLoading] = useState(true);
+    const [searchTerm, setSearchTerm] = useState("");
+
+    useEffect(() => {
+        fetchResults();
+    }, []);
+
+    const fetchResults = async () => {
+        setLoading(true);
+        try {
+            const data = await getAllResults(50); // Fetch last 50 results
+            setResults(data);
+        } catch (error) {
+            console.error("Error fetching results:", error);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const filteredResults = results.filter(result =>
+        (result.student?.full_name || "").toLowerCase().includes(searchTerm.toLowerCase()) ||
+        (result.exam?.title || "").toLowerCase().includes(searchTerm.toLowerCase())
+    );
+
+    const handleExport = () => {
+        if (filteredResults.length === 0) {
+            showToast("Export qilish uchun ma'lumot yo'q", "warning");
+            return;
+        }
+
+        try {
+            // Prepare data for export
+            const exportData = filteredResults.map(result => ({
+                student_name: result.student?.full_name || 'Unknown',
+                phone: result.student?.phone || 'N/A',
+                test_title: result.exam?.title || 'N/A',
+                subject: result.direction?.title || 'General',
+                score: result.total_score || 0,
+                max_score: 189,
+                percentage: ((result.total_score || 0) / 189) * 100,
+                passing_score: 60, // Default passing score
+                completed_at: result.exam?.date || new Date().toISOString(),
+                time_spent_seconds: null // Not available in this data
+            }));
+
+            exportStudentResults(exportData);
+            showToast(`${filteredResults.length} ta natija Excel formatida yuklandi`, "success");
+        } catch (error) {
+            console.error('Export error:', error);
+            showToast("Export qilishda xatolik yuz berdi", "error");
+        }
+    };
+
+    return (
+        <div className="space-y-8">
+            {/* Header */}
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                <div>
+                    <h1 className="text-3xl font-bold text-gray-900 dark:text-white flex items-center gap-3">
+                        <FileText className="text-brand-blue" size={32} />
+                        Imtihon Natijalari
+                    </h1>
+                    <p className="text-gray-500 dark:text-gray-400 mt-1">
+                        Barcha o'tkazilgan imtihonlar ro'yxati va natijalari.
+                    </p>
+                </div>
+
+                <div className="flex items-center gap-3">
+                    <button
+                        onClick={handleExport}
+                        className="h-10 px-4 flex items-center gap-2 bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-800 rounded-xl text-sm font-medium text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-slate-800 transition-colors"
+                    >
+                        <Download size={18} />
+                        <span className="hidden sm:inline">Export</span>
+                    </button>
+                    <Link
+                        href="/admin/results/new"
+                        className="h-10 px-4 bg-brand-blue text-white rounded-xl text-sm font-medium flex items-center gap-2 hover:bg-blue-600 transition-colors shadow-sm"
+                    >
+                        <Plus size={18} />
+                        Yangi Natija
+                    </Link>
+                </div>
+            </div>
+
+            {/* Search & Filter */}
+            <div className="flex flex-col sm:flex-row items-center gap-4 bg-white dark:bg-slate-900 p-4 rounded-2xl border border-gray-200 dark:border-slate-800 shadow-sm">
+                <div className="w-full sm:flex-1 relative">
+                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
+                    <input
+                        type="text"
+                        placeholder="O'quvchi ismi bo'yicha qidirish..."
+                        value={searchTerm}
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                        className="w-full pl-10 pr-4 py-2 rounded-xl bg-gray-50 dark:bg-slate-800 border-none focus:ring-2 focus:ring-brand-blue transition-all"
+                    />
+                </div>
+                {/* Filters can generally be add later */}
+            </div>
+
+            {/* Results Table */}
+            <div className="bg-white dark:bg-slate-900 rounded-2xl border border-gray-200 dark:border-slate-800 shadow-sm overflow-hidden">
+                <div className="overflow-x-auto">
+                    <table className="w-full text-left">
+                        <thead className="bg-gray-50 dark:bg-slate-800/50">
+                            <tr>
+                                <th className="px-6 py-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">O'quvchi</th>
+                                <th className="px-6 py-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Imtihon</th>
+                                <th className="px-6 py-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Yo'nalish</th>
+                                <th className="px-6 py-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Ball</th>
+                                <th className="px-6 py-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Foiz</th>
+                                {/* <th className="px-6 py-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Amallar</th> */}
+                            </tr>
+                        </thead>
+                        <tbody className="divide-y divide-gray-200 dark:divide-slate-800">
+                            {loading ? (
+                                <tr>
+                                    <td colSpan={6} className="px-6 py-8 text-center text-gray-500">
+                                        Yuklanmoqda...
+                                    </td>
+                                </tr>
+                            ) : filteredResults.length === 0 ? (
+                                <tr>
+                                    <td colSpan={6} className="px-6 py-8 text-center text-gray-500">
+                                        Natijalar topilmadi.
+                                    </td>
+                                </tr>
+                            ) : (
+                                filteredResults.map((result) => {
+                                    const percentage = (result.total_score / 189) * 100;
+
+                                    return (
+                                        <tr key={result.id} className="hover:bg-gray-50 dark:hover:bg-slate-800/50 transition-colors group">
+                                            <td className="px-6 py-4">
+                                                <div className="font-medium text-gray-900 dark:text-white">
+                                                    {result.student?.full_name || "Unknown"}
+                                                </div>
+                                            </td>
+                                            <td className="px-6 py-4">
+                                                <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
+                                                    <Calendar size={14} className="text-gray-400" />
+                                                    {result.exam?.date ? new Date(result.exam.date).toLocaleDateString() : "-"}
+                                                </div>
+                                            </td>
+                                            <td className="px-6 py-4">
+                                                <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
+                                                    <GraduationCap size={14} className="text-gray-400" />
+                                                    {result.direction?.title || "-"}
+                                                </div>
+                                            </td>
+                                            <td className="px-6 py-4">
+                                                <span className="font-bold text-gray-900 dark:text-white">
+                                                    {result.total_score?.toFixed(1)}
+                                                </span>
+                                                <span className="text-gray-400 text-xs ml-1">/ 189.0</span>
+                                            </td>
+                                            <td className="px-6 py-4">
+                                                <div className="flex items-center gap-2">
+                                                    <div className="w-16 h-2 bg-gray-100 dark:bg-slate-800 rounded-full overflow-hidden">
+                                                        <div
+                                                            className={`h-full rounded-full ${percentage >= 80 ? 'bg-green-500' : percentage >= 60 ? 'bg-yellow-500' : 'bg-red-500'}`}
+                                                            style={{ width: `${percentage}%` }}
+                                                        />
+                                                    </div>
+                                                    <span className="text-xs font-medium text-gray-600 dark:text-gray-400">
+                                                        {percentage.toFixed(0)}%
+                                                    </span>
+                                                </div>
+                                            </td>
+                                            {/* <td className="px-6 py-4">
+                                            <button className="h-8 w-8 flex items-center justify-center text-gray-400 hover:text-brand-blue hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-lg transition-colors">
+                                                <Eye size={16} />
+                                            </button>
+                                        </td> */}
+                                        </tr>
+                                    )
+                                })
+                            )}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    );
+}

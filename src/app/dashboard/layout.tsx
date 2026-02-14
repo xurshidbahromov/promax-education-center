@@ -35,13 +35,42 @@ export default function DashboardLayout({
 
     useEffect(() => {
         const checkUser = async () => {
-            const { data: { user }, error } = await supabase.auth.getUser();
-            if (error || !user) {
-                router.push("/login");
-            } else {
+            try {
+                const { data: { user }, error } = await supabase.auth.getUser();
+
+                if (error || !user) {
+                    router.push("/login");
+                    return;
+                }
+
+                // Check user's role from profile
+                const { data: profile, error: profileError } = await supabase
+                    .from('profiles')
+                    .select('role')
+                    .eq('id', user.id)
+                    .single();
+
+                if (profileError || !profile) {
+                    console.error('Profile error:', profileError);
+                    await supabase.auth.signOut();
+                    router.push("/login");
+                    return;
+                }
+
+                // Only students can access dashboard
+                if (profile.role !== 'student') {
+                    console.log('Non-student trying to access dashboard, redirecting to admin');
+                    router.push("/admin");
+                    return;
+                }
+
                 setLoading(false);
+            } catch (err) {
+                console.error('Auth check error:', err);
+                router.push("/login");
             }
         };
+
         checkUser();
     }, [router, supabase]);
 

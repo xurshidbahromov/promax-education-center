@@ -1,7 +1,9 @@
 "use client";
 
 import { useLanguage } from "@/context/LanguageContext";
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
+import { useToast } from "@/context/ToastContext";
 import Link from "next/link";
 import {
     Plus,
@@ -23,6 +25,8 @@ import { getTeachers, demoteTeacher } from "@/lib/admin-queries";
 
 
 export default function AdminTeachersPage() {
+    const router = useRouter();
+    const { showToast } = useToast();
     const { t } = useLanguage();
     const [teachers, setTeachers] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
@@ -53,8 +57,9 @@ export default function AdminTeachersPage() {
             if (result.success) {
                 // Refresh list
                 fetchTeachers();
+                showToast("O'qituvchi muvaffaqiyatli o'chirildi", "success");
             } else {
-                alert("Xatolik: " + result.error);
+                showToast("Xatolik: " + result.error, "error");
             }
         } catch (error) {
             console.error("Delete error:", error);

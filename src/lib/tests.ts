@@ -638,3 +638,90 @@ export async function toggleTestPublish(testId: string): Promise<boolean> {
 
     return true;
 }
+
+/**
+ * Duplicate a test with all its questions
+ */
+export async function duplicateTest(testId: string): Promise<string | null> {
+    const supabase = createClient();
+
+    try {
+        // 1. Get the original test
+        const { data: originalTest, error: testError } = await supabase
+            .from('tests')
+            .select('*')
+            .eq('id', testId)
+            .single();
+
+        if (testError || !originalTest) {
+            console.error('Error fetching test:', testError);
+            return null;
+        }
+
+        // 2. Get all questions for the original test
+        const { data: originalQuestions, error: questionsError } = await supabase
+            .from('questions')
+            .select('*')
+            .eq('test_id', testId)
+            .order('order_index');
+
+        if (questionsError) {
+            console.error('Error fetching questions:', questionsError);
+            return null;
+        }
+
+        // 3. Create new test (without id and with modified title)
+        const { data: newTest, error: newTestError } = await supabase
+            .from('tests')
+            .insert({
+                title: `${originalTest.title} (Nusxa)`,
+                description: originalTest.description,
+                subject: originalTest.subject,
+                test_type: originalTest.test_type,
+                difficulty_level: originalTest.difficulty_level,
+                duration_minutes: originalTest.duration_minutes,
+                total_questions: originalTest.total_questions,
+                max_score: originalTest.max_score,
+                is_published: false, // New copy is draft by default
+                created_by: originalTest.created_by
+            })
+            .select()
+            .single();
+
+        if (newTestError || !newTest) {
+            console.error('Error creating new test:', newTestError);
+            return null;
+        }
+
+        // 4. Copy all questions
+        if (originalQuestions && originalQuestions.length > 0) {
+            const newQuestions = originalQuestions.map(q => ({
+                test_id: newTest.id,
+                question_text: q.question_text,
+                question_type: q.question_type,
+                options: q.options,
+                correct_answer: q.correct_answer,
+                explanation: q.explanation,
+                points: q.points,
+                order_index: q.order_index,
+                image_url: q.image_url
+            }));
+
+            const { error: questionsInsertError } = await supabase
+                .from('questions')
+                .insert(newQuestions);
+
+            if (questionsInsertError) {
+                console.error('Error copying questions:', questionsInsertError);
+                // Rollback: delete the new test
+                await supabase.from('tests').delete().eq('id', newTest.id);
+                return null;
+            }
+        }
+
+        return newTest.id;
+    } catch (error) {
+        console.error('Error duplicating test:', error);
+        return null;
+    }
+}

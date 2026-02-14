@@ -4,8 +4,10 @@ import "./globals.css";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { LanguageProvider } from "@/context/LanguageContext";
+import { ToastProvider } from "@/context/ToastContext";
 import { ThemeProvider } from "@/components/ThemeProvider";
 import { Background } from "@/components/Background";
+import ToastContainer from "@/components/ToastContainer";
 
 const poppins = Poppins({
   variable: "--font-poppins",
@@ -35,9 +37,12 @@ export default function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
-          <LanguageProvider>
-            {children}
-          </LanguageProvider>
+          <ToastProvider>
+            <LanguageProvider>
+              <ToastContainer />
+              {children}
+            </LanguageProvider>
+          </ToastProvider>
         </ThemeProvider>
       </body>
     </html>

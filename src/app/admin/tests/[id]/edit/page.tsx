@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useRouter, useParams } from "next/navigation";
+import { useToast } from "@/context/ToastContext";
 import { useLanguage } from "@/context/LanguageContext";
 import {
     ArrowLeft,
@@ -25,6 +26,7 @@ export default function EditTestPage() {
     const router = useRouter();
     const params = useParams();
     const { t } = useLanguage();
+    const { showToast } = useToast();
 
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
@@ -105,6 +107,7 @@ import { createClient } from "@/utils/supabase/client";
 function EditTestContent({ id }: { id: string }) {
     const router = useRouter();
     const { t } = useLanguage();
+    const { showToast } = useToast();
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
     const [currentStep, setCurrentStep] = useState<Step>("basic");
@@ -149,7 +152,7 @@ function EditTestContent({ id }: { id: string }) {
                 .single();
 
             if (testError || !test) {
-                alert("Test topilmadi");
+                showToast("Test topilmadi", "error");
                 router.push("/admin/tests");
                 return;
             }
@@ -249,7 +252,7 @@ function EditTestContent({ id }: { id: string }) {
             router.push("/admin/tests");
         } catch (error) {
             console.error("Error updating test:", error);
-            alert("Xatolik yuz berdi!");
+            showToast("Xatolik yuz berdi!", "error");
         } finally {
             setSaving(false);
         }

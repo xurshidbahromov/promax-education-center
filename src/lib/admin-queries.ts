@@ -279,8 +279,7 @@ export async function saveExamResult(
                 .from('directions')
                 .insert({
                     code: dirInfo.code,
-                    title: dirInfo.name,
-                    subtitle: `${dirInfo.subject_1} & ${dirInfo.subject_2}`
+                    title: dirInfo.name
                 })
                 .select()
                 .single();

@@ -16,7 +16,9 @@ import {
     ShieldCheck,
     Bell,
     Loader2,
-    AlertCircle
+    AlertCircle,
+    BookOpen,
+    DollarSign
 } from "lucide-react";
 import Image from "next/image";
 import { createClient } from "@/utils/supabase/client";
@@ -55,17 +57,28 @@ export default function AdminLayout({
 
                 if (profileError || !profile) {
                     console.error("Error fetching profile:", profileError);
-                    router.push("/dashboard");
+                    console.error("Profile data:", profile);
+                    // Don't redirect immediately, might be temporary network
+                    setLoading(false);
                     return;
                 }
+
+                console.log("🔍 Admin Access Check:", {
+                    userId: user.id,
+                    userEmail: user.email,
+                    profileRole: profile.role,
+                    allowedRoles: ['admin', 'teacher', 'staff']
+                });
 
                 // Only allow admin, teacher, and staff roles
                 const allowedRoles = ['admin', 'teacher', 'staff'];
                 if (!allowedRoles.includes(profile.role)) {
+                    console.warn("❌ Access DENIED - User role not allowed:", profile.role);
                     router.push("/dashboard");
                     return;
                 }
 
+                console.log("✅ Access GRANTED - User is authorized");
                 setAuthorized(true);
                 setLoading(false);
             } catch (error) {
@@ -75,7 +88,7 @@ export default function AdminLayout({
         };
 
         checkAccess();
-    }, [router, supabase]);
+    }, []); // Only run once on mount
 
     // Render date only on client to avoid hydration mismatch
     useEffect(() => {
@@ -128,7 +141,10 @@ export default function AdminLayout({
         { icon: LayoutDashboard, label: "Dashboard", href: "/admin" },
         { icon: Users, label: "Students", href: "/admin/students" },
         { icon: GraduationCap, label: "Teachers", href: "/admin/teachers" },
+        { icon: BookOpen, label: "Tests", href: "/admin/tests" },
         { icon: FileText, label: "Results", href: "/admin/results" },
+        { icon: DollarSign, label: "Payments", href: "/admin/payments" },
+        { icon: Bell, label: "Announcements", href: "/admin/announcements" },
         { icon: Settings, label: "Settings", href: "/admin/settings" },
     ];
 

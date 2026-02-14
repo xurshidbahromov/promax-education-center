@@ -18,6 +18,7 @@ export interface ExamResult {
         title: string;
         date: string;
         type: string;
+        max_score: number;
     };
     direction?: {
         title: string;
@@ -55,7 +56,8 @@ export async function getStudentResults(studentId: string): Promise<ExamResult[]
             exam:exams (
                 title,
                 date,
-                type
+                type,
+                max_score
             ),
             direction:directions (
                 title,

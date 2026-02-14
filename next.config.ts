@@ -1,7 +1,23 @@
 import type { NextConfig } from "next";
 
+// Bundle analyzer
+const withBundleAnalyzer = require('@next/bundle-analyzer')({
+  enabled: process.env.ANALYZE === 'true',
+});
+
 const nextConfig: NextConfig = {
-  /* config options here */
+  images: {
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: '**',
+      },
+    ],
+  },
+  // Performance optimizations
+  experimental: {
+    optimizePackageImports: ['lucide-react'], // Tree-shake lucide icons
+  },
 };
 
-export default nextConfig;
+export default withBundleAnalyzer(nextConfig);

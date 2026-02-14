@@ -1,6 +1,7 @@
 "use client";
 
 import { useLanguage } from "@/context/LanguageContext";
+import { useToast } from "@/context/ToastContext";
 import { useState, useEffect } from "react";
 import { getUserProfile, updateUserProfile } from "@/lib/profile";
 import {
@@ -17,8 +18,11 @@ import Image from "next/image";
 
 export default function ProfilePage() {
     const { t } = useLanguage();
+    const { showToast } = useToast();
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
+    const [changingPassword, setChangingPassword] = useState(false);
+    const [showPasswordForm, setShowPasswordForm] = useState(false);
     const [formData, setFormData] = useState({
         firstName: "",
         lastName: "",
@@ -27,6 +31,12 @@ export default function ProfilePage() {
         bio: "",
         location: ""
     });
+    const [passwordData, setPasswordData] = useState({
+        currentPassword: "",
+        newPassword: "",
+        confirmPassword: ""
+    });
+    const [passwordError, setPasswordError] = useState("");
 
     useEffect(() => {
         loadProfile();
@@ -70,15 +80,90 @@ export default function ProfilePage() {
             });
 
             if (result.success) {
-                alert(t("profile.success_update"));
+                showToast(t("profile.success_update"), "success");
             } else {
-                alert(t("profile.error_update"));
+                showToast(t("profile.error_update"), "error");
             }
         } catch (error) {
             console.error("Error updating profile:", error);
-            alert(t("profile.error_update"));
+            showToast(t("profile.error_update"), "error");
         } finally {
             setSaving(false);
+        }
+    };
+
+    const handlePasswordChange = async (e: React.FormEvent) => {
+        e.preventDefault();
+        setPasswordError("");
+
+        // Validation
+        if (!passwordData.currentPassword || !passwordData.newPassword || !passwordData.confirmPassword) {
+            setPasswordError("Barcha maydonlarni to'ldiring");
+            return;
+        }
+
+        if (passwordData.newPassword.length < 6) {
+            setPasswordError("Yangi parol kamida 6 ta belgidan iborat bo'lishi kerak");
+            return;
+        }
+
+        if (passwordData.newPassword !== passwordData.confirmPassword) {
+            setPasswordError("Yangi parollar mos kelmayapti");
+            return;
+        }
+
+        if (passwordData.currentPassword === passwordData.newPassword) {
+            setPasswordError("Yangi parol joriy paroldan farq qilishi kerak");
+            return;
+        }
+
+        setChangingPassword(true);
+
+        try {
+            const { createClient } = await import("@/utils/supabase/client");
+            const supabase = createClient();
+
+            // Get current user email
+            const { data: { user } } = await supabase.auth.getUser();
+            if (!user?.email) {
+                setPasswordError("Foydalanuvchi ma'lumotlari topilmadi");
+                setChangingPassword(false);
+                return;
+            }
+
+            // Verify current password by attempting to sign in
+            const { error: signInError } = await supabase.auth.signInWithPassword({
+                email: user.email,
+                password: passwordData.currentPassword
+            });
+
+            if (signInError) {
+                setPasswordError("Joriy parol noto'g'ri kiritilgan");
+                setChangingPassword(false);
+                return;
+            }
+
+            // Current password is correct, now update to new password
+            const { error } = await supabase.auth.updateUser({
+                password: passwordData.newPassword
+            });
+
+            if (error) {
+                setPasswordError(error.message || "Parol o'zgartirishda xatolik");
+            } else {
+                showToast("Parol muvaffaqiyatli o'zgartirildi!", "success");
+                setPasswordData({
+                    currentPassword: "",
+                    newPassword: "",
+                    confirmPassword: ""
+                });
+                setShowPasswordForm(false);
+            }
+        } catch (error) {
+            console.error("Error changing password:", error);
+            setPasswordError("Kutilmagan xatolik yuz berdi");
+        } finally {
+            setChangingPassword(false);
         }
     };
 
@@ -241,15 +326,93 @@ export default function ProfilePage() {
                             <Key size={20} className="text-brand-orange" />
                             {t("profile.security")}
                         </h3>
-                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-slate-800/50 rounded-xl">
-                            <div>
-                                <p className="font-semibold text-gray-900 dark:text-white">{t("profile.password")}</p>
-                                <p className="text-sm text-gray-500">{t("profile.password_managed")}</p>
+
+                        {!showPasswordForm ? (
+                            <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-slate-800/50 rounded-xl">
+                                <div>
+                                    <p className="font-semibold text-gray-900 dark:text-white">{t("profile.password")}</p>
+                                    <p className="text-sm text-gray-500">********</p>
+                                </div>
+                                <button
+                                    onClick={() => setShowPasswordForm(true)}
+                                    className="px-4 py-2 bg-brand-blue hover:bg-blue-700 text-white rounded-lg font-medium text-sm transition-colors"
+                                >
+                                    {t("profile.change_password")}
+                                </button>
                             </div>
-                            <button className="text-brand-blue hover:text-blue-700 font-medium text-sm disabled:opacity-50 disabled:cursor-not-allowed" disabled>
-                                {t("profile.change_password")}
-                            </button>
-                        </div>
+                        ) : (
+                            <form onSubmit={handlePasswordChange} className="space-y-4">
+                                {passwordError && (
+                                    <div className="p-3 bg-red-100 dark:bg-red-900/20 text-red-700 dark:text-red-400 rounded-lg text-sm">
+                                        {passwordError}
+                                    </div>
+                                )}
+
+                                <div>
+                                    <label className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 block">
+                                        Joriy parol
+                                    </label>
+                                    <input
+                                        type="password"
+                                        value={passwordData.currentPassword}
+                                        onChange={(e) => setPasswordData({ ...passwordData, currentPassword: e.target.value })}
+                                        className="w-full px-4 py-3 rounded-xl bg-gray-50 dark:bg-slate-800 border-none focus:ring-2 focus:ring-brand-blue transition-all"
+                                        placeholder="Joriy parolingizni kiriting"
+                                        required
+                                    />
+                                </div>
+
+                                <div>
+                                    <label className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 block">
+                                        Yangi parol
+                                    </label>
+                                    <input
+                                        type="password"
+                                        value={passwordData.newPassword}
+                                        onChange={(e) => setPasswordData({ ...passwordData, newPassword: e.target.value })}
+                                        className="w-full px-4 py-3 rounded-xl bg-gray-50 dark:bg-slate-800 border-none focus:ring-2 focus:ring-brand-blue transition-all"
+                                        placeholder="Kamida 6 ta belgi"
+                                        required
+                                        minLength={6}
+                                    />
+                                </div>
+
+                                <div>
+                                    <label className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 block">
+                                        Yangi parolni tasdiqlang
+                                    </label>
+                                    <input
+                                        type="password"
+                                        value={passwordData.confirmPassword}
+                                        onChange={(e) => setPasswordData({ ...passwordData, confirmPassword: e.target.value })}
+                                        className="w-full px-4 py-3 rounded-xl bg-gray-50 dark:bg-slate-800 border-none focus:ring-2 focus:ring-brand-blue transition-all"
+                                        placeholder="Yangi parolni qayta kiriting"
+                                        required
+                                    />
+                                </div>
+
+                                <div className="flex gap-3 pt-2">
+                                    <button
+                                        type="submit"
+                                        disabled={changingPassword}
+                                        className="flex-1 px-4 py-3 bg-brand-blue hover:bg-blue-700 text-white rounded-xl font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                                    >
+                                        {changingPassword ? "Saqlanmoqda..." : "Parolni o'zgartirish"}
+                                    </button>
+                                    <button
+                                        type="button"
+                                        onClick={() => {
+                                            setShowPasswordForm(false);
+                                            setPasswordData({ currentPassword: "", newPassword: "", confirmPassword: "" });
+                                            setPasswordError("");
+                                        }}
+                                        className="px-4 py-3 bg-gray-200 dark:bg-slate-800 hover:bg-gray-300 dark:hover:bg-slate-700 text-gray-700 dark:text-gray-300 rounded-xl font-medium transition-colors"
+                                    >
+                                        Bekor qilish
+                                    </button>
+                                </div>
+                            </form>
+                        )}
                     </div>
                 </div>
             </div>

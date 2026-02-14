@@ -19,6 +19,7 @@ import {
 import { useEffect, useState } from "react";
 import { createClient } from "@/utils/supabase/client";
 import { getDashboardStats, getRecentResultsForChart, getStudentActivity, getLeaderboard, getAvailableExams, getUserRank } from "@/lib/supabase-queries";
+import MyCourses from "@/components/MyCourses";
 
 export default function DashboardPage() {
     const { t } = useLanguage();
@@ -51,7 +52,15 @@ export default function DashboardPage() {
             }
 
             setCurrentUserId(user.id);
-            setUserFullName(user.user_metadata?.full_name || "Student");
+
+            // Get profile from profiles table (more reliable than user_metadata)
+            const { data: profile } = await supabase
+                .from('profiles')
+                .select('full_name')
+                .eq('id', user.id)
+                .single();
+
+            setUserFullName(profile?.full_name || user.user_metadata?.full_name || "Student");
 
             // Get dashboard stats
             const stats = await getDashboardStats(user.id);
@@ -119,12 +128,81 @@ export default function DashboardPage() {
         },
     ];
 
-    const announcements = [
-        { title: "Katta Mock Imtihon!", date: "Ertaga, 09:00", type: "urgent", message: "Barcha o'quvchilar pasport nusxasi bilan kelishi shart." },
-        // TODO: We can localize mock announcements later or keep them dynamic from DB
-        { title: "Speaking Club", date: "Shanba, 14:00", type: "info", message: "Mr. John bilan bepul speaking darsi." },
-        { title: "Yangi 'Game Zone' ochildi", date: "Bugun", type: "success", message: "Tanaffusda stol tennisi o'ynashingiz mumkin." },
-    ];
+    const [announcements, setAnnouncements] = useState<any[]>([]);
+
+    // Fetch user and dashboard data
+    useEffect(() => {
+        async function fetchDashboardData() {
+            const supabase = createClient();
+
+            // Get current user
+            const { data: { user } } = await supabase.auth.getUser();
+
+            if (!user) {
+                setLoading(false);
+                return;
+            }
+
+            setCurrentUserId(user.id);
+
+            // Get profile from profiles table (more reliable than user_metadata)
+            const { data: profile } = await supabase
+                .from('profiles')
+                .select('full_name')
+                .eq('id', user.id)
+                .single();
+
+            setUserFullName(profile?.full_name || user.user_metadata?.full_name || "Student");
+
+            // Get dashboard stats
+            const stats = await getDashboardStats(user.id);
+            setDashboardStats(stats);
+
+            // Get recent results for chart
+            const recentResults = await getRecentResultsForChart(user.id);
+            setChartData(recentResults);
+
+            // Get activity feed
+            const activity = await getStudentActivity(user.id);
+            setActivityFeed(activity);
+
+            // Get leaderboard
+            const leaderboardData = await getLeaderboard();
+            setLeaderboard(leaderboardData);
+
+            // Get available exams
+            const availableExams = await getAvailableExams();
+            setUpcomingTests(availableExams.slice(0, 3)); // Top 3 upcoming
+
+            // Get user rank
+            const rank = await getUserRank(user.id);
+            setUserRank(rank);
+
+            // Fetch announcements from database
+            try {
+                const { data: announcementsData, error } = await supabase
+                    .from('announcements')
+                    .select('*')
+                    .eq('is_active', true)
+                    .or('target_audience.eq.all,target_audience.eq.students')
+                    .order('created_at', { ascending: false })
+                    .order('priority', { ascending: false })
+                    .limit(5);
+
+                if (error) {
+                    console.error('Error fetching announcements:', error);
+                } else {
+                    setAnnouncements(announcementsData || []);
+                }
+            } catch (error) {
+                console.error('Error:', error);
+            }
+
+            setLoading(false);
+        }
+
+        fetchDashboardData();
+    }, []);
 
     // const leaderboard = [
     //     { name: "Aziz Rahimov", points: 2400, rank: 1, avatar: "🥇" },
@@ -197,19 +275,25 @@ export default function DashboardPage() {
                                 {t('dashboard.announcements.title')}
                             </h3>
                         </div>
-                        <div className="space-y-3">
-                            {announcements.map((item, i) => (
-                                <div key={i} className="bg-white dark:bg-slate-900/50 p-4 rounded-xl border border-gray-100 dark:border-slate-700 flex gap-4">
-                                    <div className={`w-1 h-full rounded-full ${item.type === 'urgent' ? 'bg-red-500' : item.type === 'info' ? 'bg-blue-500' : 'bg-green-500'}`}></div>
-                                    <div>
-                                        <h4 className="font-semibold text-gray-900 dark:text-white">{item.title}</h4>
-                                        <p className="text-sm text-gray-600 dark:text-gray-300 mt-1">{item.message}</p>
-                                        <p className="text-xs text-gray-400 mt-2 flex items-center gap-1">
-                                            <Clock size={12} /> {item.date}
-                                        </p>
+                        <div className="space-y-3 max-h-[280px] overflow-y-auto pr-2 custom-scrollbar">
+                            {announcements.length === 0 ? (
+                                <p className="text-gray-500 dark:text-gray-400 text-sm text-center py-4">
+                                    {t('dashboard.announcements.empty') || "E'lonlar yo'q"}
+                                </p>
+                            ) : (
+                                announcements.map((item, i) => (
+                                    <div key={item.id || i} className="bg-white dark:bg-slate-900/50 p-4 rounded-xl border border-gray-100 dark:border-slate-700 flex gap-4">
+                                        <div className={`w-1 h-full rounded-full ${item.type === 'error' ? 'bg-red-500' : item.type === 'warning' ? 'bg-yellow-500' : item.type === 'success' ? 'bg-green-500' : 'bg-blue-500'}`}></div>
+                                        <div>
+                                            <h4 className="font-semibold text-gray-900 dark:text-white">{item.title}</h4>
+                                            <p className="text-sm text-gray-600 dark:text-gray-300 mt-1">{item.message}</p>
+                                            <p className="text-xs text-gray-400 mt-2 flex items-center gap-1">
+                                                <Clock size={12} /> {new Date(item.created_at).toLocaleDateString('uz-UZ', { year: 'numeric', month: 'short', day: 'numeric' })}
+                                            </p>
+                                        </div>
                                     </div>
-                                </div>
-                            ))}
+                                ))
+                            )}
                         </div>
                     </div>
 
@@ -331,6 +415,9 @@ export default function DashboardPage() {
 
                 </div>
             </div>
+
+            {/* My Courses Section - Moved to bottom */}
+            <MyCourses />
         </div>
     );
 }

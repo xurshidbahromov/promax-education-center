@@ -107,7 +107,24 @@ export default function RegisterPage() {
             }
 
             if (data?.user) {
+                // Manually create profile in profiles table
+                const { error: profileError } = await supabase
+                    .from('profiles')
+                    .upsert({
+                        id: data.user.id,
+                        full_name: name,
+                        email: generatedEmail,
+                        phone: phone,
+                        role: 'student'
+                    });
+
+                if (profileError) {
+                    console.error('Profile creation error:', profileError);
+                }
+
                 setSuccess(t('auth.success_registration'));
+
+                // Redirect to dashboard (user is already logged in after signup)
                 setTimeout(() => {
                     router.push('/dashboard');
                 }, 2000);

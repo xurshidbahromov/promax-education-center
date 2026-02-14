@@ -2,6 +2,8 @@
 
 import { useLanguage } from "@/context/LanguageContext";
 import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
+import { useToast } from "@/context/ToastContext";
 import Link from "next/link";
 import {
     Plus,
@@ -15,12 +17,15 @@ import {
     XCircle,
     BarChart3,
     Search,
-    Filter
+    Filter,
+    Copy
 } from "lucide-react";
 import { supabase } from "@/lib/supabase";
-import { type Test, deleteTest, toggleTestPublish } from "@/lib/tests";
+import { type Test, deleteTest, toggleTestPublish, duplicateTest } from "@/lib/tests";
 
 export default function AdminTestsPage() {
+    const router = useRouter();
+    const { showToast } = useToast();
     const { t } = useLanguage();
     const [tests, setTests] = useState<Test[]>([]);
     const [loading, setLoading] = useState(true);
@@ -56,8 +61,9 @@ export default function AdminTestsPage() {
             const success = await deleteTest(id);
             if (success) {
                 setTests(tests.filter(t => t.id !== id));
+                showToast("Test muvaffaqiyatli o'chirildi", "success");
             } else {
-                alert("Xatolik yuz berdi");
+                showToast("Xatolik yuz berdi", "error");
             }
         } catch (error) {
             console.error("Error deleting test:", error);
@@ -72,11 +78,31 @@ export default function AdminTestsPage() {
                 setTests(tests.map(t =>
                     t.id === id ? { ...t, is_published: !t.is_published } : t
                 ));
+                showToast("Status o'zgartirildi", "success");
             } else {
-                alert("Xatolik yuz berdi");
+                showToast("Xatolik yuz berdi", "error");
             }
         } catch (error) {
             console.error("Error toggling publish status:", error);
+        }
+    };
+
+    const handleDuplicate = async (id: string) => {
+        if (!confirm("Bu testni nusxalamoqchimisiz?")) {
+            return;
+        }
+
+        try {
+            const newTestId = await duplicateTest(id);
+            if (newTestId) {
+                // Refresh the list to show the new test
+                fetchTests();
+                showToast("Test muvaffaqiyatli nusxalandi!", "success");
+            } else {
+                showToast("Xatolik yuz berdi", "error");
+            }
+        } catch (error) {
+            console.error("Error duplicating test:", error);
         }
     };
 
@@ -247,8 +273,8 @@ export default function AdminTestsPage() {
                                                 <button
                                                     onClick={() => handleTogglePublish(test.id)}
                                                     className={`h-8 w-8 flex items-center justify-center rounded-lg transition-colors ${test.is_published
-                                                            ? "text-yellow-600 hover:bg-yellow-50 dark:hover:bg-yellow-900/20"
-                                                            : "text-green-600 hover:bg-green-50 dark:hover:bg-green-900/20"
+                                                        ? "text-yellow-600 hover:bg-yellow-50 dark:hover:bg-yellow-900/20"
+                                                        : "text-green-600 hover:bg-green-50 dark:hover:bg-green-900/20"
                                                         }`}
                                                     title={test.is_published ? "Noshir qilish" : "Nashr qilish"}
                                                 >
@@ -265,6 +291,13 @@ export default function AdminTestsPage() {
                                                 >
                                                     <Edit size={18} />
                                                 </Link>
+                                                <button
+                                                    onClick={() => handleDuplicate(test.id)}
+                                                    className="h-8 w-8 flex items-center justify-center text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-lg transition-colors"
+                                                    title="Nusxalash"
+                                                >
+                                                    <Copy size={18} />
+                                                </button>
                                                 <button
                                                     onClick={() => handleDelete(test.id)}
                                                     className="h-8 w-8 flex items-center justify-center text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"

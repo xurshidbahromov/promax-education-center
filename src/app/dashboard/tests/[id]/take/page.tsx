@@ -24,6 +24,7 @@ import {
     type Question
 } from "@/lib/tests";
 import { createClient } from "@/utils/supabase/client";
+import { useToast } from "@/context/ToastContext";
 
 export default function TakeTestPage() {
     const params = useParams();
@@ -41,6 +42,9 @@ export default function TakeTestPage() {
     const [loading, setLoading] = useState(true);
     const [submitting, setSubmitting] = useState(false);
     const [autoSaving, setAutoSaving] = useState(false);
+    const [showConfirmModal, setShowConfirmModal] = useState(false);
+
+    const { showToast } = useToast();
 
     const autoSaveInterval = useRef<NodeJS.Timeout | null>(null);
     const questionStartTime = useRef<number>(Date.now());
@@ -182,27 +186,55 @@ export default function TakeTestPage() {
     };
 
     const handleAutoSubmit = async () => {
-        if (!attemptId) return;
-        await saveAnswers();
-        await completeTestAttempt(attemptId, 0);
-        router.push(`/dashboard/tests/${testId}/results/${attemptId}`);
-    };
-
-    const handleSubmit = async () => {
-        if (!attemptId) return;
-
-        const unanswered = questions.filter(q => !answers[q.id]);
-        if (unanswered.length > 0) {
-            const confirm = window.confirm(
-                t('tests.take.confirm_finish', { count: unanswered.length })
-            );
-            if (!confirm) return;
-        }
+        if (!attemptId || submitting) return;
 
         setSubmitting(true);
-        await saveAnswers();
-        await completeTestAttempt(attemptId, 0);
-        router.push(`/dashboard/tests/${testId}/results/${attemptId}`);
+        showToast("Vaqt tugadi! Test avtomatik yakunlanmoqda...", "warning");
+
+        try {
+            await saveAnswers();
+            const success = await completeTestAttempt(attemptId, test?.duration_minutes ? test.duration_minutes * 60 : 0);
+            if (success) {
+                router.push(`/dashboard/results/${attemptId}`);
+            }
+        } catch (error) {
+            console.error("Error auto-submitting:", error);
+        }
+    };
+
+    const handleSubmitClick = () => {
+        setShowConfirmModal(true);
+    };
+
+    const handleConfirmSubmit = async () => {
+        if (!attemptId) return;
+
+        setShowConfirmModal(false);
+        setSubmitting(true);
+
+        try {
+            // Save any pending answers
+            await saveAnswers();
+
+            // Calculate time spent
+            const timeSpent = test?.duration_minutes ? (test.duration_minutes * 60 - (timeRemaining || 0)) : 0;
+
+            // Complete the attempt
+            const success = await completeTestAttempt(attemptId, timeSpent);
+
+            if (success) {
+                showToast("Test muvaffaqiyatli yakunlandi!", "success");
+                // Redirect to results page
+                router.push(`/dashboard/results/${attemptId}`);
+            } else {
+                showToast("Testni yakunlashda xatolik yuz berdi", "error");
+                setSubmitting(false);
+            }
+        } catch (error) {
+            console.error("Error submitting test:", error);
+            showToast("Kutilmagan xatolik yuz berdi", "error");
+            setSubmitting(false);
+        }
     };
 
     const formatTime = (seconds: number) => {
@@ -250,9 +282,11 @@ export default function TakeTestPage() {
     return (
         <div className="min-h-screen bg-gray-50 dark:bg-slate-950">
             {/* Header */}
+            {/* Mobile-Responsive Header */}
             <div className="bg-white dark:bg-slate-900 border-b border-gray-200 dark:border-slate-800 sticky top-0 z-50">
-                <div className="max-w-7xl mx-auto px-4 py-4">
-                    <div className="flex items-center justify-between">
+                <div className="max-w-7xl mx-auto px-4 py-3">
+                    {/* Desktop Header */}
+                    <div className="hidden md:flex items-center justify-between">
                         <div className="flex-1">
                             <h1 className="text-lg font-bold text-gray-900 dark:text-white truncate">
                                 {test.title}
@@ -276,11 +310,41 @@ export default function TakeTestPage() {
                                     {formatTime(timeRemaining)}
                                 </div>
                             )}
+
+                            <button
+                                onClick={handleSubmitClick}
+                                disabled={submitting}
+                                className="flex items-center gap-2 px-6 py-2 bg-green-600 hover:bg-green-700 disabled:bg-gray-400 text-white rounded-xl font-semibold transition-colors shadow-sm"
+                            >
+                                <Send size={18} />
+                                {submitting ? "Yuklanmoqda..." : "Yakunlash"}
+                            </button>
                         </div>
                     </div>
 
-                    {/* Progress Bar */}
-                    <div className="mt-3 w-full bg-gray-200 dark:bg-slate-800 rounded-full h-2">
+                    {/* Mobile Header - Compact */}
+                    <div className="md:hidden">
+                        <div className="flex items-center justify-between mb-2">
+                            <h1 className="text-sm font-semibold text-gray-900 dark:text-white truncate flex-1">
+                                Savol {currentQuestionIndex + 1}/{questions.length}
+                            </h1>
+                            {timeRemaining !== null && (
+                                <div className={`flex items-center gap-1.5 px-3 py-1.5 bg-gray-100 dark:bg-slate-800 rounded-lg font-mono text-sm font-bold ${getTimerColor()}`}>
+                                    <Clock size={14} />
+                                    {formatTime(timeRemaining)}
+                                </div>
+                            )}
+                        </div>
+                        <div className="w-full bg-gray-200 dark:bg-slate-800 rounded-full h-1.5">
+                            <div
+                                className="bg-gradient-to-r from-brand-blue to-cyan-500 h-1.5 rounded-full transition-all duration-300"
+                                style={{ width: `${progress}%` }}
+                            />
+                        </div>
+                    </div>
+
+                    {/* Desktop Progress Bar */}
+                    <div className="hidden md:block mt-3 w-full bg-gray-200 dark:bg-slate-800 rounded-full h-2">
                         <div
                             className="bg-gradient-to-r from-brand-blue to-cyan-500 h-2 rounded-full transition-all duration-300"
                             style={{ width: `${progress}%` }}
@@ -290,7 +354,7 @@ export default function TakeTestPage() {
             </div>
 
             {/* Main Content */}
-            <div className="max-w-7xl mx-auto px-4 py-8">
+            <div className="max-w-7xl mx-auto px-4 py-8 pb-24 md:pb-8">
                 <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
                     {/* Question Display */}
                     <div className="lg:col-span-3">
@@ -397,8 +461,8 @@ export default function TakeTestPage() {
                             </div>
                         </div>
 
-                        {/* Navigation */}
-                        <div className="mt-6 flex items-center justify-between">
+                        {/* Navigation Buttons - Desktop Only */}
+                        <div className="hidden md:flex mt-6 items-center justify-between">
                             <button
                                 onClick={() => setCurrentQuestionIndex(prev => Math.max(0, prev - 1))}
                                 disabled={currentQuestionIndex === 0}
@@ -410,7 +474,7 @@ export default function TakeTestPage() {
 
                             {currentQuestionIndex === questions.length - 1 ? (
                                 <button
-                                    onClick={handleSubmit}
+                                    onClick={handleSubmitClick}
                                     disabled={submitting}
                                     className="px-8 py-3 bg-gradient-to-r from-green-500 to-emerald-500 text-white rounded-xl font-bold flex items-center gap-2 hover:shadow-xl transition-all disabled:opacity-50"
                                 >
@@ -429,11 +493,41 @@ export default function TakeTestPage() {
                         </div>
                     </div>
 
-                    {/* Question Navigator Sidebar */}
+                    {/* Mobile Horizontal Question Navigator */}
+                    <div className="lg:hidden mt-4 bg-white dark:bg-slate-900 rounded-xl border border-gray-200 dark:border-slate-800 p-3">
+                        <div className="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-thin">
+                            {questions.map((q, index) => {
+                                const isAnswered = !!answers[q.id];
+                                const isMarked = markedForReview.has(q.id);
+                                const isCurrent = index === currentQuestionIndex;
+
+                                return (
+                                    <button
+                                        key={q.id}
+                                        onClick={() => setCurrentQuestionIndex(index)}
+                                        className={`shrink-0 w-12 h-12 rounded-lg font-semibold text-sm transition-all ${isCurrent
+                                            ? "bg-brand-blue text-white ring-2 ring-brand-blue"
+                                            : isMarked
+                                                ? "bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400"
+                                                : isAnswered
+                                                    ? "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400"
+                                                    : "bg-gray-100 text-gray-600 dark:bg-slate-800 dark:text-gray-400"
+                                            }`}
+                                    >
+                                        {index + 1}
+                                    </button>
+                                );
+                            })}
+                        </div>
+                    </div>
+
+
+                    {/* Question Navigator - Responsive */}
                     <div className="lg:col-span-1">
-                        <div className="bg-white dark:bg-slate-900 rounded-2xl border border-gray-200 dark:border-slate-800 p-4 sticky top-24">
+                        {/* Desktop Sidebar */}
+                        <div className="hidden lg:block bg-white dark:bg-slate-900 rounded-2xl border border-gray-200 dark:border-slate-800 p-4 sticky top-24">
                             <h3 className="font-bold text-gray-900 dark:text-white mb-4">{t('tests.take.questions_list')}</h3>
-                            <div className="grid grid-cols-5 lg:grid-cols-4 gap-2">
+                            <div className="grid grid-cols-4 gap-2">
                                 {questions.map((q, index) => {
                                     const isAnswered = !!answers[q.id];
                                     const isMarked = markedForReview.has(q.id);
@@ -477,6 +571,89 @@ export default function TakeTestPage() {
                     </div>
                 </div>
             </div>
+
+            {/* Confirmation Modal */}
+            {showConfirmModal && (
+                <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+                    <div className="bg-white dark:bg-slate-900 rounded-2xl p-6 max-w-md w-full border border-gray-200 dark:border-slate-800 shadow-xl">
+                        <div className="flex items-center gap-3 mb-4">
+                            <div className="w-12 h-12 bg-yellow-100 dark:bg-yellow-900/30 rounded-full flex items-center justify-center">
+                                <AlertCircle className="text-yellow-600 dark:text-yellow-400" size={24} />
+                            </div>
+                            <h3 className="text-xl font-bold text-gray-900 dark:text-white">Testni yakunlash</h3>
+                        </div>
+
+                        <div className="space-y-3 mb-6">
+                            <p className="text-gray-600 dark:text-gray-300">
+                                Siz <span className="font-bold text-brand-blue">{Object.keys(answers).length}/{questions.length}</span> ta savolga javob berdingiz.
+                            </p>
+                            {Object.keys(answers).length < questions.length && (
+                                <div className="flex items-start gap-2 p-3 bg-yellow-50 dark:bg-yellow-900/20 rounded-lg border border-yellow-200 dark:border-yellow-800">
+                                    <AlertCircle className="text-yellow-600 dark:text-yellow-400 flex-shrink-0 mt-0.5" size={18} />
+                                    <p className="text-sm text-yellow-800 dark:text-yellow-300">
+                                        <span className="font-semibold">{questions.length - Object.keys(answers).length}</span> ta savol javobsiz qoldi!
+                                    </p>
+                                </div>
+                            )}
+                            <p className="text-sm text-gray-500 dark:text-gray-400">
+                                Testni yakunlashdan keyin qayta tahrirlash imkoniyati bo'lmaydi.
+                            </p>
+                        </div>
+
+                        <div className="flex gap-3">
+                            <button
+                                onClick={() => setShowConfirmModal(false)}
+                                disabled={submitting}
+                                className="flex-1 py-3 px-4 bg-gray-100 dark:bg-slate-800 hover:bg-gray-200 dark:hover:bg-slate-700 text-gray-700 dark:text-gray-300 rounded-xl font-semibold transition-colors"
+                            >
+                                Bekor qilish
+                            </button>
+                            <button
+                                onClick={handleConfirmSubmit}
+                                disabled={submitting}
+                                className="flex-1 py-3 px-4 bg-green-600 hover:bg-green-700 disabled:bg-gray-400 text-white rounded-xl font-semibold transition-colors flex items-center justify-center gap-2"
+                            >
+                                <CheckCircle size={18} />
+                                {submitting ? "Yuklanmoqda..." : "Yakunlash"}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Mobile Sticky Bottom Navigation */}
+            <div className="md:hidden fixed bottom-0 left-0 right-0 bg-white dark:bg-slate-900 border-t border-gray-200 dark:border-slate-800 p-4 z-40">
+                <div className="flex items-center justify-between gap-3">
+                    <button
+                        onClick={() => setCurrentQuestionIndex(prev => Math.max(0, prev - 1))}
+                        disabled={currentQuestionIndex === 0}
+                        className="px-4 py-3 bg-gray-100 dark:bg-slate-800 text-gray-700 dark:text-gray-300 rounded-xl font-semibold flex items-center gap-2 hover:bg-gray-200 dark:hover:bg-slate-700 disabled:opacity-50 disabled:cursor-not-allowed min-w-[100px]"
+                    >
+                        <ArrowLeft size={18} />
+                        Orqaga
+                    </button>
+
+                    {currentQuestionIndex === questions.length - 1 ? (
+                        <button
+                            onClick={handleSubmitClick}
+                            disabled={submitting}
+                            className="flex-1 py-3 px-4 bg-gradient-to-r from-green-500 to-emerald-500 text-white rounded-xl font-bold flex items-center justify-center gap-2 hover:shadow-xl transition-all disabled:opacity-50"
+                        >
+                            <Send size={18} />
+                            {submitting ? "Yuklanmoqda..." : "Yakunlash"}
+                        </button>
+                    ) : (
+                        <button
+                            onClick={() => setCurrentQuestionIndex(prev => Math.min(questions.length - 1, prev + 1))}
+                            className="px-4 py-3 bg-brand-blue text-white rounded-xl font-semibold flex items-center gap-2 hover:shadow-lg min-w-[100px]"
+                        >
+                            Keyingi
+                            <ArrowRight size={18} />
+                        </button>
+                    )}
+                </div>
+            </div>
         </div>
+
     );
 }
