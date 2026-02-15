@@ -306,23 +306,19 @@ export async function getLeaderboard(limit: number = 1000) {
     const supabase = createClient();
 
     const { data, error } = await supabase
-        .from('profiles')
-        .select('id, full_name, coins')
-        .eq('role', 'student')
-        .order('coins', { ascending: false })
-        .limit(limit);
+        .rpc('get_leaderboard_data', { limit_count: limit });
 
     if (error) {
         console.error('Error fetching leaderboard:', error);
         return [];
     }
 
-    return data.map((user, index) => ({
+    return (data as any[]).map((user, index) => ({
         id: user.id,
-        name: user.full_name || 'Anonymous',
-        points: user.coins || 0,
-        rank: index + 1,
-        avatar: index === 0 ? "🥇" : index === 1 ? "🥈" : index === 2 ? "🥉" : "👤"
+        name: user.full_name,
+        points: user.coins,
+        rank: user.rank,
+        avatar: user.rank === 1 ? "🥇" : user.rank === 2 ? "🥈" : user.rank === 3 ? "🥉" : "👤"
     }));
 }
 
@@ -332,16 +328,16 @@ export async function getLeaderboard(limit: number = 1000) {
 export async function getUserRank(userId: string) {
     const supabase = createClient();
 
-    // 1. Get user stats
+    // 1. Get user basic info first (name, role) - RLS allows reading own profile
     const { data: user, error } = await supabase
         .from('profiles')
-        .select('full_name, coins, role')
+        .select('full_name, role, coins') // Get coins here as fallback/display
         .eq('id', userId)
         .single();
 
     if (error || !user) return null;
 
-    // If admin/teacher, mock a rank for display purposes or return null
+    // If admin/teacher, mock a rank for display purposes
     if (user.role !== 'student') {
         return {
             id: userId,
@@ -352,19 +348,30 @@ export async function getUserRank(userId: string) {
         };
     }
 
-    // 2. Get rank (count students with more coins)
-    const { count, error: countError } = await supabase
-        .from('profiles')
-        .select('*', { count: 'exact', head: true })
-        .eq('role', 'student')
-        .gt('coins', user.coins || 0);
+    // 2. Get secure rank from RPC
+    const { data: rankData, error: rankError } = await supabase
+        .rpc('get_student_rank', { target_student_id: userId })
+        .single();
 
-    const rank = (count || 0) + 1;
+    if (rankError) {
+        console.error("Error fetching rank:", rankError);
+        // Fallback to basic data
+        return {
+            id: userId,
+            name: user.full_name || 'Student',
+            points: user.coins || 0,
+            rank: 0,
+            avatar: "👤"
+        };
+    }
+
+    const rank = Number((rankData as any)?.rank) || 0;
+    const points = (rankData as any)?.coins ?? user.coins ?? 0;
 
     return {
         id: userId,
         name: user.full_name || 'Student',
-        points: user.coins || 0,
+        points: points,
         rank,
         avatar: rank === 1 ? "🥇" : rank === 2 ? "🥈" : rank === 3 ? "🥉" : "👤"
     };

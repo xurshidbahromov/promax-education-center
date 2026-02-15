@@ -3,6 +3,7 @@
 import { useLanguage } from "@/context/LanguageContext";
 import { useToast } from "@/context/ToastContext";
 import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { getUserProfile, updateUserProfile } from "@/lib/profile";
 import {
     User,
@@ -12,12 +13,14 @@ import {
     Camera,
     Save,
     Shield,
-    Key
+    Key,
+    ArrowLeft
 } from "lucide-react";
 import Image from "next/image";
 
 export default function ProfilePage() {
     const { t } = useLanguage();
+    const router = useRouter();
     const { showToast } = useToast();
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
@@ -177,6 +180,14 @@ export default function ProfilePage() {
 
     return (
         <div className="max-w-4xl mx-auto space-y-8 pb-8">
+            <button
+                onClick={() => router.back()}
+                className="flex items-center gap-2 text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white transition-colors"
+            >
+                <ArrowLeft size={20} />
+                <span>{t("common.back")}</span>
+            </button>
+
             <h1 className="text-3xl font-bold text-gray-900 dark:text-white flex items-center gap-3">
                 <User className="text-brand-blue" size={32} />
                 {t("profile.title")}

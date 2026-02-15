@@ -1,5 +1,6 @@
 export const uz = {
     "nav.home": "Bosh Sahifa",
+    "common.back": "Orqaga",
     "nav.courses": "Kurslar",
     "nav.results": "Natijalar",
     "nav.about": "Biz Haqimizda",

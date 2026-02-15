@@ -1,6 +1,7 @@
 "use client";
 
 import { useLanguage } from "@/context/LanguageContext";
+import { Skeleton, StatsSkeleton, ChartSkeleton, ListItemSkeleton } from "@/components/ui/Skeleton";
 import { motion } from "framer-motion";
 import {
     BookOpen,
@@ -232,36 +233,51 @@ export default function DashboardPage() {
 
             {/* Stats Grid */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-                {stats.map((stat, index) => (
-                    <motion.div
-                        key={index}
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ delay: index * 0.1 }}
-                        className="relative group h-full"
-                    >
-                        {/* Soft Glow Behind Box */}
-                        <div className={`absolute inset-0 bg-gradient-to-r ${stat.color.replace('bg-', 'from-')} to-transparent opacity-0 group-hover:opacity-10 blur-xl transition-opacity duration-500 rounded-2xl`} />
+                {loading ? (
+                    // Show 4 Skeletons while loading
+                    [...Array(4)].map((_, i) => (
+                        <motion.div
+                            key={i}
+                            initial={{ opacity: 0, y: 20 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ delay: i * 0.1 }}
+                            className="relative group h-full"
+                        >
+                            <StatsSkeleton />
+                        </motion.div>
+                    ))
+                ) : (
+                    stats.map((stat, index) => (
+                        <motion.div
+                            key={index}
+                            initial={{ opacity: 0, y: 20 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ delay: index * 0.1 }}
+                            className="relative group h-full"
+                        >
+                            {/* Soft Glow Behind Box */}
+                            <div className={`absolute inset-0 bg-gradient-to-r ${stat.color.replace('bg-', 'from-')} to-transparent opacity-0 group-hover:opacity-10 blur-xl transition-opacity duration-500 rounded-2xl`} />
 
-                        <div className="bg-white dark:bg-slate-900 p-5 rounded-2xl border border-gray-200 dark:border-slate-800 shadow-sm hover:shadow-md transition-all relative z-10 overflow-hidden h-full flex flex-col justify-between">
-                            <div className="relative z-10">
-                                <p className="text-gray-500 dark:text-gray-400 text-sm font-medium">{stat.title}</p>
-                                <h3 className="text-4xl font-bold text-gray-900 dark:text-white mt-3 mb-1">{stat.value}</h3>
-                            </div>
+                            <div className="bg-white dark:bg-slate-900 p-5 rounded-2xl border border-gray-200 dark:border-slate-800 shadow-sm hover:shadow-md transition-all relative z-10 overflow-hidden h-full flex flex-col justify-between">
+                                <div className="relative z-10">
+                                    <p className="text-gray-500 dark:text-gray-400 text-sm font-medium">{stat.title}</p>
+                                    <h3 className="text-4xl font-bold text-gray-900 dark:text-white mt-3 mb-1">{stat.value}</h3>
+                                </div>
 
-                            <div className="relative z-10">
-                                <p className="text-xs text-brand-blue font-medium flex items-center gap-1">
-                                    <TrendingUp size={12} /> {stat.trend}
-                                </p>
-                            </div>
+                                <div className="relative z-10">
+                                    <p className="text-xs text-brand-blue font-medium flex items-center gap-1">
+                                        <TrendingUp size={12} /> {stat.trend}
+                                    </p>
+                                </div>
 
-                            {/* Watermark Icon */}
-                            <div className={`absolute -right-6 -bottom-6 opacity-10 ${stat.textColor}`}>
-                                <stat.icon size={100} />
+                                {/* Watermark Icon */}
+                                <div className={`absolute -right-6 -bottom-6 opacity-10 ${stat.textColor}`}>
+                                    <stat.icon size={100} />
+                                </div>
                             </div>
-                        </div>
-                    </motion.div>
-                ))}
+                        </motion.div>
+                    ))
+                )}
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -276,7 +292,9 @@ export default function DashboardPage() {
                             </h3>
                         </div>
                         <div className="space-y-3 max-h-[280px] overflow-y-auto pr-2 custom-scrollbar">
-                            {announcements.length === 0 ? (
+                            {loading ? (
+                                [...Array(3)].map((_, i) => <ListItemSkeleton key={i} />)
+                            ) : announcements.length === 0 ? (
                                 <p className="text-gray-500 dark:text-gray-400 text-sm text-center py-4">
                                     {t('dashboard.announcements.empty') || "E'lonlar yo'q"}
                                 </p>
@@ -301,9 +319,7 @@ export default function DashboardPage() {
                     <div className="bg-white dark:bg-slate-900 p-6 rounded-2xl border border-gray-200 dark:border-slate-800 shadow-sm flex-1 flex flex-col">
                         <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-6">{t('dashboard.chart.title')}</h3>
                         {loading ? (
-                            <div className="flex-1 flex items-center justify-center min-h-[250px]">
-                                <p className="text-gray-400">Loading...</p>
-                            </div>
+                            <ChartSkeleton />
                         ) : chartData.length === 0 ? (
                             <div className="flex-1 flex items-center justify-center min-h-[250px]">
                                 <p className="text-gray-400">{t('dashboard.no_results')}</p>
@@ -343,7 +359,9 @@ export default function DashboardPage() {
                             {t('dashboard.activity.title')}
                         </h3>
                         <div className="space-y-4">
-                            {activityFeed.length === 0 ? (
+                            {loading ? (
+                                [...Array(3)].map((_, i) => <ListItemSkeleton key={i} />)
+                            ) : activityFeed.length === 0 ? (
                                 <p className="text-sm text-gray-500 text-center py-4">{t('dashboard.activity.empty')}</p>
                             ) : (
                                 activityFeed.map((item, i) => (
@@ -387,7 +405,7 @@ export default function DashboardPage() {
                                         <span className={`font-bold w-6 text-center ${user.rank <= 3 ? 'text-yellow-500' : 'text-gray-400'}`}>#{user.rank}</span>
                                         <span className="text-xl">{user.avatar}</span>
                                         <div>
-                                            <h4 className="font-semibold text-gray-900 dark:text-white text-sm">{user.name} {user.id === currentUserId && '(Siz)'}</h4>
+                                            <h4 className="font-semibold text-gray-900 dark:text-white text-sm">{user.name} {user.id === currentUserId && `(${t('dashboard.leaderboard.you')})`}</h4>
                                             <p className="text-xs text-gray-500">{user.points} coins</p>
                                         </div>
                                     </div>
@@ -403,7 +421,7 @@ export default function DashboardPage() {
                                         <span className="font-bold w-6 text-center text-brand-blue">#{userRank.rank}</span>
                                         <span className="text-xl">{userRank.avatar}</span>
                                         <div>
-                                            <h4 className="font-semibold text-gray-900 dark:text-white text-sm">{userRank.name} (Siz)</h4>
+                                            <h4 className="font-semibold text-gray-900 dark:text-white text-sm">{userRank.name} ({t('dashboard.leaderboard.you')})</h4>
                                             <p className="text-xs text-gray-500">{userRank.points} coins</p>
                                         </div>
                                     </div>

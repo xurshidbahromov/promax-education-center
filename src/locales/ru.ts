@@ -1,5 +1,6 @@
 export const ru = {
     "nav.home": "Главная",
+    "common.back": "Назад",
     "nav.courses": "Курсы",
     "nav.results": "Результаты",
     "nav.about": "О Нас",

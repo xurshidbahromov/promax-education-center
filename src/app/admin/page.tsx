@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { Skeleton, StatsSkeleton, TableSkeleton } from "@/components/ui/Skeleton";
 import {
     Users,
     GraduationCap,
@@ -24,6 +25,9 @@ export default function AdminDashboardPage() {
     useEffect(() => {
         const fetchData = async () => {
             try {
+                // Simulate network latency for skeleton demo (optional, can be removed)
+                // await new Promise(r => setTimeout(r, 1000));
+
                 const [statsData, activityData] = await Promise.all([
                     getAdminStats(),
                     getRecentActivity()
@@ -85,24 +89,29 @@ export default function AdminDashboardPage() {
 
             {/* Stats Grid */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                {statCards.map((stat, index) => (
-                    <div key={index} className="bg-white dark:bg-slate-900 p-6 rounded-2xl border border-gray-200 dark:border-slate-800 shadow-sm hover:shadow-md transition-shadow">
-                        <div className="flex items-center justify-between mb-4">
-                            <div className={`p-3 rounded-xl ${stat.bg} ${stat.color}`}>
-                                <stat.icon size={24} />
-                            </div>
-                            {/* Trend badge - kept mock for visual consistency */}
-                            {/* <span className={`text-xs font-semibold px-2 py-1 rounded-full bg-green-100 text-green-700`}>
-                                {stat.trend}
-                            </span> */}
+                {loading ? (
+                    // Show 4 Skeletons while loading
+                    [...Array(4)].map((_, i) => (
+                        <div key={i} className="h-full">
+                            <StatsSkeleton />
                         </div>
-                        <h3 className="text-2xl font-bold text-gray-900 dark:text-white">
-                            {loading ? "-" : stat.value}
-                            <span className="text-sm font-normal text-gray-500 ml-1">{stat.suffix}</span>
-                        </h3>
-                        <p className="text-sm text-gray-500 dark:text-gray-400">{stat.title}</p>
-                    </div>
-                ))}
+                    ))
+                ) : (
+                    statCards.map((stat, index) => (
+                        <div key={index} className="bg-white dark:bg-slate-900 p-6 rounded-2xl border border-gray-200 dark:border-slate-800 shadow-sm hover:shadow-md transition-shadow">
+                            <div className="flex items-center justify-between mb-4">
+                                <div className={`p-3 rounded-xl ${stat.bg} ${stat.color}`}>
+                                    <stat.icon size={24} />
+                                </div>
+                            </div>
+                            <h3 className="text-2xl font-bold text-gray-900 dark:text-white">
+                                {stat.value}
+                                <span className="text-sm font-normal text-gray-500 ml-1">{stat.suffix}</span>
+                            </h3>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">{stat.title}</p>
+                        </div>
+                    ))
+                )}
             </div>
 
             {/* Recent Activity Table */}
@@ -111,45 +120,47 @@ export default function AdminDashboardPage() {
                     <h2 className="text-lg font-bold text-gray-900 dark:text-white">So'nggi Faoliyat</h2>
                     <Link href="/admin/results" className="text-sm text-brand-blue hover:text-blue-700 font-medium">Barchasini ko'rish</Link>
                 </div>
-                <div className="overflow-x-auto">
-                    <table className="w-full text-left">
-                        <thead className="bg-gray-50 dark:bg-slate-800/50">
-                            <tr>
-                                <th className="px-6 py-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Foydalanuvchi</th>
-                                <th className="px-6 py-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Harakat</th>
-                                <th className="px-6 py-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Vaqt</th>
-                                <th className="px-6 py-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Status</th>
-                            </tr>
-                        </thead>
-                        <tbody className="divide-y divide-gray-200 dark:divide-slate-800">
-                            {loading ? (
+                {loading ? (
+                    <div className="p-6">
+                        <TableSkeleton />
+                    </div>
+                ) : (
+                    <div className="overflow-x-auto">
+                        <table className="w-full text-left">
+                            <thead className="bg-gray-50 dark:bg-slate-800/50">
                                 <tr>
-                                    <td colSpan={4} className="px-6 py-8 text-center text-gray-500">Yuklanmoqda...</td>
+                                    <th className="px-6 py-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Foydalanuvchi</th>
+                                    <th className="px-6 py-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Harakat</th>
+                                    <th className="px-6 py-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Vaqt</th>
+                                    <th className="px-6 py-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Status</th>
                                 </tr>
-                            ) : activity.length === 0 ? (
-                                <tr>
-                                    <td colSpan={4} className="px-6 py-8 text-center text-gray-500">Hozircha faoliyat yo'q</td>
-                                </tr>
-                            ) : (
-                                activity.map((item, index) => (
-                                    <tr key={index} className="hover:bg-gray-50 dark:hover:bg-slate-800/50 transition-colors">
-                                        <td className="px-6 py-4 font-medium text-gray-900 dark:text-white">{item.user}</td>
-                                        <td className="px-6 py-4 text-gray-600 dark:text-gray-400">{item.action}</td>
-                                        <td className="px-6 py-4 text-gray-500 text-sm">{new Date(item.date).toLocaleString()}</td>
-                                        <td className="px-6 py-4">
-                                            <span className={`px-3 py-1 rounded-full text-xs font-medium ${item.status === 'Result' ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400' :
+                            </thead>
+                            <tbody className="divide-y divide-gray-200 dark:divide-slate-800">
+                                {activity.length === 0 ? (
+                                    <tr>
+                                        <td colSpan={4} className="px-6 py-8 text-center text-gray-500">Hozircha faoliyat yo'q</td>
+                                    </tr>
+                                ) : (
+                                    activity.map((item, index) => (
+                                        <tr key={index} className="hover:bg-gray-50 dark:hover:bg-slate-800/50 transition-colors">
+                                            <td className="px-6 py-4 font-medium text-gray-900 dark:text-white">{item.user}</td>
+                                            <td className="px-6 py-4 text-gray-600 dark:text-gray-400">{item.action}</td>
+                                            <td className="px-6 py-4 text-gray-500 text-sm">{new Date(item.date).toLocaleString()}</td>
+                                            <td className="px-6 py-4">
+                                                <span className={`px-3 py-1 rounded-full text-xs font-medium ${item.status === 'Result' ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400' :
                                                     item.status === 'New' ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400' :
                                                         'bg-gray-100 text-gray-700'
-                                                }`}>
-                                                {item.status === 'Result' ? 'Natija' : 'Yangi'}
-                                            </span>
-                                        </td>
-                                    </tr>
-                                ))
-                            )}
-                        </tbody>
-                    </table>
-                </div>
+                                                    }`}>
+                                                    {item.status === 'Result' ? 'Natija' : 'Yangi'}
+                                                </span>
+                                            </td>
+                                        </tr>
+                                    ))
+                                )}
+                            </tbody>
+                        </table>
+                    </div>
+                )}
             </div>
         </div>
     );
