@@ -33,9 +33,9 @@ const BetaNotification = () => {
                     animate={{ y: 0, opacity: 1, scale: 1 }}
                     exit={{ y: 20, opacity: 0, scale: 0.95 }}
                     transition={{ type: "spring", stiffness: 300, damping: 30 }}
-                    className="fixed bottom-6 right-6 z-[60] max-w-sm w-full"
+                    className="fixed bottom-4 left-4 right-4 md:left-auto md:right-6 md:bottom-6 z-[60] md:max-w-sm w-auto"
                 >
-                    <div className="relative bg-white/70 dark:bg-slate-900/70 backdrop-blur-md border border-amber-200/50 dark:border-amber-900/30 p-4 rounded-2xl shadow-xl shadow-amber-500/5">
+                    <div className="relative bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border border-amber-200/50 dark:border-amber-900/30 p-4 rounded-2xl shadow-xl shadow-amber-500/5">
 
                         {/* Glow effect */}
                         <div className="absolute -inset-0.5 bg-gradient-to-r from-amber-500/20 to-orange-500/20 rounded-2xl blur opacity-50 -z-10"></div>
@@ -55,12 +55,12 @@ const BetaNotification = () => {
                                     {t('beta.message')}
                                 </p>
 
-                                <div className="flex items-center gap-3">
+                                <div className="flex flex-wrap items-center gap-3">
                                     <a
-                                        href="https://t.me/promax_support" // Replace with actual support link
+                                        href="https://t.me/xurshidbahromov"
                                         target="_blank"
                                         rel="noopener noreferrer"
-                                        className="text-xs font-medium text-brand-blue hover:text-brand-blue/80 flex items-center gap-1.5 transition-colors"
+                                        className="text-xs font-medium text-brand-blue hover:text-brand-blue/80 flex items-center gap-1.5 transition-colors bg-blue-50 dark:bg-blue-900/20 px-3 py-1.5 rounded-lg"
                                     >
                                         <MessageSquare size={14} />
                                         {t('beta.action')}
