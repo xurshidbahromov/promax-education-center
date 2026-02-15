@@ -20,6 +20,7 @@ import {
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
+import NotificationBell from "@/components/NotificationBell";
 
 export default function DashboardLayout({
     children,
@@ -181,10 +182,7 @@ export default function DashboardLayout({
                     </button>
 
                     <div className="flex items-center gap-4 ml-auto">
-                        <button className="p-2 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-slate-800 rounded-full relative">
-                            <Bell size={20} />
-                            <span className="absolute top-2 right-2 w-2 h-2 bg-brand-orange rounded-full border-2 border-white dark:border-slate-900"></span>
-                        </button>
+                        <NotificationBell />
                         <Link href="/dashboard/profile">
                             <div className="w-8 h-8 rounded-full bg-brand-blue/10 flex items-center justify-center text-brand-blue font-bold hover:bg-brand-blue/20 transition-colors">
                                 <User size={18} />

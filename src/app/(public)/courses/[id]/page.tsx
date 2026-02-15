@@ -2,6 +2,7 @@
 
 import { useLanguage } from '@/context/LanguageContext';
 import { courses } from '@/data/courses';
+import { courseDetails } from '@/data/course-details';
 import { motion } from 'framer-motion';
 import { ArrowLeft, BookOpen, User, CheckCircle2, GraduationCap } from 'lucide-react';
 import Link from 'next/link';
@@ -65,40 +66,84 @@ export default function CourseDetailPage() {
                     {/* Main Content (Left) */}
                     <div className="lg:col-span-2 space-y-12">
 
-                        {/* Methodology Section */}
-                        <motion.section
-                            initial={{ opacity: 0, y: 20 }}
-                            whileInView={{ opacity: 1, y: 0 }}
-                            viewport={{ once: true }}
-                            className="bg-white dark:bg-slate-900 rounded-2xl p-8 shadow-sm border border-gray-100 dark:border-slate-800"
-                        >
-                            <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-6 flex items-center gap-3">
-                                <span className={`p-2 rounded-lg ${course.bg} ${course.color}`}>
-                                    <CheckCircle2 size={24} />
-                                </span>
-                                {t('course.methodology')}
-                            </h2>
-                            <p className="text-gray-600 dark:text-gray-300 text-lg leading-relaxed mb-6">
-                                {t('course.methodology.desc')}
-                            </p>
-                            <ul className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                {[1, 2, 3, 4].map((step) => (
-                                    <li key={step} className="flex items-start gap-3 bg-gray-50 dark:bg-slate-800/50 p-4 rounded-xl">
-                                        <div className="mt-1 w-6 h-6 rounded-full bg-brand-blue text-white flex items-center justify-center text-xs font-bold flex-shrink-0">
-                                            {step}
-                                        </div>
-                                        <div>
-                                            <h4 className="font-bold text-gray-900 dark:text-white text-sm mb-1">
-                                                {t(`methodology.step${step}.title`)}
-                                            </h4>
-                                            <p className="text-xs text-gray-500 dark:text-gray-400">
-                                                {t(`methodology.step${step}.desc`)}
-                                            </p>
-                                        </div>
-                                    </li>
+                        {/* Methodology Section / Detailed Programs */}
+                        {courseDetails[id] ? (
+                            <div className="space-y-8">
+                                {courseDetails[id].programs.map((program, index) => (
+                                    <motion.section
+                                        key={index}
+                                        initial={{ opacity: 0, y: 20 }}
+                                        whileInView={{ opacity: 1, y: 0 }}
+                                        viewport={{ once: true }}
+                                        transition={{ delay: index * 0.1 }}
+                                        className="bg-white dark:bg-slate-900 rounded-2xl p-8 shadow-sm border border-gray-100 dark:border-slate-800"
+                                    >
+                                        <h2 className="text-xl md:text-2xl font-bold text-gray-900 dark:text-white mb-6 flex items-start gap-3">
+                                            <span className={`p-2 rounded-lg ${course.bg} ${course.color} mt-1`}>
+                                                <CheckCircle2 size={24} />
+                                            </span>
+                                            <span>{t(program.titleKey)}</span>
+                                        </h2>
+
+                                        <ul className="space-y-4 mb-6">
+                                            {t(program.featuresKey).split('|').map((feature, fIndex) => (
+                                                <li key={fIndex} className="flex items-start gap-3">
+                                                    <div className="mt-1.5 w-2 h-2 rounded-full bg-brand-blue flex-shrink-0" />
+                                                    <span className="text-gray-600 dark:text-gray-300 leading-relaxed">
+                                                        {feature.trim()}
+                                                    </span>
+                                                </li>
+                                            ))}
+                                        </ul>
+
+                                        {program.priceKey && (
+                                            <div className="mt-6 pt-6 border-t border-gray-100 dark:border-slate-800 flex items-center justify-between flex-wrap gap-4">
+                                                <span className="text-gray-500 dark:text-gray-400 font-medium">
+                                                    Narxi:
+                                                </span>
+                                                <span className="text-xl font-bold text-brand-blue">
+                                                    {t(program.priceKey)}
+                                                </span>
+                                            </div>
+                                        )}
+                                    </motion.section>
                                 ))}
-                            </ul>
-                        </motion.section>
+                            </div>
+                        ) : (
+                            <motion.section
+                                initial={{ opacity: 0, y: 20 }}
+                                whileInView={{ opacity: 1, y: 0 }}
+                                viewport={{ once: true }}
+                                className="bg-white dark:bg-slate-900 rounded-2xl p-8 shadow-sm border border-gray-100 dark:border-slate-800"
+                            >
+                                <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-6 flex items-center gap-3">
+                                    <span className={`p-2 rounded-lg ${course.bg} ${course.color}`}>
+                                        <CheckCircle2 size={24} />
+                                    </span>
+                                    {t('course.methodology')}
+                                </h2>
+                                <p className="text-gray-600 dark:text-gray-300 text-lg leading-relaxed mb-6">
+                                    {t('course.methodology.desc')}
+                                </p>
+                                <ul className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    {[1, 2, 3, 4].map((step) => (
+                                        <li key={step} className="flex items-start gap-3 bg-gray-50 dark:bg-slate-800/50 p-4 rounded-xl">
+                                            <div className="mt-1 w-6 h-6 rounded-full bg-brand-blue text-white flex items-center justify-center text-xs font-bold flex-shrink-0">
+                                                {step}
+                                            </div>
+                                            <div>
+                                                <h4 className="font-bold text-gray-900 dark:text-white text-sm mb-1">
+                                                    {t(`methodology.step${step}.title`)}
+                                                </h4>
+                                                <p className="text-xs text-gray-500 dark:text-gray-400">
+                                                    {t(`methodology.step${step}.desc`)}
+                                                </p>
+                                            </div>
+                                        </li>
+                                    ))}
+                                </ul>
+                            </motion.section>
+                        )}
 
                         {/* Materials Section */}
                         <motion.section

@@ -51,6 +51,9 @@ export const ru = {
     "contact.form.success": "Ваше сообщение успешно отправлено!",
     "cta.title": "Постройте свое будущее с нами",
     "cta.subtitle": "Зарегистрируйтесь сейчас и запишитесь на первый бесплатный урок!",
+    "announcement.admission.title": "Открыт набор на все курсы!",
+    "announcement.admission.subtitle": "Места ограничены. Звоните прямо сейчас!",
+    "announcement.admission.action": "Позвонить",
     "cta.button.primary": "Начать",
     "cta.button.secondary": "Подробнее",
     "auth.login.title": "Вход в систему",
@@ -79,6 +82,9 @@ export const ru = {
     "auth.error_wrong_portal": "Неправильный портал! Используйте студенческий или педагогический портал.",
     "auth.error_registration_failed": "Регистрация не удалась",
     "auth.error_login_failed": "Вход не удался",
+    "auth.forgot_password.title": "Сброс пароля",
+    "auth.forgot_password.message": "Пожалуйста, обратитесь в администрацию Учебного Центра для изменения пароля.",
+    "auth.forgot_password.close": "Закрыть",
     "tests.title": "Онлайн Тесты",
     "tests.subtitle": "Проверьте свои знания и улучшите навыки",
     "tests.search_placeholder": "Поиск тестов...",
@@ -199,6 +205,13 @@ export const ru = {
     "courses.biology.teacher_name": "Наргиза опа",
     "courses.biology.teacher_bio": "Учитель биологии высшей категории.",
 
+    "courses.chemistry": "Химия",
+    "courses.chemistry.desc": "Исследуйте мир молекул и реакций.",
+    "courses.chemistry.long_desc": "Изучение химических элементов и реакций.",
+    "courses.chemistry.materials": "Сборник задач по химии, Хомченко.",
+    "courses.chemistry.teacher_name": "Рустам ака",
+    "courses.chemistry.teacher_bio": "Учитель, подготовивший победителей олимпиад.",
+
     "courses.native.long_desc": "Глубокие знания грамматики и литературы родного языка.",
     "courses.native.materials": "Учебники родного языка и литературы, тесты DTM.",
     "courses.native.teacher_name": "Феруза опа",
@@ -228,6 +241,8 @@ export const ru = {
     "courses.cert.sat.materials": "College Board, Khan Academy, Princeton Review.",
     "courses.cert.sat.teacher_name": "Сарвар ака",
     "courses.cert.sat.teacher_bio": "Результат SAT 1500+.",
+    "courses.cert.sat.program.main.title": "SAT Intensive",
+    "courses.cert.sat.program.main.features": "3 урока в неделю (по 2 часа) + воскресный обзор|2 пробных урока (Регистрация с 1-го урока, если понравится)|Внутренние экзамены каждые две недели|Ежемесячный MOCK EXAM по пройденным темам|Длительность курса: 8 месяцев (6 месяцев интенсив + 2 месяца практика SAT*GMAT)|100% гарантия качества (Минимум 690+ по математике)",
 
     "courses.prep.inha.long_desc": "Целевая подготовка к вступительным экзаменам Университета Инха (Math & Physics).",
     "courses.prep.inha.materials": "Inha past papers, книги по Calculus.",
@@ -238,6 +253,13 @@ export const ru = {
     "courses.prep.west.materials": "Экзамены по математике WIUT, материалы IELTS.",
     "courses.prep.west.teacher_name": "Команда West",
     "courses.prep.west.teacher_bio": "Выпускники WIUT.",
+
+    "courses.categories.general": "Общеобразовательные предметы",
+
+    // Detailed Course Programs (New)
+
+
+
 
     // Auth Layout Keys
     "auth.back_to_home": "Вернуться на главную",
@@ -295,6 +317,18 @@ export const ru = {
     "dashboard.onlinetests.desc": "Проверьте знания и заработайте коины!",
     "dashboard.onlinetests.button": "Начать Тест",
     "dashboard.chart.week": "Неделя",
+
+
+
+    // Admin Results Page
+    "admin.results.title": "Результаты Тестов",
+    "admin.results.export": "Экспорт",
+    "admin.results.table.student": "Студент",
+    "admin.results.table.exam": "Экзамен",
+    "admin.results.table.score": "Балл",
+    "admin.results.table.percentage": "Процент",
+    "admin.results.table.date": "Дата",
+    "admin.results.table.actions": "Действия",
 
     // Tests List
     "tests.list.loading": "Загрузка тестов...",
@@ -471,4 +505,6 @@ export const ru = {
     "admin.announcements.toast.created": "Новое объявление создано",
     "admin.announcements.toast.deleted": "Объявление удалено",
     "admin.announcements.toast.status_error": "Ошибка при изменении статуса",
+
+
 };

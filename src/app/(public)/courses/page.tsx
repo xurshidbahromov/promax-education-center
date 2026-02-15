@@ -39,7 +39,7 @@ export default function CoursesPage() {
                 {/* General Subjects */}
                 <div className="mb-20">
                     <h2 className="text-2xl font-bold text-gray-800 dark:text-white mb-8 border-l-4 border-brand-blue pl-4">
-                        General Subjects
+                        {t('courses.categories.general')}
                     </h2>
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                         {generalCourses.map((course, index) => (

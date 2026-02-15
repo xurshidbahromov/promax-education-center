@@ -361,25 +361,22 @@ export async function getAdminStats() {
     const supabase = createClient();
 
     try {
-        // Run queries in parallel
-        const [studentsParams, teachersParams, resultsParams] = await Promise.all([
-            supabase.from('profiles').select('id', { count: 'exact', head: true }).eq('role', 'student'),
-            supabase.from('profiles').select('id', { count: 'exact', head: true }).eq('role', 'teacher'),
-            supabase.from('results').select('id', { count: 'exact', head: true })
-        ]);
+        const { data, error } = await supabase.rpc('get_admin_dashboard_stats').single();
 
-        const totalStudents = studentsParams.count || 0;
-        const activeTeachers = teachersParams.count || 0;
-        const totalTests = resultsParams.count || 0;
+        if (error) throw error;
 
-        // Mock revenue: e.g. 150,000 UZS per student (just for display)
-        const monthlyRevenue = (totalStudents * 150000).toLocaleString('uz-UZ');
+        const stats = data as {
+            total_students: number;
+            active_teachers: number;
+            total_tests: number;
+            monthly_revenue: string;
+        };
 
         return {
-            totalStudents,
-            activeTeachers,
-            totalTests,
-            monthlyRevenue
+            totalStudents: Number(stats.total_students) || 0,
+            activeTeachers: Number(stats.active_teachers) || 0,
+            totalTests: Number(stats.total_tests) || 0,
+            monthlyRevenue: Number(stats.monthly_revenue).toLocaleString('uz-UZ')
         };
     } catch (error) {
         console.error('Error fetching admin stats:', error);

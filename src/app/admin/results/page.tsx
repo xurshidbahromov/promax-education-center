@@ -15,9 +15,11 @@ import {
 } from "lucide-react";
 import { getAllResults } from "@/lib/admin-queries";
 import { exportStudentResults } from "@/lib/excel-export";
+import { useLanguage } from "@/context/LanguageContext";
 import { useToast } from "@/context/ToastContext";
 
 export default function ResultsListPage() {
+    const { t } = useLanguage();
     const [results, setResults] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState("");
@@ -54,14 +56,14 @@ export default function ResultsListPage() {
             const exportData = filteredResults.map(r => ({
                 student_name: r.student?.full_name || 'Unknown',
                 phone: r.student?.phone || 'N/A',
-                test_title: r.exam?.title || 'N/A', // Changed from r.test?.title
-                subject: r.direction?.title || 'N/A', // Changed from r.test?.subject
-                score: r.total_score || 0, // Changed from r.score
-                max_score: 189, // Changed from r.max_score, assuming 189 is constant
-                percentage: ((r.total_score || 0) / 189) * 100, // Changed from r.percentage
-                passing_score: 60, // Changed from r.test?.passing_score || 60, assuming 60 is constant
-                completed_at: r.exam?.date || new Date().toISOString(), // Changed from r.completed_at
-                time_spent_seconds: null // Changed from r.time_spent_seconds, assuming null
+                test_title: r.exam?.title || 'N/A',
+                subject: r.direction?.title || 'N/A',
+                score: r.total_score || 0,
+                max_score: 189,
+                percentage: ((r.total_score || 0) / 189) * 100,
+                passing_score: 60,
+                completed_at: r.exam?.date || new Date().toISOString(),
+                time_spent_seconds: null
             }));
 
             setLoading(true);
@@ -82,10 +84,10 @@ export default function ResultsListPage() {
                 <div>
                     <h1 className="text-3xl font-bold text-gray-900 dark:text-white flex items-center gap-3">
                         <FileText className="text-brand-blue" size={32} />
-                        Imtihon Natijalari
+                        {t('admin.results.title')}
                     </h1>
                     <p className="text-gray-500 dark:text-gray-400 mt-1">
-                        Barcha o'tkazilgan imtihonlar ro'yxati va natijalari.
+                        {t('admin.results.title')} - {filteredResults.length}
                     </p>
                 </div>
 
@@ -95,7 +97,7 @@ export default function ResultsListPage() {
                         className="h-10 px-4 flex items-center gap-2 bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-800 rounded-xl text-sm font-medium text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-slate-800 transition-colors"
                     >
                         <Download size={18} />
-                        <span className="hidden sm:inline">Export</span>
+                        <span className="hidden sm:inline">{t('admin.results.export')}</span>
                     </button>
                     <Link
                         href="/admin/results/new"
@@ -165,7 +167,7 @@ export default function ResultsListPage() {
                                 {/* Progress Bar */}
                                 <div className="space-y-2">
                                     <div className="flex justify-between text-xs">
-                                        <span className="text-gray-500">Foiz</span>
+                                        <span className="text-gray-500">{t('admin.results.table.percentage')}</span>
                                         <span className="font-semibold" style={{ color: percentage >= 56.6 ? '#16a34a' : percentage >= 30 ? '#f59e0b' : '#ef4444' }}>
                                             {percentage.toFixed(1)}%
                                         </span>
@@ -192,11 +194,11 @@ export default function ResultsListPage() {
                     <table className="w-full text-left">
                         <thead className="bg-gray-50 dark:bg-slate-800/50">
                             <tr>
-                                <th className="px-6 py-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">O'quvchi</th>
-                                <th className="px-6 py-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Imtihon</th>
+                                <th className="px-6 py-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">{t('admin.results.table.student')}</th>
+                                <th className="px-6 py-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">{t('admin.results.table.exam')}</th>
                                 <th className="px-6 py-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Yo'nalish</th>
-                                <th className="px-6 py-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Ball</th>
-                                <th className="px-6 py-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Foiz</th>
+                                <th className="px-6 py-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">{t('admin.results.table.score')}</th>
+                                <th className="px-6 py-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">{t('admin.results.table.percentage')}</th>
                                 {/* <th className="px-6 py-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Amallar</th> */}
                             </tr>
                         </thead>

@@ -4,6 +4,9 @@ export const en = {
     "contact.form.success": "Your message has been sent successfully!",
     "cta.title": "Build Your Future With Us",
     "cta.subtitle": "Register now and sign up for your first free lesson!",
+    "announcement.admission.title": "Admissions Open for All Courses!",
+    "announcement.admission.subtitle": "Limited seats available. Call now!",
+    "announcement.admission.action": "Call Now",
     "cta.button.primary": "Get Started",
     "cta.button.secondary": "Learn More",
     "auth.login.title": "Login",
@@ -32,6 +35,9 @@ export const en = {
     "auth.error_wrong_portal": "Wrong portal! Please use student or teacher portal.",
     "auth.error_registration_failed": "Registration failed",
     "auth.error_login_failed": "Login failed",
+    "auth.forgot_password.title": "Reset Password",
+    "auth.forgot_password.message": "Please contact the Learning Center administration to change your password.",
+    "auth.forgot_password.close": "Close",
     "tests.title": "Online Tests",
     "tests.subtitle": "Practice and improve your skills",
     "tests.search_placeholder": "Search tests...",
@@ -199,6 +205,13 @@ export const en = {
     "courses.biology.teacher_name": "Ms. Nargiza",
     "courses.biology.teacher_bio": "Top-category biology teacher.",
 
+    "courses.chemistry": "Chemistry",
+    "courses.chemistry.desc": "Explore the world of molecules and reactions.",
+    "courses.chemistry.long_desc": "Study of chemical elements and reactions.",
+    "courses.chemistry.materials": "Chemistry problem sets, Homchenko.",
+    "courses.chemistry.teacher_name": "Mr. Rustam",
+    "courses.chemistry.teacher_bio": "Teacher who prepared Olympiad winners.",
+
     "courses.native.long_desc": "Deep knowledge of Native language grammar and literature.",
     "courses.native.materials": "Native language and literature textbooks, DTM tests.",
     "courses.native.teacher_name": "Ms. Feruza",
@@ -228,6 +241,8 @@ export const en = {
     "courses.cert.sat.materials": "College Board, Khan Academy, Princeton Review.",
     "courses.cert.sat.teacher_name": "Mr. Sarvar",
     "courses.cert.sat.teacher_bio": "Scored 1500+ on SAT.",
+    "courses.cert.sat.program.main.title": "SAT Intensive",
+    "courses.cert.sat.program.main.features": "3 lessons per week (2 hours each) + Sunday review|2 trial lessons (Registration starts from the 1st lesson if satisfied)|Bi-weekly internal exams|Monthly MOCK EXAM on covered topics|Course duration: 8 months (6 months intensive topics + 2 months SAT*GMAT practice)|100% Quality Guarantee (Minimum 690+ in Math section)",
 
     "courses.prep.inha.long_desc": "Targeted preparation for Inha University entrance exams (Math & Physics).",
     "courses.prep.inha.materials": "Inha past papers, Calculus books.",
@@ -238,6 +253,13 @@ export const en = {
     "courses.prep.west.materials": "WIUT math exams, IELTS materials.",
     "courses.prep.west.teacher_name": "West Team",
     "courses.prep.west.teacher_bio": "WIUT alumni.",
+
+    "courses.categories.general": "General Subjects",
+
+    // Detailed Course Programs (New)
+
+
+
 
     // Auth Layout Keys
     "auth.back_to_home": "Back to Home",
@@ -258,6 +280,8 @@ export const en = {
     "stats.success_rate": "University Admission Rate",
     "quote.education": "\"Education is the best investment for the future.\"",
 
+
+
     // Dashboard Keys
     "sidebar.dashboard": "Dashboard",
     "sidebar.onlinetests": "Online Tests",
@@ -275,6 +299,16 @@ export const en = {
     "dashboard.stats.exams_count": "Total Tests",
     "dashboard.stats.exams_count.trend": "total taken",
     "dashboard.stats.next_exam": "Next Exam",
+
+    // Admin Results Page
+    "admin.results.title": "Test Results",
+    "admin.results.export": "Export",
+    "admin.results.table.student": "Student",
+    "admin.results.table.exam": "Exam",
+    "admin.results.table.score": "Score",
+    "admin.results.table.percentage": "Percentage",
+    "admin.results.table.date": "Date",
+    "admin.results.table.actions": "Actions",
     "dashboard.stats.next_exam.value": "Sunday, 9:00",
     "dashboard.stats.next_exam.trend": "MOCK exam",
     "dashboard.announcements.title": "Announcements",
@@ -471,4 +505,6 @@ export const en = {
     "admin.announcements.toast.created": "New announcement created",
     "admin.announcements.toast.deleted": "Announcement deleted",
     "admin.announcements.toast.status_error": "Error changing status",
+
+
 };

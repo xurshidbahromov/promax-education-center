@@ -22,6 +22,7 @@ export default function LoginPage() {
     const [showPassword, setShowPassword] = useState(false);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
+    const [showForgotPassword, setShowForgotPassword] = useState(false);
 
     // Phone number formatting
     const formatPhoneNumber = (value: string) => {
@@ -319,9 +320,13 @@ export default function LoginPage() {
                                             <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
                                                 {t('auth.login.password')}
                                             </label>
-                                            <Link href="/forgot-password" className="text-xs text-brand-blue hover:underline">
+                                            <button
+                                                type="button"
+                                                onClick={() => setShowForgotPassword(true)}
+                                                className="text-xs text-brand-blue hover:underline font-medium"
+                                            >
                                                 {t('auth.login.forgot')}
-                                            </Link>
+                                            </button>
                                         </div>
                                         <div className="relative group">
                                             <div className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-brand-blue transition-colors">
@@ -371,6 +376,26 @@ export default function LoginPage() {
                         )}
                     </AnimatePresence>
                 </motion.div>
+
+                {/* Forgot Password Modal */}
+                {showForgotPassword && (
+                    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-in fade-in duration-200">
+                        <div className="bg-white dark:bg-slate-800 rounded-2xl p-6 max-w-sm w-full shadow-2xl scale-100 animate-in zoom-in-95 duration-200">
+                            <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2">
+                                {t("auth.forgot_password.title")}
+                            </h3>
+                            <p className="text-gray-600 dark:text-gray-300 mb-6">
+                                {t("auth.forgot_password.message")}
+                            </p>
+                            <button
+                                onClick={() => setShowForgotPassword(false)}
+                                className="w-full bg-gray-100 hover:bg-gray-200 dark:bg-slate-700 dark:hover:bg-slate-600 text-gray-900 dark:text-white font-medium py-2.5 rounded-xl transition-colors"
+                            >
+                                {t("auth.forgot_password.close")}
+                            </button>
+                        </div>
+                    </div>
+                )}
             </div>
         </div>
     );

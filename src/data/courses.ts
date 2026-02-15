@@ -18,6 +18,7 @@ export const courses: Course[] = [
     { id: 'russian', icon: Languages, color: 'text-cyan-600', bg: 'bg-cyan-50 dark:bg-cyan-900/20', type: 'general' },
     { id: 'history', icon: ScrollText, color: 'text-amber-600', bg: 'bg-amber-50 dark:bg-amber-900/20', type: 'general' },
     { id: 'biology', icon: Dna, color: 'text-green-600', bg: 'bg-green-50 dark:bg-green-900/20', type: 'general' },
+    { id: 'chemistry', icon: Atom, color: 'text-teal-600', bg: 'bg-teal-50 dark:bg-teal-900/20', type: 'general' },
     { id: 'law', icon: Scale, color: 'text-violet-600', bg: 'bg-violet-50 dark:bg-violet-900/20', type: 'general' },
 
     // Certificate Prep

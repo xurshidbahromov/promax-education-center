@@ -5,6 +5,8 @@ import ResultsStats from "@/components/ResultsStats";
 import Methodology from '@/components/Methodology';
 import CallToAction from "@/components/CallToAction";
 
+import AdmissionAnnouncement from "@/components/ui/AdmissionAnnouncement";
+
 export default function Home() {
   return (
     <main className="min-h-screen">
@@ -14,6 +16,7 @@ export default function Home() {
       <ResultsStats />
       <YouTubeSection />
       <CallToAction />
+      <AdmissionAnnouncement />
     </main>
   );
 }

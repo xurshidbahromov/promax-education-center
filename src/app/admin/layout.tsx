@@ -57,8 +57,6 @@ export default function AdminLayout({
 
                 if (profileError || !profile) {
                     console.error("Error fetching profile:", profileError);
-                    console.error("Profile data:", profile);
-                    // Don't redirect immediately, might be temporary network
                     setLoading(false);
                     return;
                 }

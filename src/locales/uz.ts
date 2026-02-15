@@ -61,6 +61,9 @@ export const uz = {
     "contact.form.success": "Xabaringiz muvaffaqiyatli yuborildi!",
     "cta.title": "Kelajagingizni biz bilan quring",
     "cta.subtitle": "Hoziroq ro'yxatdan o'ting va birinchi darsga bepul yoziling!",
+    "announcement.admission.title": "Barcha kurslarga qabul ochiq!",
+    "announcement.admission.subtitle": "Joylar soni cheklangan. Hoziroq qo'ng'iroq qiling!",
+    "announcement.admission.action": "Qo'ng'iroq qilish",
     "cta.button.primary": "Boshlash",
     "cta.button.secondary": "Batafsil ma'lumot",
     "auth.login.title": "Tizimga kirish",
@@ -96,6 +99,9 @@ export const uz = {
     "auth.error_email_invalid": "Email noto'g'ri formatda",
     "auth.error_already_registered": "Bu email allaqachon ro'yxatdan o'tgan",
     "auth.error_registration_failed": "Ro'yxatdan o'tish muvaffaqiyatsiz",
+    "auth.forgot_password.title": "Parolni tiklash",
+    "auth.forgot_password.message": "Parolingizni o'zgartirish uchun O'quv Markazi ma'muriyatiga murojaat qiling.",
+    "auth.forgot_password.close": "Yopish",
     "stats.students": "Muvaffaqiyatli o'quvchilar",
     "stats.success_rate": "Muvaffaqiyat ko'rsatkichi",
     "tests.title": "Online Testlar",
@@ -209,6 +215,8 @@ export const uz = {
     "courses.biology.teacher_name": "Nargiza opa",
     "courses.biology.teacher_bio": "Biologiya fanidan oliy toifali o'qituvchi.",
 
+    "courses.chemistry": "Kimyo",
+    "courses.chemistry.desc": "Molekulalar va reaksiyalar olamini o'rganing.",
     "courses.chemistry.long_desc": "Kimyoviy elementlar va reaksiyalarni o'rganish.",
     "courses.chemistry.materials": "Kimyo masalalar to'plami, Homchenko.",
     "courses.chemistry.teacher_name": "Rustam aka",
@@ -243,6 +251,12 @@ export const uz = {
     "courses.cert.sat.materials": "College Board, Khan Academy, Princeton Review.",
     "courses.cert.sat.teacher_name": "Sarvar aka",
     "courses.cert.sat.teacher_bio": "SAT 1500+ natija sohibi.",
+    "courses.cert.sat.program.main.title": "SAT Intensive",
+    "courses.cert.sat.program.main.features": "Darslar haftada 3 marta 2 soatdan bo'lib o'tadi + yakshanba takrorlash darsi|2 ta sinov darsi (Darslarimiz ma'qul kelsa, 1-kelgan dars kuningizdan ro'yhatga o'tkaziladi)|Ikki haftada bir marotaba ichki imtihon|Har oy so'ngida o'tilgan mavzular yuzasidan MOCK EXAM|Kurs davomiyligi 8 oy (6 oy intensiv tarzda mavzular va 2 oy SAT*GMAT practice booklar yuzasidan praktika)|Dars sifatiga 100% kafolat (Aynan math sectiondan eng kam natijangiz 690+)",
+
+    "courses.categories.general": "Umumta'lim Fanlari",
+
+    // Detailed Course Programs (New) - REMOVED AS REQUESTED
 
     "courses.prep.inha.long_desc": "Inha universiteti kirish imtihonlariga (Math & Physics) maqsadli tayyorgarlik.",
     "courses.prep.inha.materials": "Inha past papers, Calculus books.",
@@ -281,6 +295,16 @@ export const uz = {
     "dashboard.stats.exams_count": "Testlar Soni",
     "dashboard.stats.exams_count.trend": "jami topshirilgan",
     "dashboard.stats.next_exam": "Keyingi Imtihon",
+
+    // Admin Results Page
+    "admin.results.title": "Test Natijalari",
+    "admin.results.export": "Eksport",
+    "admin.results.table.student": "O'quvchi",
+    "admin.results.table.exam": "Imtihon",
+    "admin.results.table.score": "Ball",
+    "admin.results.table.percentage": "Foiz",
+    "admin.results.table.date": "Sana",
+    "admin.results.table.actions": "Amallar",
     "dashboard.stats.next_exam.value": "Yakshanba, 9:00",
     "dashboard.stats.next_exam.trend": "MOCK imtihoni",
     "dashboard.announcements.title": "E'lonlar",
@@ -477,4 +501,6 @@ export const uz = {
     "admin.announcements.toast.created": "Yangi e'lon qo'shildi",
     "admin.announcements.toast.deleted": "E'lon o'chirildi",
     "admin.announcements.toast.status_error": "Status o'zgartirishda xatolik",
+
+
 };

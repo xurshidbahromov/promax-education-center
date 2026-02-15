@@ -36,12 +36,12 @@ export const LanguageProvider = ({ children }: { children: ReactNode }) => {
         }
     }, []);
 
-    const handleSetLanguage = (lang: Language) => {
+    const handleSetLanguage = React.useCallback((lang: Language) => {
         setLanguage(lang);
         localStorage.setItem('promax-lang', lang);
-    };
+    }, []);
 
-    const t = (key: string, params?: Record<string, string | number>): string => {
+    const t = React.useCallback((key: string, params?: Record<string, string | number>): string => {
         let text = translations[language][key] || key;
         if (params) {
             Object.entries(params).forEach(([key, value]) => {
@@ -49,10 +49,16 @@ export const LanguageProvider = ({ children }: { children: ReactNode }) => {
             });
         }
         return text;
-    };
+    }, [language]);
+
+    const value = React.useMemo(() => ({
+        language,
+        setLanguage: handleSetLanguage,
+        t
+    }), [language, handleSetLanguage, t]);
 
     return (
-        <LanguageContext.Provider value={{ language, setLanguage: handleSetLanguage, t }}>
+        <LanguageContext.Provider value={value}>
             {children}
         </LanguageContext.Provider>
     );
