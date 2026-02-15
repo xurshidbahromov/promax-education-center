@@ -17,193 +17,72 @@ import {
     Gamepad2,
     Crown
 } from "lucide-react";
-import { useEffect, useState } from "react";
-import { createClient } from "@/utils/supabase/client";
-import { getDashboardStats, getRecentResultsForChart, getStudentActivity, getLeaderboard, getAvailableExams, getUserRank } from "@/lib/supabase-queries";
+import {
+    useCurrentUser,
+    useUserProfile,
+    useDashboardStats,
+    useChartData,
+    useActivityFeed,
+    useLeaderboard,
+    useUserRank,
+    useUpcomingTests,
+    useAnnouncements
+} from "@/hooks/useDashboardData";
 import MyCourses from "@/components/MyCourses";
 
 export default function DashboardPage() {
     const { t } = useLanguage();
-    const [loading, setLoading] = useState(true);
-    const [userFullName, setUserFullName] = useState<string>("Student");
-    const [dashboardStats, setDashboardStats] = useState({
-        totalTests: 0,
-        averageScore: 0,
-        bestScore: 0,
-        totalCoins: 0
-    });
-    const [chartData, setChartData] = useState<any[]>([]);
-    const [activityFeed, setActivityFeed] = useState<any[]>([]);
-    const [leaderboard, setLeaderboard] = useState<any[]>([]);
-    const [upcomingTests, setUpcomingTests] = useState<any[]>([]);
-    const [currentUserId, setCurrentUserId] = useState<string | null>(null);
-    const [userRank, setUserRank] = useState<any>(null);
 
-    // Fetch user and dashboard data
-    useEffect(() => {
-        async function fetchDashboardData() {
-            const supabase = createClient();
+    // React Query Hooks
+    const { data: user } = useCurrentUser();
+    const { data: profile } = useUserProfile(user?.id);
+    const { data: dashboardStats, isLoading: statsLoading } = useDashboardStats(user?.id);
+    const { data: chartData, isLoading: chartLoading } = useChartData(user?.id);
+    const { data: activityFeed, isLoading: activityLoading } = useActivityFeed(user?.id);
+    const { data: leaderboard, isLoading: leaderboardLoading } = useLeaderboard();
+    const { data: userRank } = useUserRank(user?.id);
+    const { data: upcomingTests, isLoading: testsLoading } = useUpcomingTests();
+    const { data: announcements, isLoading: announcementsLoading } = useAnnouncements();
 
-            // Get current user
-            const { data: { user } } = await supabase.auth.getUser();
+    const loading = statsLoading || chartLoading || activityLoading || leaderboardLoading || testsLoading || announcementsLoading;
+    const userFullName = profile?.full_name || user?.user_metadata?.full_name || "Student";
+    const currentUserId = user?.id;
 
-            if (!user) {
-                setLoading(false);
-                return;
-            }
-
-            setCurrentUserId(user.id);
-
-            // Get profile from profiles table (more reliable than user_metadata)
-            const { data: profile } = await supabase
-                .from('profiles')
-                .select('full_name')
-                .eq('id', user.id)
-                .single();
-
-            setUserFullName(profile?.full_name || user.user_metadata?.full_name || "Student");
-
-            // Get dashboard stats
-            const stats = await getDashboardStats(user.id);
-            setDashboardStats(stats);
-
-            // Get recent results for chart
-            const recentResults = await getRecentResultsForChart(user.id);
-            setChartData(recentResults);
-
-            // Get activity feed
-            const activity = await getStudentActivity(user.id);
-            setActivityFeed(activity);
-
-            // Get leaderboard
-            const leaderboardData = await getLeaderboard();
-            setLeaderboard(leaderboardData);
-
-            // Get specific user rank (in case they are not in visible list or for sticky footer)
-            const rankData = await getUserRank(user.id);
-            setUserRank(rankData);
-
-            // Get available exams (upcoming tests)
-            const exams = await getAvailableExams();
-            setUpcomingTests(exams);
-
-            setLoading(false);
-        }
-
-        fetchDashboardData();
-    }, []);
-
-    // Stats cards with real data
+    // derived stats (safely access data)
     const stats = [
         {
             title: t('dashboard.stats.coins'),
-            value: loading ? "..." : `${dashboardStats.totalCoins}`,
+            value: statsLoading ? "..." : `${dashboardStats?.totalCoins || 0}`,
             icon: Trophy,
             color: "bg-brand-orange",
             textColor: "text-brand-orange",
-            trend: loading ? "" : `+${Math.floor(dashboardStats.totalCoins / 10)} ${t('dashboard.stats.coins.trend')}`
+            trend: statsLoading ? "" : `+${Math.floor((dashboardStats?.totalCoins || 0) / 10)} ${t('dashboard.stats.coins.trend')}`
         },
         {
             title: t('dashboard.stats.average_score'),
-            value: loading ? "..." : `${dashboardStats.averageScore.toFixed(1)}`,
+            value: statsLoading ? "..." : `${dashboardStats?.averageScore.toFixed(1) || 0}`,
             icon: Target,
             color: "bg-brand-blue",
             textColor: "text-brand-blue",
-            trend: loading ? "" : t('dashboard.stats.average_score.trend')
+            trend: statsLoading ? "" : t('dashboard.stats.average_score.trend')
         },
         {
             title: t('dashboard.stats.exams_count'),
-            value: loading ? "..." : `${dashboardStats.totalTests}`,
+            value: statsLoading ? "..." : `${dashboardStats?.totalTests || 0}`,
             icon: BookOpen,
             color: "bg-indigo-500",
             textColor: "text-indigo-500",
-            trend: loading ? "" : t('dashboard.stats.exams_count.trend')
+            trend: statsLoading ? "" : t('dashboard.stats.exams_count.trend')
         },
         {
             title: t('dashboard.stats.next_exam'),
-            value: loading ? "..." : t('dashboard.stats.next_exam.value'),
+            value: statsLoading ? "..." : t('dashboard.stats.next_exam.value'),
             icon: Calendar,
             color: "bg-green-500",
             textColor: "text-green-500",
             trend: t('dashboard.stats.next_exam.trend')
         },
     ];
-
-    const [announcements, setAnnouncements] = useState<any[]>([]);
-
-    // Fetch user and dashboard data
-    useEffect(() => {
-        async function fetchDashboardData() {
-            const supabase = createClient();
-
-            // Get current user
-            const { data: { user } } = await supabase.auth.getUser();
-
-            if (!user) {
-                setLoading(false);
-                return;
-            }
-
-            setCurrentUserId(user.id);
-
-            // Get profile from profiles table (more reliable than user_metadata)
-            const { data: profile } = await supabase
-                .from('profiles')
-                .select('full_name')
-                .eq('id', user.id)
-                .single();
-
-            setUserFullName(profile?.full_name || user.user_metadata?.full_name || "Student");
-
-            // Get dashboard stats
-            const stats = await getDashboardStats(user.id);
-            setDashboardStats(stats);
-
-            // Get recent results for chart
-            const recentResults = await getRecentResultsForChart(user.id);
-            setChartData(recentResults);
-
-            // Get activity feed
-            const activity = await getStudentActivity(user.id);
-            setActivityFeed(activity);
-
-            // Get leaderboard
-            const leaderboardData = await getLeaderboard();
-            setLeaderboard(leaderboardData);
-
-            // Get available exams
-            const availableExams = await getAvailableExams();
-            setUpcomingTests(availableExams.slice(0, 3)); // Top 3 upcoming
-
-            // Get user rank
-            const rank = await getUserRank(user.id);
-            setUserRank(rank);
-
-            // Fetch announcements from database
-            try {
-                const { data: announcementsData, error } = await supabase
-                    .from('announcements')
-                    .select('*')
-                    .eq('is_active', true)
-                    .or('target_audience.eq.all,target_audience.eq.students')
-                    .order('created_at', { ascending: false })
-                    .order('priority', { ascending: false })
-                    .limit(5);
-
-                if (error) {
-                    console.error('Error fetching announcements:', error);
-                } else {
-                    setAnnouncements(announcementsData || []);
-                }
-            } catch (error) {
-                console.error('Error:', error);
-            }
-
-            setLoading(false);
-        }
-
-        fetchDashboardData();
-    }, []);
 
     // const leaderboard = [
     //     { name: "Aziz Rahimov", points: 2400, rank: 1, avatar: "🥇" },
@@ -294,12 +173,12 @@ export default function DashboardPage() {
                         <div className="space-y-3 max-h-[280px] overflow-y-auto pr-2 custom-scrollbar">
                             {loading ? (
                                 [...Array(3)].map((_, i) => <ListItemSkeleton key={i} />)
-                            ) : announcements.length === 0 ? (
+                            ) : (announcements?.length || 0) === 0 ? (
                                 <p className="text-gray-500 dark:text-gray-400 text-sm text-center py-4">
                                     {t('dashboard.announcements.empty') || "E'lonlar yo'q"}
                                 </p>
                             ) : (
-                                announcements.map((item, i) => (
+                                announcements?.map((item, i) => (
                                     <div key={item.id || i} className="bg-white dark:bg-slate-900/50 p-4 rounded-xl border border-gray-100 dark:border-slate-700 flex gap-4">
                                         <div className={`w-1 h-full rounded-full ${item.type === 'error' ? 'bg-red-500' : item.type === 'warning' ? 'bg-yellow-500' : item.type === 'success' ? 'bg-green-500' : 'bg-blue-500'}`}></div>
                                         <div>
@@ -320,13 +199,13 @@ export default function DashboardPage() {
                         <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-6">{t('dashboard.chart.title')}</h3>
                         {loading ? (
                             <ChartSkeleton />
-                        ) : chartData.length === 0 ? (
+                        ) : (chartData?.length || 0) === 0 ? (
                             <div className="flex-1 flex items-center justify-center min-h-[250px]">
                                 <p className="text-gray-400">{t('dashboard.no_results')}</p>
                             </div>
                         ) : (
                             <div className="flex-1 w-full min-h-[250px] flex items-end justify-between gap-2">
-                                {chartData.map((result, i) => {
+                                {chartData?.map((result, i) => {
                                     // Calculate percentage (out of 189 max score)
                                     const percentage = Math.round((result.score / 189) * 100);
                                     return (
@@ -361,10 +240,10 @@ export default function DashboardPage() {
                         <div className="space-y-4">
                             {loading ? (
                                 [...Array(3)].map((_, i) => <ListItemSkeleton key={i} />)
-                            ) : activityFeed.length === 0 ? (
+                            ) : (activityFeed?.length || 0) === 0 ? (
                                 <p className="text-sm text-gray-500 text-center py-4">{t('dashboard.activity.empty')}</p>
                             ) : (
-                                activityFeed.map((item, i) => (
+                                activityFeed?.map((item, i) => (
                                     <div key={i} className="flex gap-3 items-start">
                                         <div className="mt-1">
                                             <CheckCircle2 size={16} className="text-green-500" />
@@ -399,7 +278,7 @@ export default function DashboardPage() {
                         </div>
 
                         <div className="space-y-4 overflow-y-auto flex-1 custom-scrollbar pr-2 mb-2">
-                            {leaderboard.map((user, i) => (
+                            {leaderboard?.map((user: any, i: number) => (
                                 <div key={i} className={`flex items-center justify-between p-3 rounded-xl ${user.id === currentUserId ? 'bg-brand-blue/10 border border-brand-blue/20' : 'hover:bg-gray-50 dark:hover:bg-slate-800'}`}>
                                     <div className="flex items-center gap-3">
                                         <span className={`font-bold w-6 text-center ${user.rank <= 3 ? 'text-yellow-500' : 'text-gray-400'}`}>#{user.rank}</span>

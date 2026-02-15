@@ -13,33 +13,29 @@ import {
     Calendar,
     GraduationCap
 } from "lucide-react";
-import { getAllResults } from "@/lib/admin-queries";
+import { useAllResults } from "@/hooks/useAdminData";
 import { exportStudentResults } from "@/lib/excel-export";
 import { useLanguage } from "@/context/LanguageContext";
 import { useToast } from "@/context/ToastContext";
 
 export default function ResultsListPage() {
     const { t } = useLanguage();
-    const [results, setResults] = useState<any[]>([]);
-    const [loading, setLoading] = useState(true);
-    const [searchTerm, setSearchTerm] = useState("");
     const { showToast } = useToast();
+    const [searchTerm, setSearchTerm] = useState("");
+    const [debouncedSearchTerm, setDebouncedSearchTerm] = useState("");
+    const [limit] = useState(50); // Fetch last 50 results
+    const [isExporting, setIsExporting] = useState(false);
 
+    // Debounce search
     useEffect(() => {
-        fetchResults();
-    }, []);
+        const timer = setTimeout(() => setDebouncedSearchTerm(searchTerm), 500);
+        return () => clearTimeout(timer);
+    }, [searchTerm]);
 
-    const fetchResults = async () => {
-        setLoading(true);
-        try {
-            const data = await getAllResults(50); // Fetch last 50 results
-            setResults(data);
-        } catch (error) {
-            console.error("Error fetching results:", error);
-        } finally {
-            setLoading(false);
-        }
-    };
+    // Data fetching
+    const { data: resultsData, isLoading: loadingResult } = useAllResults(limit);
+    const results = resultsData || [];
+    const loading = loadingResult; // Alias for compatibility
 
     const filteredResults = results.filter(result =>
         (result.student?.full_name || "").toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -66,14 +62,14 @@ export default function ResultsListPage() {
                 time_spent_seconds: null
             }));
 
-            setLoading(true);
+            setIsExporting(true);
             await exportStudentResults(exportData);
             showToast(`${filteredResults.length} ta natija Excel formatida yuklandi`, "success");
         } catch (error) {
             console.error("Export error:", error);
             showToast("Export qilishda xatolik yuz berdi", "error");
         } finally {
-            setLoading(false);
+            setIsExporting(false);
         }
     };
 
@@ -94,10 +90,11 @@ export default function ResultsListPage() {
                 <div className="flex items-center gap-3">
                     <button
                         onClick={handleExport}
-                        className="h-10 px-4 flex items-center gap-2 bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-800 rounded-xl text-sm font-medium text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-slate-800 transition-colors"
+                        disabled={isExporting}
+                        className="h-10 px-4 flex items-center gap-2 bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-800 rounded-xl text-sm font-medium text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-slate-800 transition-colors disabled:opacity-50"
                     >
-                        <Download size={18} />
-                        <span className="hidden sm:inline">{t('admin.results.export')}</span>
+                        <Download size={18} className={isExporting ? "animate-bounce" : ""} />
+                        <span className="hidden sm:inline">{isExporting ? "Yuklanmoqda..." : t('admin.results.export')}</span>
                     </button>
                     <Link
                         href="/admin/results/new"

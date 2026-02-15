@@ -7,6 +7,7 @@ import { LanguageProvider } from "@/context/LanguageContext";
 import { ToastProvider } from "@/context/ToastContext";
 import { ThemeProvider } from "@/components/ThemeProvider";
 import { Background } from "@/components/Background";
+import QueryProvider from "@/providers/QueryProvider";
 import ToastContainer from "@/components/ToastContainer";
 
 const poppins = Poppins({
@@ -37,12 +38,14 @@ export default function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
-          <ToastProvider>
-            <LanguageProvider>
-              <ToastContainer />
-              {children}
-            </LanguageProvider>
-          </ToastProvider>
+          <QueryProvider>
+            <ToastProvider>
+              <LanguageProvider>
+                <ToastContainer />
+                {children}
+              </LanguageProvider>
+            </ToastProvider>
+          </QueryProvider>
         </ThemeProvider>
       </body>
     </html>

@@ -18,75 +18,62 @@ import {
     FileText,
     DollarSign
 } from "lucide-react";
-import { getStudents, deleteStudent, Student } from "@/lib/admin-queries";
-import { getStudentPaymentSummary, type StudentPaymentSummary } from "@/lib/payments";
+import { deleteStudent, Student } from "@/lib/admin-queries";
+import { type StudentPaymentSummary } from "@/lib/payments";
 import PaymentBadge from "@/components/PaymentBadge";
 import { exportStudentsList } from "@/lib/excel-export";
+import { useQueryClient } from "@tanstack/react-query";
+import { useStudents, useStudentPaymentSummaries } from "@/hooks/useAdminData";
 
 export default function AdminStudentsPage() {
     const router = useRouter();
     const { showToast } = useToast();
-    const [students, setStudents] = useState<Student[]>([]);
-    const [loading, setLoading] = useState(true);
+    const queryClient = useQueryClient();
     const [searchTerm, setSearchTerm] = useState("");
+    const [debouncedSearchTerm, setDebouncedSearchTerm] = useState("");
     const [paymentFilter, setPaymentFilter] = useState<'all' | 'all_paid' | 'partial' | 'overdue' | 'no_courses'>('all');
-    const [paymentSummaries, setPaymentSummaries] = useState<Map<string, StudentPaymentSummary>>(new Map());
+    const [isExporting, setIsExporting] = useState(false);
 
-    // Debounce search
+    // Debounce search term
     useEffect(() => {
         const timer = setTimeout(() => {
-            fetchStudents();
+            setDebouncedSearchTerm(searchTerm);
         }, 500);
-
         return () => clearTimeout(timer);
     }, [searchTerm]);
 
-    const fetchStudents = async () => {
-        setLoading(true);
-        try {
-            const data = await getStudents(searchTerm);
-            setStudents(data);
+    // React Query hooks
+    const { data: studentsData, isLoading: studentsLoading } = useStudents(debouncedSearchTerm);
+    const students = studentsData || [];
 
-            // Fetch payment summaries for all students
-            const summaries = new Map<string, StudentPaymentSummary>();
-            await Promise.all(
-                data.map(async (student) => {
-                    const summary = await getStudentPaymentSummary(student.id);
-                    summaries.set(student.id, summary);
-                })
-            );
-            setPaymentSummaries(summaries);
-        } catch (error) {
-            console.error("Error fetching students:", error);
-        } finally {
-            setLoading(false);
-        }
-    };
+    // Fetch payment summaries for loaded students
+    const { data: paymentSummariesData, isLoading: approachesLoading } = useStudentPaymentSummaries(students);
+    const paymentSummaries = paymentSummariesData || new Map();
+
+    const loading = studentsLoading || approachesLoading;
 
     const handleDelete = async (id: string) => {
         if (!confirm("Haqiqatan ham bu o'quvchini o'chirmoqchimisiz?")) return;
 
-        setLoading(true);
         try {
             const result = await deleteStudent(id);
             if (result.success) {
-                // Refresh list
-                await fetchStudents();
+                // Refresh list by invalidating cache
+                queryClient.invalidateQueries({ queryKey: ['students'] });
+                queryClient.invalidateQueries({ queryKey: ['paymentSummaries'] });
                 showToast("Student muvaffaqiyatli o'chirildi", "success");
             } else {
                 showToast("Xatolik: " + result.error, "error");
             }
         } catch (error) {
             console.error("Delete error:", error);
-        } finally {
-            setLoading(false);
         }
     };
 
     const handleExportStudents = async () => {
         const filteredStudents = students.filter(student => {
-            const matchesSearch = student.full_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                student.phone?.includes(searchTerm);
+            const matchesSearch = (student.full_name || "").toLowerCase().includes(searchTerm.toLowerCase()) ||
+                (student.phone || "").includes(searchTerm);
 
             if (paymentFilter === 'all') return matchesSearch;
             const summary = paymentSummaries.get(student.id);
@@ -99,7 +86,7 @@ export default function AdminStudentsPage() {
         }
 
         try {
-            setLoading(true);
+            setIsExporting(true);
             showToast("Excel fayl tayyorlanmoqda...", "info");
             await exportStudentsList(filteredStudents, paymentSummaries);
             showToast(`${filteredStudents.length} ta talaba Excel formatida yuklandi`, "success");
@@ -107,7 +94,7 @@ export default function AdminStudentsPage() {
             console.error('Export error:', error);
             showToast("Export qilishda xatolik yuz berdi", "error");
         } finally {
-            setLoading(false);
+            setIsExporting(false);
         }
     };
 
@@ -126,9 +113,9 @@ export default function AdminStudentsPage() {
                 </div>
 
                 <div className="flex items-center gap-3">
-                    <button onClick={handleExportStudents} className="h-10 px-4 flex items-center gap-2 bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-800 rounded-xl text-sm font-medium text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-slate-800 transition-colors">
-                        <Download size={18} />
-                        <span className="hidden sm:inline">Export</span>
+                    <button onClick={handleExportStudents} disabled={isExporting} className="h-10 px-4 flex items-center gap-2 bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-800 rounded-xl text-sm font-medium text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-slate-800 transition-colors disabled:opacity-50">
+                        <Download size={18} className={isExporting ? "animate-bounce" : ""} />
+                        <span className="hidden sm:inline">{isExporting ? "Yuklanmoqda..." : "Export"}</span>
                     </button>
                     {/* Add Student functionality can be added later - currently registration is self-service */}
                     <button disabled className="h-10 px-4 flex items-center gap-2 bg-brand-blue/50 text-white rounded-xl text-sm font-medium cursor-not-allowed transition-colors shadow-sm">

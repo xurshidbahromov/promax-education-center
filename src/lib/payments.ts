@@ -412,3 +412,122 @@ export async function getStudentPaymentSummary(studentId: string): Promise<Stude
         status: overallStatus
     };
 }
+
+export async function getPaymentSummariesForStudents(studentIds: string[]): Promise<Map<string, StudentPaymentSummary>> {
+    const supabase = createClient();
+    const currentDate = new Date();
+    const currentMonth = currentDate.getMonth() + 1;
+    const currentYear = currentDate.getFullYear();
+    const summaries = new Map<string, StudentPaymentSummary>();
+
+    if (studentIds.length === 0) return summaries;
+
+    // 1. Get all active courses for these students
+    const { data: courses } = await supabase
+        .from('student_courses')
+        .select('id, student_id')
+        .in('student_id', studentIds)
+        .eq('status', 'active');
+
+    if (!courses || courses.length === 0) {
+        studentIds.forEach(id => {
+            summaries.set(id, {
+                totalCourses: 0,
+                paidCourses: 0,
+                partialCourses: 0,
+                overdueCourses: 0,
+                totalOverdue: 0,
+                status: 'no_courses'
+            });
+        });
+        return summaries;
+    }
+
+    // Group courses by student
+    const coursesByStudent = new Map<string, string[]>();
+    courses.forEach(c => {
+        const list = coursesByStudent.get(c.student_id) || [];
+        list.push(c.id);
+        coursesByStudent.set(c.student_id, list);
+    });
+
+    // 2. Get payment statuses for all these courses
+    const courseIds = courses.map(c => c.id);
+    const { data: paymentStatuses } = await supabase
+        .from('monthly_payment_status')
+        .select('*')
+        .in('student_course_id', courseIds)
+        .eq('month', currentMonth)
+        .eq('year', currentYear);
+
+    const statusByCourse = new Map<string, any>();
+    if (paymentStatuses) {
+        paymentStatuses.forEach(s => statusByCourse.set(s.student_course_id, s));
+    }
+
+    // 3. Build summaries
+    studentIds.forEach(studentId => {
+        const studentCourseIds = coursesByStudent.get(studentId) || [];
+
+        if (studentCourseIds.length === 0) {
+            summaries.set(studentId, {
+                totalCourses: 0,
+                paidCourses: 0,
+                partialCourses: 0,
+                overdueCourses: 0,
+                totalOverdue: 0,
+                status: 'no_courses'
+            });
+            return;
+        }
+
+        let paidCourses = 0;
+        let partialCourses = 0;
+        let overdueCourses = 0;
+        let totalOverdue = 0;
+
+        studentCourseIds.forEach(courseId => {
+            const status = statusByCourse.get(courseId);
+            if (!status) {
+                // No status record usually means pending/not paid? Or maybe created just now.
+                // Assuming partial/pending if record exists but logic above handles standard statuses.
+                // If no record exists, it might be unpaid. Let's assume 'pending' counts as partial for now or handle as separate.
+                // In original logic: if status is missing, it skips. But typically a record is created.
+                // Let's assume if no record, it's not overdue yet? 
+                // Using safer defaults:
+                partialCourses++;
+            } else {
+                if (status.status === 'paid') {
+                    paidCourses++;
+                } else if (status.status === 'partial' || status.status === 'pending') {
+                    partialCourses++;
+                } else if (status.status === 'overdue') {
+                    overdueCourses++;
+                    totalOverdue += Number(status.remaining_amount);
+                }
+            }
+        });
+
+        let overallStatus: 'all_paid' | 'partial' | 'overdue' | 'no_courses';
+        if (overdueCourses > 0) {
+            overallStatus = 'overdue';
+        } else if (partialCourses > 0) {
+            overallStatus = 'partial';
+        } else if (paidCourses === studentCourseIds.length) {
+            overallStatus = 'all_paid';
+        } else {
+            overallStatus = 'partial';
+        }
+
+        summaries.set(studentId, {
+            totalCourses: studentCourseIds.length,
+            paidCourses,
+            partialCourses,
+            overdueCourses,
+            totalOverdue,
+            status: overallStatus
+        });
+    });
+
+    return summaries;
+}

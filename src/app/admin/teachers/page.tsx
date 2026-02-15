@@ -21,57 +21,51 @@ import {
 } from "lucide-react";
 
 // Supabase queries
-import { getTeachers, demoteTeacher } from "@/lib/admin-queries";
+import { demoteTeacher } from "@/lib/admin-queries";
 
+
+import { useQueryClient } from "@tanstack/react-query";
+import { useTeachers } from "@/hooks/useAdminData";
 
 export default function AdminTeachersPage() {
     const router = useRouter();
     const { showToast } = useToast();
     const { t } = useLanguage();
-    const [teachers, setTeachers] = useState<any[]>([]);
-    const [loading, setLoading] = useState(true);
+    const queryClient = useQueryClient();
+
+    // Search state
     const [searchQuery, setSearchQuery] = useState("");
+    const [debouncedSearchQuery, setDebouncedSearchQuery] = useState("");
 
+    // Debounce search
     useEffect(() => {
-        fetchTeachers();
-    }, []);
+        const timer = setTimeout(() => setDebouncedSearchQuery(searchQuery), 500);
+        return () => clearTimeout(timer);
+    }, [searchQuery]);
 
-    const fetchTeachers = async () => {
-        setLoading(true);
-        try {
-            const data = await getTeachers();
-            setTeachers(data);
-        } catch (error) {
-            console.error("Error fetching teachers:", error);
-        } finally {
-            setLoading(false);
-        }
-    };
+    // Data fetching
+    const { data: teachersData, isLoading: loading } = useTeachers(debouncedSearchQuery);
+    const teachers = teachersData || [];
+
+    // Use server-filtered teachers directly
+    const filteredTeachers = teachers;
 
     const handleDelete = async (id: string) => {
         if (!confirm("Haqiqatan ham bu o'qituvchini o'chirmoqchimisiz? U 'Student' rolilega qaytariladi.")) return;
 
-        setLoading(true);
         try {
             const result = await demoteTeacher(id);
             if (result.success) {
                 // Refresh list
-                fetchTeachers();
+                queryClient.invalidateQueries({ queryKey: ['teachers'] });
                 showToast("O'qituvchi muvaffaqiyatli o'chirildi", "success");
             } else {
                 showToast("Xatolik: " + result.error, "error");
             }
         } catch (error) {
             console.error("Delete error:", error);
-        } finally {
-            setLoading(false);
         }
     };
-
-    const filteredTeachers = teachers.filter(teacher =>
-        (teacher.full_name || "").toLowerCase().includes(searchQuery.toLowerCase()) ||
-        (teacher.email || "").toLowerCase().includes(searchQuery.toLowerCase())
-    );
 
     const getSubjectBadges = (subjects: string[]) => {
         const colors: Record<string, string> = {
@@ -166,11 +160,11 @@ export default function AdminTeachersPage() {
                             <div className="flex items-start justify-between mb-4">
                                 <div className="flex items-center gap-3">
                                     <div className="w-12 h-12 rounded-full bg-gradient-to-br from-brand-blue to-cyan-500 flex items-center justify-center text-white font-bold text-lg">
-                                        {teacher.full_name.charAt(0)}
+                                        {(teacher.full_name || "U").charAt(0)}
                                     </div>
                                     <div>
                                         <h3 className="font-bold text-gray-900 dark:text-white group-hover:text-brand-blue transition-colors">
-                                            {teacher.full_name}
+                                            {teacher.full_name || "Noma'lum o'qituvchi"}
                                         </h3>
                                         <p className="text-sm text-gray-500 dark:text-gray-400">O'qituvchi</p>
                                     </div>

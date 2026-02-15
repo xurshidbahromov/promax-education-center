@@ -1,52 +1,36 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import { Skeleton, StatsSkeleton, TableSkeleton } from "@/components/ui/Skeleton";
 import {
     Users,
     GraduationCap,
     Wallet,
-    TrendingUp,
     FileText
 } from "lucide-react";
-import { getAdminStats, getRecentActivity } from "@/lib/admin-queries";
 import Link from "next/link";
+import { useAdminStats, useRecentActivity } from "@/hooks/useAdminData";
 
 export default function AdminDashboardPage() {
-    const [stats, setStats] = useState({
+    const { data: stats, isLoading: statsLoading } = useAdminStats();
+    const { data: activity, isLoading: activityLoading } = useRecentActivity();
+
+    // Default values if undefined
+    const safeStats = stats || {
         totalStudents: 0,
         activeTeachers: 0,
         monthlyRevenue: "0",
         totalTests: 0
-    });
-    const [activity, setActivity] = useState<any[]>([]);
-    const [loading, setLoading] = useState(true);
+    };
 
-    useEffect(() => {
-        const fetchData = async () => {
-            try {
-                // Simulate network latency for skeleton demo (optional, can be removed)
-                // await new Promise(r => setTimeout(r, 1000));
+    const loading = statsLoading || activityLoading;
 
-                const [statsData, activityData] = await Promise.all([
-                    getAdminStats(),
-                    getRecentActivity()
-                ]);
-                setStats(statsData);
-                setActivity(activityData);
-            } catch (error) {
-                console.error("Error loading dashboard data:", error);
-            } finally {
-                setLoading(false);
-            }
-        };
-        fetchData();
-    }, []);
+    // Use safe access to activity array
+    const activityList = activity || [];
 
     const statCards = [
         {
             title: "Jami O'quvchilar",
-            value: stats.totalStudents,
+            value: safeStats.totalStudents,
             icon: Users,
             color: "text-blue-600",
             bg: "bg-blue-100 dark:bg-blue-900/20",
@@ -54,7 +38,7 @@ export default function AdminDashboardPage() {
         },
         {
             title: "Faol O'qituvchilar",
-            value: stats.activeTeachers,
+            value: safeStats.activeTeachers,
             icon: GraduationCap,
             color: "text-purple-600",
             bg: "bg-purple-100 dark:bg-purple-900/20",
@@ -62,7 +46,7 @@ export default function AdminDashboardPage() {
         },
         {
             title: "Oylik Tushum (Tahminiy)",
-            value: stats.monthlyRevenue,
+            value: safeStats.monthlyRevenue,
             suffix: " so'm",
             icon: Wallet,
             color: "text-green-600",
@@ -71,7 +55,7 @@ export default function AdminDashboardPage() {
         },
         {
             title: "Jami Testlar",
-            value: stats.totalTests,
+            value: safeStats.totalTests,
             icon: FileText,
             color: "text-orange-600",
             bg: "bg-orange-100 dark:bg-orange-900/20",
@@ -89,7 +73,7 @@ export default function AdminDashboardPage() {
 
             {/* Stats Grid */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                {loading ? (
+                {statsLoading ? (
                     // Show 4 Skeletons while loading
                     [...Array(4)].map((_, i) => (
                         <div key={i} className="h-full">
@@ -120,7 +104,7 @@ export default function AdminDashboardPage() {
                     <h2 className="text-lg font-bold text-gray-900 dark:text-white">So'nggi Faoliyat</h2>
                     <Link href="/admin/results" className="text-sm text-brand-blue hover:text-blue-700 font-medium">Barchasini ko'rish</Link>
                 </div>
-                {loading ? (
+                {activityLoading ? (
                     <div className="p-6">
                         <TableSkeleton />
                     </div>
@@ -136,12 +120,12 @@ export default function AdminDashboardPage() {
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-gray-200 dark:divide-slate-800">
-                                {activity.length === 0 ? (
+                                {activityList.length === 0 ? (
                                     <tr>
                                         <td colSpan={4} className="px-6 py-8 text-center text-gray-500">Hozircha faoliyat yo'q</td>
                                     </tr>
                                 ) : (
-                                    activity.map((item, index) => (
+                                    activityList.map((item: any, index: number) => (
                                         <tr key={index} className="hover:bg-gray-50 dark:hover:bg-slate-800/50 transition-colors">
                                             <td className="px-6 py-4 font-medium text-gray-900 dark:text-white">{item.user}</td>
                                             <td className="px-6 py-4 text-gray-600 dark:text-gray-400">{item.action}</td>
