@@ -22,6 +22,8 @@ import Image from "next/image";
 import { usePathname } from "next/navigation";
 import NotificationBell from "@/components/NotificationBell";
 
+import DashboardReveal from "@/components/ui/DashboardReveal";
+
 export default function DashboardLayout({
     children,
 }: {
@@ -98,6 +100,9 @@ export default function DashboardLayout({
 
     return (
         <div className="min-h-screen bg-gray-50 dark:bg-slate-950 flex">
+            {/* Reveal Animation */}
+            <DashboardReveal />
+
             {/* Mobile Sidebar Overlay */}
             {sidebarOpen && (
                 <div

@@ -45,10 +45,15 @@ const AdmissionAnnouncement = () => {
 
                             {/* Icon / Visual */}
                             <div className="relative flex-shrink-0">
-                                <div className="w-12 h-12 rounded-full bg-gradient-to-br from-amber-500 to-orange-600 flex items-center justify-center text-white shadow-lg">
-                                    <Sparkles size={24} className="animate-spin-slow" />
+                                <div className="w-14 h-14 flex items-center justify-center">
+                                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                                    <img
+                                        src="/Logo_without_sentence.png"
+                                        alt="Promax Logo"
+                                        className="w-full h-full object-contain drop-shadow-sm"
+                                    />
                                 </div>
-                                <span className="absolute -top-1 -right-1 flex h-3 w-3">
+                                <span className="absolute top-0 right-0 flex h-3 w-3">
                                     <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
                                     <span className="relative inline-flex rounded-full h-3 w-3 bg-red-500"></span>
                                 </span>
