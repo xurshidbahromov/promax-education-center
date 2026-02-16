@@ -63,6 +63,7 @@ export const uz = {
     "cta.subtitle": "Hoziroq ro'yxatdan o'ting va birinchi darsga bepul yoziling!",
     "beta.title": "Test Rejimi (MVP)",
     "beta.message": "Platforma test rejimida ishlamoqda. Xatolik topsangiz, bizga xabar bering.",
+    "beta.sidebar_message": "Tizim test rejimida. Xatoliklar haqida xabar bering.",
     "beta.action": "Aloqa",
     "common.dismiss": "Yopish",
     "announcement.admission.title": "Barcha kurslarga qabul ochiq!",

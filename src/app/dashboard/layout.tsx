@@ -23,7 +23,7 @@ import { usePathname } from "next/navigation";
 import NotificationBell from "@/components/NotificationBell";
 
 import DashboardReveal from "@/components/ui/DashboardReveal";
-import BetaNotification from "@/components/ui/BetaNotification";
+import SidebarBetaWidget from "@/components/ui/SidebarBetaWidget";
 
 export default function DashboardLayout({
     children,
@@ -104,8 +104,7 @@ export default function DashboardLayout({
             {/* Reveal Animation */}
             <DashboardReveal />
 
-            {/* Beta Notification */}
-            <BetaNotification />
+
 
             {/* Mobile Sidebar Overlay */}
             {sidebarOpen && (
@@ -165,6 +164,9 @@ export default function DashboardLayout({
                             );
                         })}
                     </nav>
+
+                    {/* Sidebar Beta Widget */}
+                    <SidebarBetaWidget />
 
                     {/* User Profile & Logout */}
                     <div className="p-4 border-t border-gray-200/50 dark:border-slate-800/50">
