@@ -138,7 +138,7 @@ export default function TakeTestPage() {
 
     // Auto-save answers
     useEffect(() => {
-        if (!attemptId) return;
+        if (!attemptId || submitting) return;
 
         autoSaveInterval.current = setInterval(() => {
             saveAnswers();
@@ -149,7 +149,7 @@ export default function TakeTestPage() {
                 clearInterval(autoSaveInterval.current);
             }
         };
-    }, [attemptId, answers]);
+    }, [attemptId, answers, submitting]);
 
     const saveAnswers = useCallback(async () => {
         if (!attemptId || Object.keys(answers).length === 0) return;

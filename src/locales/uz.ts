@@ -443,6 +443,10 @@ export const uz = {
     "tests.result.motivation.low_desc": "Mashq qilish orqali natijalarni yaxshilashingiz mumkin. Qayta urinib ko'ring!",
     "tests.result.no_answer": "Javob berilmagan",
 
+    // Notifications
+    "notification.announcement.title": "Yangi E'lon",
+    "notification.announcement.message": "Yangi e'lon joylandi. Batafsil ma'lumotni Dashboard sahifasidagi e'lonlar bo'limidan o'qishingiz mumkin.",
+
     // Admin Settings Page
     "admin.settings.header.title": "Platforma Sozlamalari",
     "admin.settings.header.desc": "Platformaning global sozlamalarini boshqaring",

@@ -442,3 +442,30 @@ export async function getRecentActivity() {
         return [];
     }
 }
+
+// Broadcast Notification
+export async function broadcastNotification(
+    title: string,
+    message: string,
+    type: 'info' | 'success' | 'warning' | 'error',
+    audience: 'all' | 'students' | 'teachers' | 'admin' = 'all'
+): Promise<{ success: boolean; error?: string; count?: number }> {
+    const supabase = createClient();
+
+    try {
+        const { data, error } = await supabase.rpc('broadcast_announcement', {
+            title,
+            message,
+            type,
+            audience
+        });
+
+        if (error) throw error;
+
+        // RPC returns { success: boolean, count?: number, error?: string }
+        return data as { success: boolean; error?: string; count?: number };
+    } catch (error: any) {
+        console.error('Error broadcasting notification:', error);
+        return { success: false, error: error.message };
+    }
+}

@@ -263,7 +263,12 @@ export async function submitAnswer(
         });
 
     if (error) {
-        console.error('Error submitting answer:', error);
+        // If the error is RLS related and we are submitting, it usually means the test is completed/abandoned
+        if (error.message?.includes('row-level security')) {
+            console.warn('Answer submission blocked by RLS (Test likely completed):', error.message);
+        } else {
+            console.error('Error submitting answer:', error.message, error);
+        }
         return false;
     }
 
@@ -373,7 +378,7 @@ export async function completeTestAttempt(attemptId: string, totalTimeSpent?: nu
         .eq('id', attemptId);
 
     if (updateAttemptError) {
-        console.error('Error completing attempt:', updateAttemptError);
+        console.error('Error completing attempt:', JSON.stringify(updateAttemptError, null, 2));
         return false;
     }
 

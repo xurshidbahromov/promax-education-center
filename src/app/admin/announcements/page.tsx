@@ -16,6 +16,7 @@ import {
     X
 } from "lucide-react";
 import { createClient } from "@/utils/supabase/client";
+import { broadcastNotification } from "@/lib/admin-queries";
 
 // Lazy load Modal
 const AnnouncementModal = dynamic(() => import('./components/AnnouncementModal'), {
@@ -108,6 +109,14 @@ export default function AdminAnnouncementsPage() {
 
                 if (error) throw error;
                 showToast(t('admin.announcements.toast.created'), "success");
+
+                // Broadcast notification
+                await broadcastNotification(
+                    t('notification.announcement.title') || "Yangi E'lon",
+                    t('notification.announcement.message') || "Yangi e'lon joylandi. Batafsil ma'lumotni Dashboard sahifasidagi e'lonlar bo'limidan o'qishingiz mumkin.",
+                    payload.type,
+                    payload.target_audience
+                );
             }
 
             setShowModal(false);
