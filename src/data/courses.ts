@@ -25,6 +25,7 @@ export const courses: Course[] = [
     { id: 'cert.national', icon: ScrollText, color: 'text-purple-600', bg: 'bg-purple-50 dark:bg-purple-900/20', type: 'certificate' },
     { id: 'cert.ielts', icon: Globe, color: 'text-orange-600', bg: 'bg-orange-50 dark:bg-orange-900/20', type: 'certificate' },
     { id: 'cert.sat', icon: BookOpen, color: 'text-green-600', bg: 'bg-green-50 dark:bg-green-900/20', type: 'certificate' },
+    { id: 'cert.cefr', icon: Languages, color: 'text-blue-500', bg: 'bg-blue-50 dark:bg-blue-900/20', type: 'certificate' },
 
     // University Prep
     { id: 'prep.inha', icon: GraduationCap, color: 'text-blue-700', bg: 'bg-blue-100 dark:bg-blue-900/30', type: 'prep' },

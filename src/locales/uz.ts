@@ -198,22 +198,43 @@ export const uz = {
     "courses.math.materials": "Skavi, Uzoqov to'plamlari, 1996-2003 testlar to'plami.",
     "courses.math.teacher_name": "Azizbek Rahimov",
     "courses.math.teacher_bio": "10 yillik tajribaga ega oliy toifali matematika o'qituvchisi. Ko'plab o'quvchilari nufuzli oliygohlarga grant asosida qabul qilingan.",
+    "courses.math.program.cert.title": "Milliy Sertifikatga Tayyorlov",
+    "courses.math.program.cert.features": "Darslar haftada 3 marta 2 soatdan bo'lib o'tadi + yakshanba takrorlash darsi|2 ta sinov darsi (Darslarimiz ma'qul kelsa, 1-kelgan dars kuningizdan ro'yhatga o'tkaziladi)|Ikki haftada bir marotaba ichki imtihon|Har oy so'ngida o'tilgan mavzular yuzasidan MONITORING TEST|Kurs davmoiyligi 7 oy (5 oy intensiv tarzda mavzular va 2 oy Milliy sertifikat sinovi yuzasidan praktika)|Dars sifatiga 100% kafolat|Izoh: Ushbu kurs orqali siz muddatidan avval OTMga kirishda maksimal ballni qo'lga kiritishingizni yoki ta'lim berayotgan maktabingizda qo'shimcha 50%gacha ustamaga ega bo'lishingiz mumkin.",
+    "courses.math.program.prep.title": "Abituriyentlar uchun Tayyorlov",
+    "courses.math.program.prep.features": "Darslar haftada 3 marta 2 soatdan bo'lib o'tadi|2 ta sinov darsi (Darslarimiz ma'qul kelsa, 1-kelgan dars kuningizdan ro'yhatga o'tkaziladi)|Ikki haftada bir marotaba ichki imtihon|Har oy so'ngida o'tilgan mavzular yuzasidan MONITORING TEST|Kurs davmoiyligi 10 oy (7 oy intensiv tarzda mavzular va 3 oy BMBA tomonidan tuzilgan variantlar yuzasidan praktika)|Dars sifatiga 100% kafolat",
 
     "courses.english.long_desc": "Ingliz tili kursi 4 ta asosiy ko'nikmani (Listening, Reading, Writing, Speaking) rivojlantirishga qaratilgan. Darslar interaktiv usulda olib boriladi.",
     "courses.english.materials": "Headway, English File, Cambridge IELTS books (1-18).",
     "courses.english.teacher_name": "Madina Karimova",
     "courses.english.teacher_bio": "IELTS 8.5 sertifikatiga ega, TESOL sertifikati sohibasi. Xalqaro ta'lim tajribasiga ega.",
+    "courses.english.program.main.title": "General English (4 Levels)",
+    "courses.english.program.main.features": "Beginner level (1 oy): Grammar, Reading, Vocabulary|Elementary level (2 oy): Grammar, Reading, Listening, Vocabulary|Pre-Intermediate level (2 oy): Grammar, Reading, Listening, Vocabulary|Intermediate level (2 oy): Reading, Listening, Writing, Speaking|Darslar haftada 3 marotaba 2 soatdan + yakshanba takrorlash darsi|Har bir levelda 2 marta exam (review va Level exam)|Dars sifatiga va uy vazifalarini bajarib borish natijasi sifatli bo'lishiga kafolat",
 
     // Placeholder for others to avoid errors, can be filled properly later
     "courses.physics.long_desc": "Fizika qonunlarini chuqur o'rganish va hayotiy masalalarni yechish.",
     "courses.physics.materials": "Rimkevich, Usmonov masalalar to'plami.",
     "courses.physics.teacher_name": "Jasur Aliyev",
     "courses.physics.teacher_bio": "Fizika fanlari nomzodi, 15 yillik pedagogik staj.",
+    "courses.physics.program.cert.title": "Milliy Sertifikatga Tayyorlov",
+    "courses.physics.program.cert.features": "Darslar haftada 3 marta 2 soatdan bo'lib o'tadi + yakshanba takrorlash darsi|2 ta sinov darsi (Darslarimiz ma'qul kelsa, 1-kelgan dars kuningizdan ro'yhatga o'tkaziladi)|Ikki haftada bir marotaba ichki imtihon|Har oy so'ngida o'tilgan mavzular yuzasidan MONITORING TEST|Kurs davmoiyligi 7 oy (5 oy intensiv tarzda mavzular va 2 oy Milliy sertifikat sinovi yuzasidan praktika)|Dars sifatiga 100% kafolat|Izoh: Ushbu kurs orqali siz muddatidan avval OTMga kirishda maksimal ballni qo'lga kiritishingizni yoki ta'lim berayotgan maktabingizda qo'shimcha 50%gacha ustamaga ega bo'lishingiz mumkin.",
+    "courses.physics.program.prep.title": "Abituriyentlar uchun Tayyorlov",
+    "courses.physics.program.prep.features": "Darslar haftada 3 marta 2 soatdan bo'lib o'tadi|2 ta sinov darsi (Darslarimiz ma'qul kelsa, 1-kelgan dars kuningizdan ro'yhatga o'tkaziladi)|Ikki haftada bir marotaba ichki imtihon|Har oy so'ngida o'tilgan mavzular yuzasidan MONITORING TEST|Kurs davmoiyligi 10 oy (7 oy intensiv tarzda mavzular va 3 oy BMBA tomonidan tuzilgan variantlar yuzasidan praktika)|Dars sifatiga 100% kafolat",
 
     "courses.history.long_desc": "Tarixiy voqealarni tahlil qilish va xronologik ketma-ketlikni o'rganish.",
     "courses.history.materials": "O'zbekiston tarixi, Jahon tarixi darsliklari.",
     "courses.history.teacher_name": "Dilshodbek Ergashev",
     "courses.history.teacher_bio": "Tarix fani bo'yicha ekspert, DTM testlari muallifi.",
+    "courses.history.program.cert.title": "Milliy Sertifikatga Tayyorlov",
+    "courses.history.program.cert.features": "Darslar haftada 3 marta 2 soatdan bo'lib o'tadi + yakshanba takrorlash darsi|2 ta sinov darsi (Darslarimiz ma'qul kelsa, 1-kelgan dars kuningizdan ro'yhatga o'tkaziladi)|Ikki haftada bir marotaba ichki imtihon|Har oy so'ngida o'tilgan mavzular yuzasidan MONITORING TEST|Kurs davmoiyligi 7 oy (5 oy intensiv tarzda mavzular va 2 oy Milliy sertifikat sinovi yuzasidan praktika)|Dars sifatiga 100% kafolat|Izoh: Ushbu kurs orqali siz muddatidan avval OTMga kirishda maksimal ballni qo'lga kiritishingizni yoki ta'lim berayotgan maktabingizda qo'shimcha 50%gacha ustamaga ega bo'lishingiz mumkin.",
+    "courses.history.program.prep.title": "Abituriyentlar uchun Tayyorlov",
+    "courses.history.program.prep.features": "Darslar haftada 3 marta 2 soatdan bo'lib o'tadi|2 ta sinov darsi (Darslarimiz ma'qul kelsa, 1-kelgan dars kuningizdan ro'yhatga o'tkaziladi)|Ikki haftada bir marotaba ichki imtihon|Har oy so'ngida o'tilgan mavzular yuzasidan MONITORING TEST|Kurs davmoiyligi 10 oy (7 oy intensiv tarzda mavzular va 3 oy BMBA tomonidan tuzilgan variantlar yuzasidan praktika)|Dars sifatiga 100% kafolat",
+
+    "courses.law.long_desc": "Huquqshunoslik asoslari va qonunchilikni o'rganish.",
+    "courses.law.materials": "Konstitutsiya, Kodekslar sharhlari.",
+    "courses.law.teacher_name": "Advokat Alisher",
+    "courses.law.teacher_bio": "Amaliyotchi huquqshunos, yuridik fanlar magistri.",
+    "courses.law.program.prep.title": "Huquqshunoslik (Abituriyent)",
+    "courses.law.program.prep.features": "Darslar haftada 3 marta 2 soatdan bo'lib o'tadi|2 ta sinov darsi|Ikki haftada bir marotaba ichki imtihon|Har oy so'ngida o'tilgan mavzular yuzasidan MONITORING TEST|Kurs davmoiyligi 10 oy (Intensiv)|Dars sifatiga 100% kafolat",
 
     "courses.biology.long_desc": "Tirik organizmlar va ularning tuzilishini o'rganish.",
     "courses.biology.materials": "Biologiya 6-11 sinf darsliklari, Green to'plami.",
@@ -225,32 +246,66 @@ export const uz = {
     "courses.chemistry.long_desc": "Kimyoviy elementlar va reaksiyalarni o'rganish.",
     "courses.chemistry.materials": "Kimyo masalalar to'plami, Homchenko.",
     "courses.chemistry.teacher_name": "Rustam aka",
-    "courses.chemistry.teacher_bio": "Kimyo fanidan olimpiada g'oliblarini tayyorlagan ustoz.",
+    "courses.chemistry.program.cert.title": "Milliy Sertifikatga Tayyorlov",
+    "courses.chemistry.program.cert.features": "Darslar haftada 3 marta 2 soatdan bo'lib o'tadi + yakshanba takrorlash darsi|2 ta sinov darsi (Darslarimiz ma'qul kelsa, 1-kelgan dars kuningizdan ro'yhatga o'tkaziladi)|Ikki haftada bir marotaba ichki imtihon|Har oy so'ngida o'tilgan mavzular yuzasidan MONITORING TEST|Kurs davmoiyligi 7 oy (5 oy intensiv tarzda mavzular va 2 oy Milliy sertifikat sinovi yuzasidan praktika)|Dars sifatiga 100% kafolat|Izoh: Ushbu kurs orqali siz muddatidan avval OTMga kirishda maksimal ballni qo'lga kiritishingizni yoki ta'lim berayotgan maktabingizda qo'shimcha 50%gacha ustamaga ega bo'lishingiz mumkin.",
+
+    "courses.chemistry.program.prep.title": "Abituriyentlar uchun Tayyorlov",
+    "courses.chemistry.program.prep.features": "Darslar haftada 3 marta 2 soatdan bo'lib o'tadi|2 ta sinov darsi (Darslarimiz ma'qul kelsa, 1-kelgan dars kuningizdan ro'yhatga o'tkaziladi)|Ikki haftada bir marotaba ichki imtihon|Har oy so'ngida o'tilgan mavzular yuzasidan MONITORING TEST|Kurs davmoiyligi 10 oy (7 oy intensiv tarzda mavzular va 3 oy BMBA tomonidan tuzilgan variantlar yuzasidan praktika)|Dars sifatiga 100% kafolat",
+
+    "courses.biology.program.cert.title": "Milliy Sertifikatga Tayyorlov",
+    "courses.biology.program.cert.features": "Darslar haftada 3 marta 2 soatdan bo'lib o'tadi + yakshanba takrorlash darsi|2 ta sinov darsi (Darslarimiz ma'qul kelsa, 1-kelgan dars kuningizdan ro'yhatga o'tkaziladi)|Ikki haftada bir marotaba ichki imtihon|Har oy so'ngida o'tilgan mavzular yuzasidan MONITORING TEST|Kurs davmoiyligi 7 oy (5 oy intensiv tarzda mavzular va 2 oy Milliy sertifikat sinovi yuzasidan praktika)|Dars sifatiga 100% kafolat|Izoh: Ushbu kurs orqali siz muddatidan avval OTMga kirishda maksimal ballni qo'lga kiritishingizni yoki ta'lim berayotgan maktabingizda qo'shimcha 50%gacha ustamaga ega bo'lishingiz mumkin.",
+
+    "courses.biology.program.prep.title": "Abituriyentlar uchun Tayyorlov",
+    "courses.biology.program.prep.features": "Darslar haftada 3 marta 2 soatdan bo'lib o'tadi|2 ta sinov darsi (Darslarimiz ma'qul kelsa, 1-kelgan dars kuningizdan ro'yhatga o'tkaziladi)|Ikki haftada bir marotaba ichki imtihon|Har oy so'ngida o'tilgan mavzular yuzasidan MONITORING TEST|Kurs davmoiyligi 10 oy (7 oy intensiv tarzda mavzular va 3 oy BMBA tomonidan tuzilgan variantlar yuzasidan praktika)|Dars sifatiga 100% kafolat",
 
     "courses.native.long_desc": "Ona tili grammatikasi va adabiyoti bo'yicha chuqur bilimlar.",
     "courses.native.materials": "Ona tili va adabiyot darsliklari, DTM testlari.",
     "courses.native.teacher_name": "Feruza opa",
     "courses.native.teacher_bio": "Filologiya fanlari nomzodi.",
+    "courses.native.program.cert.title": "Milliy Sertifikatga Tayyorlov",
+    "courses.native.program.cert.features": "Darslar haftada 3 marta 2 soatdan bo'lib o'tadi + yakshanba takrorlash darsi|2 ta sinov darsi (Darslarimiz ma'qul kelsa, 1-kelgan dars kuningizdan ro'yhatga o'tkaziladi)|Ikki haftada bir marotaba ichki imtihon|Har oy so'ngida o'tilgan mavzular yuzasidan MONITORING TEST|Kurs davmoiyligi 7 oy (5 oy intensiv tarzda mavzular va 2 oy Milliy sertifikat sinovi yuzasidan praktika)|Izoh: Ushbu kurs orqali siz muddatidan avval OTMga kirishda maksimal ballni qo'lga kiritishingizni yoki ta'lim berayotgan maktabingizda qo'shimcha 50%gacha ustamaga ega bo'lishingiz mumkin.",
+
+    "courses.native.program.prep.title": "Abituriyentlar uchun Tayyorlov",
+    "courses.native.program.prep.features": "Darslar haftada 3 marta 2 soatdan bo'lib o'tadi|2 ta sinov darsi (Darslarimiz ma'qul kelsa, 1-kelgan dars kuningizdan ro'yhatga o'tkaziladi)|Ikki haftada bir marotaba ichki imtihon|Har oy so'ngida o'tilgan mavzular yuzasidan MONITORING TEST|Kurs davmoiyligi 10 oy (7 oy intensiv tarzda mavzular va 3 oy BMBA tomonidan tuzilgan variantlar yuzasidan praktika)",
 
     "courses.russian.long_desc": "Rus tilida erkin so'zlashish va grammatikani o'rganish.",
     "courses.russian.materials": "Poexali, Rus tili grammatikasi.",
     "courses.russian.teacher_name": "Elena Vladimirovna",
     "courses.russian.teacher_bio": "Rus tili va adabiyoti o'qituvchisi.",
+    "courses.russian.program.main.title": "General Russian (So'zlashuv)",
+    "courses.russian.program.main.features": "Grammatika, O'qish, Yozish, So'zlashuv|Darslar haftada 3 marta 2 soatdan|Rus muhiti|Erkin muloqot va debatlar|Davomiyligi: 6 oy (Intensiv)|Dars sifatiga 100% kafolat",
+
 
     "courses.korean.long_desc": "Koreys tilini noldan TOPIK darajasigacha o'rganish.",
     "courses.korean.materials": "Sejong Korean, TOPIK testlari.",
     "courses.korean.teacher_name": "Kim Min-ji",
     "courses.korean.teacher_bio": "Koreyada tahsil olgan va 5 yillik tajribaga ega.",
+    "courses.korean.program.main.title": "TOPIK Intensive",
+    "courses.korean.program.main.features": "TOPIK I (1-2 daraja) - 3 oy|TOPIK II (3-4 daraja) - 3 oy|TOPIK II (5-6 daraja) - 3 oy|Darslar haftada 3 marta 2 soatdan|Koreys tili grammatikasi va so'zlashuv|Davomiyligi: 9 oy|Dars sifatiga 100% kafolat",
+
 
     "courses.cert.national.long_desc": "Milliy sertifikat imtihoniga maxsus tayyorgarlik kursi.",
     "courses.cert.national.materials": "DTM rasmiy testlari.",
     "courses.cert.national.teacher_name": "Expert Team",
     "courses.cert.national.teacher_bio": "Milliy sertifikat bo'yicha mutaxassislar guruhi.",
+    "courses.cert.national.program.main.title": "Milliy Sertifikat Intensive",
+    "courses.cert.national.program.main.features": "Darslar haftada 3 marta 2 soatdan bo'lib o'tadi + yakshanba takrorlash darsi|2 ta sinov darsi (Darslarimiz ma'qul kelsa, 1-kelgan dars kuningizdan ro'yhatga o'tkaziladi)|Ikki haftada bir marotaba ichki imtihon|Har oy so'ngida o'tilgan mavzular yuzasidan MONITORING IMTIHON|Kurs davmoiyligi 10 oy (7 oy intensiv tarzda mavzular va 3 oy BMBA variantlari yuzasidan praktika time management uchun)|Dars sifatiga 100% kafolat|Izoh: Ushbu kurs orqali siz muddatidan avval OTMga kirishda maksimal ballni qo'lga kiritishingizni yoki ta'lim berayotgan maktabingizda qo'shimcha 50%gacha ustamaga ega bo'lishingiz mumkin.",
 
     "courses.cert.ielts.long_desc": "IELTS imtihoniga intensiv tayyorgarlik (Academic & General).",
     "courses.cert.ielts.materials": "Cambridge 10-18, Makkar IELTS.",
-    "courses.cert.ielts.teacher_name": "Mr. John",
-    "courses.cert.ielts.teacher_bio": "IELTS Examiner experience.",
+    "courses.cert.ielts.teacher_name": "Mr. Akmal",
+    "courses.cert.ielts.teacher_bio": "IELTS 8.5 (R:9, L:9), 7 yillik tajriba.",
+    "courses.cert.ielts.program.main.title": "IELTS Intensive (8 Months)",
+    "courses.cert.ielts.program.main.features": "PRE- IELTS (3 months) : band score: 5.5-6.5|IELTS FOUNDATION (3 months) : band score: 6.5-7.5|IELTS GRADUATION (3 months) : band score: 7.5+|Kurs davomiyligi: 8 oy (Intensiv)|Har ikki haftada takrorlash|Har oyda MOCK EXAM va CEFR PRACTICElar orqali natijangiz mustahkamlanib boradi",
+
+    "courses.cert.cefr": "CEFR (Multilevel)",
+    "courses.cert.cefr.desc": "Mukammal muloqot va yuqori daraja sari.",
+    "courses.cert.cefr.long_desc": "CEFR (Multilevel) imtihoniga tayyorgarlik.",
+    "courses.cert.cefr.materials": "Multilevel tests, Grammar books.",
+    "courses.cert.cefr.teacher_name": "Mr. Davron",
+    "courses.cert.cefr.teacher_bio": "CEFR C1 daraja sohibi.",
+    "courses.cert.cefr.program.main.title": "CEFR Intensive (6 Months)",
+    "courses.cert.cefr.program.main.features": "PRE-MULTILEVEL (3 months): Reading, Listening, Writing, Speaking, Vocabulary (B1-B2)|MULTILEVEL (3 months): Reading, Listening, Writing, Speaking, Vocabulary (B2-C1)|Kurs davomiyligi: 6 oy|Dars sifatiga 100% kafolat|Har ikki haftada takrorlash|Har oyda MOCK EXAM va CEFR PRACTICElar orqali natijangiz mustahkamlanib boradi",
 
     "courses.cert.sat.long_desc": "SAT Math va English qismlariga mukammal tayyorgarlik.",
     "courses.cert.sat.materials": "College Board, Khan Academy, Princeton Review.",
@@ -267,11 +322,21 @@ export const uz = {
     "courses.prep.inha.materials": "Inha past papers, Calculus books.",
     "courses.prep.inha.teacher_name": "Inha Team",
     "courses.prep.inha.teacher_bio": "Inha universiteti talabalari va bitiruvchilari.",
+    "courses.prep.inha.program.main.title": "INHA Intensive",
+    "courses.prep.inha.program.main.features": "Darslar haftada 3 marta 2 soatdan bo'lib o'tadi + yakshanba takrorlash darsi|2 ta sinov darsi (Darslarimiz ma'qul kelsa, 1-kelgan dars kuningizdan ro'yhatga o'tkaziladi)|Ikki haftada bir marotaba ichki imtihon|Har oy so'ngida o'tilgan mavzular yuzasidan MOCK EXAM|Kurs davmoiyligi 8 oy (6 oy intensiv tarzda mavzular va 2 oy SAT*GMAT practice booklar yuzasidan praktika)|Dars sifatiga 100% kafolat (Aynan math sectiondan eng kam natijangiz 50%+ kafolat)",
 
     "courses.prep.west.long_desc": "WIUT kirish imtihoni (Math) va IELTS ga tayyorgarlik.",
     "courses.prep.west.materials": "WIUT math exams, IELTS materials.",
     "courses.prep.west.teacher_name": "West Team",
     "courses.prep.west.teacher_bio": "WIUT bitiruvchilari.",
+    "courses.prep.west.program.main.title": "WIUT Intensive",
+    "courses.prep.west.program.main.features": "Darslar haftada 3 marta 2 soatdan bo'lib o'tadi + yakshanba takrorlash darsi|2 ta sinov darsi (Darslarimiz ma'qul kelsa, 1-kelgan dars kuningizdan ro'yhatga o'tkaziladi)|Ikki haftada bir marotaba ichki imtihon|Har oy so'ngida o'tilgan mavzular yuzasidan MOCK EXAM|Kurs davmoiyligi 8 oy (6 oy intensiv tarzda mavzular va 2 oy SAT*GMAT practice booklar yuzasidan praktika)|Dars sifatiga 100% kafolat (Aynan math sectiondan eng kam natijangiz 50%+ kafolat)",
+
+    "courses.prep.turin.program.main.title": "TURIN Intensive",
+    "courses.prep.turin.program.main.features": "Darslar haftada 3 marta 2 soatdan bo'lib o'tadi + yakshanba takrorlash darsi|2 ta sinov darsi (Darslarimiz ma'qul kelsa, 1-kelgan dars kuningizdan ro'yhatga o'tkaziladi)|Ikki haftada bir marotaba ichki imtihon|Har oy so'ngida o'tilgan mavzular yuzasidan MOCK EXAM|Kurs davmoiyligi 8 oy (6 oy intensiv tarzda mavzular va 2 oy SAT*GMAT practice booklar yuzasidan praktika)|Dars sifatiga 100% kafolat (Aynan math sectiondan eng kam natijangiz 50%+ kafolat)",
+
+    "courses.prep.aut.program.main.title": "AUT Intensive",
+    "courses.prep.aut.program.main.features": "Darslar haftada 3 marta 2 soatdan bo'lib o'tadi + yakshanba takrorlash darsi|2 ta sinov darsi (Darslarimiz ma'qul kelsa, 1-kelgan dars kuningizdan ro'yhatga o'tkaziladi)|Ikki haftada bir marotaba ichki imtihon|Har oy so'ngida o'tilgan mavzular yuzasidan MOCK EXAM|Kurs davmoiyligi 8 oy (6 oy intensiv tarzda mavzular va 2 oy SAT*GMAT practice booklar yuzasidan praktika)|Dars sifatiga 100% kafolat (Aynan math sectiondan eng kam natijangiz 50%+ kafolat)",
 
     // Auth Layout Keys
     "auth.back_to_home": "Bosh sahifaga qaytish",
