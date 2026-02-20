@@ -18,8 +18,22 @@ const poppins = Poppins({
 });
 
 export const metadata: Metadata = {
-  title: "Promax Education Center",
-  description: "Expert preparation for OTM, IELTS, SAT, and International Universities.",
+  title: "Promax Education Center | Zamonaviy Ta'lim Markazi",
+  description: "Xorazm Urganch shahridagi eng zamonaviy o'quv markazi. OTM larga, IELTS, SAT va Xalqaro Universitetlarga tayyorlov.",
+  keywords: ["O'quv markazi", "Urganch", "Xorazm", "IELTS", "SAT", "OTM", "Abituriyent", "Matematika", "Ingliz tili", "Promax Education"],
+  openGraph: {
+    title: "Promax Education Center",
+    description: "Urganch shahridagi eng zamonaviy o'quv markazi",
+    url: "https://promaxedu.uz",
+    siteName: "Promax Education Center",
+    locale: "uz_UZ",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Promax Education Center",
+    description: "Zamonaviy ta'lim markazi - IELTS, SAT, Milliy Sertifikatlar",
+  }
 };
 
 export default function RootLayout({

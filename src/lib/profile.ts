@@ -133,3 +133,18 @@ export async function uploadAvatar(file: File): Promise<string | null> {
 
     return data.publicUrl;
 }
+
+/**
+ * Update user password
+ */
+export async function updatePassword(password: string): Promise<{ success: boolean; error?: any }> {
+    const supabase = createClient();
+    const { error } = await supabase.auth.updateUser({ password });
+
+    if (error) {
+        console.error('Error updating password:', error);
+        return { success: false, error };
+    }
+
+    return { success: true };
+}

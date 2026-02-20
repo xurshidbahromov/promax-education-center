@@ -26,7 +26,7 @@ const Footer = () => {
                                 <div className="relative w-24 h-24">
                                     <Image
                                         src="/favicon.ico"
-                                        alt="Promax Education Logo"
+                                        alt="Promax Education Center Logo"
                                         fill
                                         sizes="96px"
                                         className="object-contain dark:filter-none invert hue-rotate-180"

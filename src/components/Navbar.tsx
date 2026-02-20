@@ -65,7 +65,7 @@ const Navbar = () => {
                             <div className="w-24 h-24">
                                 <Image
                                     src="/logo.png"
-                                    alt="Logo"
+                                    alt="Promax Education Center Logo"
                                     width={256}
                                     height={256}
                                     className="w-full h-full object-contain dark:filter-none invert hue-rotate-180"

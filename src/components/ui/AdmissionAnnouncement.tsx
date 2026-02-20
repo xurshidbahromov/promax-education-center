@@ -49,7 +49,7 @@ const AdmissionAnnouncement = () => {
                                     {/* eslint-disable-next-line @next/next/no-img-element */}
                                     <img
                                         src="/Logo_without_sentence.png"
-                                        alt="Promax Logo"
+                                        alt="Promax Education Center Logo"
                                         className="w-full h-full object-contain drop-shadow-sm"
                                     />
                                 </div>

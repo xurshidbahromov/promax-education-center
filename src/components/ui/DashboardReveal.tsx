@@ -69,7 +69,7 @@ const DashboardReveal = () => {
                             <div className="relative w-full h-full drop-shadow-2xl">
                                 <Image
                                     src="/Logo_without_sentence.png"
-                                    alt="Promax Logo"
+                                    alt="Promax Education Center Logo"
                                     fill
                                     className="object-contain"
                                     priority

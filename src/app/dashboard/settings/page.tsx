@@ -12,17 +12,34 @@ import {
     Smartphone,
     Mail,
     Globe,
-    Loader2
+    Loader2,
+    User,
+    Camera,
+    Save,
+    Lock
 } from "lucide-react";
-import { useState, useEffect } from "react";
-import { getUserProfile, updateUserSettings } from "@/lib/profile";
+import { useState, useEffect, useRef } from "react";
+import { getUserProfile, updateUserSettings, updateUserProfile, uploadAvatar, updatePassword } from "@/lib/profile";
+import { useToast } from "@/context/ToastContext";
+import Image from "next/image";
 
 export default function SettingsPage() {
     const { t, language, setLanguage } = useLanguage();
     const { theme, setTheme } = useTheme();
+    const { showToast } = useToast();
     const [mounted, setMounted] = useState(false);
     const [loading, setLoading] = useState(false);
     const [userId, setUserId] = useState<string | null>(null);
+
+    // Profile State
+    const [fullName, setFullName] = useState("");
+    const [phone, setPhone] = useState("");
+    const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
+    const [password, setPassword] = useState("");
+    const [isSavingProfile, setIsSavingProfile] = useState(false);
+    const [isSavingPassword, setIsSavingPassword] = useState(false);
+    const [isUploadingAvatar, setIsUploadingAvatar] = useState(false);
+    const fileInputRef = useRef<HTMLInputElement>(null);
 
     // Settings State
     const [notifications, setNotifications] = useState({
@@ -43,6 +60,10 @@ export default function SettingsPage() {
             if (profile) {
                 setUserId(profile.id);
                 const s = profile.settings || {};
+
+                setFullName(profile.full_name || "");
+                setPhone(profile.phone || "");
+                setAvatarUrl(profile.avatar_url || null);
 
                 // Apply saved settings
                 if (s.theme) setTheme(s.theme);
@@ -96,6 +117,53 @@ export default function SettingsPage() {
         saveSetting('notifications', newNotifs);
     };
 
+    const handleProfileSave = async () => {
+        setIsSavingProfile(true);
+        const { success } = await updateUserProfile({ full_name: fullName, phone });
+        setIsSavingProfile(false);
+        if (success) {
+            showToast(t('settings.profile.saved') || "Profil saqlandi", "success");
+        } else {
+            showToast(t('settings.profile.error') || "Xatolik yuz berdi", "error");
+        }
+    };
+
+    const handlePasswordSave = async () => {
+        if (!password || password.length < 6) {
+            showToast(t('settings.password.min_length') || "Parol kamida 6ta belgi bo'lishi kerak", "error");
+            return;
+        }
+        setIsSavingPassword(true);
+        const { success } = await updatePassword(password);
+        setIsSavingPassword(false);
+        if (success) {
+            setPassword("");
+            showToast(t('settings.password.saved') || "Parol yangilandi", "success");
+        } else {
+            showToast(t('settings.password.error') || "Xatolik yuz berdi", "error");
+        }
+    };
+
+    const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (!file) return;
+
+        setIsUploadingAvatar(true);
+        const url = await uploadAvatar(file);
+        if (url) {
+            const { success } = await updateUserProfile({ avatar_url: url });
+            if (success) {
+                setAvatarUrl(url);
+                showToast(t('settings.avatar.saved') || "Rasm yuklandi", "success");
+            } else {
+                showToast(t('settings.avatar.error') || "Xatolik yuz berdi", "error");
+            }
+        } else {
+            showToast(t('settings.avatar.error') || "Yuklashda xatolik", "error");
+        }
+        setIsUploadingAvatar(false);
+    };
+
     if (!mounted) return null;
 
     return (
@@ -107,6 +175,121 @@ export default function SettingsPage() {
             </h1>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {/* Profile Settings */}
+                <div className="md:col-span-2 bg-white dark:bg-slate-900 rounded-3xl p-6 border border-gray-200 dark:border-slate-800 shadow-sm flex flex-col md:flex-row gap-8">
+                    <div className="flex-1 space-y-6">
+                        <h2 className="text-lg font-bold text-gray-900 dark:text-white flex items-center gap-2">
+                            <User size={20} className="text-brand-blue" />
+                            {t('settings.profile.title') || "Profil Ma'lumotlari"}
+                        </h2>
+
+                        <div className="space-y-4">
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                                    {t('settings.profile.name') || "Ism familiya"}
+                                </label>
+                                <input
+                                    type="text"
+                                    value={fullName}
+                                    onChange={(e) => setFullName(e.target.value)}
+                                    className="w-full px-4 py-3 rounded-xl border border-gray-300 dark:border-slate-700 bg-gray-50 dark:bg-slate-800 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-brand-blue/50"
+                                    placeholder="Ism familiyangiz"
+                                />
+                            </div>
+
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                                    {t('settings.profile.phone') || "Telefon raqam"}
+                                </label>
+                                <input
+                                    type="text"
+                                    value={phone}
+                                    onChange={(e) => setPhone(e.target.value)}
+                                    className="w-full px-4 py-3 rounded-xl border border-gray-300 dark:border-slate-700 bg-gray-50 dark:bg-slate-800 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-brand-blue/50"
+                                    placeholder="+998 90 123 45 67"
+                                />
+                            </div>
+
+                            <button
+                                onClick={handleProfileSave}
+                                disabled={isSavingProfile}
+                                className="flex items-center gap-2 px-6 py-3 bg-brand-blue text-white rounded-xl font-medium hover:bg-blue-600 transition-colors disabled:opacity-50 w-fit"
+                            >
+                                {isSavingProfile ? <Loader2 size={18} className="animate-spin" /> : <Save size={18} />}
+                                {t('common.save') || "Saqlash"}
+                            </button>
+                        </div>
+                    </div>
+
+                    <div className="flex-1 space-y-6">
+                        <h2 className="text-lg font-bold text-gray-900 dark:text-white flex items-center gap-2">
+                            <Lock size={20} className="text-brand-orange" />
+                            {t('settings.password.title') || "Parolni Qayta Tiklash"}
+                        </h2>
+
+                        <div className="space-y-4">
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                                    {t('settings.password.new') || "Yangi parol"}
+                                </label>
+                                <input
+                                    type="password"
+                                    value={password}
+                                    onChange={(e) => setPassword(e.target.value)}
+                                    className="w-full px-4 py-3 rounded-xl border border-gray-300 dark:border-slate-700 bg-gray-50 dark:bg-slate-800 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-brand-blue/50"
+                                    placeholder="••••••••"
+                                />
+                            </div>
+
+                            <button
+                                onClick={handlePasswordSave}
+                                disabled={isSavingPassword || !password}
+                                className="flex items-center gap-2 px-6 py-3 bg-gray-900 dark:bg-white dark:text-gray-900 text-white rounded-xl font-medium hover:bg-gray-800 dark:hover:bg-gray-100 transition-colors disabled:opacity-50 w-fit"
+                            >
+                                {isSavingPassword ? <Loader2 size={18} className="animate-spin" /> : <Lock size={18} />}
+                                {t('settings.password.update') || "Parolni o'rnatish"}
+                            </button>
+                        </div>
+
+                        <div className="pt-6 border-t border-gray-100 dark:border-slate-800">
+                            <h3 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">
+                                {t('settings.avatar.title') || "Profil rasmi"}
+                            </h3>
+                            <div className="flex items-center gap-4">
+                                <div className="w-16 h-16 rounded-full bg-gray-200 dark:bg-slate-800 overflow-hidden flex items-center justify-center border-2 border-brand-blue relative">
+                                    {avatarUrl ? (
+                                        <Image src={avatarUrl} alt="Avatar" fill className="object-cover" />
+                                    ) : (
+                                        <User size={24} className="text-gray-400" />
+                                    )}
+                                    {isUploadingAvatar && (
+                                        <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
+                                            <Loader2 size={16} className="text-white animate-spin" />
+                                        </div>
+                                    )}
+                                </div>
+                                <div>
+                                    <input
+                                        type="file"
+                                        className="hidden"
+                                        ref={fileInputRef}
+                                        accept="image/*"
+                                        onChange={handleAvatarUpload}
+                                    />
+                                    <button
+                                        onClick={() => fileInputRef.current?.click()}
+                                        disabled={isUploadingAvatar}
+                                        className="flex items-center gap-2 px-4 py-2 text-sm border border-gray-300 dark:border-slate-700 rounded-lg shadow-sm hover:bg-gray-50 dark:hover:bg-slate-800 transition-colors font-medium text-gray-700 dark:text-gray-300"
+                                    >
+                                        <Camera size={16} />
+                                        {t('settings.avatar.upload') || "Rasm yuklash"}
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
                 {/* Appearance Settings */}
                 <div className="bg-white dark:bg-slate-900 rounded-3xl p-6 border border-gray-200 dark:border-slate-800 shadow-sm">
                     <h2 className="text-lg font-bold text-gray-900 dark:text-white mb-6 flex items-center gap-2">

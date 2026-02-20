@@ -424,6 +424,27 @@ export const uz = {
     "settings.language.ru": "Русский",
     "settings.language.ru.desc": "Kirill yozuvi",
 
+    // Profile Settings
+    "settings.profile.title": "Profil Ma'lumotlari",
+    "settings.profile.name": "Ism familiya",
+    "settings.profile.phone": "Telefon raqam",
+    "settings.profile.saved": "Profil muvaffaqiyatli saqlandi",
+    "settings.profile.error": "Profilni saqlashda xatolik",
+
+    // Password Settings
+    "settings.password.title": "Parolni Qayta Tiklash",
+    "settings.password.new": "Yangi parol",
+    "settings.password.update": "Parolni o'rnatish",
+    "settings.password.min_length": "Parol kamida 6ta belgi bo'lishi kerak",
+    "settings.password.saved": "Parol muvaffaqiyatli yangilandi",
+    "settings.password.error": "Parolni yangilashda xatolik yuz berdi",
+
+    // Avatar Settings
+    "settings.avatar.title": "Profil rasmi",
+    "settings.avatar.upload": "Rasm yuklash",
+    "settings.avatar.saved": "Rasm yuklandi",
+    "settings.avatar.error": "Rasm yuklashda xatolik",
+
     // Results Page
     "results.title": "Imtihon Natijalari",
     "results.subtitle": "Barcha topshirilgan mock va testlar tarixi",
