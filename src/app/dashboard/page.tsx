@@ -14,7 +14,6 @@ import {
     XCircle,
     Megaphone,
     Medal,
-    Gamepad2,
     Crown
 } from "lucide-react";
 import {
@@ -101,12 +100,6 @@ export default function DashboardPage() {
                     <p className="text-gray-500 dark:text-gray-400 mt-1">
                         {new Date().toLocaleDateString(t('locale') === 'uz' ? 'uz-UZ' : 'en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
                     </p>
-                </div>
-                <div className="flex gap-3">
-                    <button className="px-4 py-2 bg-gradient-to-r from-brand-blue to-indigo-600 text-white rounded-xl text-sm font-medium hover:opacity-90 transition-opacity shadow-lg shadow-brand-blue/30 flex items-center gap-2">
-                        <Gamepad2 size={18} />
-                        {t('dashboard.game_zone')}
-                    </button>
                 </div>
             </div>
 
