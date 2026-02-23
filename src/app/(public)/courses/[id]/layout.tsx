@@ -2,8 +2,9 @@ import { Metadata } from 'next';
 import { courses } from '@/data/courses';
 import { uz } from '@/locales/uz';
 
-export async function generateMetadata({ params }: { params: { id: string } }): Promise<Metadata> {
-    const course = courses.find((c) => c.id === params.id);
+export async function generateMetadata({ params }: { params: Promise<{ id: string }> }): Promise<Metadata> {
+    const resolvedParams = await params;
+    const course = courses.find((c) => c.id === resolvedParams.id);
 
     if (!course) {
         return {
@@ -24,17 +25,18 @@ export async function generateMetadata({ params }: { params: { id: string } }): 
         openGraph: {
             title: `${title} - Promax Education Center`,
             description: description,
-            url: `https://promaxedu.uz/courses/${params.id}`,
+            url: `https://promaxedu.uz/courses/${resolvedParams.id}`,
             type: "website",
         },
         alternates: {
-            canonical: `https://promaxedu.uz/courses/${params.id}`
+            canonical: `https://promaxedu.uz/courses/${resolvedParams.id}`
         }
     };
 }
 
-export default function CourseLayout({ children, params }: { children: React.ReactNode, params: { id: string } }) {
-    const course = courses.find((c) => c.id === params.id);
+export default async function CourseLayout({ children, params }: { children: React.ReactNode, params: Promise<{ id: string }> }) {
+    const resolvedParams = await params;
+    const course = courses.find((c) => c.id === resolvedParams.id);
 
     // Create JSON-LD for this individual course
     let jsonLd = null;
