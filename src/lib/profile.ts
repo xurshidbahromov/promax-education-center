@@ -115,8 +115,8 @@ export async function uploadAvatar(file: File): Promise<string | null> {
     if (!user) return null;
 
     const fileExt = file.name.split('.').pop();
-    const fileName = `${user.id}-${Math.random()}.${fileExt}`;
-    const filePath = `avatars/${fileName}`;
+    const fileName = `${Math.random()}.${fileExt}`;
+    const filePath = `${user.id}/${fileName}`;
 
     const { error: uploadError } = await supabase.storage
         .from('avatars')

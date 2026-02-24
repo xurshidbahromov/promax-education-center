@@ -33,6 +33,53 @@ export const useUserProfile = (userId: string | undefined) => {
     });
 };
 
+// Hook to get FULL user profile (used on Profile and Settings pages)
+export const useFullUserProfile = (userId: string | undefined) => {
+    return useQuery({
+        queryKey: ['fullUserProfile', userId],
+        queryFn: async () => {
+            if (!userId) return null;
+            const supabase = createClient();
+
+            // First get the email from auth
+            const { data: { user } } = await supabase.auth.getUser();
+
+            // Then get the profile from public.profiles
+            const { data: profile, error } = await supabase
+                .from('profiles')
+                .select('*')
+                .eq('id', userId)
+                .single();
+
+            if (error && error.code !== 'PGRST116') { // PGRST116 is no rows found
+                console.error('Error fetching profile:', error);
+            }
+
+            // Combine them
+            if (profile) {
+                return {
+                    ...profile,
+                    email: user?.email || '',
+                };
+            }
+
+            // Fallback for new users who don't have a profile yet
+            return {
+                id: userId,
+                email: user?.email || '',
+                full_name: user?.user_metadata?.full_name || '',
+                phone: user?.phone || '',
+                avatar_url: user?.user_metadata?.avatar_url || '',
+                bio: '',
+                location: '',
+                coins: 0,
+                settings: {}
+            };
+        },
+        enabled: !!userId,
+    });
+};
+
 export const useDashboardStats = (userId: string | undefined) => {
     return useQuery({
         queryKey: ['dashboardStats', userId],
