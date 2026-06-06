@@ -100,7 +100,13 @@ export default function DashboardLayout({
     ];
 
     return (
-        <div className="min-h-screen bg-gray-50 dark:bg-slate-950 flex">
+        <div className="min-h-screen bg-gray-50 dark:bg-slate-950 flex relative overflow-hidden">
+            {/* Background Orbs */}
+            <div className="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none z-0">
+                <div className="absolute -top-[20%] -left-[10%] w-[50%] h-[50%] bg-brand-blue/10 rounded-full blur-[120px]"></div>
+                <div className="absolute top-[40%] -right-[10%] w-[40%] h-[60%] bg-brand-orange/10 rounded-full blur-[120px]"></div>
+            </div>
+
             {/* Reveal Animation */}
             <DashboardReveal />
 
@@ -117,7 +123,7 @@ export default function DashboardLayout({
             {/* Sidebar */}
             <aside
                 className={`
-          fixed lg:sticky top-0 h-screen z-50 w-64 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border-r border-gray-200 dark:border-slate-800 transition-transform duration-300 ease-in-out
+          fixed lg:sticky top-0 lg:top-4 h-screen lg:h-[calc(100vh-2rem)] z-50 w-64 lg:ml-4 bg-white/80 dark:bg-slate-900/80 backdrop-blur-2xl border-r lg:border border-gray-200/50 dark:border-slate-800/50 lg:rounded-3xl shadow-2xl shadow-brand-blue/5 transition-transform duration-300 ease-in-out
           ${sidebarOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"}
         `}
             >
@@ -135,8 +141,8 @@ export default function DashboardLayout({
                                     className="object-contain"
                                 />
                             </div>
-                            <span className="text-xl font-bold bg-gradient-to-r from-brand-blue to-brand-orange bg-clip-text text-transparent">
-                                Promax LMS
+                            <span className="text-2xl font-bold bg-gradient-to-r from-brand-blue to-brand-orange bg-clip-text text-transparent font-fredoka uppercase tracking-wide">
+                                Promax
                             </span>
                         </Link>
                     </div>
@@ -151,9 +157,9 @@ export default function DashboardLayout({
                                     href={item.href}
                                     onClick={() => setSidebarOpen(false)}
                                     className={`
-                    flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 group
+                    flex items-center gap-3 px-4 py-3.5 rounded-2xl transition-all duration-300 group relative overflow-hidden
                     ${isActive
-                                            ? "bg-brand-blue text-white shadow-lg shadow-brand-blue/20"
+                                            ? "text-white shadow-lg shadow-brand-blue/20 bg-brand-blue"
                                             : "text-gray-600 dark:text-gray-400 hover:bg-gray-100/50 dark:hover:bg-slate-800/50 hover:text-brand-blue"
                                         }
                   `}
@@ -182,9 +188,9 @@ export default function DashboardLayout({
             </aside>
 
             {/* Main Content */}
-            <div className="flex-1 flex flex-col min-w-0">
+            <div className="flex-1 flex flex-col min-w-0 relative z-10">
                 {/* Header */}
-                <header className="sticky top-0 z-40 h-16 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border-b border-gray-200/50 dark:border-slate-800/50 flex items-center justify-between px-4 lg:px-8">
+                <header className="sticky top-0 z-40 h-20 bg-white/60 dark:bg-slate-950/60 backdrop-blur-xl border-b border-gray-200/50 dark:border-slate-800/50 flex items-center justify-between px-4 lg:px-8">
                     <button
                         onClick={() => setSidebarOpen(true)}
                         className="lg:hidden p-2 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-slate-800 rounded-lg"
