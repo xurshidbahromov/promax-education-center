@@ -59,7 +59,7 @@ export default function AboutPage() {
                 <motion.h1
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
-                    className="text-4xl md:text-6xl font-extrabold text-gray-900 dark:text-white mb-6 tracking-tight"
+                    className="text-4xl md:text-6xl font-extrabold text-slate-800 dark:text-white mb-6 tracking-tight"
                 >
                     {t('nav.about')}
                 </motion.h1>
@@ -97,7 +97,7 @@ export default function AboutPage() {
                                 <div className="absolute inset-0 bg-black/30 group-hover:bg-black/20 transition-colors duration-500" />
                                 
                                 <div className="absolute inset-0 flex items-center justify-center">
-                                    <div className="w-20 h-20 md:w-24 md:h-24 rounded-full bg-white/20 backdrop-blur-md flex items-center justify-center border border-white/40 group-hover:scale-110 group-hover:bg-red-600 group-hover:border-red-600 transition-all duration-300 shadow-2xl">
+                                    <div className="w-20 h-20 md:w-24 md:h-24 rounded-full bg-white/20 backdrop-blur-md flex items-center justify-center border border-white/40 hover:bg-red-600 hover:border-red-600 transition-colors duration-300 shadow-md">
                                         <Play className="w-8 h-8 md:w-10 md:h-10 text-white fill-white translate-x-1" />
                                     </div>
                                 </div>
@@ -133,7 +133,7 @@ export default function AboutPage() {
                         initial={{ opacity: 0, y: 20 }}
                         whileInView={{ opacity: 1, y: 0 }}
                         viewport={{ once: true }}
-                        className="text-4xl md:text-5xl font-extrabold text-gray-900 dark:text-white mb-8 tracking-tight"
+                        className="text-4xl md:text-5xl font-extrabold text-slate-800 dark:text-white mb-8 tracking-tight"
                     >
                         {t('about.mission.title')}
                     </motion.h2>
@@ -160,12 +160,12 @@ export default function AboutPage() {
                                 whileInView={{ opacity: 1, y: 0 }}
                                 viewport={{ once: true }}
                                 transition={{ delay: index * 0.1 }}
-                                className={`bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl rounded-[2rem] p-8 border ${feature.border} shadow-lg hover:shadow-2xl transition-all duration-500 hover:-translate-y-2 group`}
+                                className={`bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl rounded-[2rem] p-8 border ${feature.border} shadow-sm transition-all duration-300 hover:-translate-y-1 group`}
                             >
-                                <div className={`w-16 h-16 rounded-2xl ${feature.bg} ${feature.color} flex items-center justify-center mb-8 group-hover:scale-110 transition-transform duration-300`}>
+                                <div className={`w-16 h-16 rounded-2xl ${feature.bg} ${feature.color} flex items-center justify-center mb-8 transition-transform duration-300`}>
                                     <feature.icon size={32} strokeWidth={2} />
                                 </div>
-                                <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-4">{feature.title}</h3>
+                                <h3 className="text-xl font-bold text-slate-800 dark:text-white mb-4">{feature.title}</h3>
                                 <p className="text-gray-600 dark:text-gray-400 text-sm md:text-base leading-relaxed">
                                     {feature.desc}
                                 </p>
@@ -191,7 +191,7 @@ export default function AboutPage() {
                             <div className="absolute top-0 right-0 w-80 h-80 bg-brand-blue/10 rounded-full blur-3xl -mr-20 -mt-20 pointer-events-none"></div>
 
                             <div>
-                                <h2 className="text-4xl font-extrabold text-gray-900 dark:text-white mb-12 relative z-10">{t('footer.contact')}</h2>
+                                <h2 className="text-4xl font-extrabold text-slate-800 dark:text-white mb-12 relative z-10">{t('footer.contact')}</h2>
 
                                 <div className="space-y-10 relative z-10">
                                     {/* Featured Call Center */}
@@ -201,13 +201,13 @@ export default function AboutPage() {
                                                 <Phone size={28} />
                                             </div>
                                             <div>
-                                                <h3 className="text-xl font-bold text-gray-900 dark:text-white">{t('about.call_center')}</h3>
+                                                <h3 className="text-xl font-bold text-slate-800 dark:text-white">{t('about.call_center')}</h3>
                                                 <p className="text-gray-500 dark:text-gray-400">{t('about.days')}, 9:00 - 18:00</p>
                                             </div>
                                         </div>
                                         <a
                                             href="tel:+998955137776"
-                                            className="block text-center bg-white dark:bg-slate-800 text-brand-blue dark:text-blue-400 text-xl sm:text-2xl md:text-3xl font-black py-4 sm:py-5 rounded-[1.5rem] shadow-sm border border-gray-100 dark:border-slate-700 hover:scale-[1.02] hover:shadow-xl transition-all duration-300"
+                                            className="block text-center bg-white dark:bg-slate-800 text-brand-blue dark:text-blue-400 text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-black py-4 sm:py-5 rounded-[1.5rem] shadow-sm border border-gray-100 dark:border-slate-700 hover:shadow-md transition-all duration-300 active:scale-[0.98]"
                                         >
                                             +998 95 513 77 76
                                         </a>
@@ -219,7 +219,7 @@ export default function AboutPage() {
                                             <MapPin size={24} />
                                         </div>
                                         <div>
-                                            <h3 className="font-bold text-gray-900 dark:text-white text-lg mb-2">{t('about.location')}</h3>
+                                            <h3 className="font-bold text-slate-800 dark:text-white text-lg mb-2">{t('about.location')}</h3>
                                             <p className="text-gray-600 dark:text-gray-400 leading-relaxed text-lg">
                                                 Tashkent, Uzbekistan<br />
                                                 Chilanzar District
@@ -233,7 +233,7 @@ export default function AboutPage() {
                                             <Clock size={24} />
                                         </div>
                                         <div>
-                                            <h3 className="font-bold text-gray-900 dark:text-white text-lg mb-2">{t('about.working_hours')}</h3>
+                                            <h3 className="font-bold text-slate-800 dark:text-white text-lg mb-2">{t('about.working_hours')}</h3>
                                             <p className="text-gray-600 dark:text-gray-400 leading-relaxed text-lg">
                                                 {t('about.days')}: 08:00 - 20:00<br />
                                                 <span className="text-red-500 dark:text-red-400 font-medium">{t('about.closed')}</span>

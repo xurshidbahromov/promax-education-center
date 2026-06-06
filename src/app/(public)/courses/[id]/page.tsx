@@ -73,7 +73,7 @@ export default function CourseDetailPage() {
                         <motion.h1
                             initial={{ opacity: 0, y: 20 }}
                             animate={{ opacity: 1, y: 0 }}
-                            className="text-4xl md:text-5xl lg:text-6xl font-extrabold text-gray-900 dark:text-white mb-4 tracking-tight"
+                            className="text-4xl md:text-5xl lg:text-6xl font-extrabold text-slate-800 dark:text-white mb-4 tracking-tight"
                         >
                             {t(`courses.${course.id}`)}
                         </motion.h1>
@@ -105,7 +105,7 @@ export default function CourseDetailPage() {
                                             transition={{ delay: index * 0.1 }}
                                             className="bg-white dark:bg-slate-900 rounded-3xl p-8 shadow-sm border border-gray-100 dark:border-slate-800"
                                         >
-                                            <h2 className="text-2xl md:text-3xl font-bold text-gray-900 dark:text-white mb-8 flex items-start gap-4">
+                                            <h2 className="text-2xl md:text-3xl font-bold text-slate-800 dark:text-white mb-8 flex items-start gap-4">
                                                 <span className={`p-3 rounded-xl ${course.bg} ${course.color} mt-1 shadow-sm`}>
                                                     <CheckCircle2 size={28} />
                                                 </span>
@@ -143,7 +143,7 @@ export default function CourseDetailPage() {
                                     viewport={{ once: true }}
                                     className="bg-white dark:bg-slate-900 rounded-3xl p-8 md:p-10 shadow-sm border border-gray-100 dark:border-slate-800"
                                 >
-                                    <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-8 flex items-center gap-4">
+                                    <h2 className="text-3xl font-bold text-slate-800 dark:text-white mb-8 flex items-center gap-4">
                                         <span className={`p-3 rounded-xl ${course.bg} ${course.color} shadow-sm`}>
                                             <CheckCircle2 size={28} />
                                         </span>
@@ -159,7 +159,7 @@ export default function CourseDetailPage() {
                                                     {step}
                                                 </div>
                                                 <div>
-                                                    <h4 className="font-bold text-gray-900 dark:text-white text-lg mb-2">
+                                                    <h4 className="font-bold text-slate-800 dark:text-white text-lg mb-2">
                                                         {t(`methodology.step${step}.title`)}
                                                     </h4>
                                                     <p className="text-sm text-gray-500 dark:text-gray-400 leading-relaxed">
@@ -181,7 +181,7 @@ export default function CourseDetailPage() {
                                 viewport={{ once: true }}
                                 className="bg-white dark:bg-slate-900 rounded-3xl p-8 shadow-sm border border-gray-100 dark:border-slate-800 sticky top-32"
                             >
-                                <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-6 flex items-center gap-4">
+                                <h2 className="text-2xl font-bold text-slate-800 dark:text-white mb-6 flex items-center gap-4">
                                     <span className={`p-3 rounded-xl ${course.bg} ${course.color} shadow-sm`}>
                                         <BookOpen size={28} />
                                     </span>

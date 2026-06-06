@@ -66,7 +66,7 @@ const CoursesPreview = () => {
                             initial={{ opacity: 0, x: -20 }}
                             whileInView={{ opacity: 1, x: 0 }}
                             viewport={{ once: true }}
-                            className="text-4xl md:text-5xl lg:text-6xl font-black text-slate-900 dark:text-white mb-4 tracking-tighter uppercase"
+                            className="text-4xl md:text-5xl lg:text-6xl font-black text-slate-800 dark:text-white mb-4 tracking-tighter uppercase"
                         >
                             {t('courses.title')}
                         </motion.h2>
@@ -92,7 +92,7 @@ const CoursesPreview = () => {
                             className="inline-flex items-center gap-2 font-bold uppercase tracking-wider text-brand-blue dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 transition-colors group"
                         >
                             {t('courses.view_all')}
-                            <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+                            <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform duration-300 ease-out" />
                         </Link>
                     </motion.div>
                 </div>
@@ -116,7 +116,7 @@ const CoursesPreview = () => {
                                 src={cat.image}
                                 alt={cat.id}
                                 fill
-                                className="object-cover transition-transform duration-700 group-hover:scale-110"
+                                className="object-cover transition-transform duration-700 group-hover:scale-[1.03]"
                             />
                             
                             {/* Gradient Overlay */}
@@ -145,10 +145,10 @@ const CoursesPreview = () => {
                 <div className="mt-8 text-center md:hidden">
                     <Link
                         href="/courses"
-                        className="w-full py-4 rounded-full border-2 border-brand-blue text-brand-blue font-bold text-center flex items-center justify-center gap-2 hover:bg-brand-blue hover:text-white transition-all active:scale-95"
+                        className="w-full py-4 rounded-full border-2 border-brand-blue text-brand-blue font-bold text-center flex items-center justify-center gap-2 hover:bg-brand-blue hover:text-white transition-all active:scale-95 group"
                     >
                         {t('courses.view_all')}
-                        <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+                        <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform duration-300 ease-out" />
                     </Link>
                 </div>
 

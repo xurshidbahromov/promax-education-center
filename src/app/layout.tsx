@@ -9,6 +9,7 @@ import { ThemeProvider } from "@/components/ThemeProvider";
 import { Background } from "@/components/Background";
 import QueryProvider from "@/providers/QueryProvider";
 import ToastContainer from "@/components/ToastContainer";
+import NextTopLoader from "nextjs-toploader";
 
 const atkinson = Atkinson_Hyperlegible({
   variable: "--font-atkinson",
@@ -53,6 +54,7 @@ export default function RootLayout({
       <body
         className={`${atkinson.variable} ${inter.variable} antialiased text-gray-900 dark:text-slate-50 min-h-screen flex flex-col font-sans selection:bg-brand-blue/20 transition-colors duration-300`}
       >
+        <NextTopLoader color="#F97316" height={3} showSpinner={false} />
         <ThemeProvider
           attribute="class"
           defaultTheme="system"

@@ -65,7 +65,7 @@ const Navbar = () => {
                     
                     {/* Left: Logo Island */}
                     <div className="flex justify-start pointer-events-auto">
-                        <div className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl border border-gray-200/50 dark:border-white/10 shadow-[0_8px_32px_rgba(0,0,0,0.08)] rounded-full h-16 px-5 flex items-center hover:scale-[1.03] hover:shadow-[0_8px_32px_rgba(0,0,0,0.12)] transition-all duration-300">
+                        <div className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl border border-gray-200/50 dark:border-white/10 shadow-sm rounded-full h-16 px-5 flex items-center transition-all duration-300">
                             <Link href="/" className="flex items-center group">
                                 <div className="w-20 h-10 relative flex items-center">
                                     <Image
@@ -82,7 +82,7 @@ const Navbar = () => {
 
                     {/* Center: Nav Links Island */}
                     <div className="hidden lg:flex justify-center pointer-events-auto">
-                        <div className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl border border-gray-200/50 dark:border-white/10 shadow-[0_8px_32px_rgba(0,0,0,0.08)] rounded-full h-16 px-8 flex items-center gap-6 xl:gap-8 hover:shadow-[0_8px_32px_rgba(0,0,0,0.12)] transition-all duration-300">
+                        <div className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl border border-gray-200/50 dark:border-white/10 shadow-sm rounded-full h-16 px-8 flex items-center gap-6 xl:gap-8 transition-all duration-300">
                             {['home', 'courses', 'methodology', 'results', 'about'].map((item) => (
                                 <Link
                                     key={item}
@@ -108,7 +108,7 @@ const Navbar = () => {
                     <div className="flex justify-end items-center gap-3">
                         {/* Desktop Controls Island */}
                         <div className="hidden lg:flex pointer-events-auto">
-                            <div className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl border border-gray-200/50 dark:border-white/10 shadow-[0_8px_32px_rgba(0,0,0,0.08)] rounded-full h-16 px-6 flex items-center gap-3 hover:shadow-[0_8px_32px_rgba(0,0,0,0.12)] transition-all duration-300">
+                            <div className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl border border-gray-200/50 dark:border-white/10 shadow-sm rounded-full h-16 px-6 flex items-center gap-3 transition-all duration-300">
                                 {/* Theme Dropdown */}
                                 <div className="relative" ref={themeRef}>
                                     <button
@@ -200,7 +200,7 @@ const Navbar = () => {
 
                                 <Link
                                     href="/register"
-                                    className="bg-brand-blue text-white px-6 h-10 flex items-center justify-center rounded-full text-sm font-bold hover:bg-blue-700 hover:shadow-lg hover:shadow-brand-blue/30 transition-all active:scale-95 ml-1"
+                                    className="bg-brand-blue text-white px-6 h-10 flex items-center justify-center rounded-full text-sm font-bold hover:bg-brand-blue/90 transition-colors active:scale-[0.98] ml-1 shadow-sm"
                                 >
                                     {t('hero.cta.primary')}
                                 </Link>
@@ -210,7 +210,7 @@ const Navbar = () => {
                         {/* Mobile: Hamburger Menu Toggle Island */}
                         <div className="lg:hidden flex justify-end pointer-events-auto">
                             <button
-                                className="flex items-center justify-center w-16 h-16 rounded-full text-gray-800 dark:text-gray-200 bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl border border-gray-200/50 dark:border-white/10 shadow-[0_8px_32px_rgba(0,0,0,0.08)] hover:scale-105 active:scale-95 transition-all duration-300"
+                                className="flex items-center justify-center w-16 h-16 rounded-full text-gray-800 dark:text-gray-200 bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl border border-gray-200/50 dark:border-white/10 shadow-sm active:scale-[0.98] transition-transform duration-300"
                                 onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
                                 aria-label="Toggle Menu"
                             >

@@ -59,7 +59,7 @@ const YouTubeSection = () => {
                             whileInView={{ opacity: 1, x: 0 }}
                             viewport={{ once: true }}
                             transition={{ delay: 0.1 }}
-                            className="text-4xl md:text-5xl lg:text-6xl font-black text-slate-900 dark:text-white uppercase tracking-tighter leading-none"
+                            className="text-4xl md:text-5xl lg:text-6xl font-black text-slate-800 dark:text-white uppercase tracking-tighter leading-none"
                         >
                             {t('home.youtube.title')}
                         </motion.h2>
@@ -75,7 +75,7 @@ const YouTubeSection = () => {
                         className="inline-flex items-center gap-2 font-bold uppercase tracking-wider text-red-600 dark:text-red-500 hover:text-red-700 dark:hover:text-red-400 transition-colors group"
                     >
                         {t('home.youtube.view_channel')}
-                        <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+                        <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform duration-300 ease-out" />
                     </motion.a>
                 </div>
 
@@ -91,13 +91,13 @@ const YouTubeSection = () => {
                             whileInView={{ opacity: 1, y: 0 }}
                             viewport={{ once: true }}
                             transition={{ delay: index * 0.15 }}
-                            className="group relative h-[400px] lg:h-[500px] rounded-3xl overflow-hidden block transition-all duration-500 hover:-translate-y-2 hover:shadow-[0_20px_50px_rgba(37,99,235,0.25)]"
+                            className="group relative h-[400px] lg:h-[500px] rounded-3xl overflow-hidden block transition-all duration-300 hover:-translate-y-1 shadow-md"
                         >
                             <Image
                                 src={playlist.image}
                                 alt="Playlist Thumbnail"
                                 fill
-                                className="object-cover transition-transform duration-700 group-hover:scale-110"
+                                className="object-cover transition-transform duration-700 group-hover:scale-[1.03]"
                             />
                             
                             {/* Gradients */}
@@ -114,11 +114,11 @@ const YouTubeSection = () => {
 
                                 {/* Bottom Info */}
                                 <div className="mt-auto">
-                                    <div className="w-16 h-16 bg-brand-blue text-white rounded-full flex items-center justify-center shadow-lg transform translate-y-4 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-500 mb-6 group-hover:scale-110 group-hover:bg-brand-orange group-hover:rotate-[360deg]">
+                                    <div className="w-16 h-16 bg-brand-blue text-white rounded-full flex items-center justify-center shadow-sm transform translate-y-4 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-500 mb-6 group-hover:bg-brand-blue/90">
                                         <Play className="w-6 h-6 ml-1" fill="currentColor" />
                                     </div>
 
-                                    <h3 className="text-2xl font-black text-white uppercase tracking-wide leading-tight group-hover:text-brand-orange transition-colors duration-300">
+                                    <h3 className="text-2xl font-black text-white uppercase tracking-wide leading-tight transition-colors duration-300">
                                         {t(playlist.titleKey)}
                                     </h3>
                                 </div>

@@ -120,9 +120,9 @@ export default function LoginPage() {
     };
 
     return (
-        <div className="min-h-screen flex bg-gray-50 dark:bg-slate-900">
+        <div className="min-h-screen flex bg-gray-50 dark:bg-slate-800/80 backdrop-blur-sm">
             {/* Left Side - Info/Branding (Hidden on mobile) */}
-            <div className="hidden lg:flex w-1/2 relative overflow-hidden bg-brand-blue dark:bg-slate-900 items-start justify-center pt-20 p-12 text-white">
+            <div className="hidden lg:flex w-1/2 relative overflow-hidden bg-brand-blue dark:bg-slate-800/80 backdrop-blur-sm items-start justify-center pt-20 p-12 text-white">
                 {/* Background Elements */}
                 <div className="absolute top-0 left-0 w-full h-full overflow-hidden">
                     <div className="absolute top-[10%] right-[10%] w-[60%] h-[60%] bg-blue-400/20 rounded-full blur-3xl"></div>
@@ -185,7 +185,7 @@ export default function LoginPage() {
                                 className="space-y-8"
                             >
                                 <div className="text-center">
-                                    <h1 className="text-4xl font-bold text-gray-900 dark:text-white mb-3">
+                                    <h1 className="text-4xl font-bold text-slate-800 dark:text-white mb-3">
                                         {t('auth.login.title') || 'Xush kelibsiz'}
                                     </h1>
                                     <p className="text-gray-600 dark:text-gray-400 text-base">
@@ -200,14 +200,14 @@ export default function LoginPage() {
                                         onClick={() => handleRoleSelect('student')}
                                         whileHover={{ scale: 1.02 }}
                                         whileTap={{ scale: 0.98 }}
-                                        className="flex-1 p-5 rounded-2xl border-2 border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-900 hover:border-brand-blue hover:bg-brand-blue/5 transition-all group"
+                                        className="flex-1 p-5 rounded-2xl border-2 border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800/80 backdrop-blur-sm hover:border-brand-blue hover:bg-brand-blue/5 transition-all group"
                                     >
                                         <div className="flex items-center justify-center gap-3">
                                             <div className="w-12 h-12 rounded-xl bg-brand-blue/10 group-hover:bg-brand-blue flex items-center justify-center transition-all">
                                                 <GraduationCap className="text-brand-blue group-hover:text-white transition-colors" size={24} />
                                             </div>
                                             <div className="text-left">
-                                                <div className="font-bold text-gray-900 dark:text-white group-hover:text-brand-blue transition-colors">
+                                                <div className="font-bold text-slate-800 dark:text-white group-hover:text-brand-blue transition-colors">
                                                     O'quvchi
                                                 </div>
                                                 <div className="text-xs text-gray-500 dark:text-gray-400">
@@ -222,14 +222,14 @@ export default function LoginPage() {
                                         onClick={() => handleRoleSelect('staff')}
                                         whileHover={{ scale: 1.02 }}
                                         whileTap={{ scale: 0.98 }}
-                                        className="flex-1 p-5 rounded-2xl border-2 border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-900 hover:border-brand-orange hover:bg-brand-orange/5 transition-all group"
+                                        className="flex-1 p-5 rounded-2xl border-2 border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800/80 backdrop-blur-sm hover:border-brand-orange hover:bg-brand-orange/5 transition-all group"
                                     >
                                         <div className="flex items-center justify-center gap-3">
                                             <div className="w-12 h-12 rounded-xl bg-brand-orange/10 group-hover:bg-brand-orange flex items-center justify-center transition-all">
                                                 <Users className="text-brand-orange group-hover:text-white transition-colors" size={24} />
                                             </div>
                                             <div className="text-left">
-                                                <div className="font-bold text-gray-900 dark:text-white group-hover:text-brand-orange transition-colors">
+                                                <div className="font-bold text-slate-800 dark:text-white group-hover:text-brand-orange transition-colors">
                                                     O'qituvchi
                                                 </div>
                                                 <div className="text-xs text-gray-500 dark:text-gray-400">
@@ -277,7 +277,7 @@ export default function LoginPage() {
                                 </div>
 
                                 <div className="text-center mb-8">
-                                    <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
+                                    <h2 className="text-3xl font-bold text-slate-800 dark:text-white mb-2">
                                         {t('auth.login.title')}
                                     </h2>
                                     <p className="text-gray-500 dark:text-gray-400">
@@ -309,7 +309,7 @@ export default function LoginPage() {
                                                 value={phone}
                                                 onChange={handlePhoneChange}
                                                 placeholder="+998 XX XXX XX XX"
-                                                className="w-full pl-12 pr-4 py-3 border-2 border-gray-200 dark:border-slate-700 rounded-xl focus:outline-none focus:border-brand-blue bg-white dark:bg-slate-900 text-gray-900 dark:text-white placeholder-gray-400 transition-colors"
+                                                className="w-full pl-12 pr-4 py-3 border-2 border-gray-200 dark:border-slate-700 rounded-xl focus:outline-none focus:border-brand-blue bg-white dark:bg-slate-800/80 backdrop-blur-sm text-slate-800 dark:text-white placeholder-gray-400 transition-colors"
                                                 required
                                             />
                                         </div>
@@ -337,7 +337,7 @@ export default function LoginPage() {
                                                 value={password}
                                                 onChange={(e) => setPassword(e.target.value)}
                                                 placeholder="••••••••"
-                                                className="w-full pl-12 pr-12 py-3 border-2 border-gray-200 dark:border-slate-700 rounded-xl focus:outline-none focus:border-brand-blue bg-white dark:bg-slate-900 text-gray-900 dark:text-white placeholder-gray-400 transition-colors"
+                                                className="w-full pl-12 pr-12 py-3 border-2 border-gray-200 dark:border-slate-700 rounded-xl focus:outline-none focus:border-brand-blue bg-white dark:bg-slate-800/80 backdrop-blur-sm text-slate-800 dark:text-white placeholder-gray-400 transition-colors"
                                                 required
                                             />
                                             <button
@@ -361,7 +361,7 @@ export default function LoginPage() {
                                     ) : (
                                         <>
                                             {t('auth.login.button')}
-                                            <ArrowRight size={20} className="group-hover:translate-x-1 transition-transform" />
+                                            <ArrowRight size={20} className="group-hover:translate-x-1 transition-transform duration-300 ease-out" />
                                         </>
                                     )}
                                 </button>
@@ -381,7 +381,7 @@ export default function LoginPage() {
                 {showForgotPassword && (
                     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-in fade-in duration-200">
                         <div className="bg-white dark:bg-slate-800 rounded-2xl p-6 max-w-sm w-full shadow-2xl scale-100 animate-in zoom-in-95 duration-200">
-                            <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2">
+                            <h3 className="text-xl font-bold text-slate-800 dark:text-white mb-2">
                                 {t("auth.forgot_password.title")}
                             </h3>
                             <p className="text-gray-600 dark:text-gray-300 mb-6">
@@ -389,7 +389,7 @@ export default function LoginPage() {
                             </p>
                             <button
                                 onClick={() => setShowForgotPassword(false)}
-                                className="w-full bg-gray-100 hover:bg-gray-200 dark:bg-slate-700 dark:hover:bg-slate-600 text-gray-900 dark:text-white font-medium py-2.5 rounded-xl transition-colors"
+                                className="w-full bg-gray-100 hover:bg-gray-200 dark:bg-slate-700 dark:hover:bg-slate-600 text-slate-800 dark:text-white font-medium py-2.5 rounded-xl transition-colors"
                             >
                                 {t("auth.forgot_password.close")}
                             </button>

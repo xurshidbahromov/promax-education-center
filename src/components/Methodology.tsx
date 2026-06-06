@@ -68,7 +68,7 @@ const Methodology = () => {
                             className="inline-flex items-center gap-2 font-bold uppercase tracking-wider text-brand-blue dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 transition-colors group"
                         >
                             {t('methodology.home.cta')}
-                            <ArrowRight className="w-5 h-5 group-hover:translate-x-1.5 transition-transform" />
+                            <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform duration-300 ease-out" />
                         </Link>
                     </motion.div>
                 </div>
@@ -172,12 +172,12 @@ function MobileZigZag({ steps, t }: { steps: StepItem[]; t: (k: string) => strin
                         className="group cursor-default"
                     >
                         <div
-                            className="w-full h-full rounded-full flex flex-col items-center justify-center text-center bg-white dark:bg-slate-800 shadow-[8px_8px_24px_rgba(0,0,0,0.10),-8px_-8px_24px_rgba(255,255,255,0.90)] dark:shadow-[8px_8px_24px_rgba(0,0,0,0.4),-8px_-8px_24px_rgba(255,255,255,0.05)] transition-all duration-500 group-hover:-translate-y-2 group-hover:shadow-[0_16px_40px_rgba(249,115,22,0.25)]"
+                            className="w-full h-full rounded-full flex flex-col items-center justify-center text-center bg-white dark:bg-slate-800 shadow-md dark:shadow-none border border-transparent dark:border-white/5 transition-all duration-300 group-hover:-translate-y-1"
                         >
                             <span className="text-[9px] font-black uppercase tracking-[0.2em] text-amber-500 mb-1">STEP</span>
                             <div className="flex items-center gap-1.5 mb-1">
-                                <Icon size={16} strokeWidth={2.5} className="text-amber-500 group-hover:scale-125 transition-transform duration-300" />
-                                <span className="text-4xl font-black text-slate-200 dark:text-slate-600 leading-none select-none group-hover:text-amber-400/30 transition-colors duration-300">
+                                <Icon size={16} strokeWidth={2.5} className="text-amber-500 transition-transform duration-300" />
+                                <span className="text-4xl font-black text-slate-200 dark:text-slate-600 leading-none select-none transition-colors duration-300">
                                     {step.num}
                                 </span>
                             </div>
@@ -300,10 +300,7 @@ function DesktopZigZag({ steps, t }: { steps: StepItem[]; t: (k: string) => stri
                     >
                         {/* Outer ring (neomorphic shadow) */}
                         <div
-                            className="w-full h-full rounded-full flex flex-col items-center justify-center text-center bg-white dark:bg-slate-800 transition-all duration-500 group-hover:-translate-y-3 group-hover:shadow-[0_24px_64px_rgba(249,115,22,0.25)]"
-                            style={{
-                                boxShadow: '8px 8px 24px rgba(0,0,0,0.10), -8px -8px 24px rgba(255,255,255,0.90)',
-                            }}
+                            className="w-full h-full rounded-full flex flex-col items-center justify-center text-center bg-white dark:bg-slate-800 border border-transparent dark:border-white/5 transition-all duration-300 group-hover:-translate-y-1 shadow-md dark:shadow-none"
                         >
                             {/* STEP label */}
                             <span className="text-[10px] font-black uppercase tracking-[0.3em] text-amber-500 mb-1">STEP</span>
@@ -313,9 +310,9 @@ function DesktopZigZag({ steps, t }: { steps: StepItem[]; t: (k: string) => stri
                                 <Icon
                                     size={20}
                                     strokeWidth={2.5}
-                                    className="text-amber-500 group-hover:scale-125 transition-transform duration-300"
+                                    className="text-amber-500 transition-transform duration-300"
                                 />
-                                <span className="text-5xl font-black text-slate-200 dark:text-slate-600 leading-none select-none group-hover:text-amber-400/30 transition-colors duration-300">
+                                <span className="text-5xl font-black text-slate-200 dark:text-slate-600 leading-none select-none transition-colors duration-300">
                                     {step.num}
                                 </span>
                             </div>

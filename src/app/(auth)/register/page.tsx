@@ -138,9 +138,9 @@ export default function RegisterPage() {
     };
 
     return (
-        <div className="min-h-screen flex bg-gray-50 dark:bg-slate-900">
+        <div className="min-h-screen flex bg-gray-50 dark:bg-slate-800/80 backdrop-blur-sm">
             {/* Left Side - Info/Branding (Hidden on mobile) */}
-            <div className="hidden lg:flex w-1/2 relative overflow-hidden bg-brand-blue dark:bg-slate-900 items-start justify-center pt-20 p-12 text-white">
+            <div className="hidden lg:flex w-1/2 relative overflow-hidden bg-brand-blue dark:bg-slate-800/80 backdrop-blur-sm items-start justify-center pt-20 p-12 text-white">
                 {/* Background Elements */}
                 <div className="absolute top-0 left-0 w-full h-full overflow-hidden">
                     <div className="absolute top-[10%] right-[10%] w-[60%] h-[60%] bg-blue-400/20 rounded-full blur-3xl"></div>
@@ -206,7 +206,7 @@ export default function RegisterPage() {
                         className="space-y-6"
                     >
                         <div className="text-center mb-8">
-                            <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
+                            <h2 className="text-3xl font-bold text-slate-800 dark:text-white mb-2">
                                 {t('auth.register.title')}
                             </h2>
                             <p className="text-gray-500 dark:text-gray-400">
@@ -248,7 +248,7 @@ export default function RegisterPage() {
                                         value={name}
                                         onChange={(e) => setName(e.target.value)}
                                         placeholder={t('auth.register.name_placeholder')}
-                                        className="w-full pl-12 pr-4 py-3 border-2 border-gray-200 dark:border-slate-700 rounded-xl focus:outline-none focus:border-brand-blue bg-white dark:bg-slate-900 text-gray-900 dark:text-white placeholder-gray-400 transition-colors"
+                                        className="w-full pl-12 pr-4 py-3 border-2 border-gray-200 dark:border-slate-700 rounded-xl focus:outline-none focus:border-brand-blue bg-white dark:bg-slate-800/80 backdrop-blur-sm text-slate-800 dark:text-white placeholder-gray-400 transition-colors"
                                         required
                                     />
                                 </div>
@@ -267,7 +267,7 @@ export default function RegisterPage() {
                                         value={phone}
                                         onChange={handlePhoneChange}
                                         placeholder="+998 XX XXX XX XX"
-                                        className="w-full pl-12 pr-4 py-3 border-2 border-gray-200 dark:border-slate-700 rounded-xl focus:outline-none focus:border-brand-blue bg-white dark:bg-slate-900 text-gray-900 dark:text-white placeholder-gray-400 transition-colors"
+                                        className="w-full pl-12 pr-4 py-3 border-2 border-gray-200 dark:border-slate-700 rounded-xl focus:outline-none focus:border-brand-blue bg-white dark:bg-slate-800/80 backdrop-blur-sm text-slate-800 dark:text-white placeholder-gray-400 transition-colors"
                                     />
                                 </div>
                             </div>
@@ -287,7 +287,7 @@ export default function RegisterPage() {
                                         value={password}
                                         onChange={(e) => setPassword(e.target.value)}
                                         placeholder="••••••••"
-                                        className="w-full pl-12 pr-12 py-3 border-2 border-gray-200 dark:border-slate-700 rounded-xl focus:outline-none focus:border-brand-blue bg-white dark:bg-slate-900 text-gray-900 dark:text-white placeholder-gray-400 transition-colors"
+                                        className="w-full pl-12 pr-12 py-3 border-2 border-gray-200 dark:border-slate-700 rounded-xl focus:outline-none focus:border-brand-blue bg-white dark:bg-slate-800/80 backdrop-blur-sm text-slate-800 dark:text-white placeholder-gray-400 transition-colors"
                                         required
                                     />
                                     <button
@@ -314,7 +314,7 @@ export default function RegisterPage() {
                             ) : (
                                 <>
                                     {t('auth.register.button')}
-                                    <ArrowRight size={20} className="group-hover:translate-x-1 transition-transform" />
+                                    <ArrowRight size={20} className="group-hover:translate-x-1 transition-transform duration-300 ease-out" />
                                 </>
                             )}
                         </button>

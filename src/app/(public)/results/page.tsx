@@ -69,7 +69,7 @@ const VideoCard = ({ video, index }: { video: { id: string, title: string }, ind
                         Muvaffaqiyat Tarixi
                     </span>
                 </div>
-                <h3 className="font-bold text-gray-900 dark:text-white text-lg md:text-xl line-clamp-3 group-hover:text-brand-blue dark:group-hover:text-blue-400 transition-colors leading-snug">
+                <h3 className="font-bold text-slate-800 dark:text-white text-lg md:text-xl line-clamp-3 group-hover:text-brand-blue dark:group-hover:text-blue-400 transition-colors leading-snug">
                     {video.title}
                 </h3>
             </div>
@@ -110,7 +110,7 @@ export default function ResultsPage() {
                     <motion.h1
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
-                        className="text-4xl md:text-6xl font-extrabold text-gray-900 dark:text-white mb-6 tracking-tight"
+                        className="text-4xl md:text-6xl font-extrabold text-slate-800 dark:text-white mb-6 tracking-tight"
                     >
                         {t('results.header.title')}
                     </motion.h1>
@@ -145,7 +145,7 @@ export default function ResultsPage() {
                             initial={{ opacity: 0, x: -20 }}
                             whileInView={{ opacity: 1, x: 0 }}
                             viewport={{ once: true }}
-                            className="text-3xl md:text-4xl font-extrabold text-gray-900 dark:text-white tracking-tight flex items-center gap-4"
+                            className="text-3xl md:text-4xl font-extrabold text-slate-800 dark:text-white tracking-tight flex items-center gap-4"
                         >
                             {t('results.stories.title')}
                             <Award className="text-brand-orange w-8 h-8" />

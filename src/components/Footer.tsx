@@ -51,7 +51,7 @@ const Footer = () => {
                                     href={social.href}
                                     target="_blank"
                                     rel="noopener noreferrer"
-                                    className={`w-10 h-10 flex items-center justify-center rounded-xl bg-white/40 dark:bg-slate-900/40 text-gray-500 dark:text-gray-400 border border-white/20 dark:border-white/5 shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:scale-105 ${social.color}`}
+                                    className={`w-10 h-10 flex items-center justify-center rounded-xl bg-white/40 dark:bg-slate-900/40 text-gray-500 dark:text-gray-400 border border-white/20 dark:border-white/5 shadow-sm transition-all duration-300 hover:-translate-y-0.5 active:scale-[0.98] ${social.color}`}
                                     aria-label={social.label}
                                 >
                                     <social.icon size={18} />
@@ -89,7 +89,7 @@ const Footer = () => {
                         <h3 className="text-xl font-bold mb-6 text-gray-900 dark:text-white">{t('footer.contact')}</h3>
                         <ul className="space-y-5">
                             <li className="flex items-start gap-4 group cursor-pointer">
-                                <div className="w-10 h-10 rounded-xl bg-white/40 dark:bg-slate-900/40 border border-white/20 dark:border-white/5 flex items-center justify-center flex-shrink-0 transition-all duration-300 group-hover:bg-brand-blue group-hover:text-white group-hover:scale-105">
+                                <div className="w-10 h-10 rounded-xl bg-white/40 dark:bg-slate-900/40 border border-white/20 dark:border-white/5 flex items-center justify-center flex-shrink-0 transition-all duration-300 group-hover:bg-brand-blue group-hover:text-white group-hover:scale-[1.02]">
                                     <MapPin className="w-5 h-5 text-brand-blue group-hover:text-white transition-colors" />
                                 </div>
                                 <div className="pt-0.5">
@@ -98,7 +98,7 @@ const Footer = () => {
                                 </div>
                             </li>
                             <li className="flex items-center gap-4 group cursor-pointer">
-                                <div className="w-10 h-10 rounded-xl bg-white/40 dark:bg-slate-900/40 border border-white/20 dark:border-white/5 flex items-center justify-center flex-shrink-0 transition-all duration-300 group-hover:bg-brand-orange group-hover:text-white group-hover:scale-105">
+                                <div className="w-10 h-10 rounded-xl bg-white/40 dark:bg-slate-900/40 border border-white/20 dark:border-white/5 flex items-center justify-center flex-shrink-0 transition-all duration-300 group-hover:bg-brand-orange group-hover:text-white group-hover:scale-[1.02]">
                                     <Phone className="w-5 h-5 text-brand-orange group-hover:text-white transition-colors" />
                                 </div>
                                 <div>
@@ -107,7 +107,7 @@ const Footer = () => {
                                 </div>
                             </li>
                             <li className="flex items-center gap-4 group cursor-pointer">
-                                <div className="w-10 h-10 rounded-xl bg-white/40 dark:bg-slate-900/40 border border-white/20 dark:border-white/5 flex items-center justify-center flex-shrink-0 transition-all duration-300 group-hover:bg-green-500 group-hover:text-white group-hover:scale-105">
+                                <div className="w-10 h-10 rounded-xl bg-white/40 dark:bg-slate-900/40 border border-white/20 dark:border-white/5 flex items-center justify-center flex-shrink-0 transition-all duration-300 group-hover:bg-green-500 group-hover:text-white group-hover:scale-[1.02]">
                                     <Mail className="w-5 h-5 text-green-600 dark:text-green-400 group-hover:text-white transition-colors" />
                                 </div>
                                 <div>

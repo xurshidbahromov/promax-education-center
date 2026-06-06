@@ -31,7 +31,7 @@ const CallToAction = () => {
                     </div>
 
                     {/* Content Section */}
-                    <div className="lg:w-7/12 bg-slate-900 dark:bg-slate-950 p-10 md:p-16 lg:p-20 relative overflow-hidden flex flex-col justify-center border-l border-white/5">
+                    <div className="lg:w-7/12 bg-slate-800/90 dark:bg-slate-900/80 backdrop-blur-md p-10 md:p-16 lg:p-20 relative overflow-hidden flex flex-col justify-center border-l border-white/5">
                         {/* Background Accents */}
                         <div className="absolute top-0 right-0 w-[400px] h-[400px] bg-brand-orange/20 rounded-full blur-[100px] pointer-events-none transform translate-x-1/3 -translate-y-1/3" />
                         <div className="absolute bottom-0 left-0 w-[300px] h-[300px] bg-brand-blue/20 rounded-full blur-[80px] pointer-events-none transform -translate-x-1/3 translate-y-1/3" />
@@ -53,14 +53,14 @@ const CallToAction = () => {
                             <div className="flex flex-col sm:flex-row gap-4 pt-6">
                                 <Link
                                     href="/register"
-                                    className="px-8 py-5 bg-brand-orange text-white font-black rounded-full text-lg hover:bg-orange-600 transition-all shadow-[0_0_30px_rgba(249,115,22,0.3)] hover:shadow-[0_0_40px_rgba(249,115,22,0.5)] flex items-center justify-center gap-3 group active:scale-95 uppercase tracking-wider"
+                                    className="group px-8 py-5 bg-brand-orange text-white font-black rounded-full text-lg hover:bg-orange-600 transition-colors shadow-sm active:scale-[0.98] flex items-center justify-center gap-3 uppercase tracking-wider"
                                 >
                                     {t('cta.button.primary')}
-                                    <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+                                    <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform duration-300 ease-out" />
                                 </Link>
                                 <Link
                                     href="/courses"
-                                    className="px-8 py-5 bg-white/5 border border-white/10 text-white font-bold rounded-full text-lg hover:bg-white/10 transition-all backdrop-blur-sm active:scale-95 flex items-center justify-center uppercase tracking-wider"
+                                    className="px-8 py-5 bg-white/5 border border-white/10 text-white font-bold rounded-full text-lg hover:bg-white/10 transition-colors backdrop-blur-sm active:scale-[0.98] flex items-center justify-center uppercase tracking-wider"
                                 >
                                     {t('cta.button.secondary')}
                                 </Link>
