@@ -1,6 +1,7 @@
 export const en = {
     "nav.home": "Home",
     "common.back": "Back",
+    "common.save": "Save",
     "contact.form.success": "Your message has been sent successfully!",
     "cta.title": "Build Your Future With Us",
     "cta.subtitle": "Register now and sign up for your first free lesson!",

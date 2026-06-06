@@ -43,11 +43,11 @@ export default function NotificationBell() {
         return () => document.removeEventListener("mousedown", handleClickOutside);
     }, []);
 
-    const fetchNotifications = async () => {
-        setLoading(true);
+    const fetchNotifications = async (showLoading = true) => {
+        if (showLoading) setLoading(true);
         const data = await getNotifications(20);
         setNotifications(data as Notification[]);
-        setLoading(false);
+        if (showLoading) setLoading(false);
     };
 
     const fetchUnreadCount = async () => {
@@ -72,7 +72,7 @@ export default function NotificationBell() {
                 (payload) => {
                     // Simple refresh on any change for now
                     fetchUnreadCount();
-                    if (isOpen) fetchNotifications();
+                    if (isOpen) fetchNotifications(false);
                 }
             )
             .subscribe();
@@ -85,7 +85,7 @@ export default function NotificationBell() {
     // Fetch list when opening dropdown
     useEffect(() => {
         if (isOpen) {
-            fetchNotifications();
+            fetchNotifications(notifications.length === 0);
         }
     }, [isOpen]);
 
@@ -149,9 +149,17 @@ export default function NotificationBell() {
 
                     <div className="max-h-[400px] overflow-y-auto custom-scrollbar">
                         {loading ? (
-                            <div className="p-8 text-center text-gray-400">
-                                <div className="animate-spin w-6 h-6 border-2 border-brand-blue border-t-transparent rounded-full mx-auto mb-2"></div>
-                                Yuklanmoqda...
+                            <div className="p-4 space-y-4">
+                                {[1, 2, 3].map((i) => (
+                                    <div key={i} className="flex gap-3 animate-pulse">
+                                        <div className="w-9 h-9 bg-gray-200 dark:bg-slate-800 rounded-full shrink-0"></div>
+                                        <div className="flex-1 space-y-2 py-1">
+                                            <div className="h-4 bg-gray-200 dark:bg-slate-800 rounded w-3/4"></div>
+                                            <div className="h-3 bg-gray-200 dark:bg-slate-800 rounded w-full"></div>
+                                            <div className="h-2 bg-gray-200 dark:bg-slate-800 rounded w-1/4 mt-2"></div>
+                                        </div>
+                                    </div>
+                                ))}
                             </div>
                         ) : notifications.length === 0 ? (
                             <div className="p-8 text-center text-gray-500 dark:text-gray-400">

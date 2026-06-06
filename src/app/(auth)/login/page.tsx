@@ -120,7 +120,7 @@ export default function LoginPage() {
     };
 
     return (
-        <div className="min-h-screen flex bg-gray-50 dark:bg-slate-950">
+        <div className="min-h-screen flex bg-gray-50 dark:bg-slate-900">
             {/* Left Side - Info/Branding (Hidden on mobile) */}
             <div className="hidden lg:flex w-1/2 relative overflow-hidden bg-brand-blue dark:bg-slate-900 items-start justify-center pt-20 p-12 text-white">
                 {/* Background Elements */}
@@ -354,7 +354,7 @@ export default function LoginPage() {
                                 <button
                                     type="submit"
                                     disabled={loading}
-                                    className="w-full py-4 bg-brand-blue hover:bg-blue-700 text-white font-bold rounded-xl text-lg shadow-lg hover:shadow-xl active:scale-95 transition-all flex items-center justify-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed group"
+                                    className="w-full py-4 bg-brand-blue hover:bg-blue-700 text-white font-bold rounded-full text-lg shadow-lg hover:shadow-xl active:scale-95 transition-all flex items-center justify-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed group"
                                 >
                                     {loading ? (
                                         <Loader2 className="animate-spin" size={20} />

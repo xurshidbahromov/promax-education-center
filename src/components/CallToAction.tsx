@@ -1,56 +1,70 @@
 "use client";
 
 import Link from 'next/link';
-import { ArrowRight, Sparkles } from 'lucide-react';
+import { ArrowRight, Phone } from 'lucide-react';
 import { useLanguage } from '@/context/LanguageContext';
 import { motion } from 'framer-motion';
+import Image from 'next/image';
 
 const CallToAction = () => {
     const { t } = useLanguage();
 
     return (
-        <section className="py-24 relative overflow-hidden">
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+        <section className="pt-16 pb-24 relative px-4 sm:px-6 lg:px-8">
+            <div className="max-w-7xl mx-auto w-full relative z-10">
                 <motion.div
-                    initial={{ opacity: 0, y: 20 }}
+                    initial={{ opacity: 0, y: 30 }}
                     whileInView={{ opacity: 1, y: 0 }}
                     viewport={{ once: true }}
-                    className="bg-brand-blue dark:bg-blue-900 rounded-3xl p-12 md:p-20 text-center relative overflow-hidden shadow-2xl"
+                    className="rounded-[2.5rem] overflow-hidden shadow-2xl flex flex-col lg:flex-row"
                 >
-                    {/* Background Elements */}
-                    <div className="absolute top-0 left-0 w-full h-full overflow-hidden">
-                        <div className="absolute -top-[50%] -left-[20%] w-[80%] h-[150%] bg-gradient-to-br from-white/10 to-transparent rotate-12 blur-3xl"></div>
-                        <div className="absolute -bottom-[50%] -right-[20%] w-[80%] h-[150%] bg-gradient-to-tl from-brand-orange/20 to-transparent -rotate-12 blur-3xl"></div>
+                    {/* Image Section */}
+                    <div className="lg:w-5/12 relative min-h-[300px] lg:min-h-full">
+                        <Image
+                            src="https://images.unsplash.com/photo-1577896851231-70ef18881754?q=80&w=1000&auto=format&fit=crop"
+                            alt="Student learning"
+                            fill
+                            className="object-cover"
+                        />
+                        <div className="absolute inset-0 bg-brand-blue/20 mix-blend-multiply" />
+                        <div className="absolute inset-0 bg-gradient-to-t from-slate-900/80 to-transparent lg:bg-gradient-to-r" />
                     </div>
 
-                    <div className="relative z-10 max-w-3xl mx-auto space-y-8">
-                        <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/10 text-white/90 text-sm font-medium backdrop-blur-sm border border-white/10">
-                            <Sparkles size={16} className="text-brand-orange" />
-                            <span>Promax Education</span>
-                        </div>
+                    {/* Content Section */}
+                    <div className="lg:w-7/12 bg-slate-900 dark:bg-slate-950 p-10 md:p-16 lg:p-20 relative overflow-hidden flex flex-col justify-center border-l border-white/5">
+                        {/* Background Accents */}
+                        <div className="absolute top-0 right-0 w-[400px] h-[400px] bg-brand-orange/20 rounded-full blur-[100px] pointer-events-none transform translate-x-1/3 -translate-y-1/3" />
+                        <div className="absolute bottom-0 left-0 w-[300px] h-[300px] bg-brand-blue/20 rounded-full blur-[80px] pointer-events-none transform -translate-x-1/3 translate-y-1/3" />
 
-                        <h2 className="text-4xl md:text-5xl lg:text-6xl font-black text-white tracking-tight leading-tight">
-                            {t('cta.title')}
-                        </h2>
+                        <div className="relative z-10 space-y-6">
+                            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/5 border border-white/10 text-brand-orange font-bold text-sm backdrop-blur-md uppercase tracking-wider">
+                                <Phone size={16} />
+                                <span>{t('cta.subtitle')}</span>
+                            </div>
 
-                        <p className="text-xl text-blue-100/90 leading-relaxed max-w-2xl mx-auto">
-                            {t('cta.subtitle')}
-                        </p>
+                            <h2 className="text-4xl md:text-5xl lg:text-6xl font-black text-white tracking-tighter uppercase leading-[1.1]">
+                                {t('cta.title')}
+                            </h2>
 
-                        <div className="flex flex-col sm:flex-row gap-4 justify-center pt-4">
-                            <Link
-                                href="/register"
-                                className="px-8 py-4 bg-white text-brand-blue font-bold rounded-xl text-lg shadow-lg hover:shadow-xl hover:bg-gray-50 hover:transition-all duration-300 flex items-center justify-center gap-2 group"
-                            >
-                                {t('cta.button.primary')}
-                                <ArrowRight className="group-hover:translate-x-1 transition-transform" />
-                            </Link>
-                            <Link
-                                href="/courses"
-                                className="px-8 py-4 bg-transparent border-2 border-white/30 text-white font-bold rounded-xl text-lg hover:bg-white/10 transition-all duration-300 backdrop-blur-sm"
-                            >
-                                {t('cta.button.secondary')}
-                            </Link>
+                            <p className="text-lg md:text-xl text-slate-300 font-medium max-w-xl">
+                                Biz sizga qo'ng'iroq qilamiz va barcha savollaringizga javob beramiz. Kelajagingizni hozirdan boshlang!
+                            </p>
+
+                            <div className="flex flex-col sm:flex-row gap-4 pt-6">
+                                <Link
+                                    href="/register"
+                                    className="px-8 py-5 bg-brand-orange text-white font-black rounded-full text-lg hover:bg-orange-600 transition-all shadow-[0_0_30px_rgba(249,115,22,0.3)] hover:shadow-[0_0_40px_rgba(249,115,22,0.5)] flex items-center justify-center gap-3 group active:scale-95 uppercase tracking-wider"
+                                >
+                                    {t('cta.button.primary')}
+                                    <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+                                </Link>
+                                <Link
+                                    href="/courses"
+                                    className="px-8 py-5 bg-white/5 border border-white/10 text-white font-bold rounded-full text-lg hover:bg-white/10 transition-all backdrop-blur-sm active:scale-95 flex items-center justify-center uppercase tracking-wider"
+                                >
+                                    {t('cta.button.secondary')}
+                                </Link>
+                            </div>
                         </div>
                     </div>
                 </motion.div>

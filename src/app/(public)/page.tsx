@@ -28,18 +28,22 @@ export default function Home() {
   };
 
   return (
-    <main className="min-h-screen">
+    <div className="w-full">
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
       <Hero />
-      <CoursesPreview />
-      <Methodology />
+      <div className="relative overflow-hidden bg-white/30 dark:bg-slate-900/35 border-y border-gray-200/30 dark:border-white/5 backdrop-blur-[4px] transition-colors duration-300">
+        <CoursesPreview />
+        <Methodology />
+      </div>
       <ResultsStats />
-      <YouTubeSection />
-      <CallToAction />
+      <div className="relative overflow-hidden bg-white/30 dark:bg-slate-900/35 border-t border-gray-200/30 dark:border-white/5 backdrop-blur-[4px] transition-colors duration-300">
+        <YouTubeSection />
+        <CallToAction />
+      </div>
       <AdmissionAnnouncement />
-    </main>
+    </div>
   );
 }
