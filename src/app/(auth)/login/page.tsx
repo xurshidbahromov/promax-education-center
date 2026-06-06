@@ -147,7 +147,7 @@ export default function LoginPage() {
                         />
                     </div>
 
-                    <h1 className="text-5xl font-bold leading-tight">
+                    <h1 className="text-5xl font-bold leading-tight font-fredoka">
                         Xush kelibsiz
                     </h1>
                     <p className="text-xl text-blue-100/90 leading-relaxed">
@@ -171,7 +171,7 @@ export default function LoginPage() {
                     initial={{ opacity: 0, x: 20 }}
                     animate={{ opacity: 1, x: 0 }}
                     transition={{ duration: 0.5 }}
-                    className="w-full max-w-md"
+                    className="w-full max-w-md font-fredoka"
                 >
                     <AnimatePresence mode="wait">
                         {step === 'role' ? (
@@ -301,9 +301,6 @@ export default function LoginPage() {
                                             {t('auth.register.phone')}
                                         </label>
                                         <div className="relative group">
-                                            <div className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-brand-blue transition-colors">
-                                                <Users size={20} />
-                                            </div>
                                             <input
                                                 type="tel"
                                                 value={phone}
@@ -312,6 +309,9 @@ export default function LoginPage() {
                                                 className="w-full pl-12 pr-4 py-3 border-2 border-gray-200 dark:border-slate-700 rounded-xl focus:outline-none focus:border-brand-blue bg-white dark:bg-slate-800/80 backdrop-blur-sm text-slate-800 dark:text-white placeholder-gray-400 transition-colors"
                                                 required
                                             />
+                                            <div className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-brand-blue transition-colors pointer-events-none z-10">
+                                                <Users size={20} />
+                                            </div>
                                         </div>
                                     </div>
 
@@ -329,9 +329,6 @@ export default function LoginPage() {
                                             </button>
                                         </div>
                                         <div className="relative group">
-                                            <div className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-brand-blue transition-colors">
-                                                <Lock size={20} />
-                                            </div>
                                             <input
                                                 type={showPassword ? "text" : "password"}
                                                 value={password}
@@ -340,6 +337,9 @@ export default function LoginPage() {
                                                 className="w-full pl-12 pr-12 py-3 border-2 border-gray-200 dark:border-slate-700 rounded-xl focus:outline-none focus:border-brand-blue bg-white dark:bg-slate-800/80 backdrop-blur-sm text-slate-800 dark:text-white placeholder-gray-400 transition-colors"
                                                 required
                                             />
+                                            <div className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-brand-blue transition-colors pointer-events-none z-10">
+                                                <Lock size={20} />
+                                            </div>
                                             <button
                                                 type="button"
                                                 onClick={() => setShowPassword(!showPassword)}

@@ -36,7 +36,7 @@ const Hero = () => {
 
                     {/* Headline - Massive */}
                     <motion.h1
-                        className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-extrabold tracking-tighter text-slate-800 dark:text-slate-100 leading-[1.05] mb-6 max-w-2xl uppercase"
+                        className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-extrabold tracking-tighter text-slate-800 dark:text-slate-100 leading-[1.05] mb-6 max-w-2xl uppercase font-fredoka"
                         initial={{ opacity: 0, y: 30 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ duration: 0.7, delay: 0.1, ease: [0.21, 0.47, 0.32, 0.98] }}

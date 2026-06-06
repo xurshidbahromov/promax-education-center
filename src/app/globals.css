@@ -7,7 +7,7 @@
   --color-foreground: var(--foreground);
   --font-sans: var(--font-atkinson);
   --font-mono: monospace;
-
+  --font-fredoka: var(--font-fredoka), sans-serif;
 
   --color-brand-blue: #0056D2;
   --color-brand-orange: #F97316;
