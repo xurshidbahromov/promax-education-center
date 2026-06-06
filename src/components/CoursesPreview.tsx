@@ -109,7 +109,7 @@ const CoursesPreview = () => {
                         <motion.div
                             key={cat.id}
                             variants={itemVariants}
-                            className={`group relative rounded-3xl overflow-hidden shadow-lg ${cat.span} cursor-pointer`}
+                            className={`group relative rounded-3xl overflow-hidden shadow-lg ${cat.span} cursor-pointer [-webkit-mask-image:-webkit-radial-gradient(white,black)]`}
                         >
                             {/* Background Image */}
                             <Image

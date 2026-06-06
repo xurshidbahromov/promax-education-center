@@ -17,7 +17,7 @@ const VideoCard = ({ video, index }: { video: { id: string, title: string }, ind
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ delay: index * 0.05, duration: 0.5 }}
-            className="group bg-white dark:bg-slate-900 rounded-[2rem] overflow-hidden shadow-[0_8px_30px_rgb(0,0,0,0.04)] dark:shadow-none border border-gray-100 dark:border-slate-800 hover:shadow-[0_20px_40px_rgb(0,0,0,0.08)] dark:hover:shadow-brand-blue/10 hover:-translate-y-2 transition-all duration-500 flex flex-col"
+            className="group bg-white dark:bg-slate-900 rounded-[2rem] overflow-hidden shadow-[0_8px_30px_rgb(0,0,0,0.04)] dark:shadow-none border border-gray-100 dark:border-slate-800 hover:shadow-[0_20px_40px_rgb(0,0,0,0.08)] dark:hover:shadow-brand-blue/10 transition-shadow duration-500 flex flex-col [-webkit-mask-image:-webkit-radial-gradient(white,black)]"
         >
             {/* Video Facade / Iframe Container */}
             <div className="relative aspect-video w-full bg-slate-100 dark:bg-black overflow-hidden shrink-0">
@@ -69,7 +69,7 @@ const VideoCard = ({ video, index }: { video: { id: string, title: string }, ind
                         Muvaffaqiyat Tarixi
                     </span>
                 </div>
-                <h3 className="font-bold text-slate-800 dark:text-white text-lg md:text-xl line-clamp-3 group-hover:text-brand-blue dark:group-hover:text-blue-400 transition-colors leading-snug">
+                <h3 className="font-bold text-slate-800 dark:text-white text-lg md:text-xl line-clamp-3 leading-snug">
                     {video.title}
                 </h3>
             </div>

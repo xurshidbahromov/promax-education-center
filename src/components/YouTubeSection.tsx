@@ -91,7 +91,7 @@ const YouTubeSection = () => {
                             whileInView={{ opacity: 1, y: 0 }}
                             viewport={{ once: true }}
                             transition={{ delay: index * 0.15 }}
-                            className="group relative h-[400px] lg:h-[500px] rounded-3xl overflow-hidden block transition-all duration-300 hover:-translate-y-1 shadow-md"
+                            className="group relative h-[400px] lg:h-[500px] rounded-3xl overflow-hidden block shadow-md [-webkit-mask-image:-webkit-radial-gradient(white,black)]"
                         >
                             <Image
                                 src={playlist.image}

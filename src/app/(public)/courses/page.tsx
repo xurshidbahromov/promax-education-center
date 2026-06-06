@@ -64,7 +64,7 @@ export default function CoursesPage() {
                             >
                                 <Link
                                     href={`/courses/${course.id}`}
-                                    className="group flex flex-col bg-white/70 dark:bg-slate-900/70 backdrop-blur-xl rounded-[2rem] shadow-md border border-white/40 dark:border-white/10 hover:shadow-lg transition-all duration-300 h-full overflow-hidden"
+                                    className="group flex flex-col bg-white/70 dark:bg-slate-900/70 backdrop-blur-xl rounded-[2rem] shadow-md border border-white/40 dark:border-white/10 hover:shadow-lg transition-shadow duration-300 h-full overflow-hidden [-webkit-mask-image:-webkit-radial-gradient(white,black)]"
                                 >
                                     {/* Banner Image - Tighter height */}
                                     <div className="relative w-full h-24 sm:h-28 overflow-hidden shrink-0 bg-slate-100 dark:bg-slate-800">
@@ -127,7 +127,7 @@ export default function CoursesPage() {
                             >
                                 <Link
                                     href={`/courses/${course.id}`}
-                                    className="group flex flex-col bg-white/70 dark:bg-slate-900/70 backdrop-blur-xl rounded-[2rem] shadow-md border border-white/40 dark:border-white/10 hover:shadow-lg transition-all duration-300 h-full overflow-hidden"
+                                    className="group flex flex-col bg-white/70 dark:bg-slate-900/70 backdrop-blur-xl rounded-[2rem] shadow-md border border-white/40 dark:border-white/10 hover:shadow-lg transition-shadow duration-300 h-full overflow-hidden [-webkit-mask-image:-webkit-radial-gradient(white,black)]"
                                 >
                                     <div className="relative w-full h-24 sm:h-28 overflow-hidden shrink-0 bg-slate-100 dark:bg-slate-800">
                                         <Image src={course.image} alt={t(`courses.${course.id}`)} fill className="object-cover group-hover:scale-[1.03] transition-transform duration-700" />
@@ -183,7 +183,7 @@ export default function CoursesPage() {
                             >
                                 <Link
                                     href={`/courses/${course.id}`}
-                                    className="group flex flex-col bg-white/70 dark:bg-slate-900/70 backdrop-blur-xl rounded-[2rem] shadow-md border border-white/40 dark:border-white/10 hover:shadow-lg transition-all duration-300 h-full overflow-hidden"
+                                    className="group flex flex-col bg-white/70 dark:bg-slate-900/70 backdrop-blur-xl rounded-[2rem] shadow-md border border-white/40 dark:border-white/10 hover:shadow-lg transition-shadow duration-300 h-full overflow-hidden [-webkit-mask-image:-webkit-radial-gradient(white,black)]"
                                 >
                                     <div className="relative w-full h-32 sm:h-36 overflow-hidden shrink-0 bg-slate-100 dark:bg-slate-800">
                                         <Image src={course.image} alt={t(`courses.${course.id}`)} fill className="object-cover group-hover:scale-[1.03] transition-transform duration-700" />

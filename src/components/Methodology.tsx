@@ -104,7 +104,7 @@ function MobileZigZag({ steps, t }: { steps: StepItem[]; t: (k: string) => strin
         [1058, 110], // step4 left
     ];
 
-    const CARD_SIZE = 200; // px – diameter for mobile
+    const CARD_SIZE = 230; // px – diameter for mobile
     const CONTAINER_W = 340;
     const CONTAINER_H = 1200;
 
@@ -172,19 +172,19 @@ function MobileZigZag({ steps, t }: { steps: StepItem[]; t: (k: string) => strin
                         className="group cursor-default"
                     >
                         <div
-                            className="w-full h-full rounded-full flex flex-col items-center justify-center text-center bg-white dark:bg-slate-800 shadow-md dark:shadow-none border border-transparent dark:border-white/5 transition-all duration-300 group-hover:-translate-y-1"
+                            className="w-full h-full rounded-full flex flex-col items-center justify-center text-center bg-white dark:bg-slate-800 shadow-md dark:shadow-none border border-transparent dark:border-white/5 transition-all duration-300 group-hover:-translate-y-1 p-3"
                         >
-                            <span className="text-[9px] font-black uppercase tracking-[0.2em] text-amber-500 mb-1">STEP</span>
-                            <div className="flex items-center gap-1.5 mb-1">
-                                <Icon size={16} strokeWidth={2.5} className="text-amber-500 transition-transform duration-300" />
-                                <span className="text-4xl font-black text-slate-200 dark:text-slate-600 leading-none select-none transition-colors duration-300">
+                            <span className="text-[10px] font-black uppercase tracking-[0.2em] text-amber-500 mb-1">STEP</span>
+                            <div className="flex items-center gap-1.5 mb-1.5">
+                                <Icon size={20} strokeWidth={2.5} className="text-amber-500 transition-transform duration-300" />
+                                <span className="text-5xl font-black text-slate-200 dark:text-slate-600 leading-none select-none transition-colors duration-300">
                                     {step.num}
                                 </span>
                             </div>
-                            <h3 className="text-xs font-bold text-slate-700 dark:text-slate-200 uppercase tracking-tight px-4 mb-1 leading-tight group-hover:text-amber-600 transition-colors duration-300">
+                            <h3 className="text-sm sm:text-base font-bold text-slate-700 dark:text-slate-200 uppercase tracking-tight px-4 mb-2 leading-tight group-hover:text-amber-600 transition-colors duration-300">
                                 {t(`methodology.${step.id}.title`)}
                             </h3>
-                            <p className="text-[10px] text-slate-400 dark:text-slate-500 leading-relaxed px-5 line-clamp-3">
+                            <p className="text-[11px] sm:text-xs text-slate-400 dark:text-slate-500 leading-relaxed px-5 line-clamp-3">
                                 {t(`methodology.${step.id}.desc`)}
                             </p>
                         </div>
@@ -206,16 +206,16 @@ function MobileZigZag({ steps, t }: { steps: StepItem[]; t: (k: string) => strin
 ───────────────────────────────────────────── */
 
 function DesktopZigZag({ steps, t }: { steps: StepItem[]; t: (k: string) => string }) {
-    // Card positions [left%, top-px, isTop]
-    const positions: [string, number, boolean][] = [
-        ['4%',   120, false],  // step1 bottom
-        ['29%',    0, true],   // step2 top
-        ['54%',  120, false],  // step3 bottom
-        ['79%',    0, true],   // step4 top
+    // Card positions [cx, top-px, isTop]
+    const positions: [number, number, boolean][] = [
+        [158,  120, false],  // step1 bottom
+        [458,    0, true],   // step2 top
+        [758,  120, false],  // step3 bottom
+        [1058,   0, true],   // step4 top
     ];
 
-    const CARD_SIZE = 220; // px – diameter
-    const CONTAINER_H = CARD_SIZE + 120; // 340
+    const CARD_SIZE = 280; // px – diameter
+    const CONTAINER_H = CARD_SIZE + 120; // 400
 
     return (
         <div className="relative w-full" style={{ height: `${CONTAINER_H}px` }}>
@@ -280,7 +280,7 @@ function DesktopZigZag({ steps, t }: { steps: StepItem[]; t: (k: string) => stri
 
             {/* ── Cards ── */}
             {steps.map((step, i) => {
-                const [left, top] = positions[i];
+                const [cx, top] = positions[i];
                 const Icon = step.icon;
                 return (
                     <motion.div
@@ -291,7 +291,7 @@ function DesktopZigZag({ steps, t }: { steps: StepItem[]; t: (k: string) => stri
                         transition={{ delay: i * 0.15, duration: 0.6, ease: [0.34, 1.56, 0.64, 1] }}
                         style={{
                             position: 'absolute',
-                            left,
+                            left: `calc(${(cx / 1200) * 100}% - ${CARD_SIZE / 2}px)`,
                             top: `${top}px`,
                             width: `${CARD_SIZE}px`,
                             height: `${CARD_SIZE}px`,
@@ -300,30 +300,30 @@ function DesktopZigZag({ steps, t }: { steps: StepItem[]; t: (k: string) => stri
                     >
                         {/* Outer ring (neomorphic shadow) */}
                         <div
-                            className="w-full h-full rounded-full flex flex-col items-center justify-center text-center bg-white dark:bg-slate-800 border border-transparent dark:border-white/5 transition-all duration-300 group-hover:-translate-y-1 shadow-md dark:shadow-none"
+                            className="w-full h-full rounded-full flex flex-col items-center justify-center text-center bg-white dark:bg-slate-800 border border-transparent dark:border-white/5 transition-all duration-300 group-hover:-translate-y-1 shadow-md dark:shadow-none p-5"
                         >
                             {/* STEP label */}
-                            <span className="text-[10px] font-black uppercase tracking-[0.3em] text-amber-500 mb-1">STEP</span>
+                            <span className="text-[11px] font-black uppercase tracking-[0.3em] text-amber-500 mb-1.5">STEP</span>
 
                             {/* Big number + icon row */}
                             <div className="flex items-center gap-2 mb-2">
                                 <Icon
-                                    size={20}
+                                    size={24}
                                     strokeWidth={2.5}
                                     className="text-amber-500 transition-transform duration-300"
                                 />
-                                <span className="text-5xl font-black text-slate-200 dark:text-slate-600 leading-none select-none transition-colors duration-300">
+                                <span className="text-6xl font-black text-slate-200 dark:text-slate-600 leading-none select-none transition-colors duration-300">
                                     {step.num}
                                 </span>
                             </div>
 
                             {/* Title */}
-                            <h3 className="text-sm font-bold text-slate-700 dark:text-slate-200 uppercase tracking-tight px-6 mb-2 leading-tight group-hover:text-amber-600 dark:group-hover:text-amber-400 transition-colors duration-300">
+                            <h3 className="text-lg font-bold text-slate-700 dark:text-slate-200 uppercase tracking-tight px-8 mb-2.5 leading-tight group-hover:text-amber-600 dark:group-hover:text-amber-400 transition-colors duration-300">
                                 {t(`methodology.${step.id}.title`)}
                             </h3>
 
                             {/* Desc */}
-                            <p className="text-[11px] text-slate-400 dark:text-slate-500 leading-relaxed px-7 line-clamp-3">
+                            <p className="text-sm text-slate-400 dark:text-slate-500 leading-relaxed px-8 line-clamp-3">
                                 {t(`methodology.${step.id}.desc`)}
                             </p>
                         </div>
