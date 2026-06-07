@@ -104,12 +104,12 @@ function MobileZigZag({ steps, t }: { steps: StepItem[]; t: (k: string) => strin
         [1058, 110], // step4 left
     ];
 
-    const CARD_SIZE = 230; // px – diameter for mobile
+    const CARD_SIZE = 260; // px – diameter for mobile (increased from 230)
     const CONTAINER_W = 340;
     const CONTAINER_H = 1200;
 
     return (
-        <div className="relative origin-top transform scale-[0.85] sm:scale-100" style={{ width: `${CONTAINER_W}px`, height: `${CONTAINER_H}px` }}>
+        <div className="relative origin-top transform scale-[0.95] sm:scale-110" style={{ width: `${CONTAINER_W}px`, height: `${CONTAINER_H}px` }}>
             {/* SVG Vertical Connector */}
             <svg
                 className="absolute inset-0 w-full h-full pointer-events-none"
@@ -172,19 +172,19 @@ function MobileZigZag({ steps, t }: { steps: StepItem[]; t: (k: string) => strin
                         className="group cursor-default"
                     >
                         <div
-                            className="w-full h-full rounded-full flex flex-col items-center justify-center text-center bg-white dark:bg-slate-800 shadow-md dark:shadow-none border border-transparent dark:border-white/5 transition-all duration-300 group-hover:-translate-y-1 p-3"
+                            className="w-full h-full rounded-full flex flex-col items-center justify-center text-center bg-white dark:bg-slate-800 shadow-md dark:shadow-none border border-transparent dark:border-white/5 transition-all duration-300 group-hover:-translate-y-1 p-5"
                         >
-                            <span className="text-[10px] font-black uppercase tracking-[0.2em] text-amber-500 mb-1">STEP</span>
-                            <div className="flex items-center gap-1.5 mb-1.5">
-                                <Icon size={20} strokeWidth={2.5} className="text-amber-500 transition-transform duration-300" />
-                                <span className="text-5xl font-black text-slate-200 dark:text-slate-600 leading-none select-none transition-colors duration-300">
+                            <span className="text-[11px] font-black uppercase tracking-[0.2em] text-amber-500 mb-1">STEP</span>
+                            <div className="flex items-center gap-1.5 mb-1">
+                                <Icon size={22} strokeWidth={2.5} className="text-amber-500 transition-transform duration-300" />
+                                <span className="text-6xl font-black text-slate-200 dark:text-slate-600 leading-none select-none transition-colors duration-300">
                                     {step.num}
                                 </span>
                             </div>
-                            <h3 className="text-sm sm:text-base font-bold text-slate-700 dark:text-slate-200 uppercase tracking-tight px-4 mb-2 leading-tight group-hover:text-amber-600 transition-colors duration-300">
+                            <h3 className="text-base sm:text-lg font-bold text-slate-700 dark:text-slate-200 uppercase tracking-tight px-4 mb-2 leading-tight group-hover:text-amber-600 transition-colors duration-300">
                                 {t(`methodology.${step.id}.title`)}
                             </h3>
-                            <p className="text-[11px] sm:text-xs text-slate-400 dark:text-slate-500 leading-relaxed px-5 line-clamp-3">
+                            <p className="text-xs sm:text-sm text-slate-400 dark:text-slate-500 leading-relaxed px-5 line-clamp-3">
                                 {t(`methodology.${step.id}.desc`)}
                             </p>
                         </div>
