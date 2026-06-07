@@ -51,7 +51,9 @@ export default function LoginPage() {
 
     const handleRoleSelect = (role: 'student' | 'staff') => {
         setLoginAs(role);
-        setStep('form'); // Move to form step
+        setTimeout(() => {
+            setStep('form'); // Move to form step after a tiny delay to allow press animation to be felt
+        }, 150);
     };
 
     const handleBack = () => {
@@ -125,8 +127,16 @@ export default function LoginPage() {
             <div className="hidden lg:flex w-1/2 relative overflow-hidden bg-brand-blue dark:bg-slate-800/80 backdrop-blur-sm items-start justify-center pt-20 p-12 text-white">
                 {/* Background Elements */}
                 <div className="absolute top-0 left-0 w-full h-full overflow-hidden">
-                    <div className="absolute top-[10%] right-[10%] w-[60%] h-[60%] bg-blue-400/20 rounded-full blur-3xl"></div>
-                    <div className="absolute bottom-[10%] left-[10%] w-[60%] h-[60%] bg-brand-orange/20 rounded-full blur-3xl"></div>
+                    <motion.div 
+                        animate={{ scale: [1, 1.1, 1], rotate: [0, 90, 0], x: [0, 30, 0] }}
+                        transition={{ duration: 15, repeat: Infinity, ease: "linear" }}
+                        className="absolute top-[10%] right-[10%] w-[60%] h-[60%] bg-blue-400/20 rounded-full blur-3xl"
+                    />
+                    <motion.div 
+                        animate={{ scale: [1, 1.2, 1], rotate: [0, -90, 0], x: [0, -30, 0] }}
+                        transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
+                        className="absolute bottom-[10%] left-[10%] w-[60%] h-[60%] bg-brand-orange/20 rounded-full blur-3xl"
+                    />
                 </div>
 
                 <div className="relative z-10 max-w-lg space-y-12">
@@ -161,8 +171,23 @@ export default function LoginPage() {
             </div>
 
             {/* Right Side - Form */}
-            <div className="w-full lg:w-1/2 flex items-center justify-center p-6 sm:p-12 relative">
-                <Link href="/" className="absolute top-8 left-8 lg:hidden group flex items-center gap-2 text-gray-500 hover:text-brand-blue transition-colors">
+            <div className="w-full lg:w-1/2 flex items-center justify-center p-6 sm:p-12 relative overflow-hidden">
+                <AnimatePresence>
+                    {loginAs && (
+                        <motion.div
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            exit={{ opacity: 0 }}
+                            transition={{ duration: 0.8 }}
+                            className="pointer-events-none absolute inset-0 z-0"
+                        >
+                            <div className={`absolute -top-40 -right-40 w-96 h-96 rounded-full blur-[100px] opacity-20 transition-colors duration-700 ${loginAs === 'student' ? 'bg-brand-blue' : 'bg-brand-orange'}`} />
+                            <div className={`absolute -bottom-40 -left-40 w-96 h-96 rounded-full blur-[100px] opacity-20 transition-colors duration-700 ${loginAs === 'student' ? 'bg-brand-blue' : 'bg-brand-orange'}`} />
+                        </motion.div>
+                    )}
+                </AnimatePresence>
+
+                <Link href="/" className="absolute top-8 left-8 lg:hidden group flex items-center gap-2 text-gray-500 hover:text-brand-blue transition-colors z-20">
                     <ArrowLeft size={20} className="group-hover:-translate-x-1 transition-transform" />
                     <span>{t('auth.back_to_home')}</span>
                 </Link>
@@ -171,7 +196,7 @@ export default function LoginPage() {
                     initial={{ opacity: 0, x: 20 }}
                     animate={{ opacity: 1, x: 0 }}
                     transition={{ duration: 0.5 }}
-                    className="w-full max-w-md font-fredoka"
+                    className="w-full max-w-md font-fredoka relative z-10"
                 >
                     <AnimatePresence mode="wait">
                         {step === 'role' ? (
@@ -194,45 +219,137 @@ export default function LoginPage() {
                                 </div>
 
                                 {/* Minimal Role Selector */}
-                                <div className="flex flex-col sm:flex-row gap-3 max-w-sm mx-auto">
-                                    {/* Student Button */}
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 w-full mx-auto">
                                     <motion.button
                                         onClick={() => handleRoleSelect('student')}
-                                        whileHover={{ scale: 1.02 }}
-                                        whileTap={{ scale: 0.98 }}
-                                        className="flex-1 p-5 rounded-2xl border-2 border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800/80 backdrop-blur-sm hover:border-brand-blue hover:bg-brand-blue/5 transition-all group"
+                                        whileTap={{ scale: 0.95 }}
+                                        className="relative overflow-hidden flex flex-col items-center justify-center p-6 sm:p-7 rounded-3xl border border-slate-100 dark:border-slate-800/60 bg-white/70 dark:bg-slate-900/70 backdrop-blur-xl hover:border-brand-blue/30 dark:hover:border-brand-blue/20 transition-all duration-300 group shadow-[0_8px_30px_rgb(0,0,0,0.02)]"
                                     >
-                                        <div className="flex items-center justify-center gap-3">
-                                            <div className="w-12 h-12 rounded-xl bg-brand-blue/10 group-hover:bg-brand-blue flex items-center justify-center transition-all">
-                                                <GraduationCap className="text-brand-blue group-hover:text-white transition-colors" size={24} />
+                                        {/* Dynamic Glowing Blobs */}
+                                        <div className="absolute inset-0 z-0 pointer-events-none opacity-40 group-hover:opacity-100 transition-opacity duration-700">
+                                            <motion.div 
+                                                animate={{ y: [0, -15, 0], scale: [1, 1.1, 1] }}
+                                                transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
+                                                className="absolute -right-4 -top-8 w-24 h-24 bg-brand-blue/10 rounded-full blur-xl"
+                                            />
+                                            <motion.div 
+                                                animate={{ y: [0, 15, 0], scale: [1, 1.2, 1] }}
+                                                transition={{ duration: 5, repeat: Infinity, ease: "easeInOut", delay: 1 }}
+                                                className="absolute -left-8 bottom-0 w-32 h-32 bg-blue-400/10 rounded-full blur-2xl"
+                                            />
+                                        </div>
+
+                                        {/* Main Animated Watermark */}
+                                        <motion.div 
+                                            animate={{ y: [0, -6, 0], rotate: [-12, -8, -12] }}
+                                            transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
+                                            className="absolute -right-4 -bottom-4 z-0 text-brand-blue/5 dark:text-brand-blue/10 group-hover:text-brand-blue/10 dark:group-hover:text-brand-blue/20 transition-colors duration-500"
+                                        >
+                                            <GraduationCap className="w-32 h-32" />
+                                        </motion.div>
+
+                                        {/* Floating Mini Icons (Bubbles) */}
+                                        <div className="absolute inset-0 overflow-hidden pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-500">
+                                            <motion.div
+                                                animate={{ y: [40, -150], opacity: [0, 1, 0], x: [0, -15, 10] }}
+                                                transition={{ duration: 3, repeat: Infinity, ease: "linear", delay: 0.2 }}
+                                                className="absolute right-12 bottom-0 z-0 text-brand-blue/20"
+                                            >
+                                                <GraduationCap className="w-6 h-6 rotate-12" />
+                                            </motion.div>
+                                            <motion.div
+                                                animate={{ y: [40, -150], opacity: [0, 1, 0], x: [0, 15, -5] }}
+                                                transition={{ duration: 4, repeat: Infinity, ease: "linear", delay: 1.5 }}
+                                                className="absolute right-24 bottom-0 z-0 text-brand-blue/15"
+                                            >
+                                                <GraduationCap className="w-5 h-5 -rotate-12" />
+                                            </motion.div>
+                                            <motion.div
+                                                animate={{ y: [40, -150], opacity: [0, 1, 0], x: [0, -10, 20] }}
+                                                transition={{ duration: 3.5, repeat: Infinity, ease: "linear", delay: 2.5 }}
+                                                className="absolute right-4 bottom-0 z-0 text-brand-blue/10"
+                                            >
+                                                <GraduationCap className="w-4 h-4 rotate-45" />
+                                            </motion.div>
+                                        </div>
+
+                                        <div className="relative z-10 flex flex-col items-center gap-3">
+                                            <div className="w-14 h-14 rounded-2xl bg-brand-blue/10 group-hover:bg-brand-blue flex items-center justify-center transition-all duration-300 group-hover:shadow-lg group-hover:shadow-brand-blue/20 group-hover:scale-110">
+                                                <GraduationCap className="text-brand-blue group-hover:text-white transition-colors duration-300" size={26} />
                                             </div>
-                                            <div className="text-left">
-                                                <div className="font-bold text-slate-800 dark:text-white group-hover:text-brand-blue transition-colors">
+                                            <div className="text-center">
+                                                <div className="font-fredoka text-lg font-bold text-slate-800 dark:text-slate-100 group-hover:text-brand-blue transition-colors duration-300">
                                                     O'quvchi
                                                 </div>
-                                                <div className="text-xs text-gray-500 dark:text-gray-400">
+                                                <div className="text-xs text-gray-400 dark:text-gray-500 font-medium mt-0.5">
                                                     Student
                                                 </div>
                                             </div>
                                         </div>
                                     </motion.button>
 
-                                    {/* Teacher/Staff Button */}
                                     <motion.button
                                         onClick={() => handleRoleSelect('staff')}
-                                        whileHover={{ scale: 1.02 }}
-                                        whileTap={{ scale: 0.98 }}
-                                        className="flex-1 p-5 rounded-2xl border-2 border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800/80 backdrop-blur-sm hover:border-brand-orange hover:bg-brand-orange/5 transition-all group"
+                                        whileTap={{ scale: 0.95 }}
+                                        className="relative overflow-hidden flex flex-col items-center justify-center p-6 sm:p-7 rounded-3xl border border-slate-100 dark:border-slate-800/60 bg-white/70 dark:bg-slate-900/70 backdrop-blur-xl hover:border-brand-orange/30 dark:hover:border-brand-orange/20 transition-all duration-300 group shadow-[0_8px_30px_rgb(0,0,0,0.02)]"
                                     >
-                                        <div className="flex items-center justify-center gap-3">
-                                            <div className="w-12 h-12 rounded-xl bg-brand-orange/10 group-hover:bg-brand-orange flex items-center justify-center transition-all">
-                                                <Users className="text-brand-orange group-hover:text-white transition-colors" size={24} />
+                                        {/* Dynamic Glowing Blobs */}
+                                        <div className="absolute inset-0 z-0 pointer-events-none opacity-40 group-hover:opacity-100 transition-opacity duration-700">
+                                            <motion.div 
+                                                animate={{ y: [0, -15, 0], scale: [1, 1.1, 1] }}
+                                                transition={{ duration: 4.5, repeat: Infinity, ease: "easeInOut" }}
+                                                className="absolute -right-4 -top-8 w-24 h-24 bg-brand-orange/10 rounded-full blur-xl"
+                                            />
+                                            <motion.div 
+                                                animate={{ y: [0, 15, 0], scale: [1, 1.2, 1] }}
+                                                transition={{ duration: 5.5, repeat: Infinity, ease: "easeInOut", delay: 1 }}
+                                                className="absolute -left-8 bottom-0 w-32 h-32 bg-orange-400/10 rounded-full blur-2xl"
+                                            />
+                                        </div>
+
+                                        {/* Main Animated Watermark */}
+                                        <motion.div 
+                                            animate={{ y: [0, -6, 0], rotate: [-12, -8, -12] }}
+                                            transition={{ duration: 6, repeat: Infinity, ease: "easeInOut", delay: 0.5 }}
+                                            className="absolute -right-4 -bottom-4 z-0 text-brand-orange/5 dark:text-brand-orange/10 group-hover:text-brand-orange/10 dark:group-hover:text-brand-orange/20 transition-colors duration-500"
+                                        >
+                                            <Users className="w-32 h-32" />
+                                        </motion.div>
+
+                                        {/* Floating Mini Icons (Bubbles) */}
+                                        <div className="absolute inset-0 overflow-hidden pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-500">
+                                            <motion.div
+                                                animate={{ y: [40, -150], opacity: [0, 1, 0], x: [0, -15, 10] }}
+                                                transition={{ duration: 3.5, repeat: Infinity, ease: "linear", delay: 0.3 }}
+                                                className="absolute right-12 bottom-0 z-0 text-brand-orange/20"
+                                            >
+                                                <Users className="w-6 h-6 rotate-12" />
+                                            </motion.div>
+                                            <motion.div
+                                                animate={{ y: [40, -150], opacity: [0, 1, 0], x: [0, 15, -5] }}
+                                                transition={{ duration: 4.5, repeat: Infinity, ease: "linear", delay: 1.8 }}
+                                                className="absolute right-24 bottom-0 z-0 text-brand-orange/15"
+                                            >
+                                                <Users className="w-5 h-5 -rotate-12" />
+                                            </motion.div>
+                                            <motion.div
+                                                animate={{ y: [40, -150], opacity: [0, 1, 0], x: [0, -10, 20] }}
+                                                transition={{ duration: 3.8, repeat: Infinity, ease: "linear", delay: 2.8 }}
+                                                className="absolute right-4 bottom-0 z-0 text-brand-orange/10"
+                                            >
+                                                <Users className="w-4 h-4 rotate-45" />
+                                            </motion.div>
+                                        </div>
+
+                                        <div className="relative z-10 flex flex-col items-center gap-3">
+                                            <div className="w-14 h-14 rounded-2xl bg-brand-orange/10 group-hover:bg-brand-orange flex items-center justify-center transition-all duration-300 group-hover:shadow-lg group-hover:shadow-brand-orange/20 group-hover:scale-110">
+                                                <Users className="text-brand-orange group-hover:text-white transition-colors duration-300" size={26} />
                                             </div>
-                                            <div className="text-left">
-                                                <div className="font-bold text-slate-800 dark:text-white group-hover:text-brand-orange transition-colors">
+                                            <div className="text-center">
+                                                <div className="font-fredoka text-lg font-bold text-slate-800 dark:text-slate-100 group-hover:text-brand-orange transition-colors duration-300">
                                                     O'qituvchi
                                                 </div>
-                                                <div className="text-xs text-gray-500 dark:text-gray-400">
+                                                <div className="text-xs text-gray-400 dark:text-gray-500 font-medium mt-0.5">
                                                     Teacher/Staff
                                                 </div>
                                             </div>
@@ -306,10 +423,10 @@ export default function LoginPage() {
                                                 value={phone}
                                                 onChange={handlePhoneChange}
                                                 placeholder="+998 XX XXX XX XX"
-                                                className="w-full pl-12 pr-4 py-3 border-2 border-gray-200 dark:border-slate-700 rounded-xl focus:outline-none focus:border-brand-blue bg-white dark:bg-slate-800/80 backdrop-blur-sm text-slate-800 dark:text-white placeholder-gray-400 transition-colors"
+                                                className={`w-full pl-12 pr-4 py-3 border-2 border-gray-200 dark:border-slate-700 rounded-xl focus:outline-none bg-white dark:bg-slate-800/80 backdrop-blur-sm text-slate-800 dark:text-white placeholder-gray-400 transition-colors ${loginAs === 'student' ? 'focus:border-brand-blue' : 'focus:border-brand-orange'}`}
                                                 required
                                             />
-                                            <div className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-brand-blue transition-colors pointer-events-none z-10">
+                                            <div className={`absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 transition-colors pointer-events-none z-10 ${loginAs === 'student' ? 'group-focus-within:text-brand-blue' : 'group-focus-within:text-brand-orange'}`}>
                                                 <Users size={20} />
                                             </div>
                                         </div>
@@ -334,10 +451,10 @@ export default function LoginPage() {
                                                 value={password}
                                                 onChange={(e) => setPassword(e.target.value)}
                                                 placeholder="••••••••"
-                                                className="w-full pl-12 pr-12 py-3 border-2 border-gray-200 dark:border-slate-700 rounded-xl focus:outline-none focus:border-brand-blue bg-white dark:bg-slate-800/80 backdrop-blur-sm text-slate-800 dark:text-white placeholder-gray-400 transition-colors"
+                                                className={`w-full pl-12 pr-12 py-3 border-2 border-gray-200 dark:border-slate-700 rounded-xl focus:outline-none bg-white dark:bg-slate-800/80 backdrop-blur-sm text-slate-800 dark:text-white placeholder-gray-400 transition-colors ${loginAs === 'student' ? 'focus:border-brand-blue' : 'focus:border-brand-orange'}`}
                                                 required
                                             />
-                                            <div className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-brand-blue transition-colors pointer-events-none z-10">
+                                            <div className={`absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 transition-colors pointer-events-none z-10 ${loginAs === 'student' ? 'group-focus-within:text-brand-blue' : 'group-focus-within:text-brand-orange'}`}>
                                                 <Lock size={20} />
                                             </div>
                                             <button
@@ -351,20 +468,26 @@ export default function LoginPage() {
                                     </div>
                                 </div>
 
-                                <button
+                                <motion.button
+                                    whileTap={{ scale: 0.95 }}
                                     type="submit"
                                     disabled={loading}
-                                    className="w-full py-4 bg-brand-blue hover:bg-blue-700 text-white font-bold rounded-full text-lg shadow-lg hover:shadow-xl active:scale-95 transition-all flex items-center justify-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed group"
+                                    className={`w-full py-4 text-white font-bold rounded-full text-lg shadow-lg hover:shadow-xl transition-all flex items-center justify-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed group relative overflow-hidden ${
+                                        loginAs === 'student' ? 'bg-brand-blue shadow-brand-blue/30 hover:bg-blue-700' : 'bg-brand-orange shadow-brand-orange/30 hover:bg-orange-600'
+                                    }`}
                                 >
-                                    {loading ? (
-                                        <Loader2 className="animate-spin" size={20} />
-                                    ) : (
-                                        <>
-                                            {t('auth.login.button')}
-                                            <ArrowRight size={20} className="group-hover:translate-x-1 transition-transform duration-300 ease-out" />
-                                        </>
-                                    )}
-                                </button>
+                                    <div className="absolute inset-0 bg-white/20 scale-x-0 group-hover:scale-x-100 origin-left transition-transform duration-500 ease-out" />
+                                    <span className="relative z-10 flex items-center gap-2">
+                                        {loading ? (
+                                            <Loader2 className="animate-spin" size={24} />
+                                        ) : (
+                                            <>
+                                                {t('auth.login.button')}
+                                                <ArrowRight size={20} className="group-hover:translate-x-1 transition-transform duration-300 ease-out" />
+                                            </>
+                                        )}
+                                    </span>
+                                </motion.button>
 
                                 <p className="text-center text-sm text-gray-500 dark:text-gray-400">
                                     {t('auth.login.no_account')}{' '}
