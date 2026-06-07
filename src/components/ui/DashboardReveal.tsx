@@ -4,18 +4,20 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useEffect, useState } from "react";
 import Image from "next/image";
 
-const DashboardReveal = () => {
-    const [isVisible, setIsVisible] = useState(true);
+export default function DashboardReveal({ isLoading = false }: { isLoading?: boolean }) {
+    const [isFinished, setIsFinished] = useState(false);
 
     useEffect(() => {
-        const timer = setTimeout(() => {
-            setIsVisible(false);
-        }, 2200);
+        // Only start the exit animation timer when loading has finished
+        if (!isLoading) {
+            const timer = setTimeout(() => {
+                setIsFinished(true);
+            }, 2200);
+            return () => clearTimeout(timer);
+        }
+    }, [isLoading]);
 
-        return () => clearTimeout(timer);
-    }, []);
-
-    if (!isVisible) return null;
+    if (isFinished) return null;
 
     return (
         <AnimatePresence>
@@ -24,35 +26,37 @@ const DashboardReveal = () => {
                 {/* Left Glass Panel */}
                 <motion.div
                     initial={{ x: 0 }}
-                    animate={{ x: "-100%" }}
+                    animate={{ x: isLoading ? 0 : "-100%" }}
                     transition={{
                         duration: 1.0,
                         ease: [0.22, 1, 0.36, 1],
-                        delay: 1.2
+                        delay: isLoading ? 0 : 0.8
                     }}
                     className="w-1/2 h-full bg-white/60 dark:bg-slate-900/60 backdrop-blur-xl border-r border-white/20 dark:border-white/10 relative"
-                >
-                </motion.div>
+                />
 
                 {/* Right Glass Panel */}
                 <motion.div
                     initial={{ x: 0 }}
-                    animate={{ x: "100%" }}
+                    animate={{ x: isLoading ? 0 : "100%" }}
                     transition={{
                         duration: 1.0,
                         ease: [0.22, 1, 0.36, 1],
-                        delay: 1.2
+                        delay: isLoading ? 0 : 0.8
                     }}
                     className="w-1/2 h-full bg-white/60 dark:bg-slate-900/60 backdrop-blur-xl border-l border-white/20 dark:border-white/10 relative"
-                >
-                </motion.div>
+                />
 
                 {/* Center Content (Logo) */}
                 <motion.div
                     className="absolute inset-0 flex items-center justify-center z-50 mix-blend-normal"
                     initial={{ opacity: 1, scale: 1 }}
-                    animate={{ opacity: 0, scale: 1.1, filter: "blur(10px)" }}
-                    transition={{ duration: 0.5, delay: 1.0 }}
+                    animate={{ 
+                        opacity: isLoading ? 1 : 0, 
+                        scale: isLoading ? 1 : 1.1, 
+                        filter: isLoading ? "blur(0px)" : "blur(10px)" 
+                    }}
+                    transition={{ duration: 0.5, delay: isLoading ? 0 : 0.5 }}
                 >
                     <div className="relative flex flex-col items-center gap-6">
                         {/* Logo Container */}
@@ -87,8 +91,8 @@ const DashboardReveal = () => {
                             <h2 className="text-2xl font-bold text-gray-800 dark:text-white tracking-[0.2em] uppercase">
                                 Promax
                             </h2>
-                            <p className="text-brand-blue text-xs font-medium tracking-[0.4em] mt-2 uppercase">
-                                Education
+                            <p className="text-brand-blue text-xs font-bold tracking-[0.4em] mt-2 uppercase animate-pulse">
+                                {isLoading ? "Yuklanmoqda..." : "Education"}
                             </p>
                         </motion.div>
                     </div>
@@ -96,6 +100,4 @@ const DashboardReveal = () => {
             </div>
         </AnimatePresence>
     );
-};
-
-export default DashboardReveal;
+}
