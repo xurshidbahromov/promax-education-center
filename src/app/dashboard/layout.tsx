@@ -25,6 +25,7 @@ import NotificationBell from "@/components/NotificationBell";
 import DashboardReveal from "@/components/ui/DashboardReveal";
 import { motion } from "framer-motion";
 import SidebarBetaWidget from "@/components/ui/SidebarBetaWidget";
+import { Background } from "@/components/Background";
 
 export default function DashboardLayout({
     children,
@@ -97,13 +98,9 @@ export default function DashboardLayout({
             <DashboardReveal isLoading={loading} />
 
             {!loading && (
-                <div className="min-h-screen bg-gray-50 dark:bg-slate-950 flex relative overflow-hidden">
-                    {/* Ambient Background Orbs */}
-                    <div className="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none z-0 bg-gray-50/50 dark:bg-slate-950/50">
-                        <div className="absolute -top-[20%] -left-[10%] w-[60%] h-[60%] bg-brand-blue/15 dark:bg-brand-blue/10 rounded-full blur-[140px] animate-pulse" style={{ animationDuration: '8s' }}></div>
-                        <div className="absolute top-[30%] -right-[10%] w-[50%] h-[50%] bg-brand-orange/15 dark:bg-brand-orange/10 rounded-full blur-[140px] animate-pulse" style={{ animationDuration: '12s' }}></div>
-                        <div className="absolute -bottom-[20%] left-[20%] w-[40%] h-[40%] bg-indigo-500/10 dark:bg-indigo-500/5 rounded-full blur-[120px] animate-pulse" style={{ animationDuration: '10s' }}></div>
-                    </div>
+                <div className="min-h-screen bg-transparent flex relative overflow-hidden">
+                    {/* Landing Page Background */}
+                    <Background />
 
 
 
@@ -214,36 +211,44 @@ export default function DashboardLayout({
             </div>
 
             {/* Mobile Bottom Navigation */}
-            <nav className="lg:hidden fixed bottom-0 left-0 w-full bg-white/90 dark:bg-slate-900/90 backdrop-blur-xl border-t border-gray-200/50 dark:border-slate-800/50 z-50 px-2 py-2 safe-area-pb">
-                <div className="flex items-center justify-around">
+            <div className="lg:hidden fixed bottom-3 left-4 right-4 z-50 flex justify-center pointer-events-none">
+                <nav className="bg-white/90 dark:bg-slate-900/90 backdrop-blur-3xl border border-white/70 dark:border-slate-700/60 px-2 py-1.5 rounded-full shadow-[0_8px_30px_rgb(0,86,210,0.15)] dark:shadow-[0_8px_30px_rgb(0,0,0,0.3)] w-full max-w-md pointer-events-auto safe-area-pb">
+                <div className="flex items-center justify-between gap-1">
                     {menuItems.map((item) => {
                         const isActive = pathname === item.href;
                         return (
                             <Link
                                 key={item.href}
                                 href={item.href}
-                                className={`flex flex-col items-center justify-center w-16 h-14 rounded-2xl transition-all duration-300 relative ${
-                                    isActive ? "text-brand-blue" : "text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200"
+                                className={`flex items-center justify-center h-11 rounded-full transition-all duration-300 relative ${
+                                    isActive ? "text-brand-blue px-3.5" : "flex-1 text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200"
                                 }`}
                             >
                                 {isActive && (
                                     <motion.div 
                                         layoutId="bottomNavIndicator"
-                                        className="absolute inset-0 bg-brand-blue/10 dark:bg-brand-blue/20 rounded-xl"
-                                        transition={{ type: "spring", stiffness: 300, damping: 30 }}
+                                        className="absolute inset-0 bg-brand-blue/10 dark:bg-brand-blue/20 rounded-full border border-brand-blue/20 shadow-sm"
+                                        transition={{ type: "spring", stiffness: 350, damping: 30 }}
                                     />
                                 )}
-                                <div className="relative z-10 flex flex-col items-center gap-1">
-                                    <item.icon size={22} className={isActive ? "scale-110 transition-transform" : ""} />
-                                    <span className="text-[10px] font-medium tracking-tight truncate w-full text-center px-1">
-                                        {item.label}
-                                    </span>
+                                <div className="relative z-10 flex items-center justify-center">
+                                    <item.icon size={20} className={isActive ? "stroke-[2.5px] drop-shadow-sm" : "stroke-[2px]"} />
+                                    <div 
+                                        className={`overflow-hidden transition-all duration-300 flex items-center ${
+                                            isActive ? "max-w-[100px] opacity-100 ml-1.5" : "max-w-0 opacity-0 ml-0"
+                                        }`}
+                                    >
+                                        <span className="font-semibold text-[13px] tracking-wide drop-shadow-sm whitespace-nowrap">
+                                            {item.label}
+                                        </span>
+                                    </div>
                                 </div>
                             </Link>
                         );
                     })}
                 </div>
             </nav>
+            </div>
         </div>
         )}
         </>

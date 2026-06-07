@@ -68,7 +68,7 @@ export async function getStudentResults(studentId: string): Promise<ExamResult[]
         .order('created_at', { ascending: false });
 
     if (error) {
-        console.error('Error fetching results:', error);
+        console.error('Error fetching results:', error.message, error.details, error.hint, error);
         return [];
     }
 
