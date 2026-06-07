@@ -23,6 +23,7 @@ import { usePathname } from "next/navigation";
 import NotificationBell from "@/components/NotificationBell";
 
 import DashboardReveal from "@/components/ui/DashboardReveal";
+import { motion } from "framer-motion";
 import SidebarBetaWidget from "@/components/ui/SidebarBetaWidget";
 
 export default function DashboardLayout({
@@ -30,7 +31,6 @@ export default function DashboardLayout({
 }: {
     children: React.ReactNode;
 }) {
-    const [sidebarOpen, setSidebarOpen] = useState(false);
     const [loading, setLoading] = useState(true);
     const router = useRouter();
     const supabase = createClient();
@@ -112,26 +112,13 @@ export default function DashboardLayout({
 
 
 
-            {/* Mobile Sidebar Overlay */}
-            {sidebarOpen && (
-                <div
-                    className="fixed inset-0 bg-black/50 z-40 lg:hidden backdrop-blur-sm"
-                    onClick={() => setSidebarOpen(false)}
-                />
-            )}
-
-            {/* Sidebar */}
+            {/* Desktop Sidebar */}
             <aside
-                className={`
-          fixed lg:sticky top-0 lg:top-4 h-screen lg:h-[calc(100vh-2rem)] z-50 w-64 lg:ml-4 bg-white/80 dark:bg-slate-900/80 backdrop-blur-2xl border-r lg:border border-gray-200/50 dark:border-slate-800/50 lg:rounded-3xl shadow-2xl shadow-brand-blue/5 transition-transform duration-300 ease-in-out
-          ${sidebarOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"}
-        `}
+                className="hidden lg:flex flex-col sticky top-4 h-[calc(100vh-2rem)] z-50 w-64 ml-4 bg-white/80 dark:bg-slate-900/80 backdrop-blur-2xl border border-gray-200/50 dark:border-slate-800/50 rounded-3xl shadow-2xl shadow-brand-blue/5"
             >
                 <div className="h-full flex flex-col">
-
-
                     {/* Logo */}
-                    <div className="h-16 flex items-center px-6 border-b border-gray-200/50 dark:border-slate-800/50">
+                    <div className="h-20 flex items-center px-6 border-b border-gray-200/50 dark:border-slate-800/50">
                         <Link href="/" className="flex items-center gap-3">
                             <div className="relative w-12 h-8">
                                 <Image
@@ -155,14 +142,13 @@ export default function DashboardLayout({
                                 <Link
                                     key={item.href}
                                     href={item.href}
-                                    onClick={() => setSidebarOpen(false)}
                                     className={`
-                    flex items-center gap-3 px-4 py-3.5 rounded-2xl transition-all duration-300 group relative overflow-hidden
-                    ${isActive
+                                        flex items-center gap-3 px-4 py-3.5 rounded-2xl transition-all duration-300 group relative overflow-hidden
+                                        ${isActive
                                             ? "text-white shadow-lg shadow-brand-blue/20 bg-brand-blue"
                                             : "text-gray-600 dark:text-gray-400 hover:bg-gray-100/50 dark:hover:bg-slate-800/50 hover:text-brand-blue"
                                         }
-                  `}
+                                    `}
                                 >
                                     <item.icon size={20} className={isActive ? "" : "group-hover:scale-110 transition-transform"} />
                                     <span className="font-medium">{item.label}</span>
@@ -188,33 +174,81 @@ export default function DashboardLayout({
             </aside>
 
             {/* Main Content */}
-            <div className="flex-1 flex flex-col min-w-0 relative z-10">
-                {/* Header */}
-                <header className="sticky top-0 z-40 h-20 bg-white/60 dark:bg-slate-950/60 backdrop-blur-xl border-b border-gray-200/50 dark:border-slate-800/50 flex items-center justify-between px-4 lg:px-8">
-                    <button
-                        onClick={() => setSidebarOpen(true)}
-                        className="lg:hidden p-2 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-slate-800 rounded-lg"
-                    >
-                        <Menu size={24} />
-                    </button>
-
-                    <div className="flex items-center gap-4 ml-auto">
+            <div className="flex-1 flex flex-col min-w-0 relative z-10 h-screen overflow-hidden">
+                {/* Desktop Header (Island Style) */}
+                <div className="hidden lg:flex absolute top-4 right-8 z-50 justify-end pointer-events-none">
+                    <div className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-2xl border border-gray-200/50 dark:border-slate-800/50 rounded-full flex items-center gap-2 px-4 py-2 shadow-xl shadow-brand-blue/5 pointer-events-auto transition-all duration-300 hover:shadow-2xl hover:shadow-brand-blue/10">
                         <NotificationBell />
+                        <div className="w-px h-6 bg-gray-200 dark:bg-slate-700 mx-1" />
                         <Link href="/dashboard/profile">
-                            <div className="w-8 h-8 rounded-full bg-brand-blue/10 flex items-center justify-center text-brand-blue font-bold hover:bg-brand-blue/20 transition-colors">
-                                <User size={18} />
+                            <div className="w-10 h-10 rounded-full bg-brand-blue/10 flex items-center justify-center text-brand-blue hover:bg-brand-blue/20 transition-colors">
+                                <User size={20} />
                             </div>
                         </Link>
                     </div>
-                </header>
+                </div>
+
+                {/* Mobile Top Bar (Split Islands) */}
+                <div className="lg:hidden absolute top-4 left-4 right-4 z-50 flex items-center justify-between pointer-events-none">
+                    {/* Logo Island */}
+                    <Link href="/dashboard" className="h-12 bg-white/80 dark:bg-slate-900/80 backdrop-blur-2xl border border-gray-200/50 dark:border-slate-800/50 rounded-full flex items-center justify-center gap-2 px-5 shadow-lg shadow-brand-blue/5 pointer-events-auto">
+                        <div className="relative w-6 h-5">
+                            <Image src="/favicon.ico" alt="Logo" fill className="object-contain" />
+                        </div>
+                        <span className="font-fredoka font-bold text-lg text-slate-800 dark:text-white uppercase tracking-wide">Promax</span>
+                    </Link>
+                    
+                    {/* Profile/Bell Island */}
+                    <div className="h-12 bg-white/80 dark:bg-slate-900/80 backdrop-blur-2xl border border-gray-200/50 dark:border-slate-800/50 rounded-full flex items-center justify-center gap-2 px-3 shadow-lg shadow-brand-blue/5 pointer-events-auto">
+                        <NotificationBell />
+                        <div className="w-px h-5 bg-gray-200 dark:bg-slate-700 mx-1" />
+                        <Link href="/dashboard/profile">
+                            <div className="w-8 h-8 rounded-full bg-brand-blue/10 flex items-center justify-center text-brand-blue">
+                                <User size={16} />
+                            </div>
+                        </Link>
+                    </div>
+                </div>
 
                 {/* Page Content */}
-                <main className="flex-1 p-4 lg:p-8 overflow-y-auto">
-                    <div className="max-w-7xl mx-auto">
+                <main className="flex-1 p-4 pt-24 pb-32 lg:p-8 lg:pt-24 lg:pb-8 overflow-y-auto w-full relative z-0">
+                    <div className="max-w-7xl mx-auto min-h-full">
                         {children}
                     </div>
                 </main>
             </div>
+
+            {/* Mobile Bottom Navigation */}
+            <nav className="lg:hidden fixed bottom-0 left-0 w-full bg-white/90 dark:bg-slate-900/90 backdrop-blur-xl border-t border-gray-200/50 dark:border-slate-800/50 z-50 px-2 py-2 safe-area-pb">
+                <div className="flex items-center justify-around">
+                    {menuItems.map((item) => {
+                        const isActive = pathname === item.href;
+                        return (
+                            <Link
+                                key={item.href}
+                                href={item.href}
+                                className={`flex flex-col items-center justify-center w-16 h-14 rounded-2xl transition-all duration-300 relative ${
+                                    isActive ? "text-brand-blue" : "text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200"
+                                }`}
+                            >
+                                {isActive && (
+                                    <motion.div 
+                                        layoutId="bottomNavIndicator"
+                                        className="absolute inset-0 bg-brand-blue/10 dark:bg-brand-blue/20 rounded-xl"
+                                        transition={{ type: "spring", stiffness: 300, damping: 30 }}
+                                    />
+                                )}
+                                <div className="relative z-10 flex flex-col items-center gap-1">
+                                    <item.icon size={22} className={isActive ? "scale-110 transition-transform" : ""} />
+                                    <span className="text-[10px] font-medium tracking-tight truncate w-full text-center px-1">
+                                        {item.label}
+                                    </span>
+                                </div>
+                            </Link>
+                        );
+                    })}
+                </div>
+            </nav>
         </div>
     );
 }

@@ -94,7 +94,7 @@ export default function DashboardPage() {
             {/* Header */}
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <div>
-                    <h1 className="text-4xl lg:text-5xl font-bold text-gray-900 dark:text-white flex items-center gap-2 font-fredoka tracking-wide">
+                    <h1 className="text-3xl lg:text-5xl font-bold text-gray-900 dark:text-white flex items-center gap-2 font-fredoka tracking-wide">
                         {t('auth.welcome')} 👋
                     </h1>
                     <p className="text-gray-500 dark:text-gray-400 mt-1">
@@ -104,7 +104,7 @@ export default function DashboardPage() {
             </div>
 
             {/* Stats Grid */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6">
                 {loading ? (
                     // Show 4 Skeletons while loading
                     [...Array(4)].map((_, i) => (
@@ -130,15 +130,15 @@ export default function DashboardPage() {
                             {/* Soft Glow Behind Box */}
                             <div className={`absolute inset-0 bg-gradient-to-r ${stat.color.replace('bg-', 'from-')} to-transparent opacity-0 group-hover:opacity-10 blur-xl transition-opacity duration-500 rounded-2xl`} />
 
-                            <div className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl p-5 rounded-3xl border border-white/20 dark:border-slate-800/50 shadow-lg shadow-gray-200/20 dark:shadow-black/20 hover:shadow-xl hover:-translate-y-1 transition-all duration-300 relative z-10 overflow-hidden h-full flex flex-col justify-between group-hover:border-white/40 dark:group-hover:border-slate-700/50">
+                            <div className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl p-4 sm:p-5 rounded-3xl border border-white/20 dark:border-slate-800/50 shadow-lg shadow-gray-200/20 dark:shadow-black/20 hover:shadow-xl hover:-translate-y-1 transition-all duration-300 relative z-10 overflow-hidden h-full flex flex-col justify-between group-hover:border-white/40 dark:group-hover:border-slate-700/50">
                                 <div className="relative z-10">
-                                    <p className="text-gray-500 dark:text-gray-400 text-sm font-medium">{stat.title}</p>
-                                    <h3 className="text-4xl font-bold text-gray-900 dark:text-white mt-3 mb-1 font-fredoka">{stat.value}</h3>
+                                    <p className="text-gray-500 dark:text-gray-400 text-xs sm:text-sm font-medium">{stat.title}</p>
+                                    <h3 className="text-2xl sm:text-4xl font-bold text-gray-900 dark:text-white mt-2 mb-1 font-fredoka truncate">{stat.value}</h3>
                                 </div>
 
                                 <div className="relative z-10">
-                                    <p className="text-xs text-brand-blue font-medium flex items-center gap-1">
-                                        <TrendingUp size={12} /> {stat.trend}
+                                    <p className="text-[10px] sm:text-xs text-brand-blue font-medium flex items-center gap-1 truncate mt-2">
+                                        <TrendingUp size={12} className="hidden sm:block" /> <span className="truncate">{stat.trend}</span>
                                     </p>
                                 </div>
 
@@ -154,9 +154,9 @@ export default function DashboardPage() {
 
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
                 {/* Main Content: Announcements & Mock Chart */}
-                <div className="lg:col-span-2 flex flex-col gap-8 h-full">
+                <div className="lg:col-span-2 flex flex-col gap-8 lg:h-full">
                     {/* Announcements */}
-                    <div className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl p-6 rounded-3xl border border-white/20 dark:border-slate-800/50 shadow-lg shadow-gray-200/20 dark:shadow-black/20 relative overflow-hidden">
+                    <div className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl p-4 sm:p-6 rounded-3xl border border-white/20 dark:border-slate-800/50 shadow-lg shadow-gray-200/20 dark:shadow-black/20 relative overflow-hidden">
                         {/* decorative blur */}
                         <div className="absolute top-0 right-0 w-32 h-32 bg-brand-blue/5 rounded-full blur-[50px] -z-10"></div>
                         <div className="flex items-center justify-between mb-4">
@@ -190,7 +190,7 @@ export default function DashboardPage() {
                     </div>
 
                     {/* Mock Progress Chart - Now with Real Data */}
-                    <div className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl p-6 rounded-3xl border border-white/20 dark:border-slate-800/50 shadow-lg shadow-gray-200/20 dark:shadow-black/20 flex-1 flex flex-col relative overflow-hidden">
+                    <div className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl p-4 sm:p-6 rounded-3xl border border-white/20 dark:border-slate-800/50 shadow-lg shadow-gray-200/20 dark:shadow-black/20 flex-1 flex flex-col relative overflow-hidden">
                         <div className="absolute bottom-0 left-0 w-full h-1/2 bg-gradient-to-t from-brand-blue/5 to-transparent pointer-events-none"></div>
                         <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-6 font-fredoka tracking-wide relative z-10">{t('dashboard.chart.title')}</h3>
                         {loading ? (
@@ -226,9 +226,9 @@ export default function DashboardPage() {
                 </div>
 
                 {/* Right Column: Activity, Leaderboard & CTA */}
-                <div className="flex flex-col gap-8 h-full">
+                <div className="flex flex-col gap-8 lg:h-full">
                     {/* Recent Activity */}
-                    <div className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl p-6 rounded-3xl border border-white/20 dark:border-slate-800/50 shadow-lg shadow-gray-200/20 dark:shadow-black/20 relative overflow-hidden">
+                    <div className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl p-4 sm:p-6 rounded-3xl border border-white/20 dark:border-slate-800/50 shadow-lg shadow-gray-200/20 dark:shadow-black/20 relative overflow-hidden">
                         <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-4 flex items-center gap-2 font-fredoka tracking-wide">
                             <Clock className="text-brand-blue" size={20} />
                             {t('dashboard.activity.title')}
@@ -265,7 +265,7 @@ export default function DashboardPage() {
                     </div>
 
                     {/* Leaderboard */}
-                    <div className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl p-6 rounded-3xl border border-white/20 dark:border-slate-800/50 shadow-lg shadow-gray-200/20 dark:shadow-black/20 flex-1 flex flex-col min-h-[300px] relative overflow-hidden">
+                    <div className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl p-4 sm:p-6 rounded-3xl border border-white/20 dark:border-slate-800/50 shadow-lg shadow-gray-200/20 dark:shadow-black/20 flex-1 flex flex-col min-h-[300px] relative overflow-hidden">
                         <div className="absolute top-0 right-0 w-32 h-32 bg-yellow-500/5 rounded-full blur-[50px] pointer-events-none"></div>
                         <div className="flex items-center justify-between mb-4 relative z-10">
                             <h3 className="text-xl font-bold text-gray-900 dark:text-white flex items-center gap-2 font-fredoka tracking-wide">
