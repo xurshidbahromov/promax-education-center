@@ -1,317 +1,67 @@
 "use client";
 
 import { useLanguage } from "@/context/LanguageContext";
-import { Skeleton, StatsSkeleton, ChartSkeleton, ListItemSkeleton } from "@/components/ui/Skeleton";
+import { useCurrentUser, useUserProfile } from "@/hooks/useDashboardData";
+import dynamic from "next/dynamic";
 import { motion } from "framer-motion";
-import {
-    BookOpen,
-    Trophy,
-    Target,
-    Calendar,
-    TrendingUp,
-    Clock,
-    CheckCircle2,
-    XCircle,
-    Megaphone,
-    Medal,
-    Crown
-} from "lucide-react";
-import {
-    useCurrentUser,
-    useUserProfile,
-    useDashboardStats,
-    useChartData,
-    useActivityFeed,
-    useLeaderboard,
-    useUserRank,
-    useUpcomingTests,
-    useAnnouncements
-} from "@/hooks/useDashboardData";
-import MyCourses from "@/components/MyCourses";
+
+// Dynamically import heavy dashboard components for code splitting & performance
+const StatsGrid = dynamic(() => import("@/components/dashboard/StatsGrid"));
+const AnnouncementsList = dynamic(() => import("@/components/dashboard/AnnouncementsList"));
+const ProgressChart = dynamic(() => import("@/components/dashboard/ProgressChart"));
+const ActivityFeed = dynamic(() => import("@/components/dashboard/ActivityFeed"));
+const LeaderboardWidget = dynamic(() => import("@/components/dashboard/LeaderboardWidget"));
+const MyCourses = dynamic(() => import("@/components/MyCourses"));
 
 export default function DashboardPage() {
     const { t } = useLanguage();
 
-    // React Query Hooks
+    // Only fetch basic user info here, let child components handle their own heavy data fetching
     const { data: user } = useCurrentUser();
     const { data: profile } = useUserProfile(user?.id);
-    const { data: dashboardStats, isLoading: statsLoading } = useDashboardStats(user?.id);
-    const { data: chartData, isLoading: chartLoading } = useChartData(user?.id);
-    const { data: activityFeed, isLoading: activityLoading } = useActivityFeed(user?.id);
-    const { data: leaderboard, isLoading: leaderboardLoading } = useLeaderboard();
-    const { data: userRank } = useUserRank(user?.id);
-    const { data: upcomingTests, isLoading: testsLoading } = useUpcomingTests();
-    const { data: announcements, isLoading: announcementsLoading } = useAnnouncements();
 
-    const loading = statsLoading || chartLoading || activityLoading || leaderboardLoading || testsLoading || announcementsLoading;
     const userFullName = profile?.full_name || user?.user_metadata?.full_name || "Student";
     const currentUserId = user?.id;
 
-    // derived stats (safely access data)
-    const stats = [
-        {
-            title: t('dashboard.stats.coins'),
-            value: statsLoading ? "..." : `${dashboardStats?.totalCoins || 0}`,
-            icon: Trophy,
-            color: "bg-brand-orange",
-            textColor: "text-brand-orange",
-            trend: statsLoading ? "" : `+${Math.floor((dashboardStats?.totalCoins || 0) / 10)} ${t('dashboard.stats.coins.trend')}`
-        },
-        {
-            title: t('dashboard.stats.average_score'),
-            value: statsLoading ? "..." : `${dashboardStats?.averageScore.toFixed(1) || 0}`,
-            icon: Target,
-            color: "bg-brand-blue",
-            textColor: "text-brand-blue",
-            trend: statsLoading ? "" : t('dashboard.stats.average_score.trend')
-        },
-        {
-            title: t('dashboard.stats.exams_count'),
-            value: statsLoading ? "..." : `${dashboardStats?.totalTests || 0}`,
-            icon: BookOpen,
-            color: "bg-indigo-500",
-            textColor: "text-indigo-500",
-            trend: statsLoading ? "" : t('dashboard.stats.exams_count.trend')
-        },
-        {
-            title: t('dashboard.stats.next_exam'),
-            value: statsLoading ? "..." : t('dashboard.stats.next_exam.value'),
-            icon: Calendar,
-            color: "bg-green-500",
-            textColor: "text-green-500",
-            trend: t('dashboard.stats.next_exam.trend')
-        },
-    ];
-
-    // const leaderboard = [
-    //     { name: "Aziz Rahimov", points: 2400, rank: 1, avatar: "🥇" },
-    //     { name: "Malika Karimova", points: 2150, rank: 2, avatar: "🥈" },
-    //     { name: t('dashboard.leaderboard.you'), points: 1250, rank: 15, avatar: "👤" },
-    // ];
-
     return (
-        <div className="space-y-8">
+        <div className="space-y-6 sm:space-y-8 pb-10">
             {/* Header */}
-            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <motion.div 
+                initial={{ opacity: 0, y: -10 }} 
+                animate={{ opacity: 1, y: 0 }} 
+                className="flex flex-col md:flex-row md:items-center justify-between gap-4"
+            >
                 <div>
-                    <h1 className="text-3xl lg:text-5xl font-bold text-gray-900 dark:text-white flex items-center gap-2 font-fredoka tracking-wide">
+                    <h1 className="text-3xl lg:text-5xl font-bold text-gray-900 dark:text-white flex items-center gap-2 font-fredoka tracking-wide drop-shadow-sm">
                         {t('auth.welcome')} 👋
                     </h1>
-                    <p className="text-gray-500 dark:text-gray-400 mt-1">
+                    <p className="text-gray-600 dark:text-gray-300 mt-2 font-medium">
                         {new Date().toLocaleDateString(t('locale') === 'uz' ? 'uz-UZ' : 'en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
                     </p>
                 </div>
-            </div>
+            </motion.div>
 
             {/* Stats Grid */}
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6">
-                {loading ? (
-                    // Show 4 Skeletons while loading
-                    [...Array(4)].map((_, i) => (
-                        <motion.div
-                            key={i}
-                            initial={{ opacity: 0, y: 20 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            transition={{ delay: i * 0.1 }}
-                            className="relative group h-full"
-                        >
-                            <StatsSkeleton />
-                        </motion.div>
-                    ))
-                ) : (
-                    stats.map((stat, index) => (
-                        <motion.div
-                            key={index}
-                            initial={{ opacity: 0, y: 20 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            transition={{ delay: index * 0.1 }}
-                            className="relative group h-full"
-                        >
-                            {/* Soft Glow Behind Box */}
-                            <div className={`absolute inset-0 bg-gradient-to-r ${stat.color.replace('bg-', 'from-')} to-transparent opacity-0 group-hover:opacity-10 blur-xl transition-opacity duration-500 rounded-2xl`} />
+            <StatsGrid userId={currentUserId} />
 
-                            <div className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl p-4 sm:p-5 rounded-3xl border border-white/20 dark:border-slate-800/50 shadow-lg shadow-gray-200/20 dark:shadow-black/20 hover:shadow-xl hover:-translate-y-1 transition-all duration-300 relative z-10 overflow-hidden h-full flex flex-col justify-between group-hover:border-white/40 dark:group-hover:border-slate-700/50">
-                                <div className="relative z-10">
-                                    <p className="text-gray-500 dark:text-gray-400 text-xs sm:text-sm font-medium">{stat.title}</p>
-                                    <h3 className="text-2xl sm:text-4xl font-bold text-gray-900 dark:text-white mt-2 mb-1 font-fredoka truncate">{stat.value}</h3>
-                                </div>
-
-                                <div className="relative z-10">
-                                    <p className="text-[10px] sm:text-xs text-brand-blue font-medium flex items-center gap-1 truncate mt-2">
-                                        <TrendingUp size={12} className="hidden sm:block" /> <span className="truncate">{stat.trend}</span>
-                                    </p>
-                                </div>
-
-                                {/* Watermark Icon */}
-                                <div className={`absolute -right-6 -bottom-6 opacity-10 ${stat.textColor}`}>
-                                    <stat.icon size={100} />
-                                </div>
-                            </div>
-                        </motion.div>
-                    ))
-                )}
-            </div>
-
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 sm:gap-8">
                 {/* Main Content: Announcements & Mock Chart */}
-                <div className="lg:col-span-2 flex flex-col gap-8 lg:h-full">
-                    {/* Announcements */}
-                    <div className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl p-4 sm:p-6 rounded-3xl border border-white/20 dark:border-slate-800/50 shadow-lg shadow-gray-200/20 dark:shadow-black/20 relative overflow-hidden">
-                        {/* decorative blur */}
-                        <div className="absolute top-0 right-0 w-32 h-32 bg-brand-blue/5 rounded-full blur-[50px] -z-10"></div>
-                        <div className="flex items-center justify-between mb-4">
-                            <h3 className="text-xl font-bold text-gray-900 dark:text-white flex items-center gap-2 font-fredoka tracking-wide">
-                                <Megaphone className="text-brand-blue" size={20} />
-                                {t('dashboard.announcements.title')}
-                            </h3>
-                        </div>
-                        <div className="space-y-3 max-h-[280px] overflow-y-auto pr-2 custom-scrollbar">
-                            {loading ? (
-                                [...Array(3)].map((_, i) => <ListItemSkeleton key={i} />)
-                            ) : (announcements?.length || 0) === 0 ? (
-                                <p className="text-gray-500 dark:text-gray-400 text-sm text-center py-4">
-                                    {t('dashboard.announcements.empty') || "E'lonlar yo'q"}
-                                </p>
-                            ) : (
-                                announcements?.map((item, i) => (
-                                    <div key={item.id || i} className="bg-white/50 dark:bg-slate-800/50 hover:bg-white dark:hover:bg-slate-800 p-4 rounded-2xl border border-gray-100/50 dark:border-slate-700/50 flex gap-4 transition-all duration-300 hover:shadow-md hover:translate-x-1 group">
-                                        <div className={`w-1 h-full rounded-full ${item.type === 'error' ? 'bg-red-500' : item.type === 'warning' ? 'bg-yellow-500' : item.type === 'success' ? 'bg-green-500' : 'bg-blue-500'}`}></div>
-                                        <div>
-                                            <h4 className="font-semibold text-gray-900 dark:text-white">{item.title}</h4>
-                                            <p className="text-sm text-gray-600 dark:text-gray-300 mt-1">{item.message}</p>
-                                            <p className="text-xs text-gray-400 mt-2 flex items-center gap-1">
-                                                <Clock size={12} /> {new Date(item.created_at).toLocaleDateString('uz-UZ', { year: 'numeric', month: 'short', day: 'numeric' })}
-                                            </p>
-                                        </div>
-                                    </div>
-                                ))
-                            )}
-                        </div>
-                    </div>
-
-                    {/* Mock Progress Chart - Now with Real Data */}
-                    <div className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl p-4 sm:p-6 rounded-3xl border border-white/20 dark:border-slate-800/50 shadow-lg shadow-gray-200/20 dark:shadow-black/20 flex-1 flex flex-col relative overflow-hidden">
-                        <div className="absolute bottom-0 left-0 w-full h-1/2 bg-gradient-to-t from-brand-blue/5 to-transparent pointer-events-none"></div>
-                        <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-6 font-fredoka tracking-wide relative z-10">{t('dashboard.chart.title')}</h3>
-                        {loading ? (
-                            <ChartSkeleton />
-                        ) : (chartData?.length || 0) === 0 ? (
-                            <div className="flex-1 flex items-center justify-center min-h-[250px]">
-                                <p className="text-gray-400">{t('dashboard.no_results')}</p>
-                            </div>
-                        ) : (
-                            <div className="flex-1 w-full min-h-[250px] flex items-end justify-between gap-2">
-                                {chartData?.map((result, i) => {
-                                    // Calculate percentage (out of 189 max score)
-                                    const percentage = Math.round((result.score / 189) * 100);
-                                    return (
-                                        <div key={i} className="w-full bg-gray-50 dark:bg-slate-800 rounded-t-lg relative group h-full flex flex-col justify-end" title={result.examTitle}>
-                                            <motion.div
-                                                className="w-full bg-brand-blue rounded-t-lg relative"
-                                                initial={{ height: 0 }}
-                                                animate={{ height: `${percentage}%` }}
-                                                transition={{ duration: 1, type: "spring", delay: i * 0.1 }}
-                                            >
-                                                <div className="absolute -top-10 left-1/2 -translate-x-1/2 bg-gray-900 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
-                                                    {result.score} / 189
-                                                </div>
-                                            </motion.div>
-                                            <span className="text-xs text-gray-400 text-center mt-2 truncate">{result.date}</span>
-                                        </div>
-                                    );
-                                })}
-                            </div>
-                        )}
-                    </div>
+                <div className="lg:col-span-2 flex flex-col gap-6 sm:gap-8 lg:h-full">
+                    <AnnouncementsList />
+                    <ProgressChart userId={currentUserId} />
                 </div>
 
                 {/* Right Column: Activity, Leaderboard & CTA */}
-                <div className="flex flex-col gap-8 lg:h-full">
-                    {/* Recent Activity */}
-                    <div className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl p-4 sm:p-6 rounded-3xl border border-white/20 dark:border-slate-800/50 shadow-lg shadow-gray-200/20 dark:shadow-black/20 relative overflow-hidden">
-                        <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-4 flex items-center gap-2 font-fredoka tracking-wide">
-                            <Clock className="text-brand-blue" size={20} />
-                            {t('dashboard.activity.title')}
-                        </h3>
-                        <div className="space-y-4">
-                            {loading ? (
-                                [...Array(3)].map((_, i) => <ListItemSkeleton key={i} />)
-                            ) : (activityFeed?.length || 0) === 0 ? (
-                                <p className="text-sm text-gray-500 text-center py-4">{t('dashboard.activity.empty')}</p>
-                            ) : (
-                                activityFeed?.map((item, i) => (
-                                    <div key={i} className="flex gap-3 items-start p-2 rounded-xl hover:bg-gray-50 dark:hover:bg-slate-800/50 transition-colors group">
-                                        <div className="mt-1">
-                                            <CheckCircle2 size={16} className="text-green-500" />
-                                        </div>
-                                        <div>
-                                            <h4 className="text-sm font-semibold text-gray-900 dark:text-white line-clamp-1">{item.title}</h4>
-                                            <p className="text-xs text-gray-500 dark:text-gray-400">
-                                                {t('dashboard.activity.scored')}: <span className="font-medium text-brand-blue">{item.score}/{item.maxScore}</span>
-                                            </p>
-                                            <span className="text-[10px] text-gray-400">
-                                                {new Date(item.date).toLocaleDateString(t('locale') === 'uz' ? 'uz-UZ' : t('locale') === 'ru' ? 'ru-RU' : 'en-US', {
-                                                    day: 'numeric',
-                                                    month: 'short',
-                                                    hour: '2-digit',
-                                                    minute: '2-digit'
-                                                })}
-                                            </span>
-                                        </div>
-                                    </div>
-                                ))
-                            )}
-                        </div>
-                    </div>
-
-                    {/* Leaderboard */}
-                    <div className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl p-4 sm:p-6 rounded-3xl border border-white/20 dark:border-slate-800/50 shadow-lg shadow-gray-200/20 dark:shadow-black/20 flex-1 flex flex-col min-h-[300px] relative overflow-hidden">
-                        <div className="absolute top-0 right-0 w-32 h-32 bg-yellow-500/5 rounded-full blur-[50px] pointer-events-none"></div>
-                        <div className="flex items-center justify-between mb-4 relative z-10">
-                            <h3 className="text-xl font-bold text-gray-900 dark:text-white flex items-center gap-2 font-fredoka tracking-wide">
-                                <Medal className="text-yellow-500" size={20} />
-                                {t('dashboard.leaderboard.title')}
-                            </h3>
-                        </div>
-
-                        <div className="space-y-4 overflow-y-auto flex-1 custom-scrollbar pr-2 mb-2">
-                            {leaderboard?.map((user: any, i: number) => (
-                                <div key={i} className={`flex items-center justify-between p-3 rounded-xl ${user.id === currentUserId ? 'bg-brand-blue/10 border border-brand-blue/20' : 'hover:bg-gray-50 dark:hover:bg-slate-800'}`}>
-                                    <div className="flex items-center gap-3">
-                                        <span className={`font-bold w-6 text-center ${user.rank <= 3 ? 'text-yellow-500' : 'text-gray-400'}`}>#{user.rank}</span>
-                                        <span className="text-xl">{user.avatar}</span>
-                                        <div>
-                                            <h4 className="font-semibold text-gray-900 dark:text-white text-sm">{user.name} {user.id === currentUserId && `(${t('dashboard.leaderboard.you')})`}</h4>
-                                            <p className="text-xs text-gray-500">{user.points} coins</p>
-                                        </div>
-                                    </div>
-                                </div>
-                            ))}
-                        </div>
-
-                        {/* Sticky User Rank at Bottom */}
-                        {userRank && (
-                            <div className="pt-3 mt-auto border-t border-gray-100 dark:border-slate-800 bg-white dark:bg-slate-900 z-10">
-                                <div className="flex items-center justify-between p-3 rounded-xl bg-brand-blue/10 border border-brand-blue/20">
-                                    <div className="flex items-center gap-3">
-                                        <span className="font-bold w-6 text-center text-brand-blue">#{userRank.rank}</span>
-                                        <span className="text-xl">{userRank.avatar}</span>
-                                        <div>
-                                            <h4 className="font-semibold text-gray-900 dark:text-white text-sm">{userRank.name} ({t('dashboard.leaderboard.you')})</h4>
-                                            <p className="text-xs text-gray-500">{userRank.points} coins</p>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        )}
-                    </div>
-
-
+                <div className="flex flex-col gap-6 sm:gap-8 lg:h-full">
+                    <ActivityFeed userId={currentUserId} />
+                    <LeaderboardWidget userId={currentUserId} />
                 </div>
             </div>
 
-            {/* My Courses Section - Moved to bottom */}
-            <MyCourses />
+            {/* My Courses Section */}
+            <div className="pt-4">
+                <MyCourses />
+            </div>
         </div>
     );
 }

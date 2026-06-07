@@ -101,10 +101,11 @@ export default function DashboardLayout({
 
     return (
         <div className="min-h-screen bg-gray-50 dark:bg-slate-950 flex relative overflow-hidden">
-            {/* Background Orbs */}
-            <div className="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none z-0">
-                <div className="absolute -top-[20%] -left-[10%] w-[50%] h-[50%] bg-brand-blue/10 rounded-full blur-[120px]"></div>
-                <div className="absolute top-[40%] -right-[10%] w-[40%] h-[60%] bg-brand-orange/10 rounded-full blur-[120px]"></div>
+            {/* Ambient Background Orbs */}
+            <div className="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none z-0 bg-gray-50/50 dark:bg-slate-950/50">
+                <div className="absolute -top-[20%] -left-[10%] w-[60%] h-[60%] bg-brand-blue/15 dark:bg-brand-blue/10 rounded-full blur-[140px] animate-pulse" style={{ animationDuration: '8s' }}></div>
+                <div className="absolute top-[30%] -right-[10%] w-[50%] h-[50%] bg-brand-orange/15 dark:bg-brand-orange/10 rounded-full blur-[140px] animate-pulse" style={{ animationDuration: '12s' }}></div>
+                <div className="absolute -bottom-[20%] left-[20%] w-[40%] h-[40%] bg-indigo-500/10 dark:bg-indigo-500/5 rounded-full blur-[120px] animate-pulse" style={{ animationDuration: '10s' }}></div>
             </div>
 
             {/* Reveal Animation */}
