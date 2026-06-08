@@ -44,7 +44,7 @@ const ResultsStats = () => {
                     initial={{ opacity: 0, y: 20 }}
                     whileInView={{ opacity: 1, y: 0 }}
                     viewport={{ once: true }}
-                    className="text-4xl md:text-5xl lg:text-7xl font-black text-white uppercase tracking-tighter"
+                    className="text-4xl md:text-5xl lg:text-7xl font-extrabold text-white uppercase tracking-tighter font-fredoka"
                 >
                     PROMAX <span className="text-brand-orange">NUMBERS</span>
                 </motion.h2>

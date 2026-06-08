@@ -263,7 +263,7 @@ export default function ProfilePage() {
                 <span>{t("common.back")}</span>
             </button>
 
-            <h1 className="text-3xl font-bold text-gray-900 dark:text-white flex items-center gap-3">
+            <h1 className="text-3xl font-extrabold text-slate-800 dark:text-slate-100 flex items-center gap-3 tracking-tighter uppercase font-fredoka">
                 <User className="text-brand-blue" size={32} />
                 {t("profile.title")}
             </h1>

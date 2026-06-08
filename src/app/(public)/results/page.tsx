@@ -110,7 +110,7 @@ export default function ResultsPage() {
                     <motion.h1
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
-                        className="text-4xl md:text-6xl font-extrabold text-slate-800 dark:text-white mb-6 tracking-tight"
+                        className="text-4xl md:text-6xl font-extrabold text-slate-800 dark:text-slate-100 mb-6 tracking-tighter uppercase font-fredoka"
                     >
                         {t('results.header.title')}
                     </motion.h1>

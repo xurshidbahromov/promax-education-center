@@ -59,7 +59,7 @@ const YouTubeSection = () => {
                             whileInView={{ opacity: 1, x: 0 }}
                             viewport={{ once: true }}
                             transition={{ delay: 0.1 }}
-                            className="text-4xl md:text-5xl lg:text-6xl font-black text-slate-800 dark:text-white uppercase tracking-tighter leading-none"
+                            className="text-4xl md:text-5xl lg:text-6xl font-extrabold text-slate-800 dark:text-slate-100 uppercase tracking-tighter leading-none font-fredoka"
                         >
                             {t('home.youtube.title')}
                         </motion.h2>

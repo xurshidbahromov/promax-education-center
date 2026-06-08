@@ -136,7 +136,7 @@ export default function ResultsPage() {
             {/* Header */}
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <div>
-                    <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
+                    <h1 className="text-3xl font-extrabold text-slate-800 dark:text-slate-100 tracking-tighter uppercase font-fredoka">
                         {t('results.title')}
                     </h1>
                     <p className="text-gray-500 dark:text-gray-400 mt-1">

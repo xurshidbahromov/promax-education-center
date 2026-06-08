@@ -30,7 +30,7 @@ export default function CoursesPage() {
                     <motion.h1
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
-                        className="text-4xl md:text-6xl font-extrabold text-slate-800 dark:text-white mb-6 tracking-tight"
+                        className="text-4xl md:text-6xl font-extrabold text-slate-800 dark:text-slate-100 mb-6 tracking-tighter uppercase font-fredoka"
                     >
                         {t('courses.title')}
                     </motion.h1>
@@ -49,7 +49,7 @@ export default function CoursesPage() {
                 <div className="mb-24">
                     <div className="flex flex-col md:flex-row md:items-center gap-4 mb-12">
                         <div className="w-16 h-1.5 bg-gradient-to-r from-brand-blue to-blue-400 rounded-full" />
-                        <h2 className="text-3xl md:text-4xl font-extrabold text-slate-800 dark:text-white tracking-tight">
+                        <h2 className="text-3xl md:text-4xl font-extrabold text-slate-800 dark:text-slate-100 tracking-tighter uppercase font-fredoka">
                             {t('courses.categories.general')}
                         </h2>
                     </div>
@@ -112,7 +112,7 @@ export default function CoursesPage() {
                 <div className="mb-24">
                     <div className="flex flex-col md:flex-row md:items-center gap-4 mb-12">
                         <div className="w-16 h-1.5 bg-gradient-to-r from-purple-600 to-purple-400 rounded-full" />
-                        <h2 className="text-3xl md:text-4xl font-extrabold text-slate-800 dark:text-white tracking-tight">
+                        <h2 className="text-3xl md:text-4xl font-extrabold text-slate-800 dark:text-slate-100 tracking-tighter uppercase font-fredoka">
                             {t('courses.cert.title')}
                         </h2>
                     </div>
@@ -168,7 +168,7 @@ export default function CoursesPage() {
                 <div className="mb-20">
                     <div className="flex flex-col md:flex-row md:items-center gap-4 mb-12">
                         <div className="w-16 h-1.5 bg-gradient-to-r from-brand-orange to-orange-400 rounded-full" />
-                        <h2 className="text-3xl md:text-4xl font-extrabold text-slate-800 dark:text-white tracking-tight">
+                        <h2 className="text-3xl md:text-4xl font-extrabold text-slate-800 dark:text-slate-100 tracking-tighter uppercase font-fredoka">
                             {t('courses.prep.title')}
                         </h2>
                     </div>

@@ -84,7 +84,7 @@ export default function OnlineTestsPage() {
             {/* Header */}
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <div>
-                    <h1 className="text-3xl font-bold text-gray-900 dark:text-white flex items-center gap-3">
+                    <h1 className="text-3xl font-extrabold text-slate-800 dark:text-slate-100 flex items-center gap-3 tracking-tighter uppercase font-fredoka">
                         <Zap className="text-brand-blue" size={32} />
                         {t('tests.title')}
                     </h1>

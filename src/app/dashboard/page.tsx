@@ -32,7 +32,7 @@ export default function DashboardPage() {
                 className="flex flex-col md:flex-row md:items-center justify-between gap-4"
             >
                 <div>
-                    <h1 className="text-3xl lg:text-5xl font-bold text-gray-900 dark:text-white flex items-center gap-2 font-fredoka tracking-wide drop-shadow-sm">
+                    <h1 className="text-3xl lg:text-5xl font-extrabold text-slate-800 dark:text-slate-100 flex items-center gap-2 font-fredoka tracking-tighter drop-shadow-sm">
                         {t('auth.welcome')} 👋
                     </h1>
                     <p className="text-gray-600 dark:text-gray-300 mt-2 font-medium">

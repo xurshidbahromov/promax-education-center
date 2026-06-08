@@ -66,7 +66,7 @@ const CoursesPreview = () => {
                             initial={{ opacity: 0, x: -20 }}
                             whileInView={{ opacity: 1, x: 0 }}
                             viewport={{ once: true }}
-                            className="text-4xl md:text-5xl lg:text-6xl font-black text-slate-800 dark:text-white mb-4 tracking-tighter uppercase font-fredoka"
+                            className="text-4xl md:text-5xl lg:text-6xl font-extrabold text-slate-800 dark:text-slate-100 mb-4 tracking-tighter uppercase font-fredoka"
                         >
                             {t('courses.title')}
                         </motion.h2>

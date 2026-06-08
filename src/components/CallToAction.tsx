@@ -42,7 +42,7 @@ const CallToAction = () => {
                                 <span>{t('cta.subtitle')}</span>
                             </div>
 
-                            <h2 className="text-4xl md:text-5xl lg:text-6xl font-black text-white tracking-tighter uppercase leading-[1.1] font-fredoka">
+                            <h2 className="text-4xl md:text-5xl lg:text-6xl font-extrabold text-white tracking-tighter uppercase leading-[1.1] font-fredoka">
                                 {t('cta.title')}
                             </h2>
 

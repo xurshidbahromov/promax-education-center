@@ -42,7 +42,7 @@ const Methodology = () => {
                             initial={{ opacity: 0, y: 20 }}
                             whileInView={{ opacity: 1, y: 0 }}
                             viewport={{ once: true }}
-                            className="text-4xl md:text-5xl lg:text-6xl font-black text-slate-800 dark:text-slate-100 mb-5 uppercase tracking-tighter"
+                            className="text-4xl md:text-5xl lg:text-6xl font-extrabold text-slate-800 dark:text-slate-100 mb-5 uppercase tracking-tighter font-fredoka"
                         >
                             {t('methodology.title')}
                         </motion.h2>

@@ -168,7 +168,7 @@ export default function SettingsPage() {
 
     return (
         <div className="max-w-4xl mx-auto space-y-8 pb-8">
-            <h1 className="text-3xl font-bold text-gray-900 dark:text-white flex items-center gap-3">
+            <h1 className="text-3xl font-extrabold text-slate-800 dark:text-slate-100 flex items-center gap-3 tracking-tighter uppercase font-fredoka">
                 <Settings className="text-brand-blue" size={32} />
                 {t('settings.title')}
                 {loading && <Loader2 className="animate-spin text-brand-blue" size={20} />}

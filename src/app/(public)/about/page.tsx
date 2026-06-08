@@ -59,7 +59,7 @@ export default function AboutPage() {
                 <motion.h1
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
-                    className="text-4xl md:text-6xl font-extrabold text-slate-800 dark:text-white mb-6 tracking-tight"
+                    className="text-4xl md:text-6xl font-extrabold text-slate-800 dark:text-slate-100 mb-6 tracking-tighter uppercase font-fredoka"
                 >
                     {t('nav.about')}
                 </motion.h1>
@@ -133,7 +133,7 @@ export default function AboutPage() {
                         initial={{ opacity: 0, y: 20 }}
                         whileInView={{ opacity: 1, y: 0 }}
                         viewport={{ once: true }}
-                        className="text-4xl md:text-5xl font-extrabold text-slate-800 dark:text-white mb-8 tracking-tight"
+                        className="text-4xl md:text-5xl font-extrabold text-slate-800 dark:text-slate-100 mb-8 tracking-tighter uppercase font-fredoka"
                     >
                         {t('about.mission.title')}
                     </motion.h2>
@@ -191,7 +191,7 @@ export default function AboutPage() {
                             <div className="absolute top-0 right-0 w-80 h-80 bg-brand-blue/10 rounded-full blur-3xl -mr-20 -mt-20 pointer-events-none"></div>
 
                             <div>
-                                <h2 className="text-4xl font-extrabold text-slate-800 dark:text-white mb-12 relative z-10">{t('footer.contact')}</h2>
+                                <h2 className="text-4xl font-extrabold text-slate-800 dark:text-slate-100 mb-12 relative z-10 tracking-tighter uppercase font-fredoka">{t('footer.contact')}</h2>
 
                                 <div className="space-y-10 relative z-10">
                                     {/* Featured Call Center */}
