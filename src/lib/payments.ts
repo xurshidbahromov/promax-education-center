@@ -5,529 +5,529 @@ import { createClient } from '@/utils/supabase/client';
 
 // Types
 export interface StudentCourse {
-    id: string;
-    student_id: string;
-    subject: string;
-    monthly_fee: number;
-    start_date: string;
-    end_date: string | null;
-    status: 'active' | 'paused' | 'completed';
-    created_at: string;
-    updated_at: string;
+ id: string;
+ student_id: string;
+ subject: string;
+ monthly_fee: number;
+ start_date: string;
+ end_date: string | null;
+ status: 'active' | 'paused' | 'completed';
+ created_at: string;
+ updated_at: string;
 }
 
 export interface PaymentTransaction {
-    id: string;
-    student_id: string;
-    student_course_id: string;
-    amount: number;
-    payment_date: string;
-    payment_month: number;
-    payment_year: number;
-    payment_method: 'cash' | 'card' | 'transfer' | 'other';
-    notes: string | null;
-    created_by: string | null;
-    created_at: string;
+ id: string;
+ student_id: string;
+ student_course_id: string;
+ amount: number;
+ payment_date: string;
+ payment_month: number;
+ payment_year: number;
+ payment_method: 'cash' | 'card' | 'transfer' | 'other';
+ notes: string | null;
+ created_by: string | null;
+ created_at: string;
 }
 
 export interface MonthlyPaymentStatus {
-    id: string;
-    student_id: string;
-    student_course_id: string;
-    month: number;
-    year: number;
-    required_amount: number;
-    paid_amount: number;
-    remaining_amount: number;
-    status: 'paid' | 'partial' | 'pending' | 'overdue';
-    due_date: string;
-    created_at: string;
-    updated_at: string;
+ id: string;
+ student_id: string;
+ student_course_id: string;
+ month: number;
+ year: number;
+ required_amount: number;
+ paid_amount: number;
+ remaining_amount: number;
+ status: 'paid' | 'partial' | 'pending' | 'overdue';
+ due_date: string;
+ created_at: string;
+ updated_at: string;
 }
 
 /**
  * Enroll student in a course
  */
 export async function enrollStudentInCourse(data: {
-    student_id: string;
-    subject: string;
-    monthly_fee: number;
-    start_date: string;
+ student_id: string;
+ subject: string;
+ monthly_fee: number;
+ start_date: string;
 }): Promise<{ success: boolean; course?: StudentCourse; error?: string }> {
-    const supabase = createClient();
+ const supabase = createClient();
 
-    try {
-        const { data: course, error } = await supabase
-            .from('student_courses')
-            .insert({
-                student_id: data.student_id,
-                subject: data.subject,
-                monthly_fee: data.monthly_fee,
-                start_date: data.start_date,
-                status: 'active'
-            })
-            .select()
-            .single();
+ try {
+ const { data: course, error } = await supabase
+ .from('student_courses')
+ .insert({
+ student_id: data.student_id,
+ subject: data.subject,
+ monthly_fee: data.monthly_fee,
+ start_date: data.start_date,
+ status: 'active'
+ })
+ .select()
+ .single();
 
-        if (error) {
-            console.error('Error enrolling student:', error);
-            return { success: false, error: error.message };
-        }
+ if (error) {
+ console.error('Error enrolling student:', error);
+ return { success: false, error: error.message };
+ }
 
-        return { success: true, course };
-    } catch (error) {
-        console.error('Error enrolling student:', error);
-        return { success: false, error: 'Failed to enroll student' };
-    }
+ return { success: true, course };
+ } catch (error) {
+ console.error('Error enrolling student:', error);
+ return { success: false, error: 'Failed to enroll student' };
+ }
 }
 
 /**
  * Get all courses for a student
  */
 export async function getStudentCourses(studentId: string): Promise<StudentCourse[]> {
-    const supabase = createClient();
+ const supabase = createClient();
 
-    const { data, error } = await supabase
-        .from('student_courses')
-        .select('*')
-        .eq('student_id', studentId)
-        .order('created_at', { ascending: false });
+ const { data, error } = await supabase
+ .from('student_courses')
+ .select('*')
+ .eq('student_id', studentId)
+ .order('created_at', { ascending: false });
 
-    if (error) {
-        console.error('Error fetching student courses:', error);
-        return [];
-    }
+ if (error) {
+ console.error('Error fetching student courses:', error);
+ return [];
+ }
 
-    return data || [];
+ return data || [];
 }
 
 /**
  * Get active courses for a student
  */
 export async function getActiveStudentCourses(studentId: string): Promise<StudentCourse[]> {
-    const supabase = createClient();
+ const supabase = createClient();
 
-    const { data, error } = await supabase
-        .from('student_courses')
-        .select('*')
-        .eq('student_id', studentId)
-        .eq('status', 'active')
-        .order('created_at', { ascending: false });
+ const { data, error } = await supabase
+ .from('student_courses')
+ .select('*')
+ .eq('student_id', studentId)
+ .eq('status', 'active')
+ .order('created_at', { ascending: false });
 
-    if (error) {
-        console.error('Error fetching active courses:', error);
-        return [];
-    }
+ if (error) {
+ console.error('Error fetching active courses:', error);
+ return [];
+ }
 
-    return data || [];
+ return data || [];
 }
 
 /**
  * Update course status
  */
 export async function updateCourseStatus(
-    courseId: string,
-    status: 'active' | 'paused' | 'completed'
+ courseId: string,
+ status: 'active' | 'paused' | 'completed'
 ): Promise<boolean> {
-    const supabase = createClient();
+ const supabase = createClient();
 
-    const updateData: any = { status, updated_at: new Date().toISOString() };
+ const updateData: any = { status, updated_at: new Date().toISOString() };
 
-    // If completing or pausing, set end_date
-    if (status === 'completed' || status === 'paused') {
-        updateData.end_date = new Date().toISOString().split('T')[0];
-    }
+ // If completing or pausing, set end_date
+ if (status === 'completed' || status === 'paused') {
+ updateData.end_date = new Date().toISOString().split('T')[0];
+ }
 
-    const { error } = await supabase
-        .from('student_courses')
-        .update(updateData)
-        .eq('id', courseId);
+ const { error } = await supabase
+ .from('student_courses')
+ .update(updateData)
+ .eq('id', courseId);
 
-    if (error) {
-        console.error('Error updating course status:', error);
-        return false;
-    }
+ if (error) {
+ console.error('Error updating course status:', error);
+ return false;
+ }
 
-    return true;
+ return true;
 }
 
 /**
  * Add payment transaction
  */
 export async function addPayment(data: {
-    student_id: string;
-    student_course_id: string;
-    amount: number;
-    payment_month: number;
-    payment_year: number;
-    payment_method?: 'cash' | 'card' | 'transfer' | 'other';
-    notes?: string;
+ student_id: string;
+ student_course_id: string;
+ amount: number;
+ payment_month: number;
+ payment_year: number;
+ payment_method?: 'cash' | 'card' | 'transfer' | 'other';
+ notes?: string;
 }): Promise<{ success: boolean; payment?: PaymentTransaction; error?: string }> {
-    const supabase = createClient();
+ const supabase = createClient();
 
-    try {
-        // Get current user (admin)
-        const { data: { user } } = await supabase.auth.getUser();
+ try {
+ // Get current user (admin)
+ const { data: { user } } = await supabase.auth.getUser();
 
-        const { data: payment, error } = await supabase
-            .from('payment_transactions')
-            .insert({
-                student_id: data.student_id,
-                student_course_id: data.student_course_id,
-                amount: data.amount,
-                payment_date: new Date().toISOString().split('T')[0],
-                payment_month: data.payment_month,
-                payment_year: data.payment_year,
-                payment_method: data.payment_method || 'cash',
-                notes: data.notes || null,
-                created_by: user?.id || null
-            })
-            .select()
-            .single();
+ const { data: payment, error } = await supabase
+ .from('payment_transactions')
+ .insert({
+ student_id: data.student_id,
+ student_course_id: data.student_course_id,
+ amount: data.amount,
+ payment_date: new Date().toISOString().split('T')[0],
+ payment_month: data.payment_month,
+ payment_year: data.payment_year,
+ payment_method: data.payment_method || 'cash',
+ notes: data.notes || null,
+ created_by: user?.id || null
+ })
+ .select()
+ .single();
 
-        if (error) {
-            console.error('Error adding payment:', error);
-            return { success: false, error: error.message };
-        }
+ if (error) {
+ console.error('Error adding payment:', error);
+ return { success: false, error: error.message };
+ }
 
-        return { success: true, payment };
-    } catch (error) {
-        console.error('Error adding payment:', error);
-        return { success: false, error: 'Failed to add payment' };
-    }
+ return { success: true, payment };
+ } catch (error) {
+ console.error('Error adding payment:', error);
+ return { success: false, error: 'Failed to add payment' };
+ }
 }
 
 /**
  * Get payment transactions for a student
  */
 export async function getStudentPayments(studentId: string): Promise<PaymentTransaction[]> {
-    const supabase = createClient();
+ const supabase = createClient();
 
-    const { data, error } = await supabase
-        .from('payment_transactions')
-        .select('*')
-        .eq('student_id', studentId)
-        .order('payment_date', { ascending: false });
+ const { data, error } = await supabase
+ .from('payment_transactions')
+ .select('*')
+ .eq('student_id', studentId)
+ .order('payment_date', { ascending: false });
 
-    if (error) {
-        console.error('Error fetching payments:', error);
-        return [];
-    }
+ if (error) {
+ console.error('Error fetching payments:', error);
+ return [];
+ }
 
-    return data || [];
+ return data || [];
 }
 
 /**
  * Get payment transactions for a specific course
  */
 export async function getCoursePayments(courseId: string): Promise<PaymentTransaction[]> {
-    const supabase = createClient();
+ const supabase = createClient();
 
-    const { data, error } = await supabase
-        .from('payment_transactions')
-        .select('*')
-        .eq('student_course_id', courseId)
-        .order('payment_date', { ascending: false });
+ const { data, error } = await supabase
+ .from('payment_transactions')
+ .select('*')
+ .eq('student_course_id', courseId)
+ .order('payment_date', { ascending: false });
 
-    if (error) {
-        console.error('Error fetching course payments:', error);
-        return [];
-    }
+ if (error) {
+ console.error('Error fetching course payments:', error);
+ return [];
+ }
 
-    return data || [];
+ return data || [];
 }
 
 /**
  * Get monthly payment status for a student
  */
 export async function getMonthlyPaymentStatus(
-    studentId: string,
-    month?: number,
-    year?: number
+ studentId: string,
+ month?: number,
+ year?: number
 ): Promise<MonthlyPaymentStatus[]> {
-    const supabase = createClient();
+ const supabase = createClient();
 
-    let query = supabase
-        .from('monthly_payment_status')
-        .select('*')
-        .eq('student_id', studentId);
+ let query = supabase
+ .from('monthly_payment_status')
+ .select('*')
+ .eq('student_id', studentId);
 
-    if (month && year) {
-        query = query.eq('month', month).eq('year', year);
-    }
+ if (month && year) {
+ query = query.eq('month', month).eq('year', year);
+ }
 
-    const { data, error } = await query.order('year', { ascending: false }).order('month', { ascending: false });
+ const { data, error } = await query.order('year', { ascending: false }).order('month', { ascending: false });
 
-    if (error) {
-        console.error('Error fetching monthly status:', error);
-        return [];
-    }
+ if (error) {
+ console.error('Error fetching monthly status:', error);
+ return [];
+ }
 
-    return data || [];
+ return data || [];
 }
 
 /**
  * Get overdue payments
  */
 export async function getOverduePayments(): Promise<MonthlyPaymentStatus[]> {
-    const supabase = createClient();
+ const supabase = createClient();
 
-    const { data, error } = await supabase
-        .from('monthly_payment_status')
-        .select('*, student_courses(*)')
-        .eq('status', 'overdue')
-        .order('due_date', { ascending: true });
+ const { data, error } = await supabase
+ .from('monthly_payment_status')
+ .select('*, student_courses(*)')
+ .eq('status', 'overdue')
+ .order('due_date', { ascending: true });
 
-    if (error) {
-        console.error('Error fetching overdue payments:', error);
-        return [];
-    }
+ if (error) {
+ console.error('Error fetching overdue payments:', error);
+ return [];
+ }
 
-    return data || [];
+ return data || [];
 }
 
 /**
  * Get monthly revenue
  */
 export async function getMonthlyRevenue(month: number, year: number): Promise<number> {
-    const supabase = createClient();
+ const supabase = createClient();
 
-    const { data, error } = await supabase
-        .from('payment_transactions')
-        .select('amount')
-        .eq('payment_month', month)
-        .eq('payment_year', year);
+ const { data, error } = await supabase
+ .from('payment_transactions')
+ .select('amount')
+ .eq('payment_month', month)
+ .eq('payment_year', year);
 
-    if (error) {
-        console.error('Error fetching revenue:', error);
-        return 0;
-    }
+ if (error) {
+ console.error('Error fetching revenue:', error);
+ return 0;
+ }
 
-    const total = data?.reduce((sum, payment) => sum + Number(payment.amount), 0) || 0;
-    return total;
+ const total = data?.reduce((sum, payment) => sum + Number(payment.amount), 0) || 0;
+ return total;
 }
 
 /**
  * Delete payment transaction (admin only)
  */
 export async function deletePayment(paymentId: string): Promise<boolean> {
-    const supabase = createClient();
+ const supabase = createClient();
 
-    const { error } = await supabase
-        .from('payment_transactions')
-        .delete()
-        .eq('id', paymentId);
+ const { error } = await supabase
+ .from('payment_transactions')
+ .delete()
+ .eq('id', paymentId);
 
-    if (error) {
-        console.error('Error deleting payment:', error);
-        return false;
-    }
+ if (error) {
+ console.error('Error deleting payment:', error);
+ return false;
+ }
 
-    return true;
+ return true;
 }
 
 /**
  * Get payment summary for a student (for admin students list)
  */
 export interface StudentPaymentSummary {
-    totalCourses: number;
-    paidCourses: number;
-    partialCourses: number;
-    overdueCourses: number;
-    totalOverdue: number;
-    status: 'all_paid' | 'partial' | 'overdue' | 'no_courses';
+ totalCourses: number;
+ paidCourses: number;
+ partialCourses: number;
+ overdueCourses: number;
+ totalOverdue: number;
+ status: 'all_paid' | 'partial' | 'overdue' | 'no_courses';
 }
 
 export async function getStudentPaymentSummary(studentId: string): Promise<StudentPaymentSummary> {
-    const supabase = createClient();
+ const supabase = createClient();
 
-    const currentDate = new Date();
-    const currentMonth = currentDate.getMonth() + 1;
-    const currentYear = currentDate.getFullYear();
+ const currentDate = new Date();
+ const currentMonth = currentDate.getMonth() + 1;
+ const currentYear = currentDate.getFullYear();
 
-    // Get all active courses for student
-    const { data: courses, error: coursesError } = await supabase
-        .from('student_courses')
-        .select('id')
-        .eq('student_id', studentId)
-        .eq('status', 'active');
+ // Get all active courses for student
+ const { data: courses, error: coursesError } = await supabase
+ .from('student_courses')
+ .select('id')
+ .eq('student_id', studentId)
+ .eq('status', 'active');
 
-    if (coursesError || !courses || courses.length === 0) {
-        return {
-            totalCourses: 0,
-            paidCourses: 0,
-            partialCourses: 0,
-            overdueCourses: 0,
-            totalOverdue: 0,
-            status: 'no_courses'
-        };
-    }
+ if (coursesError || !courses || courses.length === 0) {
+ return {
+ totalCourses: 0,
+ paidCourses: 0,
+ partialCourses: 0,
+ overdueCourses: 0,
+ totalOverdue: 0,
+ status: 'no_courses'
+ };
+ }
 
-    const totalCourses = courses.length;
-    let paidCourses = 0;
-    let partialCourses = 0;
-    let overdueCourses = 0;
-    let totalOverdue = 0;
+ const totalCourses = courses.length;
+ let paidCourses = 0;
+ let partialCourses = 0;
+ let overdueCourses = 0;
+ let totalOverdue = 0;
 
-    // Get current month payment status for each course
-    const courseIds = courses.map(c => c.id);
-    const { data: paymentStatuses } = await supabase
-        .from('monthly_payment_status')
-        .select('*')
-        .in('student_course_id', courseIds)
-        .eq('month', currentMonth)
-        .eq('year', currentYear);
+ // Get current month payment status for each course
+ const courseIds = courses.map(c => c.id);
+ const { data: paymentStatuses } = await supabase
+ .from('monthly_payment_status')
+ .select('*')
+ .in('student_course_id', courseIds)
+ .eq('month', currentMonth)
+ .eq('year', currentYear);
 
-    if (paymentStatuses) {
-        for (const status of paymentStatuses) {
-            if (status.status === 'paid') {
-                paidCourses++;
-            } else if (status.status === 'partial' || status.status === 'pending') {
-                partialCourses++;
-            } else if (status.status === 'overdue') {
-                overdueCourses++;
-                totalOverdue += Number(status.remaining_amount);
-            }
-        }
-    }
+ if (paymentStatuses) {
+ for (const status of paymentStatuses) {
+ if (status.status === 'paid') {
+ paidCourses++;
+ } else if (status.status === 'partial' || status.status === 'pending') {
+ partialCourses++;
+ } else if (status.status === 'overdue') {
+ overdueCourses++;
+ totalOverdue += Number(status.remaining_amount);
+ }
+ }
+ }
 
-    // Determine overall status
-    let overallStatus: 'all_paid' | 'partial' | 'overdue' | 'no_courses';
-    if (overdueCourses > 0) {
-        overallStatus = 'overdue';
-    } else if (partialCourses > 0) {
-        overallStatus = 'partial';
-    } else if (paidCourses === totalCourses) {
-        overallStatus = 'all_paid';
-    } else {
-        overallStatus = 'partial';
-    }
+ // Determine overall status
+ let overallStatus: 'all_paid' | 'partial' | 'overdue' | 'no_courses';
+ if (overdueCourses > 0) {
+ overallStatus = 'overdue';
+ } else if (partialCourses > 0) {
+ overallStatus = 'partial';
+ } else if (paidCourses === totalCourses) {
+ overallStatus = 'all_paid';
+ } else {
+ overallStatus = 'partial';
+ }
 
-    return {
-        totalCourses,
-        paidCourses,
-        partialCourses,
-        overdueCourses,
-        totalOverdue,
-        status: overallStatus
-    };
+ return {
+ totalCourses,
+ paidCourses,
+ partialCourses,
+ overdueCourses,
+ totalOverdue,
+ status: overallStatus
+ };
 }
 
 export async function getPaymentSummariesForStudents(studentIds: string[]): Promise<Map<string, StudentPaymentSummary>> {
-    const supabase = createClient();
-    const currentDate = new Date();
-    const currentMonth = currentDate.getMonth() + 1;
-    const currentYear = currentDate.getFullYear();
-    const summaries = new Map<string, StudentPaymentSummary>();
+ const supabase = createClient();
+ const currentDate = new Date();
+ const currentMonth = currentDate.getMonth() + 1;
+ const currentYear = currentDate.getFullYear();
+ const summaries = new Map<string, StudentPaymentSummary>();
 
-    if (studentIds.length === 0) return summaries;
+ if (studentIds.length === 0) return summaries;
 
-    // 1. Get all active courses for these students
-    const { data: courses } = await supabase
-        .from('student_courses')
-        .select('id, student_id')
-        .in('student_id', studentIds)
-        .eq('status', 'active');
+ // 1. Get all active courses for these students
+ const { data: courses } = await supabase
+ .from('student_courses')
+ .select('id, student_id')
+ .in('student_id', studentIds)
+ .eq('status', 'active');
 
-    if (!courses || courses.length === 0) {
-        studentIds.forEach(id => {
-            summaries.set(id, {
-                totalCourses: 0,
-                paidCourses: 0,
-                partialCourses: 0,
-                overdueCourses: 0,
-                totalOverdue: 0,
-                status: 'no_courses'
-            });
-        });
-        return summaries;
-    }
+ if (!courses || courses.length === 0) {
+ studentIds.forEach(id => {
+ summaries.set(id, {
+ totalCourses: 0,
+ paidCourses: 0,
+ partialCourses: 0,
+ overdueCourses: 0,
+ totalOverdue: 0,
+ status: 'no_courses'
+ });
+ });
+ return summaries;
+ }
 
-    // Group courses by student
-    const coursesByStudent = new Map<string, string[]>();
-    courses.forEach(c => {
-        const list = coursesByStudent.get(c.student_id) || [];
-        list.push(c.id);
-        coursesByStudent.set(c.student_id, list);
-    });
+ // Group courses by student
+ const coursesByStudent = new Map<string, string[]>();
+ courses.forEach(c => {
+ const list = coursesByStudent.get(c.student_id) || [];
+ list.push(c.id);
+ coursesByStudent.set(c.student_id, list);
+ });
 
-    // 2. Get payment statuses for all these courses
-    const courseIds = courses.map(c => c.id);
-    const { data: paymentStatuses } = await supabase
-        .from('monthly_payment_status')
-        .select('*')
-        .in('student_course_id', courseIds)
-        .eq('month', currentMonth)
-        .eq('year', currentYear);
+ // 2. Get payment statuses for all these courses
+ const courseIds = courses.map(c => c.id);
+ const { data: paymentStatuses } = await supabase
+ .from('monthly_payment_status')
+ .select('*')
+ .in('student_course_id', courseIds)
+ .eq('month', currentMonth)
+ .eq('year', currentYear);
 
-    const statusByCourse = new Map<string, any>();
-    if (paymentStatuses) {
-        paymentStatuses.forEach(s => statusByCourse.set(s.student_course_id, s));
-    }
+ const statusByCourse = new Map<string, any>();
+ if (paymentStatuses) {
+ paymentStatuses.forEach(s => statusByCourse.set(s.student_course_id, s));
+ }
 
-    // 3. Build summaries
-    studentIds.forEach(studentId => {
-        const studentCourseIds = coursesByStudent.get(studentId) || [];
+ // 3. Build summaries
+ studentIds.forEach(studentId => {
+ const studentCourseIds = coursesByStudent.get(studentId) || [];
 
-        if (studentCourseIds.length === 0) {
-            summaries.set(studentId, {
-                totalCourses: 0,
-                paidCourses: 0,
-                partialCourses: 0,
-                overdueCourses: 0,
-                totalOverdue: 0,
-                status: 'no_courses'
-            });
-            return;
-        }
+ if (studentCourseIds.length === 0) {
+ summaries.set(studentId, {
+ totalCourses: 0,
+ paidCourses: 0,
+ partialCourses: 0,
+ overdueCourses: 0,
+ totalOverdue: 0,
+ status: 'no_courses'
+ });
+ return;
+ }
 
-        let paidCourses = 0;
-        let partialCourses = 0;
-        let overdueCourses = 0;
-        let totalOverdue = 0;
+ let paidCourses = 0;
+ let partialCourses = 0;
+ let overdueCourses = 0;
+ let totalOverdue = 0;
 
-        studentCourseIds.forEach(courseId => {
-            const status = statusByCourse.get(courseId);
-            if (!status) {
-                // No status record usually means pending/not paid? Or maybe created just now.
-                // Assuming partial/pending if record exists but logic above handles standard statuses.
-                // If no record exists, it might be unpaid. Let's assume 'pending' counts as partial for now or handle as separate.
-                // In original logic: if status is missing, it skips. But typically a record is created.
-                // Let's assume if no record, it's not overdue yet? 
-                // Using safer defaults:
-                partialCourses++;
-            } else {
-                if (status.status === 'paid') {
-                    paidCourses++;
-                } else if (status.status === 'partial' || status.status === 'pending') {
-                    partialCourses++;
-                } else if (status.status === 'overdue') {
-                    overdueCourses++;
-                    totalOverdue += Number(status.remaining_amount);
-                }
-            }
-        });
+ studentCourseIds.forEach(courseId => {
+ const status = statusByCourse.get(courseId);
+ if (!status) {
+ // No status record usually means pending/not paid? Or maybe created just now.
+ // Assuming partial/pending if record exists but logic above handles standard statuses.
+ // If no record exists, it might be unpaid. Let's assume 'pending' counts as partial for now or handle as separate.
+ // In original logic: if status is missing, it skips. But typically a record is created.
+ // Let's assume if no record, it's not overdue yet? 
+ // Using safer defaults:
+ partialCourses++;
+ } else {
+ if (status.status === 'paid') {
+ paidCourses++;
+ } else if (status.status === 'partial' || status.status === 'pending') {
+ partialCourses++;
+ } else if (status.status === 'overdue') {
+ overdueCourses++;
+ totalOverdue += Number(status.remaining_amount);
+ }
+ }
+ });
 
-        let overallStatus: 'all_paid' | 'partial' | 'overdue' | 'no_courses';
-        if (overdueCourses > 0) {
-            overallStatus = 'overdue';
-        } else if (partialCourses > 0) {
-            overallStatus = 'partial';
-        } else if (paidCourses === studentCourseIds.length) {
-            overallStatus = 'all_paid';
-        } else {
-            overallStatus = 'partial';
-        }
+ let overallStatus: 'all_paid' | 'partial' | 'overdue' | 'no_courses';
+ if (overdueCourses > 0) {
+ overallStatus = 'overdue';
+ } else if (partialCourses > 0) {
+ overallStatus = 'partial';
+ } else if (paidCourses === studentCourseIds.length) {
+ overallStatus = 'all_paid';
+ } else {
+ overallStatus = 'partial';
+ }
 
-        summaries.set(studentId, {
-            totalCourses: studentCourseIds.length,
-            paidCourses,
-            partialCourses,
-            overdueCourses,
-            totalOverdue,
-            status: overallStatus
-        });
-    });
+ summaries.set(studentId, {
+ totalCourses: studentCourseIds.length,
+ paidCourses,
+ partialCourses,
+ overdueCourses,
+ totalOverdue,
+ status: overallStatus
+ });
+ });
 
-    return summaries;
+ return summaries;
 }

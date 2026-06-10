@@ -4,148 +4,148 @@ import { getDashboardStats, getRecentResultsForChart, getStudentActivity, getLea
 
 // Hook to get current user ID
 export const useCurrentUser = () => {
-    return useQuery({
-        queryKey: ['currentUser'],
-        queryFn: async () => {
-            const supabase = createClient();
-            const { data: { user } } = await supabase.auth.getUser();
-            return user;
-        },
-        staleTime: Infinity, // User session doesn't change often
-    });
+ return useQuery({
+ queryKey: ['currentUser'],
+ queryFn: async () => {
+ const supabase = createClient();
+ const { data: { user } } = await supabase.auth.getUser();
+ return user;
+ },
+ staleTime: Infinity, // User session doesn't change often
+ });
 };
 
 // Hook to get user profile
 export const useUserProfile = (userId: string | undefined) => {
-    return useQuery({
-        queryKey: ['userProfile', userId],
-        queryFn: async () => {
-            if (!userId) return null;
-            const supabase = createClient();
-            const { data: profile } = await supabase
-                .from('profiles')
-                .select('full_name')
-                .eq('id', userId)
-                .single();
-            return profile;
-        },
-        enabled: !!userId,
-    });
+ return useQuery({
+ queryKey: ['userProfile', userId],
+ queryFn: async () => {
+ if (!userId) return null;
+ const supabase = createClient();
+ const { data: profile } = await supabase
+ .from('profiles')
+ .select('full_name')
+ .eq('id', userId)
+ .single();
+ return profile;
+ },
+ enabled: !!userId,
+ });
 };
 
 // Hook to get FULL user profile (used on Profile and Settings pages)
 export const useFullUserProfile = (userId: string | undefined) => {
-    return useQuery({
-        queryKey: ['fullUserProfile', userId],
-        queryFn: async () => {
-            if (!userId) return null;
-            const supabase = createClient();
+ return useQuery({
+ queryKey: ['fullUserProfile', userId],
+ queryFn: async () => {
+ if (!userId) return null;
+ const supabase = createClient();
 
-            // First get the email from auth
-            const { data: { user } } = await supabase.auth.getUser();
+ // First get the email from auth
+ const { data: { user } } = await supabase.auth.getUser();
 
-            // Then get the profile from public.profiles
-            const { data: profile, error } = await supabase
-                .from('profiles')
-                .select('*')
-                .eq('id', userId)
-                .single();
+ // Then get the profile from public.profiles
+ const { data: profile, error } = await supabase
+ .from('profiles')
+ .select('*')
+ .eq('id', userId)
+ .single();
 
-            if (error && error.code !== 'PGRST116') { // PGRST116 is no rows found
-                console.error('Error fetching profile:', error);
-            }
+ if (error && error.code !== 'PGRST116') { // PGRST116 is no rows found
+ console.error('Error fetching profile:', error);
+ }
 
-            // Combine them
-            if (profile) {
-                return {
-                    ...profile,
-                    email: user?.email || '',
-                };
-            }
+ // Combine them
+ if (profile) {
+ return {
+ ...profile,
+ email: user?.email || '',
+ };
+ }
 
-            // Fallback for new users who don't have a profile yet
-            return {
-                id: userId,
-                email: user?.email || '',
-                full_name: user?.user_metadata?.full_name || '',
-                phone: user?.phone || '',
-                avatar_url: user?.user_metadata?.avatar_url || '',
-                bio: '',
-                location: '',
-                coins: 0,
-                settings: {}
-            };
-        },
-        enabled: !!userId,
-    });
+ // Fallback for new users who don't have a profile yet
+ return {
+ id: userId,
+ email: user?.email || '',
+ full_name: user?.user_metadata?.full_name || '',
+ phone: user?.phone || '',
+ avatar_url: user?.user_metadata?.avatar_url || '',
+ bio: '',
+ location: '',
+ coins: 0,
+ settings: {}
+ };
+ },
+ enabled: !!userId,
+ });
 };
 
 export const useDashboardStats = (userId: string | undefined) => {
-    return useQuery({
-        queryKey: ['dashboardStats', userId],
-        queryFn: () => userId ? getDashboardStats(userId) : Promise.resolve({ totalTests: 0, averageScore: 0, bestScore: 0, totalCoins: 0 }),
-        enabled: !!userId,
-    });
+ return useQuery({
+ queryKey: ['dashboardStats', userId],
+ queryFn: () => userId ? getDashboardStats(userId) : Promise.resolve({ totalTests: 0, averageScore: 0, bestScore: 0, totalCoins: 0 }),
+ enabled: !!userId,
+ });
 };
 
 export const useChartData = (userId: string | undefined) => {
-    return useQuery({
-        queryKey: ['chartData', userId],
-        queryFn: () => userId ? getRecentResultsForChart(userId) : Promise.resolve([]),
-        enabled: !!userId,
-    });
+ return useQuery({
+ queryKey: ['chartData', userId],
+ queryFn: () => userId ? getRecentResultsForChart(userId) : Promise.resolve([]),
+ enabled: !!userId,
+ });
 };
 
 export const useActivityFeed = (userId: string | undefined) => {
-    return useQuery({
-        queryKey: ['activityFeed', userId],
-        queryFn: () => userId ? getStudentActivity(userId) : Promise.resolve([]),
-        enabled: !!userId,
-    });
+ return useQuery({
+ queryKey: ['activityFeed', userId],
+ queryFn: () => userId ? getStudentActivity(userId) : Promise.resolve([]),
+ enabled: !!userId,
+ });
 };
 
 export const useLeaderboard = () => {
-    return useQuery({
-        queryKey: ['leaderboard'],
-        queryFn: () => getLeaderboard(), // Fix: wrap in arrow function
-        staleTime: 5 * 60 * 1000,
-    });
+ return useQuery({
+ queryKey: ['leaderboard'],
+ queryFn: () => getLeaderboard(), // Fix: wrap in arrow function
+ staleTime: 5 * 60 * 1000,
+ });
 };
 
 export const useUserRank = (userId: string | undefined) => {
-    return useQuery({
-        queryKey: ['userRank', userId],
-        queryFn: () => userId ? getUserRank(userId) : Promise.resolve(null),
-        enabled: !!userId,
-    });
+ return useQuery({
+ queryKey: ['userRank', userId],
+ queryFn: () => userId ? getUserRank(userId) : Promise.resolve(null),
+ enabled: !!userId,
+ });
 };
 
 export const useUpcomingTests = () => {
-    return useQuery({
-        queryKey: ['upcomingTests'],
-        queryFn: async () => {
-            const exams = await getAvailableExams();
-            return exams.slice(0, 3);
-        },
-    });
+ return useQuery({
+ queryKey: ['upcomingTests'],
+ queryFn: async () => {
+ const exams = await getAvailableExams();
+ return exams.slice(0, 3);
+ },
+ });
 };
 
 export const useAnnouncements = () => {
-    return useQuery({
-        queryKey: ['announcements'],
-        queryFn: async () => {
-            const supabase = createClient();
-            const { data, error } = await supabase
-                .from('announcements')
-                .select('*')
-                .eq('is_active', true)
-                .or('target_audience.eq.all,target_audience.eq.students')
-                .order('created_at', { ascending: false })
-                .order('priority', { ascending: false })
-                .limit(5);
+ return useQuery({
+ queryKey: ['announcements'],
+ queryFn: async () => {
+ const supabase = createClient();
+ const { data, error } = await supabase
+ .from('announcements')
+ .select('*')
+ .eq('is_active', true)
+ .or('target_audience.eq.all,target_audience.eq.students')
+ .order('created_at', { ascending: false })
+ .order('priority', { ascending: false })
+ .limit(5);
 
-            if (error) throw error;
-            return data || [];
-        },
-    });
+ if (error) throw error;
+ return data || [];
+ },
+ });
 };

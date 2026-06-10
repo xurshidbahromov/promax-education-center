@@ -3,18 +3,18 @@ import Footer from "@/components/Footer";
 import { Background } from "@/components/Background";
 
 export default function PublicLayout({
-    children,
+ children,
 }: Readonly<{
-    children: React.ReactNode;
+ children: React.ReactNode;
 }>) {
-    return (
-        <>
-            <Background />
-            <Navbar />
-            <main className="flex-grow pt-16">
-                {children}
-            </main>
-            <Footer />
-        </>
-    );
+ return (
+ <>
+ <Background />
+ <Navbar />
+ <main className="flex-grow pt-16">
+ {children}
+ </main>
+ <Footer />
+ </>
+ );
 }

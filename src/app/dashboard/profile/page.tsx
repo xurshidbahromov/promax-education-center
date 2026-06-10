@@ -1,555 +1,580 @@
 "use client";
 
 import { useLanguage } from "@/context/LanguageContext";
-import { useToast } from "@/context/ToastContext";
+import { useTheme } from "next-themes";
+import toast from "react-hot-toast";
 import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
-import { updateUserProfile, uploadAvatar } from "@/lib/profile";
+import { updateUserProfile, uploadAvatar, updateUserSettings, updatePassword } from "@/lib/profile";
 import {
-    User,
-    Mail,
-    Phone,
-    MapPin,
-    Camera,
-    Save,
-    Shield,
-    Key,
-    ArrowLeft,
-    Loader2
+ User, Mail, Phone, MapPin, Camera, Save, Shield, Key, ArrowLeft, Loader2,
+ Settings, Bell, Palette, HelpCircle, ChevronRight, Moon, Sun, Languages,
+ Smartphone, MessageSquare
 } from "lucide-react";
 import Image from "next/image";
+import { cn } from "@/lib/utils";
 import { useCurrentUser, useDashboardStats, useFullUserProfile } from "@/hooks/useDashboardData";
+import { motion, AnimatePresence } from "framer-motion";
 
 export default function ProfilePage() {
-    const { t } = useLanguage();
-    const router = useRouter();
-    const { showToast } = useToast();
-    const [saving, setSaving] = useState(false);
-    const [changingPassword, setChangingPassword] = useState(false);
-    const [showPasswordForm, setShowPasswordForm] = useState(false);
-    const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
-    const [isUploadingAvatar, setIsUploadingAvatar] = useState(false);
-    const fileInputRef = useRef<HTMLInputElement>(null);
-    const [formData, setFormData] = useState({
-        firstName: "",
-        lastName: "",
-        email: "",
-        phone: "",
-        bio: "",
-        location: ""
-    });
-    const [passwordData, setPasswordData] = useState({
-        currentPassword: "",
-        newPassword: "",
-        confirmPassword: ""
-    });
-    const [passwordError, setPasswordError] = useState("");
+ const { t, language, setLanguage } = useLanguage();
+ const { theme, setTheme } = useTheme();
+ const router = useRouter();
+ const [activeView, setActiveView] = useState<'main' | 'profile' | 'security' | 'notifications' | 'themes' | 'help' | 'contact'>('main');
 
-    // Fetch real stats and profile
-    const { data: user } = useCurrentUser();
-    const { data: dashboardStats } = useDashboardStats(user?.id);
-    const { data: profile, isLoading: isProfileLoading } = useFullUserProfile(user?.id);
+ // Data hooks
+ const { data: user } = useCurrentUser();
+ const { data: dashboardStats } = useDashboardStats(user?.id);
+ const { data: profile, isLoading: isProfileLoading } = useFullUserProfile(user?.id);
 
-    // Initialize form when profile data is loaded
-    useEffect(() => {
-        if (profile) {
-            const [firstName = "", lastName = ""] = (profile.full_name || "").split(" ");
+ // Form States
+ const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
+ const [isUploadingAvatar, setIsUploadingAvatar] = useState(false);
+ const fileInputRef = useRef<HTMLInputElement>(null);
+ const [savingProfile, setSavingProfile] = useState(false);
+ const [formData, setFormData] = useState({
+ firstName: "",
+ lastName: "",
+ phone: "",
+ });
 
-            setAvatarUrl(profile.avatar_url || null);
-            setFormData({
-                firstName,
-                lastName,
-                email: profile.email || "",
-                phone: profile.phone || "",
-                bio: profile.bio || "",
-                location: profile.location || ""
-            });
-        }
-    }, [profile]);
+ const [changingPassword, setChangingPassword] = useState(false);
+ const [passwordData, setPasswordData] = useState({
+ currentPassword: "",
+ newPassword: "",
+ confirmPassword: ""
+ });
 
-    const handleSubmit = async (e: React.FormEvent) => {
-        e.preventDefault();
-        setSaving(true);
+ const [notifications, setNotifications] = useState({
+ email: true,
+ push: true
+ });
 
-        try {
-            const fullName = `${formData.firstName} ${formData.lastName}`.trim();
+ // Initialize data
+ useEffect(() => {
+ if (profile) {
+ const [firstName = "", lastName = ""] = (profile.full_name || "").split(" ");
+ setAvatarUrl(profile.avatar_url || null);
+ setFormData({
+ firstName,
+ lastName,
+ phone: profile.phone || "",
+ });
+ if (profile.settings?.notifications) {
+ setNotifications(profile.settings.notifications);
+ }
+ }
+ }, [profile]);
 
-            const result = await updateUserProfile({
-                full_name: fullName,
-                phone: formData.phone,
-                bio: formData.bio,
-                location: formData.location
-            });
+ // Handlers
+ const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+ const file = e.target.files?.[0];
+ if (!file) return;
 
-            if (result.success) {
-                showToast(t("profile.success_update"), "success");
-            } else {
-                showToast(t("profile.error_update"), "error");
-            }
-        } catch (error) {
-            console.error("Error updating profile:", error);
-            showToast(t("profile.error_update"), "error");
-        } finally {
-            setSaving(false);
-        }
-    };
+ setIsUploadingAvatar(true);
+ const url = await uploadAvatar(file);
+ if (url) {
+ const { success } = await updateUserProfile({ avatar_url: url });
+ if (success) {
+ setAvatarUrl(url);
+ toast.success(t("profile.success_update") || "Rasm muvaffaqiyatli yuklandi");
+ } else {
+ toast.error(t("profile.error_update") || "Rasmni saqlashda xatolik");
+ }
+ } else {
+ toast.error(t("profile.error_update") || "Rasmni yuklashda xatolik");
+ }
+ setIsUploadingAvatar(false);
+ };
 
-    const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-        const file = e.target.files?.[0];
-        if (!file) return;
+ const handleProfileSubmit = async (e: React.FormEvent) => {
+ e.preventDefault();
+ setSavingProfile(true);
 
-        setIsUploadingAvatar(true);
-        const url = await uploadAvatar(file);
-        if (url) {
-            const { success } = await updateUserProfile({ avatar_url: url });
-            if (success) {
-                setAvatarUrl(url);
-                showToast(t("profile.success_update") || "Rasm muvaffaqiyatli yuklandi", "success");
-            } else {
-                showToast(t("profile.error_update") || "Rasmni saqlashda xatolik", "error");
-            }
-        } else {
-            showToast(t("profile.error_update") || "Rasmni yuklashda xatolik", "error");
-        }
-        setIsUploadingAvatar(false);
-    };
+ try {
+ const fullName = `${formData.firstName} ${formData.lastName}`.trim();
+ const result = await updateUserProfile({
+ full_name: fullName,
+ phone: formData.phone,
+ });
 
-    const handlePasswordChange = async (e: React.FormEvent) => {
-        e.preventDefault();
-        setPasswordError("");
+ if (result.success) {
+ toast.success(t("profile.success_update") || "Saqlandi");
+ setActiveView('main');
+ } else {
+ toast.error(t("profile.error_update") || "Xatolik yuz berdi");
+ }
+ } catch (error) {
+ toast.error(t("profile.error_update") || "Xatolik yuz berdi");
+ } finally {
+ setSavingProfile(false);
+ }
+ };
 
-        // Validation
-        if (!passwordData.currentPassword || !passwordData.newPassword || !passwordData.confirmPassword) {
-            setPasswordError("Barcha maydonlarni to'ldiring");
-            return;
-        }
+ const handlePasswordSubmit = async (e: React.FormEvent) => {
+ e.preventDefault();
+ 
+ if (passwordData.newPassword.length < 6) {
+ toast.error("Yangi parol kamida 6 ta belgidan iborat bo'lishi kerak");
+ return;
+ }
+ if (passwordData.newPassword !== passwordData.confirmPassword) {
+ toast.error("Yangi parollar mos kelmayapti");
+ return;
+ }
 
-        if (passwordData.newPassword.length < 6) {
-            setPasswordError("Yangi parol kamida 6 ta belgidan iborat bo'lishi kerak");
-            return;
-        }
+ setChangingPassword(true);
+ try {
+ const { success } = await updatePassword(passwordData.newPassword);
+ if (success) {
+ toast.success("Parol muvaffaqiyatli o'zgartirildi");
+ setPasswordData({ currentPassword: "", newPassword: "", confirmPassword: "" });
+ setActiveView('main');
+ } else {
+ toast.error("Parolni o'zgartirishda xatolik yuz berdi");
+ }
+ } catch (error) {
+ toast.error("Xatolik yuz berdi");
+ } finally {
+ setChangingPassword(false);
+ }
+ };
 
-        if (passwordData.newPassword !== passwordData.confirmPassword) {
-            setPasswordError("Yangi parollar mos kelmayapti");
-            return;
-        }
+ const saveSetting = async (key: string, value: any) => {
+ if (!user) return;
+ const newSettings = {
+ theme: key === 'theme' ? value : theme,
+ language: key === 'language' ? value : language,
+ notifications: key === 'notifications' ? value : notifications
+ };
+ await updateUserSettings(newSettings);
+ };
 
-        if (passwordData.currentPassword === passwordData.newPassword) {
-            setPasswordError("Yangi parol joriy paroldan farq qilishi kerak");
-            return;
-        }
+ // Components
+ const ViewHeader = ({ title }: { title: string }) => (
+ <div className="flex items-center gap-4 mb-6 px-2">
+ <button onClick={() => setActiveView('main')} className="p-2 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">
+ <ArrowLeft size={24} className="text-slate-600 dark:text-slate-300" />
+ </button>
+ <h2 className="text-2xl font-medium text-slate-800 dark:text-slate-100 font-fredoka">{title}</h2>
+ </div>
+ );
 
-        setChangingPassword(true);
+ const MenuButton = ({ icon: Icon, title, description, onClick }: any) => (
+ <button onClick={onClick} className="w-full bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl rounded-[28px] p-4 flex items-center gap-4 shadow-sm border border-gray-200/50 dark:border-slate-800/50 hover:shadow-md hover:-translate-y-0.5 transition-all duration-300 group">
+ <div className="w-12 h-12 rounded-full bg-brand-blue/10 text-brand-blue flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
+ <Icon size={24} className="stroke-[2.5px]" />
+ </div>
+ <div className="flex-1 text-left">
+ <h3 className="font-semibold text-slate-800 dark:text-slate-100 text-[16px]">{title}</h3>
+ <p className="text-sm text-slate-500 dark:text-slate-400 mt-0.5">{description}</p>
+ </div>
+ <ChevronRight size={20} className="text-slate-300 dark:text-slate-600 group-hover:translate-x-1 transition-transform" />
+ </button>
+ );
 
-        try {
-            const { createClient } = await import("@/utils/supabase/client");
-            const supabase = createClient();
+ // Views
+ const renderMain = () => (
+ <div className="flex flex-col items-center">
+ {/* Top Header / Avatar */}
+ <div className="relative w-full flex flex-col items-center pt-6 pb-8">
+ <div className="relative w-[100px] h-[100px] rounded-full shadow-lg border-4 border-white/50 dark:border-slate-800/50 bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl flex items-center justify-center overflow-hidden mb-4">
+ {avatarUrl ? (
+ <Image src={avatarUrl} alt="Avatar" fill className="object-cover" />
+ ) : (
+ <User size={48} className="text-brand-blue/50 dark:text-slate-500" />
+ )}
+ <button onClick={() => fileInputRef.current?.click()} className="absolute bottom-0 inset-x-0 h-8 bg-black/40 flex items-center justify-center hover:bg-black/60 transition-colors">
+ <Camera size={16} className="text-white" />
+ </button>
+ <input type="file" ref={fileInputRef} className="hidden" accept="image/*" onChange={handleAvatarUpload} />
+ {isUploadingAvatar && (
+ <div className="absolute inset-0 bg-white/50 dark:bg-black/50 flex items-center justify-center">
+ <Loader2 className="w-8 h-8 animate-spin text-brand-blue" />
+ </div>
+ )}
+ </div>
+ <h2 className="text-[22px] font-medium text-slate-800 dark:text-slate-100 font-fredoka">
+ {profile?.full_name || "O'quvchi"}
+ </h2>
 
-            // Get current user email
-            const { data: { user } } = await supabase.auth.getUser();
-            if (!user?.email) {
-                setPasswordError("Foydalanuvchi ma'lumotlari topilmadi");
-                setChangingPassword(false);
-                return;
-            }
+ </div>
 
-            // Verify current password by attempting to sign in
-            const { error: signInError } = await supabase.auth.signInWithPassword({
-                email: user.email,
-                password: passwordData.currentPassword
-            });
+ {/* Menu List */}
+ <div className="w-full px-2 sm:px-0 space-y-3 mt-2">
+ <MenuButton 
+ icon={Settings} title={t('profile.menu.settings') || "Settings"} description={t('profile.menu.settings_desc') || "Customize your experience"} 
+ onClick={() => setActiveView('profile')} 
+ />
+ <MenuButton 
+ icon={Shield} title={t('profile.menu.parental') || "Security"} description={t('profile.menu.parental_desc') || "Safety and privacy settings"} 
+ onClick={() => setActiveView('security')} 
+ />
+ <MenuButton 
+ icon={Bell} title={t('profile.menu.notifications') || "Notifications"} description={t('profile.menu.notifications_desc') || "Manage your alerts"} 
+ onClick={() => setActiveView('notifications')} 
+ />
+ <MenuButton 
+ icon={Palette} title={t('profile.menu.themes') || "Themes & Language"} description={t('profile.menu.themes_desc') || "Change app appearance"} 
+ onClick={() => setActiveView('themes')} 
+ />
+ <MenuButton 
+ icon={HelpCircle} title={t('profile.menu.help') || "Help and Support"} description={t('profile.menu.help_desc') || "Frequently asked questions"} 
+ onClick={() => setActiveView('help')} 
+ />
+ <MenuButton 
+ icon={Mail} title={t('profile.menu.contact') || "Contact Us"} description={t('profile.menu.contact_desc') || "Send us a message"} 
+ onClick={() => setActiveView('contact')} 
+ />
+ </div>
+ </div>
+ );
 
-            if (signInError) {
-                setPasswordError("Joriy parol noto'g'ri kiritilgan");
-                setChangingPassword(false);
-                return;
-            }
+ const renderProfileEdit = () => (
+ <div className="w-full px-2 sm:px-0 pt-4">
+ <ViewHeader title={t('profile.view.settings.title') || "Personal Information"} />
+ <form onSubmit={handleProfileSubmit} className="space-y-6">
+ <div className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl rounded-[28px] p-6 shadow-sm border border-gray-200/50 dark:border-slate-800/50 space-y-5">
+ <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+ <div className="space-y-2">
+ <label className="text-sm font-medium text-gray-700 dark:text-gray-300">{t('profile.view.settings.first_name') || "First Name"}</label>
+ <input
+ type="text"
+ value={formData.firstName}
+ onChange={(e) => setFormData({ ...formData, firstName: e.target.value })}
+ className="w-full px-4 py-3 bg-gray-50 dark:bg-slate-800 border-none rounded-xl focus:ring-2 focus:ring-brand-blue/20 transition-all dark:text-slate-100"
+ />
+ </div>
+ <div className="space-y-2">
+ <label className="text-sm font-medium text-gray-700 dark:text-gray-300">{t('profile.view.settings.last_name') || "Last Name"}</label>
+ <input
+ type="text"
+ value={formData.lastName}
+ onChange={(e) => setFormData({ ...formData, lastName: e.target.value })}
+ className="w-full px-4 py-3 bg-gray-50 dark:bg-slate-800 border-none rounded-xl focus:ring-2 focus:ring-brand-blue/20 transition-all dark:text-slate-100"
+ />
+ </div>
+ </div>
+ <div className="space-y-2">
+ <label className="text-sm font-medium text-gray-700 dark:text-gray-300">{t('profile.view.settings.phone') || "Phone Number"}</label>
+ <input
+ type="tel"
+ value={formData.phone}
+ onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+ className="w-full px-4 py-3 bg-gray-50 dark:bg-slate-800 border-none rounded-xl focus:ring-2 focus:ring-brand-blue/20 transition-all dark:text-slate-100"
+ />
+ </div>
+ </div>
+ <button
+ type="submit"
+ disabled={savingProfile}
+ className="w-full py-4 bg-brand-blue hover:bg-blue-600 text-white rounded-2xl font-medium transition-all shadow-lg shadow-brand-blue/20 disabled:opacity-50 flex items-center justify-center gap-2"
+ >
+ {savingProfile ? <Loader2 className="animate-spin" size={20} /> : <Save size={20} />}
+ {t('profile.view.settings.save') || "Save"}
+ </button>
+ </form>
+ </div>
+ );
 
-            // Current password is correct, now update to new password
-            const { error } = await supabase.auth.updateUser({
-                password: passwordData.newPassword
-            });
+ const renderSecurity = () => (
+ <div className="w-full px-2 sm:px-0 pt-4">
+ <ViewHeader title={t('profile.view.security.title') || "Security"} />
+ <form onSubmit={handlePasswordSubmit} className="space-y-6">
+ <div className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl rounded-[28px] p-6 shadow-sm border border-gray-200/50 dark:border-slate-800/50 space-y-5">
+ <div className="space-y-2">
+ <label className="text-sm font-medium text-gray-700 dark:text-gray-300">{t('profile.view.security.new_password') || "New Password"}</label>
+ <input
+ type="password"
+ value={passwordData.newPassword}
+ onChange={(e) => setPasswordData({ ...passwordData, newPassword: e.target.value })}
+ className="w-full px-4 py-3 bg-gray-50 dark:bg-slate-800 border-none rounded-xl focus:ring-2 focus:ring-brand-blue/20 transition-all dark:text-slate-100"
+ />
+ </div>
+ <div className="space-y-2">
+ <label className="text-sm font-medium text-gray-700 dark:text-gray-300">{t('profile.view.security.confirm_password') || "Confirm New Password"}</label>
+ <input
+ type="password"
+ value={passwordData.confirmPassword}
+ onChange={(e) => setPasswordData({ ...passwordData, confirmPassword: e.target.value })}
+ className="w-full px-4 py-3 bg-gray-50 dark:bg-slate-800 border-none rounded-xl focus:ring-2 focus:ring-brand-blue/20 transition-all dark:text-slate-100"
+ />
+ </div>
+ </div>
+ <button
+ type="submit"
+ disabled={changingPassword}
+ className="w-full py-4 bg-brand-blue hover:bg-blue-600 text-white rounded-2xl font-medium transition-all shadow-lg shadow-brand-blue/20 disabled:opacity-50 flex items-center justify-center gap-2"
+ >
+ {changingPassword ? <Loader2 className="animate-spin" size={20} /> : <Key size={20} />}
+ {t('profile.view.security.button') || "Change Password"}
+ </button>
+ </form>
+ </div>
+ );
 
-            if (error) {
-                setPasswordError(error.message || "Parol o'zgartirishda xatolik");
-            } else {
-                showToast("Parol muvaffaqiyatli o'zgartirildi!", "success");
-                setPasswordData({
-                    currentPassword: "",
-                    newPassword: "",
-                    confirmPassword: ""
-                });
-                setShowPasswordForm(false);
-            }
-        } catch (error) {
-            console.error("Error changing password:", error);
-            setPasswordError("Kutilmagan xatolik yuz berdi");
-        } finally {
-            setChangingPassword(false);
-        }
-    };
+ const renderThemes = () => (
+ <div className="w-full px-2 sm:px-0 pt-4">
+ <ViewHeader title={t('profile.view.themes.title') || "Themes & Language"} />
+ 
+ <div className="space-y-6">
+ {/* Theme Selection */}
+ <div className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl rounded-[28px] p-6 shadow-sm border border-gray-200/50 dark:border-slate-800/50 space-y-6">
+ <div>
+ <h3 className="text-lg font-semibold text-slate-800 dark:text-slate-100 mb-4">{t('profile.view.themes.select_theme') || "Select Theme"}</h3>
+ <div className="grid grid-cols-2 gap-4">
+ <button
+ onClick={() => { setTheme('light'); saveSetting('theme', 'light'); }}
+ className={cn(
+ "flex flex-col items-center gap-3 p-4 rounded-2xl border-2 transition-all",
+ theme === 'light' ? "border-brand-blue bg-blue-50/50 dark:bg-slate-800" : "border-gray-100 dark:border-slate-800 hover:border-brand-blue/30"
+ )}
+ >
+ <Sun size={32} className={theme === 'light' ? "text-brand-blue" : "text-slate-400"} />
+ <span className={cn("font-medium", theme === 'light' ? "text-brand-blue" : "text-slate-600 dark:text-slate-400")}>{t('profile.view.themes.light') || "Light"}</span>
+ </button>
+ <button
+ onClick={() => { setTheme('dark'); saveSetting('theme', 'dark'); }}
+ className={cn(
+ "flex flex-col items-center gap-3 p-4 rounded-2xl border-2 transition-all",
+ theme === 'dark' ? "border-brand-blue bg-blue-50/50 dark:bg-slate-800" : "border-gray-100 dark:border-slate-800 hover:border-brand-blue/30"
+ )}
+ >
+ <Moon size={32} className={theme === 'dark' ? "text-brand-blue" : "text-slate-400"} />
+ <span className={cn("font-medium", theme === 'dark' ? "text-brand-blue" : "text-slate-600 dark:text-slate-400")}>{t('profile.view.themes.dark') || "Dark"}</span>
+ </button>
+ </div>
+ </div>
+ <div className="h-px bg-gray-100 dark:bg-slate-800" />
+ <div>
+ <h3 className="text-lg font-semibold text-slate-800 dark:text-slate-100 mb-4">{t('profile.view.themes.select_lang') || "Select Language"}</h3>
+ <div className="grid grid-cols-3 gap-3">
+ {(['UZ', 'RU', 'EN'] as const).map((l) => (
+ <button
+ key={l}
+ onClick={() => { setLanguage(l); saveSetting('language', l); }}
+ className={cn(
+ "py-3 rounded-2xl border-2 font-medium transition-all",
+ language === l 
+ ? "border-brand-blue bg-blue-50 dark:bg-brand-blue/10 text-brand-blue" 
+ : "border-gray-100 dark:border-slate-800 text-slate-500 hover:border-brand-blue/30"
+ )}
+ >
+ {l}
+ </button>
+ ))}
+ </div>
+ </div>
+ </div>
+ </div>
+ </div>
+ );
 
-    if (isProfileLoading) {
-        return (
-            <div className="max-w-4xl mx-auto space-y-8 pb-8 animate-pulse">
-                <div className="flex items-center gap-2">
-                    <div className="w-5 h-5 bg-gray-200 dark:bg-slate-800 rounded-md"></div>
-                    <div className="w-16 h-5 bg-gray-200 dark:bg-slate-800 rounded-md"></div>
-                </div>
+ const renderNotifications = () => (
+ <div className="w-full px-2 sm:px-0 pt-4">
+ <ViewHeader title={t('profile.view.notifications.title') || "Notifications"} />
+ 
+ <div className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl rounded-[28px] p-6 shadow-sm border border-gray-200/50 dark:border-slate-800/50 space-y-6">
+ {/* Email Notifications */}
+ <div className="flex flex-col gap-6">
+ <div className="flex items-center justify-between">
+ <div className="flex items-center gap-3">
+ <div className="w-10 h-10 rounded-full bg-blue-50 dark:bg-slate-800 flex items-center justify-center text-brand-blue">
+ <Mail size={20} />
+ </div>
+ <div>
+ <h4 className="font-semibold text-slate-800 dark:text-slate-100">{t('profile.view.notifications.email') || "Email Notifications"}</h4>
+ <p className="text-sm text-slate-500">{t('profile.view.notifications.email_desc') || "Receive news and updates via email"}</p>
+ </div>
+ </div>
+ <button 
+ onClick={() => {
+ const newVal = !notifications.email;
+ setNotifications({...notifications, email: newVal});
+ saveSetting('notifications', {...notifications, email: newVal});
+ }}
+ className={cn("w-12 h-6 rounded-full transition-colors relative", notifications.email ? "bg-brand-blue" : "bg-gray-200 dark:bg-slate-700")}
+ >
+ <div className={cn("absolute top-1 left-1 bg-white w-4 h-4 rounded-full transition-transform", notifications.email ? "translate-x-6" : "translate-x-0")} />
+ </button>
+ </div>
+ <div className="h-px bg-gray-100 dark:bg-slate-800" />
+ <div className="flex items-center justify-between">
+ <div className="flex items-center gap-3">
+ <div className="w-10 h-10 rounded-full bg-blue-50 dark:bg-slate-800 flex items-center justify-center text-brand-blue">
+ <Smartphone size={20} />
+ </div>
+ <div>
+ <h4 className="font-semibold text-slate-800 dark:text-slate-100">{t('profile.view.notifications.push') || "Push Notifications"}</h4>
+ <p className="text-sm text-slate-500">{t('profile.view.notifications.push_desc') || "Alerts on your mobile device"}</p>
+ </div>
+ </div>
+ <button 
+ onClick={() => {
+ const newVal = !notifications.push;
+ setNotifications({...notifications, push: newVal});
+ saveSetting('notifications', {...notifications, push: newVal});
+ }}
+ className={cn("w-12 h-6 rounded-full transition-colors relative", notifications.push ? "bg-brand-blue" : "bg-gray-200 dark:bg-slate-700")}
+ >
+ <div className={cn("absolute top-1 left-1 bg-white w-4 h-4 rounded-full transition-transform", notifications.push ? "translate-x-6" : "translate-x-0")} />
+ </button>
+ </div>
+ </div>
+ </div>
+ </div>
+ );
 
-                <div className="flex items-center gap-3">
-                    <div className="w-8 h-8 bg-gray-200 dark:bg-slate-800 rounded-lg"></div>
-                    <div className="w-48 h-8 bg-gray-200 dark:bg-slate-800 rounded-xl"></div>
-                </div>
+ const renderHelp = () => {
+ const title = t('profile.view.help.title') || "Help & Support";
+ const faqs = [
+ { q: t('profile.view.help.faq1.q') || "How do I use the platform?", a: t('profile.view.help.faq1.a') || "You can watch video lessons for various subjects, take online practice tests, and analyze your performance in real-time." },
+ { q: t('profile.view.help.faq2.q') || "Where can I see my results?", a: t('profile.view.help.faq2.a') || "Go to the 'Results' tab in the dashboard to see detailed feedback, analytics, and scores of your completed tests." },
+ { q: t('profile.view.help.faq3.q') || "How do I change the theme or language?", a: t('profile.view.help.faq3.a') || "Navigate to the 'Themes' section in your profile to choose between Light/Dark mode and set your preferred language." },
+ { q: t('profile.view.help.faq4.q') || "What should I do if I encounter an issue?", a: t('profile.view.help.faq4.a') || "If you run into any technical difficulties, please contact us directly via the 'Contact Us' page." }
+ ];
 
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-                    {/* Left Column Skeleton */}
-                    <div className="md:col-span-1 space-y-6">
-                        <div className="bg-white/50 dark:bg-slate-900/50 rounded-3xl p-6 border border-white/20 dark:border-slate-800/50 shadow-sm text-center">
-                            <div className="w-32 h-32 mx-auto mb-4 bg-gray-200 dark:bg-slate-800 rounded-full"></div>
-                            <div className="w-3/4 h-6 mx-auto bg-gray-200 dark:bg-slate-800 rounded-lg mb-2"></div>
-                            <div className="w-1/2 h-4 mx-auto bg-gray-200 dark:bg-slate-800 rounded-lg mb-6"></div>
-                            <div className="grid grid-cols-2 gap-4 border-t border-gray-100 dark:border-slate-800 pt-6">
-                                <div className="h-12 bg-gray-200 dark:bg-slate-800 rounded-lg"></div>
-                                <div className="h-12 bg-gray-200 dark:bg-slate-800 rounded-lg"></div>
-                            </div>
-                        </div>
+ return (
+ <div className="w-full px-2 sm:px-0 pt-4">
+ <ViewHeader title={title} />
+ <div className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl rounded-[28px] p-6 shadow-sm border border-gray-200/50 dark:border-slate-800/50 space-y-4">
+ {faqs.map((faq, idx) => (
+ <details key={idx} className="group border-b border-gray-100 dark:border-slate-800 last:border-0 pb-3 last:pb-0 cursor-pointer">
+ <summary className="flex items-center justify-between text-base font-medium text-slate-800 dark:text-slate-100 py-1 cursor-pointer">
+ <span>{faq.q}</span>
+ <ChevronRight size={18} className="transform group-open:rotate-90 transition-transform text-slate-400" />
+ </summary>
+ <p className="mt-2 text-[14px] leading-relaxed text-slate-600 dark:text-slate-400 select-none">
+ {faq.a}
+ </p>
+ </details>
+ ))}
+ </div>
+ </div>
+ );
+ };
 
-                        <div className="bg-white/50 dark:bg-slate-900/50 rounded-3xl p-6 border border-white/20 dark:border-slate-800/50 shadow-sm">
-                            <div className="w-1/2 h-6 bg-gray-200 dark:bg-slate-800 rounded-lg mb-4"></div>
-                            <div className="w-full h-4 bg-gray-200 dark:bg-slate-800 rounded-lg mb-4"></div>
-                            <div className="w-full h-2.5 bg-gray-200 dark:bg-slate-800 rounded-full mt-6"></div>
-                        </div>
-                    </div>
+ const renderContact = () => {
+ const title = t('profile.view.contact.title') || "Contact Us";
+ const subtitle = t('profile.view.contact.subtitle') || "Have questions or technical issues? We are here to help!";
+ 
+ return (
+ <div className="w-full px-2 sm:px-0 pt-4">
+ <ViewHeader title={title} />
+ <div className="mt-6">
+ <div className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl rounded-[28px] p-6 shadow-sm border border-gray-200/50 dark:border-slate-800/50 text-center space-y-2">
+ <MessageSquare className="w-8 h-8 text-brand-blue mx-auto mb-2" />
+ <p className="text-[15px] text-slate-600 dark:text-slate-400 leading-relaxed">
+ {subtitle}
+ </p>
+ </div>
 
-                    {/* Right Column Skeleton */}
-                    <div className="md:col-span-2 space-y-6">
-                        <div className="bg-white/50 dark:bg-slate-900/50 rounded-3xl p-8 border border-white/20 dark:border-slate-800/50 shadow-sm">
-                            <div className="flex justify-between mb-8">
-                                <div className="w-1/3 h-8 bg-gray-200 dark:bg-slate-800 rounded-lg"></div>
-                                <div className="w-32 h-10 bg-gray-200 dark:bg-slate-800 rounded-xl"></div>
-                            </div>
-                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                                {[1, 2, 3, 4].map((i) => (
-                                    <div key={i} className="space-y-2">
-                                        <div className="w-1/4 h-4 bg-gray-200 dark:bg-slate-800 rounded"></div>
-                                        <div className="w-full h-12 bg-gray-200 dark:bg-slate-800 rounded-xl"></div>
-                                    </div>
-                                ))}
-                                <div className="sm:col-span-2 space-y-2 mt-2">
-                                    <div className="w-1/6 h-4 bg-gray-200 dark:bg-slate-800 rounded"></div>
-                                    <div className="w-full h-32 bg-gray-200 dark:bg-slate-800 rounded-xl"></div>
-                                </div>
-                            </div>
-                        </div>
+ <div className="grid grid-cols-1 gap-3 mt-6">
+ <a 
+ href="https://t.me/promax_admin" 
+ target="_blank" 
+ rel="noopener noreferrer"
+ className="flex items-center gap-4 p-5 rounded-[28px] bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl border border-gray-200/50 dark:border-slate-800/50 hover:border-brand-blue/30 transition-all group"
+ >
+ <div className="w-12 h-12 rounded-2xl bg-blue-50 dark:bg-brand-blue/10 flex items-center justify-center text-brand-blue">
+ <MessageSquare size={24} />
+ </div>
+ <div className="text-left">
+ <h4 className="font-medium text-slate-800 dark:text-slate-100 group-hover:text-brand-blue transition-colors">
+ {t('profile.view.contact.telegram_admin') || "O'quv markazi va darslar bo'yicha"}
+ </h4>
+ <p className="text-[13px] text-slate-500">@promax_admin (Admin)</p>
+ </div>
+ <ChevronRight size={18} className="ml-auto text-slate-400 group-hover:translate-x-1 transition-transform" />
+ </a>
 
-                        <div className="bg-white/50 dark:bg-slate-900/50 rounded-3xl p-8 border border-white/20 dark:border-slate-800/50 shadow-sm">
-                            <div className="w-1/3 h-8 bg-gray-200 dark:bg-slate-800 rounded-lg mb-6"></div>
-                            <div className="w-full h-16 bg-gray-200 dark:bg-slate-800 rounded-xl"></div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        );
-    }
+ <a 
+ href="https://t.me/xurshidbahromov" 
+ target="_blank" 
+ rel="noopener noreferrer"
+ className="flex items-center gap-4 p-5 rounded-[28px] bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl border border-gray-200/50 dark:border-slate-800/50 hover:border-brand-blue/30 transition-all group"
+ >
+ <div className="w-12 h-12 rounded-2xl bg-purple-50 dark:bg-purple-950/10 flex items-center justify-center text-purple-600">
+ <MessageSquare size={24} />
+ </div>
+ <div className="text-left">
+ <h4 className="font-medium text-slate-800 dark:text-slate-100 group-hover:text-purple-600 transition-colors">
+ {t('profile.view.contact.telegram_tech') || "Texnik muammolar (Dasturchi)"}
+ </h4>
+ <p className="text-[13px] text-slate-500">@xurshidbahromov (Developer)</p>
+ </div>
+ <ChevronRight size={18} className="ml-auto text-slate-400 group-hover:translate-x-1 transition-transform" />
+ </a>
 
-    return (
-        <div className="max-w-4xl mx-auto space-y-8 pb-8">
-            <button
-                onClick={() => router.back()}
-                className="flex items-center gap-2 text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white transition-colors w-fit"
-            >
-                <ArrowLeft size={20} />
-                <span>{t("common.back")}</span>
-            </button>
+ <a 
+ href="tel:+998901234567" 
+ className="flex items-center gap-4 p-5 rounded-[28px] bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl border border-gray-200/50 dark:border-slate-800/50 hover:border-brand-blue/30 transition-all group"
+ >
+ <div className="w-12 h-12 rounded-2xl bg-green-50 dark:bg-green-950/10 flex items-center justify-center text-green-600">
+ <Phone size={24} />
+ </div>
+ <div className="text-left">
+ <h4 className="font-medium text-slate-800 dark:text-slate-100 group-hover:text-green-600 transition-colors">
+ {t('profile.view.contact.call_center') || "Call Center"}
+ </h4>
+ <p className="text-[13px] text-slate-500">+998 (90) 123-45-67</p>
+ </div>
+ <ChevronRight size={18} className="ml-auto text-slate-400 group-hover:translate-x-1 transition-transform" />
+ </a>
 
-            <h1 className="text-3xl font-extrabold text-slate-800 dark:text-slate-100 flex items-center gap-3 tracking-tighter uppercase font-fredoka">
-                <User className="text-brand-blue" size={32} />
-                {t("profile.title")}
-            </h1>
+ <a 
+ href="mailto:support@promax.uz" 
+ className="flex items-center gap-4 p-5 rounded-[28px] bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl border border-gray-200/50 dark:border-slate-800/50 hover:border-brand-blue/30 transition-all group"
+ >
+ <div className="w-12 h-12 rounded-2xl bg-orange-50 dark:bg-orange-950/10 flex items-center justify-center text-orange-600">
+ <Mail size={24} />
+ </div>
+ <div className="text-left">
+ <h4 className="font-medium text-slate-800 dark:text-slate-100 group-hover:text-orange-600 transition-colors">
+ {t('profile.view.contact.email') || "Email Support"}
+ </h4>
+ <p className="text-[13px] text-slate-500">support@promax.uz</p>
+ </div>
+ <ChevronRight size={18} className="ml-auto text-slate-400 group-hover:translate-x-1 transition-transform" />
+ </a>
+ </div>
+ </div>
+ </div>
+ );
+ };
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-                {/* Left Column: Avatar & Quick Stats */}
-                <div className="md:col-span-1 space-y-6">
-                    <div className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl rounded-3xl p-6 border border-white/20 dark:border-slate-800/50 shadow-[0_8px_30px_rgb(0,0,0,0.04)] dark:shadow-[0_8px_30px_rgb(0,0,0,0.1)] text-center relative overflow-hidden group">
-                        <div className="relative w-32 h-32 mx-auto mb-4">
-                            <input
-                                type="file"
-                                ref={fileInputRef}
-                                onChange={handleAvatarUpload}
-                                accept="image/*"
-                                className="hidden"
-                            />
-                            <div className="w-full h-full rounded-full bg-gradient-to-br from-brand-blue to-purple-600 p-1">
-                                <div className="w-full h-full rounded-full bg-white dark:bg-slate-900 overflow-hidden relative">
-                                    {isUploadingAvatar ? (
-                                        <div className="w-full h-full flex items-center justify-center bg-gray-100 dark:bg-slate-800">
-                                            <Loader2 className="w-8 h-8 animate-spin text-brand-blue" />
-                                        </div>
-                                    ) : avatarUrl ? (
-                                        <Image
-                                            src={avatarUrl}
-                                            alt="Profile"
-                                            fill
-                                            className="object-cover"
-                                            sizes="128px"
-                                        />
-                                    ) : (
-                                        <div className="w-full h-full flex items-center justify-center bg-gray-100 dark:bg-slate-800 text-4xl font-bold text-gray-400 uppercase">
-                                            {formData.firstName?.[0]}{formData.lastName?.[0]}
-                                        </div>
-                                    )}
-                                </div>
-                            </div>
-                            <button
-                                onClick={() => fileInputRef.current?.click()}
-                                disabled={isUploadingAvatar}
-                                className="absolute bottom-0 right-0 p-2 bg-brand-blue text-white rounded-full hover:bg-blue-600 transition-colors shadow-lg disabled:opacity-50"
-                            >
-                                <Camera size={18} />
-                            </button>
-                        </div>
-                        <h2 className="text-xl font-bold text-gray-900 dark:text-white">
-                            {formData.firstName} {formData.lastName}
-                        </h2>
-                        <p className="text-sm text-gray-500 dark:text-gray-400">{formData.email}</p>
+ if (isProfileLoading) {
+ return (
+ <div className="flex items-center justify-center min-h-[50vh]">
+ <Loader2 className="w-8 h-8 animate-spin text-brand-blue" />
+ </div>
+ );
+ }
 
-                        <div className="mt-6 pt-6 border-t border-gray-100 dark:border-slate-800 grid grid-cols-2 gap-4 text-center">
-                            <div>
-                                <div className="text-2xl font-bold text-brand-blue">{dashboardStats?.totalTests || 0}</div>
-                                <div className="text-xs text-gray-500">{t("sidebar.onlinetests")}</div>
-                            </div>
-                            <div>
-                                <div className="text-2xl font-bold text-brand-orange">{dashboardStats?.totalCoins || 0}</div>
-                                <div className="text-xs text-gray-500">{t("dashboard.stats.coins")}</div>
-                            </div>
-                        </div>
-                    </div>
+ const renderAnimatedView = (children: React.ReactNode, key: string) => (
+ <motion.div
+ key={key}
+ initial={{ opacity: 0, x: 20 }}
+ animate={{ opacity: 1, x: 0 }}
+ exit={{ opacity: 0, x: -20 }}
+ transition={{ duration: 0.25, ease: "easeInOut" }}
+ className="w-full"
+ >
+ {children}
+ </motion.div>
+ );
 
-                    <div className="relative bg-gradient-to-br from-brand-blue to-indigo-600 rounded-3xl p-6 text-white shadow-[0_8px_30px_rgb(59,130,246,0.3)] overflow-hidden group">
-                        {/* Decorative Background Elements */}
-                        <div className="absolute top-0 right-0 -mr-8 -mt-8 w-32 h-32 rounded-full bg-white/10 blur-2xl group-hover:bg-white/20 transition-all duration-700 pointer-events-none" />
-                        <div className="absolute bottom-0 left-0 -ml-8 -mb-8 w-24 h-24 rounded-full bg-black/10 blur-xl group-hover:bg-black/20 transition-all duration-700 pointer-events-none" />
-
-                        <div className="relative z-10">
-                            <div className="flex items-center gap-3 mb-2">
-                                <Shield className="fill-white/20 text-white" />
-                                <h3 className="font-bold">{t("profile.student_status")}</h3>
-                            </div>
-                            <p className="text-blue-100 text-sm mb-4">{t("profile.student_desc")}</p>
-                            <div className="h-2.5 bg-black/20 rounded-full overflow-hidden backdrop-blur-sm border border-white/10">
-                                <div
-                                    className="h-full bg-gradient-to-r from-white/60 to-white shadow-[0_0_10px_rgba(255,255,255,0.5)] transition-all duration-1000 ease-out"
-                                    style={{ width: `${Math.min(100, ((dashboardStats?.totalTests || 0) % 10) * 10)}%` }}
-                                />
-                            </div>
-                            <p className="text-xs text-blue-200 mt-3 text-right font-medium tracking-wide">
-                                {t("profile.level")} {Math.floor((dashboardStats?.totalTests || 0) / 10) + 1}
-                            </p>
-                        </div>
-                    </div>
-                </div>
-
-                {/* Right Column: Edit Form */}
-                <div className="md:col-span-2 space-y-6">
-                    <form onSubmit={handleSubmit} className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl rounded-3xl p-8 border border-white/20 dark:border-slate-800/50 shadow-[0_8px_30px_rgb(0,0,0,0.04)] dark:shadow-[0_8px_30px_rgb(0,0,0,0.1)] relative overflow-hidden">
-                        {/* Decorative gradients */}
-                        <div className="absolute top-0 right-0 w-64 h-64 bg-brand-blue/5 rounded-full blur-3xl -z-10" />
-
-                        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-8">
-                            <h3 className="text-xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
-                                <span className="w-8 h-8 rounded-lg bg-brand-blue/10 dark:bg-brand-blue/20 flex items-center justify-center text-brand-blue">
-                                    <User size={18} />
-                                </span>
-                                {t("profile.personal_info")}
-                            </h3>
-                            <button
-                                type="submit"
-                                disabled={saving}
-                                className="flex items-center gap-2 px-6 py-2.5 bg-gradient-to-r from-brand-blue to-indigo-600 text-white rounded-xl font-medium hover:shadow-lg hover:shadow-brand-blue/30 hover:-translate-y-0.5 transition-all duration-300 disabled:opacity-70 disabled:cursor-not-allowed disabled:transform-none disabled:shadow-none w-full sm:w-auto justify-center"
-                            >
-                                {saving ? t("profile.saving") : (
-                                    <>
-                                        <Save size={18} /> {t("profile.save")}
-                                    </>
-                                )}
-                            </button>
-                        </div>
-
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                            <div className="space-y-2 group">
-                                <label className="text-sm font-medium text-gray-700 dark:text-gray-300 group-focus-within:text-brand-blue transition-colors">{t("profile.first_name")}</label>
-                                <input
-                                    type="text"
-                                    value={formData.firstName}
-                                    onChange={(e) => setFormData({ ...formData, firstName: e.target.value })}
-                                    className="w-full px-4 py-3 rounded-xl bg-gray-50/80 dark:bg-slate-800/50 border border-gray-200/50 dark:border-slate-700/50 focus:border-brand-blue/50 focus:bg-white dark:focus:bg-slate-800 focus:ring-4 focus:ring-brand-blue/10 transition-all outline-none"
-                                />
-                            </div>
-                            <div className="space-y-2 group">
-                                <label className="text-sm font-medium text-gray-700 dark:text-gray-300 group-focus-within:text-brand-blue transition-colors">{t("profile.last_name")}</label>
-                                <input
-                                    type="text"
-                                    value={formData.lastName}
-                                    onChange={(e) => setFormData({ ...formData, lastName: e.target.value })}
-                                    className="w-full px-4 py-3 rounded-xl bg-gray-50/80 dark:bg-slate-800/50 border border-gray-200/50 dark:border-slate-700/50 focus:border-brand-blue/50 focus:bg-white dark:focus:bg-slate-800 focus:ring-4 focus:ring-brand-blue/10 transition-all outline-none"
-                                />
-                            </div>
-
-                            <div className="space-y-2">
-                                <label className="text-sm font-medium text-gray-700 dark:text-gray-300">{t("profile.email")}</label>
-                                <div className="relative">
-                                    <Mail className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
-                                    <input
-                                        type="email"
-                                        value={formData.email}
-                                        disabled
-                                        className="w-full pl-12 pr-4 py-3 rounded-xl bg-gray-100 dark:bg-slate-800/80 text-gray-500 border border-transparent cursor-not-allowed opacity-70"
-                                    />
-                                </div>
-                            </div>
-
-                            <div className="space-y-2 group">
-                                <label className="text-sm font-medium text-gray-700 dark:text-gray-300 group-focus-within:text-brand-blue transition-colors">{t("profile.phone")}</label>
-                                <div className="relative">
-                                    <Phone className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-brand-blue transition-colors" size={18} />
-                                    <input
-                                        type="tel"
-                                        value={formData.phone}
-                                        onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                                        className="w-full pl-12 pr-4 py-3 rounded-xl bg-gray-50/80 dark:bg-slate-800/50 border border-gray-200/50 dark:border-slate-700/50 focus:border-brand-blue/50 focus:bg-white dark:focus:bg-slate-800 focus:ring-4 focus:ring-brand-blue/10 transition-all outline-none"
-                                    />
-                                </div>
-                            </div>
-
-                            <div className="md:col-span-2 space-y-2">
-                                <label className="text-sm font-medium text-gray-700 dark:text-gray-300">{t("profile.location")}</label>
-                                <div className="relative">
-                                    <MapPin className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
-                                    <input
-                                        type="text"
-                                        value={formData.location}
-                                        onChange={(e) => setFormData({ ...formData, location: e.target.value })}
-                                        placeholder={t("profile.location_placeholder")}
-                                        className="w-full pl-12 pr-4 py-3 rounded-xl bg-gray-50 dark:bg-slate-800 border-none focus:ring-2 focus:ring-brand-blue transition-all"
-                                    />
-                                </div>
-                            </div>
-
-                            <div className="sm:col-span-2 space-y-2 group">
-                                <label className="text-sm font-medium text-gray-700 dark:text-gray-300 group-focus-within:text-brand-blue transition-colors">{t("profile.bio")}</label>
-                                <textarea
-                                    rows={4}
-                                    value={formData.bio}
-                                    onChange={(e) => setFormData({ ...formData, bio: e.target.value })}
-                                    placeholder={t("profile.bio_placeholder")}
-                                    className="w-full px-4 py-3 rounded-xl bg-gray-50/80 dark:bg-slate-800/50 border border-gray-200/50 dark:border-slate-700/50 focus:border-brand-blue/50 focus:bg-white dark:focus:bg-slate-800 focus:ring-4 focus:ring-brand-blue/10 transition-all outline-none resize-none"
-                                />
-                            </div>
-                        </div>
-                    </form>
-
-                    {/* Security Section */}
-                    <div className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl rounded-3xl p-8 border border-white/20 dark:border-slate-800/50 shadow-[0_8px_30px_rgb(0,0,0,0.04)] dark:shadow-[0_8px_30px_rgb(0,0,0,0.1)] relative overflow-hidden">
-                        {/* Decorative gradients */}
-                        <div className="absolute bottom-0 left-0 w-64 h-64 bg-brand-orange/5 rounded-full blur-3xl -z-10" />
-
-                        <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-6 flex items-center gap-2">
-                            <span className="w-8 h-8 rounded-lg bg-orange-100 dark:bg-orange-500/20 flex items-center justify-center text-brand-orange border border-orange-200 dark:border-orange-500/30">
-                                <Key size={18} />
-                            </span>
-                            {t("profile.security")}
-                        </h3>
-
-                        {!showPasswordForm ? (
-                            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 p-4 bg-gray-50 dark:bg-slate-800/50 rounded-xl">
-                                <div>
-                                    <p className="font-semibold text-gray-900 dark:text-white">{t("profile.password")}</p>
-                                    <p className="text-sm text-gray-500">********</p>
-                                </div>
-                                <button
-                                    onClick={() => setShowPasswordForm(true)}
-                                    className="px-4 py-2 bg-brand-blue hover:bg-blue-700 text-white rounded-lg font-medium text-sm transition-colors w-full sm:w-auto"
-                                >
-                                    {t("profile.change_password")}
-                                </button>
-                            </div>
-                        ) : (
-                            <form onSubmit={handlePasswordChange} className="space-y-4">
-                                {passwordError && (
-                                    <div className="p-3 bg-red-100 dark:bg-red-900/20 text-red-700 dark:text-red-400 rounded-lg text-sm">
-                                        {passwordError}
-                                    </div>
-                                )}
-
-                                <div>
-                                    <label className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 block">
-                                        Joriy parol
-                                    </label>
-                                    <input
-                                        type="password"
-                                        value={passwordData.currentPassword}
-                                        onChange={(e) => setPasswordData({ ...passwordData, currentPassword: e.target.value })}
-                                        className="w-full px-4 py-3 rounded-xl bg-gray-50 dark:bg-slate-800 border-none focus:ring-2 focus:ring-brand-blue transition-all"
-                                        placeholder="Joriy parolingizni kiriting"
-                                        required
-                                    />
-                                </div>
-
-                                <div>
-                                    <label className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 block">
-                                        Yangi parol
-                                    </label>
-                                    <input
-                                        type="password"
-                                        value={passwordData.newPassword}
-                                        onChange={(e) => setPasswordData({ ...passwordData, newPassword: e.target.value })}
-                                        className="w-full px-4 py-3 rounded-xl bg-gray-50 dark:bg-slate-800 border-none focus:ring-2 focus:ring-brand-blue transition-all"
-                                        placeholder="Kamida 6 ta belgi"
-                                        required
-                                        minLength={6}
-                                    />
-                                </div>
-
-                                <div>
-                                    <label className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 block">
-                                        Yangi parolni tasdiqlang
-                                    </label>
-                                    <input
-                                        type="password"
-                                        value={passwordData.confirmPassword}
-                                        onChange={(e) => setPasswordData({ ...passwordData, confirmPassword: e.target.value })}
-                                        className="w-full px-4 py-3 rounded-xl bg-gray-50 dark:bg-slate-800 border-none focus:ring-2 focus:ring-brand-blue transition-all"
-                                        placeholder="Yangi parolni qayta kiriting"
-                                        required
-                                    />
-                                </div>
-
-                                <div className="flex flex-col sm:flex-row gap-3 pt-4">
-                                    <button
-                                        type="submit"
-                                        disabled={changingPassword}
-                                        className="flex-1 px-4 py-3 bg-gradient-to-r from-brand-blue to-indigo-600 hover:shadow-lg hover:shadow-brand-blue/30 hover:-translate-y-0.5 text-white rounded-xl font-medium transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none disabled:shadow-none order-1 sm:order-2"
-                                    >
-                                        {changingPassword ? "Saqlanmoqda..." : "Parolni o'zgartirish"}
-                                    </button>
-                                    <button
-                                        type="button"
-                                        onClick={() => {
-                                            setShowPasswordForm(false);
-                                            setPasswordData({ currentPassword: "", newPassword: "", confirmPassword: "" });
-                                            setPasswordError("");
-                                        }}
-                                        className="px-4 py-3 bg-gray-100 dark:bg-slate-800/80 hover:bg-gray-200 dark:hover:bg-slate-700 text-gray-700 dark:text-gray-300 rounded-xl font-medium transition-colors order-2 sm:order-1 border border-transparent"
-                                    >
-                                        Bekor qilish
-                                    </button>
-                                </div>
-                            </form>
-                        )}
-                    </div>
-                </div>
-            </div>
-        </div >
-    );
+ return (
+ <div className="max-w-md mx-auto pb-10 overflow-x-hidden">
+ <AnimatePresence mode="wait">
+ {activeView === 'main' && renderAnimatedView(renderMain(), 'main')}
+ {activeView === 'profile' && renderAnimatedView(renderProfileEdit(), 'profile')}
+ {activeView === 'security' && renderAnimatedView(renderSecurity(), 'security')}
+ {activeView === 'themes' && renderAnimatedView(renderThemes(), 'themes')}
+ {activeView === 'notifications' && renderAnimatedView(renderNotifications(), 'notifications')}
+ {activeView === 'help' && renderAnimatedView(renderHelp(), 'help')}
+ {activeView === 'contact' && renderAnimatedView(renderContact(), 'contact')}
+ </AnimatePresence>
+ </div>
+ );
 }

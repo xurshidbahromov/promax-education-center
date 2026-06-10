@@ -1,16 +1,16 @@
 import { Background } from "@/components/Background";
 
 export default function AuthLayout({
-    children,
+ children,
 }: Readonly<{
-    children: React.ReactNode;
+ children: React.ReactNode;
 }>) {
-    return (
-        <>
-            <Background />
-            <main className="min-h-screen">
-                {children}
-            </main>
-        </>
-    );
+ return (
+ <>
+ <Background />
+ <main className="min-h-screen">
+ {children}
+ </main>
+ </>
+ );
 }
