@@ -288,7 +288,7 @@ export const ru = {
  // Dashboard Keys
  "sidebar.dashboard": "Кабинет",
  "sidebar.onlinetests": "Онлайн Тесты",
- "sidebar.results": "Результаты",
+ "sidebar.results": "Пробный тест",
  "sidebar.games": "Игры",
  "sidebar.settings": "Настройки",
  "sidebar.profile": "Профиль",
@@ -365,7 +365,7 @@ export const ru = {
  "settings.language.ru.desc": "Кириллица",
 
  // Results Page
- "results.title": "Результаты Экзаменов",
+ "results.title": "Пробный тест",
  "results.subtitle": "История всех пройденных моков и тестов",
  "results.export": "Экспорт Всех Результатов",
 
@@ -408,6 +408,8 @@ export const ru = {
  "profile.menu.help_desc": "Часто задаваемые вопросы",
  "profile.menu.contact": "Связаться с нами",
  "profile.menu.contact_desc": "Написать администрации",
+ "profile.menu.logout": "Выйти",
+ "profile.menu.logout_desc": "Выйти из вашей учетной записи",
 
  "profile.view.settings.title": "Личные данные",
  "profile.view.settings.first_name": "Имя",

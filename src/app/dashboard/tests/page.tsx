@@ -17,6 +17,7 @@ import {
  Target
 } from "lucide-react";
 import { getPublishedTests, type Test, type TestFilters, Subject, TestType } from "@/lib/tests";
+import { TestCardSkeleton } from "@/components/ui/Skeleton";
 
 export default function OnlineTestsPage() {
  const { t } = useLanguage();
@@ -151,10 +152,11 @@ export default function OnlineTestsPage() {
  {/* Tests Grid */}
  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
  {loading ? (
- <div className="col-span-full text-center py-12">
- <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-brand-blue"></div>
- <p className="text-gray-400 mt-4">{t('tests.list.loading')}</p>
- </div>
+  <>
+    {[1, 2, 3, 4, 5, 6].map(i => (
+      <TestCardSkeleton key={i} />
+    ))}
+  </>
  ) : tests.length === 0 ? (
  <div className="col-span-full text-center py-12">
  <FileText className="mx-auto text-gray-300 dark:text-gray-700 mb-4" size={48} />

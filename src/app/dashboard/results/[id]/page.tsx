@@ -13,6 +13,7 @@ import {
  HelpCircle,
  Check
 } from "lucide-react";
+import { AttemptResultSkeleton } from "@/components/ui/Skeleton";
 
 type DetailedResponse = QuestionResponse & { question: Question };
 
@@ -46,11 +47,7 @@ export default function ResultDetailPage() {
  };
 
  if (loading) {
- return (
- <div className="flex items-center justify-center min-h-[60vh]">
- <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-brand-blue"></div>
- </div>
- );
+ return <AttemptResultSkeleton />;
  }
 
  if (!attempt) {

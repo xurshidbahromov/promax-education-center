@@ -23,6 +23,7 @@ import {
  getAttemptResponses,
  type Question
 } from "@/lib/tests";
+import { TakeTestSkeleton } from "@/components/ui/Skeleton";
 import { createClient } from "@/utils/supabase/client";
 import toast from "react-hot-toast";
 
@@ -251,16 +252,9 @@ export default function TakeTestPage() {
  return "text-gray-700 dark:text-gray-300";
  };
 
- if (loading) {
- return (
- <div className="flex items-center justify-center min-h-screen">
- <div className="text-center">
- <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-brand-blue mx-auto mb-4"></div>
- <p className="text-gray-600 dark:text-gray-400">{t('tests.take.loading')}</p>
- </div>
- </div>
- );
- }
+  if (loading) {
+    return <TakeTestSkeleton />;
+  }
 
  if (!test || questions.length === 0) {
  return (

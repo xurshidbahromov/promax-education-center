@@ -5,7 +5,6 @@ import { useState, useEffect } from "react";
 import {
  Search,
  Filter,
- Download,
  CheckCircle2,
  XCircle,
  Clock,
@@ -18,6 +17,7 @@ import {
 import { createClient } from "@/utils/supabase/client";
 import { getStudentResults, type ExamResult } from "@/lib/supabase-queries";
 import Link from "next/link";
+import { ResultRowSkeleton } from "@/components/ui/Skeleton";
 
 export default function ResultsPage() {
  const { t } = useLanguage();
@@ -27,8 +27,6 @@ export default function ResultsPage() {
  const [filterTestType, setFilterTestType] = useState("all");
  const [loading, setLoading] = useState(true);
  const [results, setResults] = useState<ExamResult[]>([]);
-
- const [exporting, setExporting] = useState(false);
 
  // Fetch results from Supabase
  useEffect(() => {
@@ -51,58 +49,6 @@ export default function ResultsPage() {
 
  fetchResults();
  }, []);
-
- const handleExport = async () => {
- try {
- setExporting(true);
- const { utils, writeFile } = await import("xlsx");
-
- const exportData = filteredResults.map(result => {
- const examType = result.exam?.type || 'quiz';
- const isDTM = examType === 'dtm';
- const score = result.total_score || 0;
- const maxScore = result.exam?.max_score || (isDTM ? 189.0 : 100);
- const percentage = (score / maxScore) * 100;
-
- return {
- "Sana": new Date(result.created_at).toLocaleDateString('uz-UZ'),
- "Imtihon Nomi": result.exam?.title || "Noma'lum",
- "Fan": (result.exam as any)?.subject || "Noma'lum",
- "Tur": isDTM ? "DTM" : "Quiz",
- "To'plangan Ball": score.toFixed(1),
- "Maksimal Ball": maxScore,
- "Foiz": `${percentage.toFixed(1)}%`,
- "Holat": percentage >= 60 ? "O'tgan" : "O'tmagan"
- };
- });
-
- const wb = utils.book_new();
- const ws = utils.json_to_sheet(exportData);
-
- // Auto-width columns
- const colWidths = [
- { wch: 12 }, // Sana
- { wch: 30 }, // Imtihon Nomi
- { wch: 15 }, // Fan
- { wch: 10 }, // Tur
- { wch: 15 }, // To'plangan Ball
- { wch: 15 }, // Maksimal Ball
- { wch: 10 }, // Foiz
- { wch: 10 } // Holat
- ];
- ws['!cols'] = colWidths;
-
- utils.book_append_sheet(wb, ws, "Natijalar");
- writeFile(wb, `Promax_Natijalar_${new Date().toISOString().split('T')[0]}.xlsx`);
-
- } catch (error) {
- console.error("Export error:", error);
- alert("Export qilishda xatolik yuz berdi");
- } finally {
- setExporting(false);
- }
- };
-
 
  const filteredResults = results.filter(result => {
  const examTitle = result.exam?.title || "";
@@ -143,18 +89,6 @@ export default function ResultsPage() {
  {t('results.subtitle')}
  </p>
  </div>
- <button
- onClick={handleExport}
- disabled={exporting || filteredResults.length === 0}
- className="px-4 py-2 bg-gradient-to-r from-brand-blue to-indigo-600 text-white rounded-xl text-sm font-medium hover:opacity-90 transition-opacity shadow-lg shadow-brand-blue/30 flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
- >
- {exporting ? (
- <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
- ) : (
- <Download size={18} />
- )}
- {exporting ? "Yuklanmoqda..." : t('results.export')}
- </button>
  </div>
 
  {/* Filters */}
@@ -206,11 +140,11 @@ export default function ResultsPage() {
 
  {/* Results Cards */}
  <div className="grid grid-cols-1 gap-6">
- {loading ? (
- <div className="bg-white dark:bg-slate-900 rounded-3xl border border-gray-200 dark:border-slate-800 p-12 text-center">
- <p className="text-gray-400">Loading results...</p>
- </div>
- ) : filteredResults.length === 0 ? (
+  {loading ? (
+    <div className="space-y-4">
+      {[1, 2, 3, 4].map(i => <ResultRowSkeleton key={i} />)}
+    </div>
+  ) : filteredResults.length === 0 ? (
  <div className="bg-white dark:bg-slate-900 rounded-3xl border border-gray-200 dark:border-slate-800 p-12 text-center">
  <p className="text-gray-400">{t('dashboard.no_results')}</p>
  </div>

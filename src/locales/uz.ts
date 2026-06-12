@@ -352,7 +352,7 @@ export const uz = {
  // Dashboard Keys
  "sidebar.dashboard": "Kabinet",
  "sidebar.onlinetests": "Online Testlar",
- "sidebar.results": "Natijalar",
+ "sidebar.results": "Test sinov imtihoni",
  "sidebar.games": "O'yinlar",
  "sidebar.settings": "Sozlamalar",
  "sidebar.profile": "Profil",
@@ -448,7 +448,7 @@ export const uz = {
  "settings.avatar.error": "Rasm yuklashda xatolik",
 
  // Results Page
- "results.title": "Imtihon Natijalari",
+ "results.title": "Test sinov imtihoni",
  "results.subtitle": "Barcha topshirilgan mock va testlar tarixi",
  "results.export": "Natijalarni Yuklab Olish",
 
@@ -491,6 +491,8 @@ export const uz = {
  "profile.menu.help_desc": "Ko'p beriladigan savollar",
  "profile.menu.contact": "Biz bilan aloqa",
  "profile.menu.contact_desc": "Bizga xabar yuborish",
+ "profile.menu.logout": "Chiqish",
+ "profile.menu.logout_desc": "Tizimdan chiqish",
 
  "profile.view.settings.title": "Shaxsiy ma'lumotlar",
  "profile.view.settings.first_name": "Ism",

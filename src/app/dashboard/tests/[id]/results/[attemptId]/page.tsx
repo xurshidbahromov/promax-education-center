@@ -17,6 +17,7 @@ import {
  AlertCircle
 } from "lucide-react";
 import { getAttemptResults } from "@/lib/tests";
+import { AttemptResultSkeleton } from "@/components/ui/Skeleton";
 
 export default function TestResultsPage() {
  const params = useParams();
@@ -45,14 +46,7 @@ export default function TestResultsPage() {
  }, [attemptId]);
 
  if (loading) {
- return (
- <div className="flex items-center justify-center min-h-screen">
- <div className="text-center">
- <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-brand-blue mx-auto mb-4"></div>
- <p className="text-gray-600 dark:text-gray-400">{t('tests.result.loading')}</p>
- </div>
- </div>
- );
+ return <AttemptResultSkeleton />;
  }
 
  if (!results) {

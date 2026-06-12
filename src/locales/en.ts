@@ -290,7 +290,7 @@ export const en = {
  // Dashboard Keys
  "sidebar.dashboard": "Dashboard",
  "sidebar.onlinetests": "Online Tests",
- "sidebar.results": "Results",
+ "sidebar.results": "Practice test",
  "sidebar.games": "Game Zone",
  "sidebar.settings": "Settings",
  "sidebar.profile": "Profile",
@@ -365,7 +365,7 @@ export const en = {
  "settings.language.ru.desc": "Cyrillic script",
 
  // Results Page
- "results.title": "Exam Results",
+ "results.title": "Practice test",
  "results.subtitle": "History of all taken mocks and tests",
  "results.export": "Export All Results",
 
@@ -408,6 +408,8 @@ export const en = {
  "profile.menu.help_desc": "Frequently asked questions",
  "profile.menu.contact": "Contact Us",
  "profile.menu.contact_desc": "Send us a message",
+ "profile.menu.logout": "Logout",
+ "profile.menu.logout_desc": "Sign out of your account",
 
  "profile.view.settings.title": "Personal Information",
  "profile.view.settings.first_name": "First Name",

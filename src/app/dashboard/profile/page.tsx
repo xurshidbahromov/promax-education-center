@@ -6,21 +6,39 @@ import toast from "react-hot-toast";
 import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { updateUserProfile, uploadAvatar, updateUserSettings, updatePassword } from "@/lib/profile";
+import { createClient } from "@/utils/supabase/client";
 import {
- User, Mail, Phone, MapPin, Camera, Save, Shield, Key, ArrowLeft, Loader2,
- Settings, Bell, Palette, HelpCircle, ChevronRight, Moon, Sun, Languages,
- Smartphone, MessageSquare
+  User, Mail, Phone, MapPin, Camera, Save, Shield, Key, ArrowLeft, Loader2,
+  Settings, Bell, Palette, HelpCircle, ChevronRight, Moon, Sun, Languages,
+  Smartphone, MessageSquare, LogOut
 } from "lucide-react";
 import Image from "next/image";
 import { cn } from "@/lib/utils";
 import { useCurrentUser, useDashboardStats, useFullUserProfile } from "@/hooks/useDashboardData";
 import { motion, AnimatePresence } from "framer-motion";
+import { ProfileSkeleton } from "@/components/ui/Skeleton";
 
 export default function ProfilePage() {
- const { t, language, setLanguage } = useLanguage();
- const { theme, setTheme } = useTheme();
- const router = useRouter();
- const [activeView, setActiveView] = useState<'main' | 'profile' | 'security' | 'notifications' | 'themes' | 'help' | 'contact'>('main');
+  const { t, language, setLanguage } = useLanguage();
+  const { theme, setTheme } = useTheme();
+  const router = useRouter();
+  const supabase = createClient();
+  const [activeView, _setActiveView] = useState<'main' | 'profile' | 'security' | 'notifications' | 'themes' | 'help' | 'contact'>('main');
+  const [direction, setDirection] = useState<'forward' | 'backward'>('forward');
+
+  const setActiveView = (view: typeof activeView) => {
+    if (view === 'main') {
+      setDirection('backward');
+    } else {
+      setDirection('forward');
+    }
+    _setActiveView(view);
+  };
+
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
+    router.push("/login");
+  };
 
  // Data hooks
  const { data: user } = useCurrentUser();
@@ -226,6 +244,23 @@ export default function ProfilePage() {
  icon={Mail} title={t('profile.menu.contact') || "Contact Us"} description={t('profile.menu.contact_desc') || "Send us a message"} 
  onClick={() => setActiveView('contact')} 
  />
+ <button 
+  onClick={handleLogout} 
+  className="w-full bg-red-500/5 dark:bg-red-500/5 backdrop-blur-xl rounded-[28px] p-4 flex items-center gap-4 shadow-sm border border-red-500/10 dark:border-red-500/20 hover:shadow-md hover:border-red-500/30 dark:hover:border-red-500/40 hover:-translate-y-0.5 transition-all duration-300 group"
+  >
+  <div className="w-12 h-12 rounded-full bg-red-500/10 dark:bg-red-500/20 text-red-500 flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
+  <LogOut size={24} className="stroke-[2.5px]" />
+  </div>
+  <div className="flex-1 text-left">
+  <h3 className="font-semibold text-red-600 dark:text-red-400 text-[16px]">
+  {t('profile.menu.logout') || "Chiqish"}
+  </h3>
+  <p className="text-sm text-red-500/70 dark:text-red-400/60 mt-0.5">
+  {t('profile.menu.logout_desc') || "Tizimdan chiqish"}
+  </p>
+  </div>
+  <ChevronRight size={20} className="text-red-300 dark:text-red-700 group-hover:translate-x-1 transition-transform" />
+  </button>
  </div>
  </div>
  );
@@ -543,38 +578,51 @@ export default function ProfilePage() {
  );
  };
 
- if (isProfileLoading) {
- return (
- <div className="flex items-center justify-center min-h-[50vh]">
- <Loader2 className="w-8 h-8 animate-spin text-brand-blue" />
- </div>
- );
- }
+  if (isProfileLoading) {
+    return <ProfileSkeleton />;
+  }
 
- const renderAnimatedView = (children: React.ReactNode, key: string) => (
- <motion.div
- key={key}
- initial={{ opacity: 0, x: 20 }}
- animate={{ opacity: 1, x: 0 }}
- exit={{ opacity: 0, x: -20 }}
- transition={{ duration: 0.25, ease: "easeInOut" }}
- className="w-full"
- >
- {children}
- </motion.div>
- );
+  const variants = {
+    enter: (dir: 'forward' | 'backward') => ({
+      x: dir === 'forward' ? 120 : -120,
+      opacity: 0,
+    }),
+    center: {
+      x: 0,
+      opacity: 1,
+    },
+    exit: (dir: 'forward' | 'backward') => ({
+      x: dir === 'forward' ? -120 : 120,
+      opacity: 0,
+    }),
+  };
 
- return (
- <div className="max-w-md mx-auto pb-10 overflow-x-hidden">
- <AnimatePresence mode="wait">
- {activeView === 'main' && renderAnimatedView(renderMain(), 'main')}
- {activeView === 'profile' && renderAnimatedView(renderProfileEdit(), 'profile')}
- {activeView === 'security' && renderAnimatedView(renderSecurity(), 'security')}
- {activeView === 'themes' && renderAnimatedView(renderThemes(), 'themes')}
- {activeView === 'notifications' && renderAnimatedView(renderNotifications(), 'notifications')}
- {activeView === 'help' && renderAnimatedView(renderHelp(), 'help')}
- {activeView === 'contact' && renderAnimatedView(renderContact(), 'contact')}
- </AnimatePresence>
- </div>
- );
+  const renderAnimatedView = (children: React.ReactNode, key: string) => (
+    <motion.div
+      key={key}
+      custom={direction}
+      variants={variants}
+      initial="enter"
+      animate="center"
+      exit="exit"
+      transition={{ type: "spring", stiffness: 380, damping: 38 }}
+      className="w-full"
+    >
+      {children}
+    </motion.div>
+  );
+
+  return (
+    <div className="max-w-md mx-auto pb-10 overflow-x-hidden relative min-h-[400px]">
+      <AnimatePresence initial={false} mode="popLayout" custom={direction}>
+        {activeView === 'main' && renderAnimatedView(renderMain(), 'main')}
+        {activeView === 'profile' && renderAnimatedView(renderProfileEdit(), 'profile')}
+        {activeView === 'security' && renderAnimatedView(renderSecurity(), 'security')}
+        {activeView === 'themes' && renderAnimatedView(renderThemes(), 'themes')}
+        {activeView === 'notifications' && renderAnimatedView(renderNotifications(), 'notifications')}
+        {activeView === 'help' && renderAnimatedView(renderHelp(), 'help')}
+        {activeView === 'contact' && renderAnimatedView(renderContact(), 'contact')}
+      </AnimatePresence>
+    </div>
+  );
 }

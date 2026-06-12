@@ -16,6 +16,7 @@ import {
  AlertCircle
 } from "lucide-react";
 import { getTestById, getStudentTestHistory, type Test } from "@/lib/tests";
+import { TestDetailSkeleton } from "@/components/ui/Skeleton";
 
 export default function TestDetailsPage() {
  const params = useParams();
@@ -49,13 +50,9 @@ export default function TestDetailsPage() {
  loadTest();
  }, [testId]);
 
- if (loading) {
- return (
- <div className="flex items-center justify-center min-h-screen">
- <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-brand-blue"></div>
- </div>
- );
- }
+  if (loading) {
+    return <TestDetailSkeleton />;
+  }
 
  if (!test) {
  return (
