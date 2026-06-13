@@ -81,7 +81,7 @@ const Methodology = () => {
  </div>
 
  {/* DESKTOP: horizontal zig-zag layout */}
- <div className="hidden lg:block">
+ <div className="hidden lg:block origin-center lg:scale-[0.82] xl:scale-[0.92] 2xl:scale-100 transition-transform duration-300">
  <DesktopZigZag steps={steps} t={t} />
  </div>
 
@@ -109,7 +109,7 @@ function MobileZigZag({ steps, t }: { steps: StepItem[]; t: (k: string) => strin
  const CONTAINER_H = 1200;
 
  return (
- <div className="relative origin-top transform scale-[0.95] sm:scale-110" style={{ width: `${CONTAINER_W}px`, height: `${CONTAINER_H}px` }}>
+ <div className="relative origin-top transform max-[350px]:scale-[0.75] max-[380px]:scale-[0.85] scale-[0.95] sm:scale-110" style={{ width: `${CONTAINER_W}px`, height: `${CONTAINER_H}px` }}>
  {/* SVG Vertical Connector */}
  <svg
  className="absolute inset-0 w-full h-full pointer-events-none"
@@ -171,9 +171,9 @@ function MobileZigZag({ steps, t }: { steps: StepItem[]; t: (k: string) => strin
  }}
  className="group cursor-default"
  >
- <div
- className="w-full h-full rounded-full flex flex-col items-center justify-center text-center bg-white dark:bg-slate-800/90 shadow-xl dark:shadow-2xl dark:shadow-black/40 border border-slate-200/60 dark:border-slate-700/50 transition-all duration-300 group-hover:-translate-y-1.5 group-hover:border-amber-500/50 dark:group-hover:border-amber-500/50 group-hover:shadow-amber-500/10 p-5 backdrop-blur-sm"
- >
+  <div
+  className="w-full h-full rounded-full flex flex-col items-center justify-center text-center bg-white dark:bg-slate-800 shadow-lg dark:shadow-2xl dark:shadow-black/30 border border-slate-100 dark:border-slate-700/60 transition-all duration-300 group-hover:-translate-y-1.5 group-hover:border-amber-500/30 group-hover:shadow-xl p-5"
+  >
  <span className="text-[11px] font-semibold uppercase tracking-[0.2em] text-amber-500 mb-1">STEP</span>
  <div className="flex items-center gap-1.5 mb-1">
  <Icon size={22} strokeWidth={2.5} className="text-amber-500 transition-transform duration-300" />
@@ -298,10 +298,9 @@ function DesktopZigZag({ steps, t }: { steps: StepItem[]; t: (k: string) => stri
  }}
  className="group cursor-default"
  >
- {/* Outer ring (neomorphic shadow) */}
- <div
- className="w-full h-full rounded-full flex flex-col items-center justify-center text-center bg-white dark:bg-slate-800/90 border border-slate-200/60 dark:border-slate-700/50 transition-all duration-300 group-hover:-translate-y-1.5 group-hover:border-amber-500/50 dark:group-hover:border-amber-500/50 shadow-xl dark:shadow-2xl dark:shadow-black/40 group-hover:shadow-amber-500/10 p-5 backdrop-blur-sm"
- >
+  <div
+  className="w-full h-full rounded-full flex flex-col items-center justify-center text-center bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700/60 transition-all duration-300 group-hover:-translate-y-1.5 shadow-lg dark:shadow-2xl dark:shadow-black/30 group-hover:border-amber-500/30 group-hover:shadow-xl p-5"
+  >
  {/* STEP label */}
  <span className="text-[11px] font-semibold uppercase tracking-[0.3em] text-amber-500 mb-1.5">STEP</span>
 
