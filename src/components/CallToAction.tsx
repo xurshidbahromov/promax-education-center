@@ -53,7 +53,7 @@ const CallToAction = () => {
  <div className="flex flex-col sm:flex-row gap-4 pt-6">
  <Link
  href="/register"
- className="group px-8 py-4 bg-brand-orange text-slate-900 font-semibold rounded-full text-lg hover:bg-orange-600 transition-colors shadow-sm active:scale-[0.98] flex items-center justify-center gap-3 uppercase tracking-wider"
+ className="group px-8 py-4 bg-brand-orange text-white font-semibold rounded-full text-lg hover:bg-orange-600 transition-colors shadow-sm active:scale-[0.98] flex items-center justify-center gap-3 uppercase tracking-wider"
  >
  {t('cta.button.primary')}
  <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform duration-300 ease-out" />

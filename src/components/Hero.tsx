@@ -69,7 +69,7 @@ const Hero = () => {
  >
  <Link
  href="/register"
- className="group bg-brand-orange text-slate-900 px-8 py-4 rounded-full font-semibold text-lg hover:bg-brand-orange/90 transition-colors active:scale-[0.98] flex items-center justify-center gap-3 uppercase tracking-wider"
+ className="group bg-brand-orange text-white px-8 py-4 rounded-full font-semibold text-lg hover:bg-brand-orange/90 transition-colors active:scale-[0.98] flex items-center justify-center gap-3 uppercase tracking-wider"
  >
  {t('hero.cta.primary')}
  <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform duration-300 ease-out" />
