@@ -10,20 +10,22 @@ import { createClient } from "@/utils/supabase/client";
 import {
   User, Mail, Phone, MapPin, Camera, Save, Shield, Key, ArrowLeft, Loader2,
   Settings, Bell, Palette, HelpCircle, ChevronRight, Moon, Sun, Languages,
-  Smartphone, MessageSquare, LogOut
+  Smartphone, MessageSquare, LogOut, TrendingUp
 } from "lucide-react";
 import Image from "next/image";
 import { cn } from "@/lib/utils";
 import { useCurrentUser, useDashboardStats, useFullUserProfile } from "@/hooks/useDashboardData";
 import { motion, AnimatePresence } from "framer-motion";
 import { ProfileSkeleton } from "@/components/ui/Skeleton";
+import StatsGrid from "@/components/dashboard/StatsGrid";
+import ProgressChart from "@/components/dashboard/ProgressChart";
 
 export default function ProfilePage() {
   const { t, language, setLanguage } = useLanguage();
   const { theme, setTheme } = useTheme();
   const router = useRouter();
   const supabase = createClient();
-  const [activeView, _setActiveView] = useState<'main' | 'profile' | 'security' | 'notifications' | 'themes' | 'help' | 'contact'>('main');
+  const [activeView, _setActiveView] = useState<'main' | 'profile' | 'security' | 'notifications' | 'themes' | 'help' | 'contact' | 'statistics'>('main');
   const [direction, setDirection] = useState<'forward' | 'backward'>('forward');
 
   const setActiveView = (view: typeof activeView) => {
@@ -221,6 +223,10 @@ export default function ProfilePage() {
  {/* Menu List */}
  <div className="w-full px-2 sm:px-0 space-y-3 mt-2">
  <MenuButton 
+ icon={TrendingUp} title={t('profile.menu.statistics') === 'profile.menu.statistics' ? "Statistika" : t('profile.menu.statistics')} description={t('profile.menu.statistics_desc') === 'profile.menu.statistics_desc' ? "O'zlashtirish statistikasini ko'rish" : t('profile.menu.statistics_desc')} 
+ onClick={() => setActiveView('statistics')} 
+ />
+ <MenuButton 
  icon={Settings} title={t('profile.menu.settings') || "Settings"} description={t('profile.menu.settings_desc') || "Customize your experience"} 
  onClick={() => setActiveView('profile')} 
  />
@@ -264,6 +270,16 @@ export default function ProfilePage() {
  </div>
  </div>
  );
+
+  const renderStatistics = () => (
+    <div className="w-full px-2 sm:px-0 pt-4 pb-10 space-y-6">
+      <ViewHeader title={t('profile.menu.statistics') === 'profile.menu.statistics' ? "Statistika" : t('profile.menu.statistics')} />
+      <div className="space-y-6">
+        <StatsGrid userId={user?.id} />
+        <ProgressChart userId={user?.id} />
+      </div>
+    </div>
+  );
 
  const renderProfileEdit = () => (
  <div className="w-full px-2 sm:px-0 pt-4">
@@ -613,9 +629,10 @@ export default function ProfilePage() {
   );
 
   return (
-    <div className="max-w-md mx-auto pb-10 overflow-x-hidden relative min-h-[400px]">
+    <div className="max-w-md mx-auto pt-8 sm:pt-12 pb-10 overflow-x-hidden relative min-h-[400px]">
       <AnimatePresence initial={false} mode="popLayout" custom={direction}>
         {activeView === 'main' && renderAnimatedView(renderMain(), 'main')}
+        {activeView === 'statistics' && renderAnimatedView(renderStatistics(), 'statistics')}
         {activeView === 'profile' && renderAnimatedView(renderProfileEdit(), 'profile')}
         {activeView === 'security' && renderAnimatedView(renderSecurity(), 'security')}
         {activeView === 'themes' && renderAnimatedView(renderThemes(), 'themes')}

@@ -27,7 +27,7 @@ const Methodology = () => {
  const { t } = useLanguage();
 
  return (
- <section className="pt-12 pb-24 sm:pb-32 relative z-10 px-4 sm:px-6 lg:px-8">
+ <section className="py-16 md:py-24 relative z-10 px-4 sm:px-6 lg:px-8">
 
  {/* Soft ambient glows */}
  <div className="pointer-events-none absolute -top-40 left-1/3 w-[40rem] h-[40rem] rounded-full bg-amber-400/10 dark:bg-amber-500/5 blur-[140px]" />
@@ -51,7 +51,7 @@ const Methodology = () => {
  whileInView={{ opacity: 1, y: 0 }}
  viewport={{ once: true }}
  transition={{ delay: 0.1 }}
- className="text-lg md:text-xl text-slate-600 dark:text-slate-300 font-medium"
+ className="text-lg md:text-xl text-slate-600 dark:text-slate-300 font-medium max-w-prose"
  >
  {t('methodology.subtitle')}
  </motion.p>

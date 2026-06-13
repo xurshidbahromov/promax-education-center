@@ -52,7 +52,7 @@ const Hero = () => {
 
  {/* Slogan */}
  <motion.p
- className="text-lg sm:text-xl md:text-2xl font-medium text-slate-600 dark:text-slate-300 mb-8 max-w-xl leading-relaxed mx-auto lg:mx-0"
+ className="text-lg sm:text-xl md:text-2xl font-medium text-slate-600 dark:text-slate-300 mb-8 max-w-prose leading-relaxed mx-auto lg:mx-0"
  initial={{ opacity: 0, y: 20 }}
  animate={{ opacity: 1, y: 0 }}
  transition={{ duration: 0.5, delay: 0.2 }}
@@ -69,7 +69,7 @@ const Hero = () => {
  >
  <Link
  href="/register"
- className="group bg-brand-orange text-white px-8 py-4 rounded-full font-semibold text-lg hover:bg-brand-orange/90 transition-colors active:scale-[0.98] flex items-center justify-center gap-3 uppercase tracking-wider"
+ className="group bg-brand-orange text-slate-900 px-8 py-4 rounded-full font-semibold text-lg hover:bg-brand-orange/90 transition-colors active:scale-[0.98] flex items-center justify-center gap-3 uppercase tracking-wider"
  >
  {t('hero.cta.primary')}
  <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform duration-300 ease-out" />

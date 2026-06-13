@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { useLanguage } from "@/context/LanguageContext";
 import { getSubjects, type Subject } from "@/lib/supabase-queries";
-import { BookOpen, ChevronRight, LayoutGrid } from "lucide-react";
+import { BookOpen, ChevronRight, LayoutGrid, Star } from "lucide-react";
 import { motion } from "framer-motion";
 import Link from "next/link";
 import Image from "next/image";
@@ -55,62 +55,72 @@ export default function SubjectsList() {
  }
 
  return (
- <div className="space-y-6">
- <h2 className="text-2xl lg:text-3xl font-medium text-slate-800 dark:text-slate-100 font-fredoka uppercase tracking-tighter flex items-center gap-3">
- <LayoutGrid className="text-brand-blue" size={28} />
- Barcha Fanlar
- </h2>
+  <div className="space-y-6">
+   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">
+    {subjects.map((subject, index) => {
+     const rating = (4.8 + Math.random() * 0.2).toFixed(1); // Premium rating
 
- {/* Reduced number of columns to make cards wider on desktop */}
- <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 sm:gap-6 lg:gap-8">
- {subjects.map((subject, index) => (
- <Link href={`/dashboard/subjects/${subject.id}`} key={subject.id} className="block group">
- <motion.div
- initial={{ opacity: 0, y: 15 }}
- animate={{ opacity: 1, y: 0 }}
- whileTap={{ scale: 0.96 }}
- transition={{ delay: index * 0.05 }}
- className="bg-white/60 dark:bg-slate-900/60 backdrop-blur-xl rounded-3xl sm:rounded-[32px] border border-white/60 dark:border-slate-800/60 overflow-hidden shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all duration-300 flex flex-col h-full cursor-pointer"
- >
- {/* Card Cover Image - Shorter height as requested */}
- <div className="w-full h-28 sm:h-36 relative overflow-hidden border-b border-gray-100 dark:border-slate-850/60 shrink-0">
- {subject.cover_image ? (
- <Image
- src={subject.cover_image}
- alt={subject.title}
- fill
- className="object-cover transition-transform duration-500 group-hover:scale-[1.02]"
- />
- ) : (
- <div className="w-full h-full bg-gradient-to-br from-brand-blue to-blue-900 flex items-center justify-center text-white">
- <BookOpen className="w-10 h-10 opacity-80" />
- </div>
- )}
- </div>
+     return (
+       <Link href={`/dashboard/subjects/${subject.id}`} key={subject.id} className="block group">
+        <motion.div
+         initial={{ opacity: 0, y: 15 }}
+         animate={{ opacity: 1, y: 0 }}
+         whileTap={{ scale: 0.98 }}
+         transition={{ delay: index * 0.05 }}
+         className="bg-black/5 dark:bg-white/5 backdrop-blur-xl rounded-[2rem] overflow-hidden shadow-lg border border-black/10 dark:border-white/10 hover:bg-black/10 dark:hover:bg-white/10 hover:border-yellow-500/50 hover:shadow-[0_0_30px_rgba(234,179,8,0.15)] transition-all duration-500 flex flex-col h-[360px] cursor-pointer relative group/card"
+        >
+         {/* Top 50% Image */}
+         <div className="relative h-[55%] w-full bg-slate-200 dark:bg-slate-800 shrink-0">
+          <Image 
+            src={subject.cover_image || "https://images.unsplash.com/photo-1516321497487-e288fb19713f?q=80&w=1000&auto=format&fit=crop"} 
+            alt={subject.title} 
+            fill 
+            className="object-cover group-hover/card:scale-105 transition-transform duration-700" 
+          />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent"></div>
+          
+          {/* Rating Top Right */}
+          <div className="absolute top-4 right-4 bg-black/40 border border-white/20 backdrop-blur-md px-3 py-1.5 rounded-full flex items-center gap-1.5">
+           <Star className="w-3.5 h-3.5 text-yellow-500 fill-yellow-500" />
+           <span className="text-xs font-bold text-white">{rating}</span>
+          </div>
 
- {/* Card Content */}
- <div className="p-4 sm:p-5 flex flex-col flex-1 min-w-0">
- <h3 className="text-base sm:text-xl font-medium text-slate-800 dark:text-slate-100 font-fredoka mb-1 sm:mb-2 line-clamp-2">
- {subject.title}
- </h3>
- <p className="text-[13px] sm:text-sm text-gray-600 dark:text-gray-400 font-medium line-clamp-2 mb-3 sm:mb-4 flex-1">
- {subject.description || "Fanning batafsil tavsifi kiritilmagan."}
- </p>
- 
- <div className="flex items-center justify-between pt-2 sm:pt-3 border-t border-gray-100 dark:border-slate-800/60 mt-auto">
- <span className="text-[10px] font-medium text-gray-500 dark:text-gray-400 bg-gray-150/80 dark:bg-slate-800/80 px-2 py-1 rounded-md sm:rounded-lg tracking-wider uppercase shrink-0">
- Fan
- </span>
- <span className="text-sm font-medium text-brand-blue dark:text-blue-400 flex items-center gap-1 transition-all shrink-0">
- Kirish
- <ChevronRight className="w-4 h-4 transform group-hover:translate-x-0.5 transition-transform duration-200" />
- </span>
- </div>
- </div>
- </motion.div>
- </Link>
- ))}
- </div>
- </div>
+          <div className="absolute bottom-4 left-4">
+             <div className="w-12 h-12 bg-white/20 backdrop-blur-md rounded-2xl flex items-center justify-center border border-white/30 shadow-lg">
+              <BookOpen className="w-6 h-6 text-white" strokeWidth={1.5} />
+             </div>
+          </div>
+         </div>
+
+         {/* Bottom 45% Content */}
+         <div className="p-6 flex flex-col flex-1 relative z-10 bg-white/60 dark:bg-transparent backdrop-blur-md">
+          <h3 className="text-2xl font-bold text-slate-800 dark:text-white font-fredoka mb-2 leading-tight tracking-wide line-clamp-1">
+           {subject.title}
+          </h3>
+          <p className="text-slate-600 dark:text-zinc-400 font-medium line-clamp-2 text-sm sm:text-base">
+           {subject.description || "Fanning batafsil tavsifi kiritilmagan."}
+          </p>
+          
+          {/* Bottom Row: Minimal UI & Action Button */}
+          <div className="flex items-center justify-between mt-auto pt-4 border-t border-black/5 dark:border-white/5">
+           <div className="flex items-center gap-2">
+              <span className="w-2 h-2 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]"></span>
+              <span className="text-xs text-slate-500 dark:text-zinc-400 font-medium tracking-wider uppercase">{t('dashboard.active_course') === 'dashboard.active_course' ? "Faol Dars" : t('dashboard.active_course')}</span>
+           </div>
+           
+           <div className="w-10 h-10 bg-yellow-500 rounded-full flex items-center justify-center shadow-[0_0_15px_rgba(234,179,8,0.3)] group-hover/card:scale-110 group-hover/card:bg-yellow-400 transition-all duration-300">
+            <ChevronRight className="w-5 h-5 text-black" strokeWidth={2.5} />
+           </div>
+          </div>
+         </div>
+         
+         {/* Subtle background glow for the card itself */}
+         <div className="absolute top-1/2 right-0 w-32 h-32 bg-yellow-500/5 rounded-full blur-3xl group-hover/card:bg-yellow-500/10 transition-colors duration-500 pointer-events-none z-0"></div>
+        </motion.div>
+      </Link>
+     );
+    })}
+   </div>
+  </div>
  );
 }

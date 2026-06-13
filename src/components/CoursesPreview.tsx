@@ -56,7 +56,7 @@ const CoursesPreview = () => {
  };
 
  return (
- <section className="pt-24 pb-12 relative px-4 sm:px-6 lg:px-8">
+ <section className="py-16 md:py-24 relative px-4 sm:px-6 lg:px-8">
  <div className="max-w-7xl mx-auto w-full relative z-10">
 
  {/* Section Header */}
@@ -75,7 +75,7 @@ const CoursesPreview = () => {
  whileInView={{ opacity: 1, x: 0 }}
  viewport={{ once: true }}
  transition={{ delay: 0.1 }}
- className="text-lg md:text-xl text-gray-600 dark:text-gray-400 font-medium"
+ className="text-lg md:text-xl text-gray-600 dark:text-gray-400 font-medium max-w-prose"
  >
  {t('courses.subtitle')}
  </motion.p>
@@ -132,8 +132,7 @@ const CoursesPreview = () => {
  <h3 className="text-2xl sm:text-3xl font-semibold text-white mb-2 uppercase tracking-wide transform translate-y-4 group-hover:translate-y-0 transition-transform duration-300">
  {t(`courses.cat.${cat.id}`)}
  </h3>
-
- <p className="text-white/80 font-medium line-clamp-2 transform translate-y-8 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-300 delay-75">
+ <p className="text-white/90 font-medium line-clamp-2 transform translate-y-8 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-300 delay-75">
  {t(`courses.cat.${cat.id}.desc`)}
  </p>
  </div>
