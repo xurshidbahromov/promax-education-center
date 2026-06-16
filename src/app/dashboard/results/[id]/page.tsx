@@ -56,22 +56,22 @@ export default function ResultDetailPage() {
  <AlertCircle className="w-16 h-16 text-red-500 mx-auto mb-4" />
  <h2 className="text-2xl font-medium text-slate-800 dark:text-slate-100">Natija topilmadi</h2>
  <button
- onClick={() => router.back()}
+ onClick={() => router.push('/dashboard/tests')}
  className="text-brand-blue hover:underline mt-4 inline-block"
  >
- Ortga qaytish
+ Testlar ro'yxatiga qaytish
  </button>
  </div>
  );
  }
 
  return (
- <div className="max-w-4xl mx-auto space-y-8 pb-12">
+ <div className="w-full max-w-full mx-auto space-y-8 pb-12 relative z-10">
  {/* Header */}
  <div>
  <button
- onClick={() => router.back()}
- className="inline-flex items-center gap-2 text-gray-500 hover:text-brand-blue mb-4 transition-colors"
+ onClick={() => router.push('/dashboard/tests')}
+ className="inline-flex items-center gap-2 text-gray-500 hover:text-brand-blue mb-4 transition-colors font-medium bg-white/50 dark:bg-slate-800/50 px-4 py-2 rounded-xl backdrop-blur-sm border border-gray-200/50 dark:border-slate-700/50"
  >
  <ArrowLeft size={20} />
  {t('common.back') || "Ortga"}

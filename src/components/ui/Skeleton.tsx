@@ -211,3 +211,107 @@ export function ProfileSkeleton() {
     </div>
   );
 }
+/** Matches dashboard home page: greeting + subjects + quick access + stats + tests + announcements */
+export function DashboardHomeSkeleton() {
+  return (
+    <div className="flex flex-col gap-8 pb-24 animate-pulse">
+      {/* 1. Hero Greeting */}
+      <div className="flex flex-col gap-2">
+        <Skeleton className="h-4 w-40 bg-slate-200/80 dark:bg-slate-700/50 rounded-full" />
+        <Skeleton className="h-8 w-64 bg-slate-200/80 dark:bg-slate-700/50 rounded-xl" />
+      </div>
+
+      {/* 2. Subject Progress Cards (2x2 grid) */}
+      <div className="flex flex-col gap-4">
+        <div className="flex items-center justify-between">
+          <Skeleton className="h-4 w-24 bg-slate-200/80 dark:bg-slate-700/50 rounded-full" />
+          <Skeleton className="h-4 w-16 bg-slate-200/80 dark:bg-slate-700/50 rounded-full" />
+        </div>
+        <div className="grid grid-cols-2 gap-3 sm:gap-4">
+          {[1, 2, 3, 4].map(i => (
+            <div
+              key={i}
+              className="bg-white/60 dark:bg-slate-900/60 backdrop-blur-xl rounded-[1.5rem] p-4 border border-white/60 dark:border-slate-700/50 flex flex-col gap-3"
+            >
+              <div className="flex items-center justify-between">
+                <Skeleton className="w-11 h-11 rounded-2xl bg-slate-200/80 dark:bg-slate-700/50" />
+                <Skeleton className="h-4 w-10 bg-slate-200/80 dark:bg-slate-700/50 rounded-full" />
+              </div>
+              <Skeleton className="h-4 w-3/4 bg-slate-200/80 dark:bg-slate-700/50 rounded-md" />
+              <Skeleton className="h-1.5 w-full bg-slate-200/80 dark:bg-slate-700/50 rounded-full" />
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* 3. Quick Access Cards (2x2 grid) */}
+      <div className="flex flex-col gap-4">
+        <Skeleton className="h-4 w-20 bg-slate-200/80 dark:bg-slate-700/50 rounded-full" />
+        <div className="grid grid-cols-2 gap-3 sm:gap-4">
+          {[1, 2, 3, 4].map(i => (
+            <div
+              key={i}
+              className="bg-white/60 dark:bg-slate-900/60 backdrop-blur-xl rounded-[1.5rem] p-4 border border-white/60 dark:border-slate-700/50 flex items-center gap-4"
+            >
+              <Skeleton className="w-12 h-12 rounded-2xl bg-slate-200/80 dark:bg-slate-700/50 shrink-0" />
+              <div className="flex-1 space-y-2">
+                <Skeleton className="h-4 w-16 bg-slate-200/80 dark:bg-slate-700/50 rounded-md" />
+                <Skeleton className="h-3 w-24 bg-slate-200/80 dark:bg-slate-700/50 rounded-md" />
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* 4. Stats Row (3 cards) */}
+      <div className="grid grid-cols-3 gap-3 sm:gap-4">
+        {[1, 2, 3].map(i => (
+          <div
+            key={i}
+            className="bg-white/60 dark:bg-slate-900/60 backdrop-blur-xl rounded-[1.5rem] p-4 border border-white/60 dark:border-slate-700/50 flex flex-col items-center gap-2"
+          >
+            <Skeleton className="w-10 h-10 rounded-xl bg-slate-200/80 dark:bg-slate-700/50" />
+            <Skeleton className="h-6 w-10 bg-slate-200/80 dark:bg-slate-700/50 rounded-md" />
+            <Skeleton className="h-3 w-14 bg-slate-200/80 dark:bg-slate-700/50 rounded-full" />
+          </div>
+        ))}
+      </div>
+
+      {/* 5. Upcoming Tests (3 list items) */}
+      <div className="flex flex-col gap-4">
+        <div className="flex items-center justify-between">
+          <Skeleton className="h-4 w-20 bg-slate-200/80 dark:bg-slate-700/50 rounded-full" />
+          <Skeleton className="h-4 w-16 bg-slate-200/80 dark:bg-slate-700/50 rounded-full" />
+        </div>
+        <div className="flex flex-col gap-3">
+          {[1, 2, 3].map(i => (
+            <div
+              key={i}
+              className="bg-white/60 dark:bg-slate-900/60 backdrop-blur-xl rounded-[1.5rem] p-4 border border-white/60 dark:border-slate-700/50 flex items-center gap-4"
+            >
+              <Skeleton className="w-11 h-11 rounded-2xl bg-slate-200/80 dark:bg-slate-700/50 shrink-0" />
+              <div className="flex-1 space-y-2">
+                <Skeleton className="h-4 w-3/4 bg-slate-200/80 dark:bg-slate-700/50 rounded-md" />
+                <Skeleton className="h-3 w-1/2 bg-slate-200/80 dark:bg-slate-700/50 rounded-full" />
+              </div>
+              <Skeleton className="w-5 h-5 rounded bg-slate-200/80 dark:bg-slate-700/50 shrink-0" />
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* 6. Announcements horizontal cards */}
+      <div className="flex flex-col gap-4">
+        <Skeleton className="h-4 w-40 bg-slate-200/80 dark:bg-slate-700/50 rounded-full" />
+        <div className="flex gap-4 overflow-hidden w-full">
+          {[1, 2, 3].map(i => (
+            <div
+              key={i}
+              className="shrink-0 w-[290px] sm:w-[380px] h-[210px] sm:h-[250px] rounded-[2rem] bg-slate-200/80 dark:bg-slate-700/50"
+            />
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}

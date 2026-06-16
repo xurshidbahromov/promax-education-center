@@ -271,381 +271,378 @@ export default function TakeTestPage() {
  const currentQuestion = questions[currentQuestionIndex];
  const progress = ((currentQuestionIndex + 1) / questions.length) * 100;
 
- return (
- <div className="min-h-screen bg-gray-50 dark:bg-slate-950">
- {/* Header */}
- {/* Mobile-Responsive Header */}
- <div className="bg-white dark:bg-slate-900 border-b border-gray-200 dark:border-slate-800 sticky top-0 z-50">
- <div className="max-w-7xl mx-auto px-4 py-3">
- {/* Desktop Header */}
- <div className="hidden md:flex items-center justify-between">
- <div className="flex-1">
- <h1 className="text-lg font-medium text-slate-800 dark:text-slate-100 truncate">
- {test.title}
- </h1>
- <p className="text-sm text-gray-500 dark:text-gray-400">
- {t('tests.take.question_progress', { current: currentQuestionIndex + 1, total: questions.length })}
- </p>
- </div>
+  return (
+    <div className="relative min-h-screen text-slate-800 dark:text-white font-sans bg-transparent pb-24 md:pb-0">
+      <div className="fixed inset-0 z-0 overflow-hidden pointer-events-none">
+        <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] rounded-full bg-blue-300/20 dark:bg-blue-500/10 blur-[130px]" />
+        <div className="absolute bottom-[-15%] right-[-10%] w-[45%] h-[45%] rounded-full bg-violet-300/20 dark:bg-purple-500/10 blur-[130px]" />
+      </div>
 
- <div className="flex items-center gap-4">
- {autoSaving && (
- <div className="flex items-center gap-2 text-sm text-gray-500">
- <Save size={16} className="animate-pulse" />
- {t('tests.take.saving')}
- </div>
- )}
+      {/* Floating Header Island */}
+      <div className="fixed top-4 left-4 right-4 md:left-auto md:right-1/2 md:translate-x-1/2 md:w-full md:max-w-3xl z-50 pointer-events-none">
+        <div className="bg-white/90 dark:bg-slate-900/90 backdrop-blur-3xl border border-white/70 dark:border-slate-700/60 rounded-[32px] p-3 shadow-[0_8px_30px_rgb(0,86,210,0.15)] dark:shadow-[0_8px_30px_rgb(0,0,0,0.3)] pointer-events-auto flex flex-col gap-2 transition-all">
+          <div className="flex items-center justify-between px-2">
+            <div className="flex items-center gap-3 truncate flex-1 pr-4">
+              <span className="w-9 h-9 shrink-0 rounded-full bg-brand-blue text-white flex items-center justify-center text-sm font-bold shadow-sm">
+                {currentQuestionIndex + 1}/{questions.length}
+              </span>
+              <h1 className="text-[15px] font-bold text-slate-800 dark:text-slate-100 truncate hidden md:block">
+                {test.title}
+              </h1>
+            </div>
 
- {timeRemaining !== null && (
- <div className={`flex items-center gap-2 px-4 py-2 bg-gray-100 dark:bg-slate-800 rounded-xl font-mono text-lg font-medium ${getTimerColor()}`}>
- <Clock size={20} />
- {formatTime(timeRemaining)}
- </div>
- )}
+            <div className="flex items-center gap-2 md:gap-3 shrink-0">
+              {autoSaving && (
+                <div className="hidden md:flex items-center gap-2 text-[13px] font-medium text-slate-500">
+                  <Save size={16} className="animate-pulse text-brand-blue" />
+                  {t('tests.take.saving')}
+                </div>
+              )}
 
- <button
- onClick={handleSubmitClick}
- disabled={submitting}
- className="flex items-center gap-2 px-6 py-2 bg-green-600 hover:bg-green-700 disabled:bg-gray-400 text-white rounded-xl font-semibold transition-colors shadow-sm"
- >
- <Send size={18} />
- {submitting ? "Yuklanmoqda..." : "Yakunlash"}
- </button>
- </div>
- </div>
+              {timeRemaining !== null && (
+                <div className={`flex items-center gap-1.5 px-3 py-1.5 md:px-4 md:py-2 bg-slate-100/80 dark:bg-slate-800/80 rounded-full font-mono text-[14px] md:text-[15px] font-bold border border-slate-200/50 dark:border-slate-700/50 ${getTimerColor()}`}>
+                  <Clock size={16} />
+                  {formatTime(timeRemaining)}
+                </div>
+              )}
 
- {/* Mobile Header - Compact */}
- <div className="md:hidden">
- <div className="flex items-center justify-between mb-2">
- <h1 className="text-sm font-semibold text-slate-800 dark:text-slate-100 truncate flex-1">
- Savol {currentQuestionIndex + 1}/{questions.length}
- </h1>
- {timeRemaining !== null && (
- <div className={`flex items-center gap-1.5 px-3 py-1.5 bg-gray-100 dark:bg-slate-800 rounded-lg font-mono text-sm font-medium ${getTimerColor()}`}>
- <Clock size={14} />
- {formatTime(timeRemaining)}
- </div>
- )}
- </div>
- <div className="w-full bg-gray-200 dark:bg-slate-800 rounded-full h-1.5">
- <div
- className="bg-gradient-to-r from-brand-blue to-cyan-500 h-1.5 rounded-full transition-all duration-300"
- style={{ width: `${progress}%` }}
- />
- </div>
- </div>
+              <button
+                onClick={handleSubmitClick}
+                disabled={submitting}
+                className="hidden md:flex items-center gap-2 px-5 py-2 bg-emerald-500 hover:bg-emerald-600 disabled:bg-slate-300 dark:disabled:bg-slate-700 text-white rounded-full font-bold transition-all shadow-sm text-[14px]"
+              >
+                <Send size={16} />
+                {submitting ? "..." : "Yakunlash"}
+              </button>
+            </div>
+          </div>
+          
+          <div className="px-3 pb-1 w-full">
+            <div className="w-full bg-slate-200/50 dark:bg-slate-800/50 rounded-full h-1.5 overflow-hidden">
+              <div
+                className="bg-brand-blue h-1.5 rounded-full transition-all duration-300"
+                style={{ width: `${progress}%` }}
+              />
+            </div>
+          </div>
+        </div>
+      </div>
 
- {/* Desktop Progress Bar */}
- <div className="hidden md:block mt-3 w-full bg-gray-200 dark:bg-slate-800 rounded-full h-2">
- <div
- className="bg-gradient-to-r from-brand-blue to-cyan-500 h-2 rounded-full transition-all duration-300"
- style={{ width: `${progress}%` }}
- />
- </div>
- </div>
- </div>
+      {/* Main Content */}
+      <div className="relative z-10 w-full max-w-6xl mx-auto px-4 py-8 pt-32 pb-32 md:pb-8">
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+          
+          {/* ── QUESTION DISPLAY ── */}
+          <div className="lg:col-span-3 flex flex-col gap-6">
+            <div className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl rounded-[28px] border border-gray-200/50 dark:border-slate-800/50 p-6 sm:p-8 shadow-sm">
+              {/* Question Header */}
+              <div className="flex items-center gap-3 mb-6">
+                <span className="w-10 h-10 flex items-center justify-center bg-brand-blue text-white rounded-full font-bold text-lg shadow-sm shrink-0">
+                  {currentQuestionIndex + 1}
+                </span>
+                <span className="px-3 py-1.5 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 rounded-[10px] text-[13px] font-bold tracking-wide uppercase">
+                  {t('tests.take.points', { points: currentQuestion.points })}
+                </span>
+                <div className="flex-1" />
+                <button
+                  onClick={() => handleMarkForReview(currentQuestion.id)}
+                  className={`flex items-center justify-center w-10 h-10 rounded-full transition-all ${
+                    markedForReview.has(currentQuestion.id)
+                      ? "bg-amber-100 text-amber-600 dark:bg-amber-500/20 dark:text-amber-400"
+                      : "bg-slate-100 text-slate-400 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700"
+                  }`}
+                  title={markedForReview.has(currentQuestion.id) ? t('tests.take.marked') : t('tests.take.mark')}
+                >
+                  <Flag size={18} className={markedForReview.has(currentQuestion.id) ? "fill-amber-500/20" : ""} />
+                </button>
+              </div>
 
- {/* Main Content */}
- <div className="max-w-7xl mx-auto px-4 py-8 pb-24 md:pb-8">
- <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
- {/* Question Display */}
- <div className="lg:col-span-3">
- <div className="bg-white dark:bg-slate-900 rounded-2xl border border-gray-200 dark:border-slate-800 p-6">
- {/* Question Header */}
- <div className="flex items-center gap-3 mb-6">
- <span className="px-4 py-2 bg-brand-blue text-white rounded-xl font-medium text-lg">
- {currentQuestionIndex + 1}
- </span>
- <span className="px-3 py-1 bg-gray-100 dark:bg-slate-800 text-gray-700 dark:text-gray-300 rounded-lg text-sm font-medium">
- {t('tests.take.points', { points: currentQuestion.points })}
- </span>
- </div>
+              {/* Question Text */}
+              <div className="mb-8">
+                <p className="text-[18px] sm:text-[20px] font-medium text-slate-800 dark:text-slate-100 leading-relaxed">
+                  {currentQuestion.question_text}
+                </p>
+              </div>
 
- {/* Question Text */}
- <div className="mb-8">
- <p className="text-xl text-slate-800 dark:text-slate-100 leading-relaxed">
- {currentQuestion.question_text}
- </p>
- </div>
+              {/* Answer Options */}
+              <div className="flex flex-col gap-3">
+                {currentQuestion.question_type === "multiple_choice" && currentQuestion.options && (
+                  <>
+                    {Object.entries(currentQuestion.options).map(([key, value]) => {
+                      const isSelected = answers[currentQuestion.id] === key;
+                      return (
+                        <label
+                          key={key}
+                          className={`flex items-center gap-4 p-4 rounded-[20px] cursor-pointer transition-all border ${
+                            isSelected
+                              ? "border-brand-blue bg-brand-blue/5 shadow-sm"
+                              : "border-gray-200/60 dark:border-slate-700/60 hover:border-brand-blue/30 hover:bg-slate-50 dark:hover:bg-slate-800/50"
+                          }`}
+                        >
+                          <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center shrink-0 transition-colors ${
+                            isSelected ? "border-brand-blue bg-brand-blue" : "border-slate-300 dark:border-slate-600 bg-transparent"
+                          }`}>
+                            {isSelected && <div className="w-2 h-2 rounded-full bg-white" />}
+                          </div>
+                          <input
+                            type="radio"
+                            name={currentQuestion.id}
+                            value={key}
+                            checked={isSelected}
+                            onChange={(e) => handleAnswerChange(currentQuestion.id, e.target.value)}
+                            className="hidden"
+                          />
+                          <div className="flex-1 text-[15px]">
+                            <span className="font-bold text-slate-700 dark:text-slate-300 mr-2 uppercase">
+                              {key}.
+                            </span>
+                            <span className={`font-medium ${isSelected ? "text-slate-900 dark:text-white" : "text-slate-600 dark:text-slate-300"}`}>
+                              {value as React.ReactNode}
+                            </span>
+                          </div>
+                        </label>
+                      );
+                    })}
+                  </>
+                )}
 
- {/* Answer Options */}
- <div className="space-y-3">
- {currentQuestion.question_type === "multiple_choice" && currentQuestion.options && (
- <>
- {Object.entries(currentQuestion.options).map(([key, value]) => (
- <label
- key={key}
- className={`flex items-start gap-4 p-4 border-2 rounded-xl cursor-pointer transition-all ${answers[currentQuestion.id] === key
- ? "border-brand-blue bg-blue-50 dark:bg-blue-900/20"
- : "border-gray-200 dark:border-slate-800 hover:border-gray-300 dark:hover:border-slate-700"
- }`}
- >
- <input
- type="radio"
- name={currentQuestion.id}
- value={key}
- checked={answers[currentQuestion.id] === key}
- onChange={(e) => handleAnswerChange(currentQuestion.id, e.target.value)}
- className="mt-1 w-5 h-5 text-brand-blue"
- />
- <div className="flex-1">
- <span className="font-semibold text-gray-700 dark:text-gray-300 mr-2">
- {key}.
- </span>
- <span className="text-slate-800 dark:text-slate-100">
- {value}
- </span>
- </div>
- </label>
- ))}
- </>
- )}
+                {currentQuestion.question_type === "true_false" && (
+                  <>
+                    {["true", "false"].map((option) => {
+                      const isSelected = answers[currentQuestion.id] === option;
+                      return (
+                        <label
+                          key={option}
+                          className={`flex items-center gap-4 p-4 rounded-[20px] cursor-pointer transition-all border ${
+                            isSelected
+                              ? "border-brand-blue bg-brand-blue/5 shadow-sm"
+                              : "border-gray-200/60 dark:border-slate-700/60 hover:border-brand-blue/30 hover:bg-slate-50 dark:hover:bg-slate-800/50"
+                          }`}
+                        >
+                          <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center shrink-0 transition-colors ${
+                            isSelected ? "border-brand-blue bg-brand-blue" : "border-slate-300 dark:border-slate-600 bg-transparent"
+                          }`}>
+                            {isSelected && <div className="w-2 h-2 rounded-full bg-white" />}
+                          </div>
+                          <input
+                            type="radio"
+                            name={currentQuestion.id}
+                            value={option}
+                            checked={isSelected}
+                            onChange={(e) => handleAnswerChange(currentQuestion.id, e.target.value)}
+                            className="hidden"
+                          />
+                          <span className={`font-bold text-[15px] ${isSelected ? "text-slate-900 dark:text-white" : "text-slate-600 dark:text-slate-300"}`}>
+                            {option === "true" ? t('tests.take.true') : t('tests.take.false')}
+                          </span>
+                        </label>
+                      );
+                    })}
+                  </>
+                )}
 
- {currentQuestion.question_type === "true_false" && (
- <>
- {["true", "false"].map((option) => (
- <label
- key={option}
- className={`flex items-center gap-4 p-4 border-2 rounded-xl cursor-pointer transition-all ${answers[currentQuestion.id] === option
- ? "border-brand-blue bg-blue-50 dark:bg-blue-900/20"
- : "border-gray-200 dark:border-slate-800 hover:border-gray-300 dark:hover:border-slate-700"
- }`}
- >
- <input
- type="radio"
- name={currentQuestion.id}
- value={option}
- checked={answers[currentQuestion.id] === option}
- onChange={(e) => handleAnswerChange(currentQuestion.id, e.target.value)}
- className="w-5 h-5 text-brand-blue"
- />
- <span className="text-slate-800 dark:text-slate-100 font-medium">
- {option === "true" ? t('tests.take.true') : t('tests.take.false')}
- </span>
- </label>
- ))}
- </>
- )}
+                {currentQuestion.question_type === "short_answer" && (
+                  <textarea
+                    value={answers[currentQuestion.id] || ""}
+                    onChange={(e) => handleAnswerChange(currentQuestion.id, e.target.value)}
+                    placeholder={t('tests.take.placeholder')}
+                    rows={4}
+                    className="w-full px-5 py-4 border border-gray-200/60 dark:border-slate-700/60 rounded-[20px] bg-white/50 dark:bg-slate-800/50 text-[15px] font-medium text-slate-800 dark:text-slate-100 focus:border-brand-blue focus:ring-4 focus:ring-brand-blue/10 outline-none transition-all placeholder:text-slate-400"
+                  />
+                )}
+              </div>
+            </div>
 
- {currentQuestion.question_type === "short_answer" && (
- <textarea
- value={answers[currentQuestion.id] || ""}
- onChange={(e) => handleAnswerChange(currentQuestion.id, e.target.value)}
- placeholder={t('tests.take.placeholder')}
- rows={4}
- className="w-full px-4 py-3 border-2 border-gray-200 dark:border-slate-800 rounded-xl bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-100 focus:border-brand-blue focus:ring-2 focus:ring-brand-blue/20"
- />
- )}
- </div>
+            {/* Navigation Buttons - Desktop Only */}
+            <div className="hidden md:flex items-center justify-between mt-2">
+              <button
+                onClick={() => setCurrentQuestionIndex(prev => Math.max(0, prev - 1))}
+                disabled={currentQuestionIndex === 0}
+                className="px-6 py-3 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border border-gray-200/50 dark:border-slate-800/50 text-slate-600 dark:text-slate-300 rounded-[20px] font-bold flex items-center gap-2 hover:bg-slate-100 dark:hover:bg-slate-800 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-sm"
+              >
+                <ArrowLeft size={18} />
+                {t('tests.take.prev')}
+              </button>
 
- {/* Mark for Review */}
- <div className="mt-6">
- <button
- onClick={() => handleMarkForReview(currentQuestion.id)}
- className={`flex items-center gap-2 px-4 py-2 rounded-xl font-medium transition-all ${markedForReview.has(currentQuestion.id)
- ? "bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400"
- : "bg-gray-100 text-gray-600 dark:bg-slate-800 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-slate-700"
- }`}
- >
- <Flag size={18} />
- {markedForReview.has(currentQuestion.id) ? t('tests.take.marked') : t('tests.take.mark')}
- </button>
- </div>
- </div>
+              {currentQuestionIndex === questions.length - 1 ? (
+                <button
+                  onClick={handleSubmitClick}
+                  disabled={submitting}
+                  className="px-8 py-3 bg-emerald-500 text-white rounded-[20px] font-bold flex items-center gap-2 hover:shadow-lg hover:-translate-y-0.5 transition-all disabled:opacity-50"
+                >
+                  <Send size={18} />
+                  {submitting ? t('tests.take.submitting') : t('tests.take.finish')}
+                </button>
+              ) : (
+                <button
+                  onClick={() => setCurrentQuestionIndex(prev => Math.min(questions.length - 1, prev + 1))}
+                  className="px-8 py-3 bg-brand-blue text-white rounded-[20px] font-bold flex items-center gap-2 hover:shadow-lg hover:-translate-y-0.5 transition-all"
+                >
+                  {t('tests.take.next')}
+                  <ArrowRight size={18} />
+                </button>
+              )}
+            </div>
+          </div>
 
- {/* Navigation Buttons - Desktop Only */}
- <div className="hidden md:flex mt-6 items-center justify-between">
- <button
- onClick={() => setCurrentQuestionIndex(prev => Math.max(0, prev - 1))}
- disabled={currentQuestionIndex === 0}
- className="px-6 py-3 bg-gray-200 dark:bg-slate-800 text-gray-700 dark:text-gray-300 rounded-xl font-semibold flex items-center gap-2 hover:bg-gray-300 dark:hover:bg-slate-700 disabled:opacity-50 disabled:cursor-not-allowed"
- >
- <ArrowLeft size={20} />
- {t('tests.take.prev')}
- </button>
+          {/* ── QUESTION NAVIGATOR ── */}
+          <div className="lg:col-span-1">
+            {/* Desktop Sidebar */}
+            <div className="hidden lg:flex flex-col bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl rounded-[28px] border border-gray-200/50 dark:border-slate-800/50 p-6 sticky top-28 shadow-sm">
+              <h3 className="font-bold text-slate-800 dark:text-slate-100 mb-4">{t('tests.take.questions_list')}</h3>
+              <div className="grid grid-cols-4 gap-2">
+                {questions.map((q, index) => {
+                  const isAnswered = !!answers[q.id];
+                  const isMarked = markedForReview.has(q.id);
+                  const isCurrent = index === currentQuestionIndex;
 
- {currentQuestionIndex === questions.length - 1 ? (
- <button
- onClick={handleSubmitClick}
- disabled={submitting}
- className="px-8 py-3 bg-gradient-to-r from-green-500 to-emerald-500 text-white rounded-xl font-medium flex items-center gap-2 hover:shadow-xl transition-all disabled:opacity-50"
- >
- <Send size={20} />
- {submitting ? t('tests.take.submitting') : t('tests.take.finish')}
- </button>
- ) : (
- <button
- onClick={() => setCurrentQuestionIndex(prev => Math.min(questions.length - 1, prev + 1))}
- className="px-6 py-3 bg-brand-blue text-white rounded-xl font-semibold flex items-center gap-2 hover:shadow-lg"
- >
- {t('tests.take.next')}
- <ArrowRight size={20} />
- </button>
- )}
- </div>
- </div>
+                  let btnClass = "bg-slate-100 text-slate-500 dark:bg-slate-800 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700 border-transparent";
+                  if (isCurrent) {
+                    btnClass = "bg-brand-blue text-white shadow-md border-brand-blue";
+                  } else if (isMarked) {
+                    btnClass = "bg-amber-100 text-amber-600 dark:bg-amber-500/20 dark:text-amber-400 border-transparent";
+                  } else if (isAnswered) {
+                    btnClass = "bg-emerald-100 text-emerald-600 dark:bg-emerald-500/20 dark:text-emerald-400 border-transparent";
+                  }
 
- {/* Mobile Horizontal Question Navigator */}
- <div className="lg:hidden mt-4 bg-white dark:bg-slate-900 rounded-xl border border-gray-200 dark:border-slate-800 p-3">
- <div className="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-thin">
- {questions.map((q, index) => {
- const isAnswered = !!answers[q.id];
- const isMarked = markedForReview.has(q.id);
- const isCurrent = index === currentQuestionIndex;
+                  return (
+                    <button
+                      key={q.id}
+                      onClick={() => setCurrentQuestionIndex(index)}
+                      className={`aspect-square rounded-xl font-bold text-[14px] flex items-center justify-center transition-all border ${btnClass}`}
+                    >
+                      {index + 1}
+                    </button>
+                  );
+                })}
+              </div>
 
- return (
- <button
- key={q.id}
- onClick={() => setCurrentQuestionIndex(index)}
- className={`shrink-0 w-12 h-12 rounded-lg font-semibold text-sm transition-all ${isCurrent
- ? "bg-brand-blue text-white ring-2 ring-brand-blue"
- : isMarked
- ? "bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400"
- : isAnswered
- ? "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400"
- : "bg-gray-100 text-gray-600 dark:bg-slate-800 dark:text-gray-400"
- }`}
- >
- {index + 1}
- </button>
- );
- })}
- </div>
- </div>
+              {/* Legend */}
+              <div className="mt-6 pt-5 border-t border-gray-200/50 dark:border-slate-800/50 flex flex-col gap-3 text-[12px] font-semibold text-slate-500 dark:text-slate-400">
+                <div className="flex items-center gap-2">
+                  <div className="w-3 h-3 bg-emerald-400 rounded-full shadow-[0_0_8px_rgba(52,211,153,0.5)]"></div>
+                  <span>{t('tests.take.status.answered')}</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <div className="w-3 h-3 bg-amber-400 rounded-full shadow-[0_0_8px_rgba(251,191,36,0.5)]"></div>
+                  <span>{t('tests.take.status.marked')}</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <div className="w-3 h-3 bg-slate-300 dark:bg-slate-600 rounded-full"></div>
+                  <span>{t('tests.take.status.no_answer')}</span>
+                </div>
+              </div>
+            </div>
 
+            {/* Mobile Horizontal Question Navigator */}
+            <div className="lg:hidden mt-2 bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl rounded-[24px] border border-gray-200/50 dark:border-slate-800/50 p-4 shadow-sm">
+              <div className="flex items-center gap-2 overflow-x-auto no-scrollbar pb-1">
+                {questions.map((q, index) => {
+                  const isAnswered = !!answers[q.id];
+                  const isMarked = markedForReview.has(q.id);
+                  const isCurrent = index === currentQuestionIndex;
 
- {/* Question Navigator - Responsive */}
- <div className="lg:col-span-1">
- {/* Desktop Sidebar */}
- <div className="hidden lg:block bg-white dark:bg-slate-900 rounded-2xl border border-gray-200 dark:border-slate-800 p-4 sticky top-24">
- <h3 className="font-medium text-slate-800 dark:text-slate-100 mb-4">{t('tests.take.questions_list')}</h3>
- <div className="grid grid-cols-4 gap-2">
- {questions.map((q, index) => {
- const isAnswered = !!answers[q.id];
- const isMarked = markedForReview.has(q.id);
- const isCurrent = index === currentQuestionIndex;
+                  let btnClass = "bg-slate-100 text-slate-500 dark:bg-slate-800 dark:text-slate-400";
+                  if (isCurrent) btnClass = "bg-brand-blue text-white shadow-md";
+                  else if (isMarked) btnClass = "bg-amber-100 text-amber-600 dark:bg-amber-500/20 dark:text-amber-400";
+                  else if (isAnswered) btnClass = "bg-emerald-100 text-emerald-600 dark:bg-emerald-500/20 dark:text-emerald-400";
 
- return (
- <button
- key={q.id}
- onClick={() => setCurrentQuestionIndex(index)}
- className={`aspect-square rounded-lg font-semibold text-sm transition-all ${isCurrent
- ? "bg-brand-blue text-white ring-2 ring-brand-blue ring-offset-2 dark:ring-offset-slate-900"
- : isMarked
- ? "bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400"
- : isAnswered
- ? "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400"
- : "bg-gray-100 text-gray-600 dark:bg-slate-800 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-slate-700"
- }`}
- >
- {index + 1}
- </button>
- );
- })}
- </div>
+                  return (
+                    <button
+                      key={q.id}
+                      onClick={() => setCurrentQuestionIndex(index)}
+                      className={`shrink-0 w-11 h-11 rounded-xl font-bold text-[14px] flex items-center justify-center transition-all ${btnClass}`}
+                    >
+                      {index + 1}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
 
- {/* Legend */}
- <div className="mt-4 pt-4 border-t border-gray-200 dark:border-slate-800 space-y-2 text-xs">
- <div className="flex items-center gap-2">
- <div className="w-4 h-4 bg-green-100 dark:bg-green-900/30 rounded"></div>
- <span className="text-gray-600 dark:text-gray-400">{t('tests.take.status.answered')}</span>
- </div>
- <div className="flex items-center gap-2">
- <div className="w-4 h-4 bg-yellow-100 dark:bg-yellow-900/30 rounded"></div>
- <span className="text-gray-600 dark:text-gray-400">{t('tests.take.status.marked')}</span>
- </div>
- <div className="flex items-center gap-2">
- <div className="w-4 h-4 bg-gray-100 dark:bg-slate-800 rounded"></div>
- <span className="text-gray-600 dark:text-gray-400">{t('tests.take.status.no_answer')}</span>
- </div>
- </div>
- </div>
- </div>
- </div>
- </div>
+      {/* ── CONFIRMATION MODAL ── */}
+      {showConfirmModal && (
+        <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="bg-white/90 dark:bg-slate-900/90 backdrop-blur-xl rounded-[32px] p-8 max-w-md w-full border border-gray-200/50 dark:border-slate-800/50 shadow-2xl">
+            <div className="flex items-center gap-4 mb-6">
+              <div className="w-14 h-14 bg-amber-100 dark:bg-amber-500/20 rounded-full flex items-center justify-center shrink-0">
+                <AlertCircle className="text-amber-500" size={28} />
+              </div>
+              <h3 className="text-xl font-bold text-slate-800 dark:text-slate-100 font-fredoka">Testni yakunlash</h3>
+            </div>
 
- {/* Confirmation Modal */}
- {showConfirmModal && (
- <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
- <div className="bg-white dark:bg-slate-900 rounded-2xl p-6 max-w-md w-full border border-gray-200 dark:border-slate-800 shadow-xl">
- <div className="flex items-center gap-3 mb-4">
- <div className="w-12 h-12 bg-yellow-100 dark:bg-yellow-900/30 rounded-full flex items-center justify-center">
- <AlertCircle className="text-yellow-600 dark:text-yellow-400" size={24} />
- </div>
- <h3 className="text-xl font-medium text-slate-800 dark:text-slate-100">Testni yakunlash</h3>
- </div>
+            <div className="flex flex-col gap-4 mb-8">
+              <p className="text-[15px] text-slate-600 dark:text-slate-300 font-medium">
+                Siz <span className="font-bold text-brand-blue px-2 py-1 bg-brand-blue/10 rounded-md mx-1">{Object.keys(answers).length}/{questions.length}</span> ta savolga javob berdingiz.
+              </p>
+              {Object.keys(answers).length < questions.length && (
+                <div className="flex items-start gap-3 p-4 bg-amber-50 dark:bg-amber-500/10 rounded-[20px] border border-amber-200/50 dark:border-amber-500/20">
+                  <AlertCircle className="text-amber-500 shrink-0 mt-0.5" size={18} />
+                  <p className="text-[13px] text-amber-700 dark:text-amber-400 font-medium leading-relaxed">
+                    <span className="font-bold">{questions.length - Object.keys(answers).length}</span> ta savol javobsiz qoldi! Agar ishonchingiz komil bo'lsa, yakunlashingiz mumkin.
+                  </p>
+                </div>
+              )}
+              <p className="text-[13px] text-slate-500 dark:text-slate-400 mt-2 font-medium">
+                Testni yakunlagandan keyin qayta tahrirlash imkoniyati bo'lmaydi.
+              </p>
+            </div>
 
- <div className="space-y-3 mb-6">
- <p className="text-gray-600 dark:text-gray-300">
- Siz <span className="font-medium text-brand-blue">{Object.keys(answers).length}/{questions.length}</span> ta savolga javob berdingiz.
- </p>
- {Object.keys(answers).length < questions.length && (
- <div className="flex items-start gap-2 p-3 bg-yellow-50 dark:bg-yellow-900/20 rounded-lg border border-yellow-200 dark:border-yellow-800">
- <AlertCircle className="text-yellow-600 dark:text-yellow-400 flex-shrink-0 mt-0.5" size={18} />
- <p className="text-sm text-yellow-800 dark:text-yellow-300">
- <span className="font-semibold">{questions.length - Object.keys(answers).length}</span> ta savol javobsiz qoldi!
- </p>
- </div>
- )}
- <p className="text-sm text-gray-500 dark:text-gray-400">
- Testni yakunlashdan keyin qayta tahrirlash imkoniyati bo'lmaydi.
- </p>
- </div>
+            <div className="flex gap-3">
+              <button
+                onClick={() => setShowConfirmModal(false)}
+                disabled={submitting}
+                className="flex-1 py-3.5 px-4 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 rounded-[20px] font-bold transition-all"
+              >
+                Bekor qilish
+              </button>
+              <button
+                onClick={handleConfirmSubmit}
+                disabled={submitting}
+                className="flex-1 py-3.5 px-4 bg-emerald-500 hover:bg-emerald-600 disabled:bg-slate-300 dark:disabled:bg-slate-700 text-white rounded-[20px] font-bold transition-all flex items-center justify-center gap-2 shadow-sm"
+              >
+                <CheckCircle size={18} />
+                {submitting ? "Yuklanmoqda..." : "Yakunlash"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
- <div className="flex gap-3">
- <button
- onClick={() => setShowConfirmModal(false)}
- disabled={submitting}
- className="flex-1 py-3 px-4 bg-gray-100 dark:bg-slate-800 hover:bg-gray-200 dark:hover:bg-slate-700 text-gray-700 dark:text-gray-300 rounded-xl font-semibold transition-colors"
- >
- Bekor qilish
- </button>
- <button
- onClick={handleConfirmSubmit}
- disabled={submitting}
- className="flex-1 py-3 px-4 bg-green-600 hover:bg-green-700 disabled:bg-gray-400 text-white rounded-xl font-semibold transition-colors flex items-center justify-center gap-2"
- >
- <CheckCircle size={18} />
- {submitting ? "Yuklanmoqda..." : "Yakunlash"}
- </button>
- </div>
- </div>
- </div>
- )}
+      {/* ── MOBILE FLOATING BOTTOM NAVIGATION ── */}
+      <div className="md:hidden fixed bottom-6 left-4 right-4 z-50 pointer-events-none">
+        <div className="bg-white/90 dark:bg-slate-900/90 backdrop-blur-3xl border border-white/70 dark:border-slate-700/60 rounded-full p-2 shadow-[0_8px_30px_rgb(0,86,210,0.15)] dark:shadow-[0_8px_30px_rgb(0,0,0,0.3)] pointer-events-auto flex items-center justify-between gap-2 max-w-sm mx-auto safe-area-pb">
+          <button
+            onClick={() => setCurrentQuestionIndex(prev => Math.max(0, prev - 1))}
+            disabled={currentQuestionIndex === 0}
+            className="w-12 h-12 flex items-center justify-center shrink-0 bg-slate-100/80 dark:bg-slate-800/80 text-slate-600 dark:text-slate-300 rounded-full font-bold hover:bg-slate-200 dark:hover:bg-slate-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+          >
+            <ArrowLeft size={20} />
+          </button>
 
- {/* Mobile Sticky Bottom Navigation */}
- <div className="md:hidden fixed bottom-0 left-0 right-0 bg-white dark:bg-slate-900 border-t border-gray-200 dark:border-slate-800 p-4 z-40">
- <div className="flex items-center justify-between gap-3">
- <button
- onClick={() => setCurrentQuestionIndex(prev => Math.max(0, prev - 1))}
- disabled={currentQuestionIndex === 0}
- className="px-4 py-3 bg-gray-100 dark:bg-slate-800 text-gray-700 dark:text-gray-300 rounded-xl font-semibold flex items-center gap-2 hover:bg-gray-200 dark:hover:bg-slate-700 disabled:opacity-50 disabled:cursor-not-allowed min-w-[100px]"
- >
- <ArrowLeft size={18} />
- Orqaga
- </button>
-
- {currentQuestionIndex === questions.length - 1 ? (
- <button
- onClick={handleSubmitClick}
- disabled={submitting}
- className="flex-1 py-3 px-4 bg-gradient-to-r from-green-500 to-emerald-500 text-white rounded-xl font-medium flex items-center justify-center gap-2 hover:shadow-xl transition-all disabled:opacity-50"
- >
- <Send size={18} />
- {submitting ? "Yuklanmoqda..." : "Yakunlash"}
- </button>
- ) : (
- <button
- onClick={() => setCurrentQuestionIndex(prev => Math.min(questions.length - 1, prev + 1))}
- className="px-4 py-3 bg-brand-blue text-white rounded-xl font-semibold flex items-center gap-2 hover:shadow-lg min-w-[100px]"
- >
- Keyingi
- <ArrowRight size={18} />
- </button>
- )}
- </div>
- </div>
- </div>
-
- );
+          {currentQuestionIndex === questions.length - 1 ? (
+            <button
+              onClick={handleSubmitClick}
+              disabled={submitting}
+              className="flex-1 h-12 px-6 bg-emerald-500 text-white rounded-full font-bold flex items-center justify-center gap-2 hover:shadow-md transition-all disabled:opacity-50 shadow-sm"
+            >
+              <Send size={18} />
+              <span className="text-[15px]">{submitting ? "..." : "Yakunlash"}</span>
+            </button>
+          ) : (
+            <button
+              onClick={() => setCurrentQuestionIndex(prev => Math.min(questions.length - 1, prev + 1))}
+              className="flex-1 h-12 px-6 bg-brand-blue text-white rounded-full font-bold flex items-center justify-center gap-2 hover:shadow-md transition-all shadow-sm"
+            >
+              <span className="text-[15px]">Keyingi</span>
+              <ArrowRight size={18} />
+            </button>
+          )}
+        </div>
+      </div>
+    </div>
+  );
 }

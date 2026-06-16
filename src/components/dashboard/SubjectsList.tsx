@@ -61,61 +61,52 @@ export default function SubjectsList() {
      const rating = (4.8 + Math.random() * 0.2).toFixed(1); // Premium rating
 
      return (
-       <Link href={`/dashboard/subjects/${subject.id}`} key={subject.id} className="block group">
+       <Link href={`/dashboard/subjects/${subject.id}`} key={subject.id} className="block w-full group">
         <motion.div
          initial={{ opacity: 0, y: 15 }}
          animate={{ opacity: 1, y: 0 }}
          whileTap={{ scale: 0.98 }}
          transition={{ delay: index * 0.05 }}
-         className="bg-black/5 dark:bg-white/5 backdrop-blur-xl rounded-[2rem] overflow-hidden shadow-lg border border-black/10 dark:border-white/10 hover:bg-black/10 dark:hover:bg-white/10 hover:border-yellow-500/50 hover:shadow-[0_0_30px_rgba(234,179,8,0.15)] transition-all duration-500 flex flex-col h-[360px] cursor-pointer relative group/card"
+         className="bg-white dark:bg-slate-900 rounded-[1.5rem] overflow-hidden shadow-sm hover:shadow-xl border border-slate-200 dark:border-slate-800 transition-all duration-300 flex flex-col h-[280px] cursor-pointer relative group/card w-full"
         >
-         {/* Top 50% Image */}
-         <div className="relative h-[55%] w-full bg-slate-200 dark:bg-slate-800 shrink-0">
+         {/* Top 40% Image */}
+         <div className="relative h-[40%] w-full bg-slate-100 dark:bg-slate-800 shrink-0">
           <Image 
             src={subject.cover_image || "https://images.unsplash.com/photo-1516321497487-e288fb19713f?q=80&w=1000&auto=format&fit=crop"} 
             alt={subject.title} 
             fill 
-            className="object-cover group-hover/card:scale-105 transition-transform duration-700" 
+            className="object-cover group-hover/card:scale-105 transition-transform duration-500" 
           />
-          <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent"></div>
+          <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
           
           {/* Rating Top Right */}
-          <div className="absolute top-4 right-4 bg-black/40 border border-white/20 backdrop-blur-md px-3 py-1.5 rounded-full flex items-center gap-1.5">
-           <Star className="w-3.5 h-3.5 text-yellow-500 fill-yellow-500" />
-           <span className="text-xs font-bold text-white">{rating}</span>
-          </div>
-
-          <div className="absolute bottom-4 left-4">
-             <div className="w-12 h-12 bg-white/20 backdrop-blur-md rounded-2xl flex items-center justify-center border border-white/30 shadow-lg">
-              <BookOpen className="w-6 h-6 text-white" strokeWidth={1.5} />
-             </div>
+          <div className="absolute top-3 right-3 bg-white/90 dark:bg-slate-800/90 backdrop-blur-sm px-2.5 py-1 rounded-full flex items-center gap-1.5 shadow-sm">
+           <Star className="w-3.5 h-3.5 text-amber-500 fill-amber-500" />
+           <span className="text-xs font-bold text-slate-800 dark:text-slate-100">{rating}</span>
           </div>
          </div>
 
-         {/* Bottom 45% Content */}
-         <div className="p-6 flex flex-col flex-1 relative z-10 bg-white/60 dark:bg-transparent backdrop-blur-md">
-          <h3 className="text-2xl font-bold text-slate-800 dark:text-white font-fredoka mb-2 leading-tight tracking-wide line-clamp-1">
+         {/* Bottom 60% Content */}
+         <div className="p-5 flex flex-col flex-1 relative z-10 bg-white dark:bg-slate-900">
+          <h3 className="text-xl font-bold text-slate-800 dark:text-slate-100 mb-1.5 leading-tight tracking-wide line-clamp-1">
            {subject.title}
           </h3>
-          <p className="text-slate-600 dark:text-zinc-400 font-medium line-clamp-2 text-sm sm:text-base">
+          <p className="text-slate-500 dark:text-slate-400 font-medium line-clamp-2 text-sm">
            {subject.description || "Fanning batafsil tavsifi kiritilmagan."}
           </p>
           
           {/* Bottom Row: Minimal UI & Action Button */}
-          <div className="flex items-center justify-between mt-auto pt-4 border-t border-black/5 dark:border-white/5">
+          <div className="flex items-center justify-between mt-auto pt-4 border-t border-slate-100 dark:border-slate-800">
            <div className="flex items-center gap-2">
-              <span className="w-2 h-2 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]"></span>
-              <span className="text-xs text-slate-500 dark:text-zinc-400 font-medium tracking-wider uppercase">{t('dashboard.active_course') === 'dashboard.active_course' ? "Faol Dars" : t('dashboard.active_course')}</span>
+              <BookOpen className="w-4 h-4 text-slate-400 dark:text-slate-500" />
+              <span className="text-xs text-slate-500 dark:text-slate-400 font-medium tracking-wide">{t('dashboard.active_course') === 'dashboard.active_course' ? "Faol Dars" : t('dashboard.active_course')}</span>
            </div>
            
-           <div className="w-10 h-10 bg-yellow-500 rounded-full flex items-center justify-center shadow-[0_0_15px_rgba(234,179,8,0.3)] group-hover/card:scale-110 group-hover/card:bg-yellow-400 transition-all duration-300">
-            <ChevronRight className="w-5 h-5 text-black" strokeWidth={2.5} />
+           <div className="w-9 h-9 bg-slate-50 dark:bg-slate-800 rounded-full flex items-center justify-center border border-slate-200 dark:border-slate-700 group-hover/card:bg-brand-blue group-hover/card:border-brand-blue group-hover/card:text-white text-slate-500 dark:text-slate-400 transition-colors duration-300">
+            <ChevronRight className="w-4 h-4" strokeWidth={2.5} />
            </div>
           </div>
          </div>
-         
-         {/* Subtle background glow for the card itself */}
-         <div className="absolute top-1/2 right-0 w-32 h-32 bg-yellow-500/5 rounded-full blur-3xl group-hover/card:bg-yellow-500/10 transition-colors duration-500 pointer-events-none z-0"></div>
         </motion.div>
       </Link>
      );

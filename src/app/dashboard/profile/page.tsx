@@ -172,7 +172,7 @@ export default function ProfilePage() {
 
  // Components
  const ViewHeader = ({ title }: { title: string }) => (
- <div className="flex items-center gap-4 mb-6 px-2">
+ <div className="flex items-center gap-4 mb-6">
  <button onClick={() => setActiveView('main')} className="p-2 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">
  <ArrowLeft size={24} className="text-slate-600 dark:text-slate-300" />
  </button>
@@ -221,7 +221,7 @@ export default function ProfilePage() {
  </div>
 
  {/* Menu List */}
- <div className="w-full px-2 sm:px-0 space-y-3 mt-2">
+ <div className="w-full space-y-3 mt-2">
  <MenuButton 
  icon={TrendingUp} title={t('profile.menu.statistics') === 'profile.menu.statistics' ? "Statistika" : t('profile.menu.statistics')} description={t('profile.menu.statistics_desc') === 'profile.menu.statistics_desc' ? "O'zlashtirish statistikasini ko'rish" : t('profile.menu.statistics_desc')} 
  onClick={() => setActiveView('statistics')} 
@@ -272,7 +272,7 @@ export default function ProfilePage() {
  );
 
   const renderStatistics = () => (
-    <div className="w-full px-2 sm:px-0 pt-4 pb-10 space-y-6">
+    <div className="w-full pt-4 pb-10 space-y-6">
       <ViewHeader title={t('profile.menu.statistics') === 'profile.menu.statistics' ? "Statistika" : t('profile.menu.statistics')} />
       <div className="space-y-6">
         <StatsGrid userId={user?.id} />
@@ -282,7 +282,7 @@ export default function ProfilePage() {
   );
 
  const renderProfileEdit = () => (
- <div className="w-full px-2 sm:px-0 pt-4">
+ <div className="w-full pt-4">
  <ViewHeader title={t('profile.view.settings.title') || "Personal Information"} />
  <form onSubmit={handleProfileSubmit} className="space-y-6">
  <div className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl rounded-[28px] p-6 shadow-sm border border-gray-200/50 dark:border-slate-800/50 space-y-5">
@@ -329,7 +329,7 @@ export default function ProfilePage() {
  );
 
  const renderSecurity = () => (
- <div className="w-full px-2 sm:px-0 pt-4">
+ <div className="w-full pt-4">
  <ViewHeader title={t('profile.view.security.title') || "Security"} />
  <form onSubmit={handlePasswordSubmit} className="space-y-6">
  <div className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl rounded-[28px] p-6 shadow-sm border border-gray-200/50 dark:border-slate-800/50 space-y-5">
@@ -365,7 +365,7 @@ export default function ProfilePage() {
  );
 
  const renderThemes = () => (
- <div className="w-full px-2 sm:px-0 pt-4">
+ <div className="w-full pt-4">
  <ViewHeader title={t('profile.view.themes.title') || "Themes & Language"} />
  
  <div className="space-y-6">
@@ -422,7 +422,7 @@ export default function ProfilePage() {
  );
 
  const renderNotifications = () => (
- <div className="w-full px-2 sm:px-0 pt-4">
+ <div className="w-full pt-4">
  <ViewHeader title={t('profile.view.notifications.title') || "Notifications"} />
  
  <div className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl rounded-[28px] p-6 shadow-sm border border-gray-200/50 dark:border-slate-800/50 space-y-6">
@@ -486,7 +486,7 @@ export default function ProfilePage() {
  ];
 
  return (
- <div className="w-full px-2 sm:px-0 pt-4">
+ <div className="w-full pt-4">
  <ViewHeader title={title} />
  <div className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl rounded-[28px] p-6 shadow-sm border border-gray-200/50 dark:border-slate-800/50 space-y-4">
  {faqs.map((faq, idx) => (
@@ -510,7 +510,7 @@ export default function ProfilePage() {
  const subtitle = t('profile.view.contact.subtitle') || "Have questions or technical issues? We are here to help!";
  
  return (
- <div className="w-full px-2 sm:px-0 pt-4">
+ <div className="w-full pt-4">
  <ViewHeader title={title} />
  <div className="mt-6">
  <div className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl rounded-[28px] p-6 shadow-sm border border-gray-200/50 dark:border-slate-800/50 text-center space-y-2">
@@ -629,7 +629,7 @@ export default function ProfilePage() {
   );
 
   return (
-    <div className="max-w-md mx-auto pt-8 sm:pt-12 pb-10 overflow-x-hidden relative min-h-[400px]">
+    <div className="w-full max-w-full mx-auto pt-8 sm:pt-12 pb-10 overflow-x-hidden relative min-h-[400px]">
       <AnimatePresence initial={false} mode="popLayout" custom={direction}>
         {activeView === 'main' && renderAnimatedView(renderMain(), 'main')}
         {activeView === 'statistics' && renderAnimatedView(renderStatistics(), 'statistics')}

@@ -66,218 +66,197 @@ export default function TestDetailsPage() {
  );
  }
 
- const getSubjectGradient = (subject: string) => {
- const gradients: Record<string, string> = {
- math: "from-blue-500 to-cyan-500",
- english: "from-green-500 to-emerald-500",
- physics: "from-purple-500 to-pink-500",
- chemistry: "from-orange-500 to-red-500",
- biology: "from-teal-500 to-green-500",
- };
- return gradients[subject] || "from-gray-500 to-slate-500";
- };
+  const bestScore = previousAttempts.length > 0
+    ? Math.max(...previousAttempts.map(a => a.percentage || 0))
+    : null;
 
- const bestScore = previousAttempts.length > 0
- ? Math.max(...previousAttempts.map(a => a.percentage || 0))
- : null;
+  return (
+    <div className="relative min-h-screen text-slate-800 dark:text-white font-sans pb-24">
+      {/* Ambient bg blobs */}
+      <div className="fixed inset-0 z-0 overflow-hidden pointer-events-none">
+        <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] rounded-full bg-blue-300/20 dark:bg-blue-500/10 blur-[130px]" />
+        <div className="absolute bottom-[-15%] right-[-10%] w-[45%] h-[45%] rounded-full bg-violet-300/20 dark:bg-purple-500/10 blur-[130px]" />
+      </div>
 
- return (
- <div className="max-w-4xl mx-auto py-8 px-4">
- {/* Back Button */}
- <Link
- href="/dashboard/tests"
- className="flex items-center gap-2 text-gray-600 dark:text-gray-400 hover:text-brand-blue mb-6"
- >
- <ArrowLeft size={20} />
- Testlar ro'yxatiga qaytish
- </Link>
+      <div className="relative z-10 flex flex-col gap-6 max-w-2xl mx-auto pt-4 sm:pt-6 px-4 sm:px-0">
+        
+        {/* Back Button */}
+        <Link
+          href="/dashboard/tests"
+          className="flex items-center gap-2 text-slate-500 dark:text-slate-400 hover:text-brand-blue transition-colors text-[14px] font-medium w-fit"
+        >
+          <ArrowLeft size={18} />
+          Testlar ro'yxatiga qaytish
+        </Link>
 
- {/* Test Header */}
- <div className={`bg-gradient-to-r ${getSubjectGradient(test.subject)} rounded-3xl p-8 mb-8 text-white`}>
- <div className="flex items-start justify-between mb-4">
- <div className="flex-1">
- <div className="flex items-center gap-2 mb-3">
- <span className="px-3 py-1 bg-white/20 backdrop-blur rounded-full text-sm font-semibold">
- {test.subject.toUpperCase()}
- </span>
- <span className="px-3 py-1 bg-white/20 backdrop-blur rounded-full text-sm font-semibold capitalize">
- {test.test_type}
- </span>
- </div>
- <h1 className="text-3xl font-medium mb-2">{test.title}</h1>
- {test.description && (
- <p className="text-white/90">{test.description}</p>
- )}
- </div>
- <div className="w-20 h-20 bg-white/20 backdrop-blur rounded-2xl flex items-center justify-center">
- <FileText size={40} />
- </div>
- </div>
+        {/* ── PAGE HEADER ── */}
+        <div className="flex flex-col gap-1.5 mt-2">
+          <div className="flex items-center gap-2">
+            <span className="text-[11px] font-bold text-brand-blue uppercase tracking-widest bg-brand-blue/10 px-2.5 py-1 rounded-md">
+              {test.subject}
+            </span>
+            <span className="text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest bg-slate-200/50 dark:bg-slate-800/50 px-2.5 py-1 rounded-md">
+              {test.test_type}
+            </span>
+          </div>
+          <h1 className="text-2xl sm:text-3xl font-bold font-fredoka text-slate-900 dark:text-white leading-tight mt-2">
+            {test.title}
+          </h1>
+          {test.description && (
+            <p className="text-sm text-slate-500 dark:text-slate-400 mt-1 leading-relaxed">
+              {test.description}
+            </p>
+          )}
+        </div>
 
- {/* Test Stats */}
- <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-6">
- <div className="bg-white/10 backdrop-blur rounded-xl p-4">
- <div className="flex items-center gap-2 mb-1">
- <BookOpen size={18} />
- <span className="text-sm opacity-90">Savollar</span>
- </div>
- <div className="text-2xl font-medium">{test.total_questions}</div>
- </div>
+        {/* ── TEST STATS (Minimalist Grid) ── */}
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mt-2">
+          {/* Savollar */}
+          <div className="bg-white/60 dark:bg-slate-900/60 backdrop-blur-xl rounded-[20px] p-4 border border-gray-200/50 dark:border-slate-800/50 flex flex-col items-center justify-center text-center gap-1 shadow-sm">
+            <BookOpen size={18} className="text-brand-blue mb-1" />
+            <span className="text-2xl font-bold text-slate-800 dark:text-slate-100 font-fredoka leading-none">{test.total_questions}</span>
+            <span className="text-[12px] font-medium text-slate-500 dark:text-slate-400">Savollar</span>
+          </div>
 
- {test.duration_minutes && (
- <div className="bg-white/10 backdrop-blur rounded-xl p-4">
- <div className="flex items-center gap-2 mb-1">
- <Clock size={18} />
- <span className="text-sm opacity-90">Vaqt</span>
- </div>
- <div className="text-2xl font-medium">{test.duration_minutes} min</div>
- </div>
- )}
+          {/* Vaqt */}
+          <div className="bg-white/60 dark:bg-slate-900/60 backdrop-blur-xl rounded-[20px] p-4 border border-gray-200/50 dark:border-slate-800/50 flex flex-col items-center justify-center text-center gap-1 shadow-sm">
+            <Clock size={18} className="text-orange-500 mb-1" />
+            <span className="text-2xl font-bold text-slate-800 dark:text-slate-100 font-fredoka leading-none">{test.duration_minutes || "∞"}</span>
+            <span className="text-[12px] font-medium text-slate-500 dark:text-slate-400">Daqiqa</span>
+          </div>
 
- <div className="bg-white/10 backdrop-blur rounded-xl p-4">
- <div className="flex items-center gap-2 mb-1">
- <BarChart size={18} />
- <span className="text-sm opacity-90">Qiyinlik</span>
- </div>
- <div className="text-2xl font-medium capitalize">{test.difficulty_level}</div>
- </div>
+          {/* Qiyinlik */}
+          <div className="bg-white/60 dark:bg-slate-900/60 backdrop-blur-xl rounded-[20px] p-4 border border-gray-200/50 dark:border-slate-800/50 flex flex-col items-center justify-center text-center gap-1 shadow-sm">
+            <BarChart size={18} className="text-emerald-500 mb-1" />
+            <span className="text-[16px] font-bold text-slate-800 dark:text-slate-100 leading-none capitalize mt-1 mb-1">{test.difficulty_level}</span>
+            <span className="text-[12px] font-medium text-slate-500 dark:text-slate-400">Qiyinlik</span>
+          </div>
 
- {bestScore !== null && (
- <div className="bg-white/10 backdrop-blur rounded-xl p-4">
- <div className="flex items-center gap-2 mb-1">
- <Award size={18} />
- <span className="text-sm opacity-90">Eng yaxshi</span>
- </div>
- <div className="text-2xl font-medium">{bestScore.toFixed(0)}%</div>
- </div>
- )}
- </div>
- </div>
+          {/* Eng yaxshi natija */}
+          <div className="bg-white/60 dark:bg-slate-900/60 backdrop-blur-xl rounded-[20px] p-4 border border-gray-200/50 dark:border-slate-800/50 flex flex-col items-center justify-center text-center gap-1 shadow-sm">
+            <Award size={18} className="text-purple-500 mb-1" />
+            <span className="text-2xl font-bold text-slate-800 dark:text-slate-100 font-fredoka leading-none">
+              {bestScore !== null ? `${bestScore.toFixed(0)}%` : "0%"}
+            </span>
+            <span className="text-[12px] font-medium text-slate-500 dark:text-slate-400">Eng yaxshi</span>
+          </div>
+        </div>
 
- {/* Test Rules & Instructions */}
- <div className="bg-white dark:bg-slate-900 rounded-2xl border border-gray-200 dark:border-slate-800 p-6 mb-6">
- <h2 className="text-xl font-medium text-slate-800 dark:text-slate-100 mb-4">
- Test qoidalari
- </h2>
- <ul className="space-y-3">
- <li className="flex items-start gap-3">
- <div className="w-6 h-6 rounded-full bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center flex-shrink-0 mt-0.5">
- <span className="text-blue-600 text-xs font-medium">1</span>
- </div>
- <p className="text-gray-700 dark:text-gray-300">
- Testda <strong>{test.total_questions} ta savol</strong> bor
- </p>
- </li>
- {test.duration_minutes && (
- <li className="flex items-start gap-3">
- <div className="w-6 h-6 rounded-full bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center flex-shrink-0 mt-0.5">
- <span className="text-blue-600 text-xs font-medium">2</span>
- </div>
- <p className="text-gray-700 dark:text-gray-300">
- Vaqt cheklangan: <strong>{test.duration_minutes} daqiqa</strong>. Vaqt tugagach test avtomatik yuboriladi.
- </p>
- </li>
- )}
- <li className="flex items-start gap-3">
- <div className="w-6 h-6 rounded-full bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center flex-shrink-0 mt-0.5">
- <span className="text-blue-600 text-xs font-medium">{test.duration_minutes ? '3' : '2'}</span>
- </div>
- <p className="text-gray-700 dark:text-gray-300">
- Javoblaringiz avtomatik saqlanadi. Sahifani yopsangiz ham, qaytib davom ettira olasiz.
- </p>
- </li>
- <li className="flex items-start gap-3">
- <div className="w-6 h-6 rounded-full bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center flex-shrink-0 mt-0.5">
- <span className="text-blue-600 text-xs font-medium">{test.duration_minutes ? '4' : '3'}</span>
- </div>
- <p className="text-gray-700 dark:text-gray-300">
- Testni tugatgandan keyin to'g'ri javoblar va tushuntirishlarni ko'rasiz.
- </p>
- </li>
- </ul>
- </div>
+        {/* ── TEST RULES ── */}
+        <div className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl rounded-[28px] p-6 sm:p-8 border border-gray-200/50 dark:border-slate-800/50 shadow-sm flex flex-col gap-5 mt-2">
+          <h2 className="text-[16px] font-bold text-slate-800 dark:text-slate-100 flex items-center gap-2">
+            <AlertCircle className="text-brand-blue" size={18} />
+            Test qoidalari
+          </h2>
+          <ul className="flex flex-col gap-4">
+            <li className="flex items-start gap-3">
+              <div className="w-6 h-6 rounded-full bg-brand-blue/10 flex items-center justify-center shrink-0 mt-0.5">
+                <span className="text-brand-blue text-[11px] font-bold">1</span>
+              </div>
+              <p className="text-[14px] text-slate-600 dark:text-slate-300 leading-relaxed">
+                Testda jami <strong className="text-slate-800 dark:text-white">{test.total_questions} ta savol</strong> mavjud. Har bir savolga bittadan to'g'ri javobni tanlang.
+              </p>
+            </li>
+            {test.duration_minutes && (
+              <li className="flex items-start gap-3">
+                <div className="w-6 h-6 rounded-full bg-brand-blue/10 flex items-center justify-center shrink-0 mt-0.5">
+                  <span className="text-brand-blue text-[11px] font-bold">2</span>
+                </div>
+                <p className="text-[14px] text-slate-600 dark:text-slate-300 leading-relaxed">
+                  Testni yechish uchun sizga <strong className="text-slate-800 dark:text-white">{test.duration_minutes} daqiqa</strong> vaqt beriladi. Vaqt tugagach test avtomatik yakunlanadi.
+                </p>
+              </li>
+            )}
+            <li className="flex items-start gap-3">
+              <div className="w-6 h-6 rounded-full bg-brand-blue/10 flex items-center justify-center shrink-0 mt-0.5">
+                <span className="text-brand-blue text-[11px] font-bold">{test.duration_minutes ? '3' : '2'}</span>
+              </div>
+              <p className="text-[14px] text-slate-600 dark:text-slate-300 leading-relaxed">
+                Javoblaringiz avtomatik saqlanadi. Agarda internet uzilib qolsa yoki sahifani yopsangiz, qaytib kelganda davom ettira olasiz.
+              </p>
+            </li>
+            <li className="flex items-start gap-3">
+              <div className="w-6 h-6 rounded-full bg-brand-blue/10 flex items-center justify-center shrink-0 mt-0.5">
+                <span className="text-brand-blue text-[11px] font-bold">{test.duration_minutes ? '4' : '3'}</span>
+              </div>
+              <p className="text-[14px] text-slate-600 dark:text-slate-300 leading-relaxed">
+                Test yakunlangach, to'g'ri va noto'g'ri javoblarni, shuningdek to'liq tahlilni ko'rishingiz mumkin.
+              </p>
+            </li>
+          </ul>
+        </div>
 
- {/* Previous Attempts */}
- {previousAttempts.length > 0 && (
- <div className="bg-white dark:bg-slate-900 rounded-2xl border border-gray-200 dark:border-slate-800 p-6 mb-6">
- <h2 className="text-xl font-medium text-slate-800 dark:text-slate-100 mb-4 flex items-center gap-2">
- <TrendingUp size={24} className="text-brand-blue" />
- Oldingi urinishlar
- </h2>
- <div className="space-y-3">
- {previousAttempts.slice(0, 5).map((attempt, index) => (
- <div
- key={attempt.id}
- className="flex items-center justify-between p-4 bg-gray-50 dark:bg-slate-800/50 rounded-xl"
- >
- <div className="flex items-center gap-4">
- <div className={`w-12 h-12 rounded-xl flex items-center justify-center font-medium text-lg ${(attempt.percentage || 0) >= 80
- ? "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400"
- : (attempt.percentage || 0) >= 60
- ? "bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400"
- : "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400"
- }`}>
- {attempt.percentage?.toFixed(0) || 0}%
- </div>
- <div>
- <div className="font-semibold text-slate-800 dark:text-slate-100">
- Urinish #{previousAttempts.length - index}
- </div>
- <div className="text-sm text-gray-500 dark:text-gray-400">
- {new Date(attempt.completed_at || attempt.started_at).toLocaleDateString('uz-UZ', {
- month: 'short',
- day: 'numeric',
- hour: '2-digit',
- minute: '2-digit'
- })}
- </div>
- </div>
- </div>
- <div className="flex items-center gap-4">
- <div className="text-right">
- <div className="text-sm text-gray-500 dark:text-gray-400">Ball</div>
- <div className="font-medium text-slate-800 dark:text-slate-100">
- {attempt.score || 0}/{attempt.max_score || test.total_questions}
- </div>
- </div>
- {attempt.status === 'completed' && (
- <Link
- href={`/dashboard/results/${attempt.id}`}
- className="px-4 py-2 bg-gray-200 dark:bg-slate-700 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-300 dark:hover:bg-slate-600 text-sm font-medium"
- >
- Ko'rish
- </Link>
- )}
- </div>
- </div>
- ))}
- </div>
- </div>
- )}
+        {/* ── PREVIOUS ATTEMPTS ── */}
+        {previousAttempts.length > 0 && (
+          <div className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl rounded-[28px] p-6 sm:p-8 border border-gray-200/50 dark:border-slate-800/50 shadow-sm flex flex-col gap-4">
+            <h2 className="text-[16px] font-bold text-slate-800 dark:text-slate-100 flex items-center gap-2">
+              <TrendingUp className="text-brand-blue" size={18} />
+              Oldingi urinishlar
+            </h2>
+            <div className="flex flex-col gap-3 mt-2">
+              {previousAttempts.slice(0, 5).map((attempt, index) => {
+                const perc = attempt.percentage || 0;
+                const scoreColor = perc >= 80 ? "text-emerald-500 bg-emerald-500/10" : perc >= 60 ? "text-amber-500 bg-amber-500/10" : "text-rose-500 bg-rose-500/10";
+                
+                return (
+                  <div
+                    key={attempt.id}
+                    className="flex items-center justify-between p-3 sm:p-4 bg-white/50 dark:bg-slate-800/50 rounded-[20px] border border-gray-100 dark:border-slate-700/50"
+                  >
+                    <div className="flex items-center gap-4">
+                      {/* Circle score badge */}
+                      <div className={`w-12 h-12 rounded-full flex items-center justify-center shrink-0 font-fredoka font-bold ${scoreColor}`}>
+                        {perc.toFixed(0)}%
+                      </div>
+                      <div className="flex flex-col">
+                        <span className="font-bold text-slate-800 dark:text-slate-100 text-[14px]">
+                          Urinish #{previousAttempts.length - index}
+                        </span>
+                        <span className="text-[12px] text-slate-500 dark:text-slate-400 mt-0.5">
+                          {new Date(attempt.completed_at || attempt.started_at).toLocaleDateString('uz-UZ', {
+                            month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit'
+                          })}
+                        </span>
+                      </div>
+                    </div>
 
- {/* Start Test Button */}
- <div className="bg-gradient-to-r from-blue-50 to-cyan-50 dark:from-blue-900/20 dark:to-cyan-900/20 border border-blue-200 dark:border-blue-800 rounded-2xl p-6">
- <div className="flex flex-col md:flex-row items-center justify-between gap-4">
- <div>
- <h3 className="text-lg font-medium text-slate-800 dark:text-slate-100 mb-1">
- Tayyor misiz?
- </h3>
- <p className="text-sm text-gray-600 dark:text-gray-400">
- {previousAttempts.length > 0
- ? "Natijani yaxshilash uchun qayta urinib ko'ring"
- : "Testni boshlash uchun tugmani bosing"
- }
- </p>
- </div>
- <Link
- href={`/dashboard/tests/${test.id}/take`}
- className="px-8 py-4 bg-gradient-to-r from-brand-blue to-cyan-500 text-white rounded-xl font-medium flex items-center gap-2 hover:shadow-xl transition-all"
- >
- <Play size={20} />
- Testni Boshlash
- </Link>
- </div>
- </div>
- </div>
- );
+                    <div className="flex items-center gap-4">
+                      <div className="hidden sm:flex flex-col items-end mr-2">
+                        <span className="text-[11px] text-slate-400 font-medium uppercase tracking-wider">Ball</span>
+                        <span className="text-[14px] font-bold text-slate-700 dark:text-slate-200">
+                          {attempt.score || 0} / {attempt.max_score || test.total_questions}
+                        </span>
+                      </div>
+                      {attempt.status === 'completed' && (
+                        <Link
+                          href={`/dashboard/results/${attempt.id}`}
+                          className="bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 px-4 py-2 rounded-xl text-[13px] font-bold hover:bg-slate-200 dark:hover:bg-slate-600 transition-colors"
+                        >
+                          Ko'rish
+                        </Link>
+                      )}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        )}
+
+        {/* ── START BUTTON ACTION AREA ── */}
+        <div className="mt-4 mb-8">
+          <Link
+            href={`/dashboard/tests/${test.id}/take`}
+            className="w-full bg-brand-blue text-white rounded-[24px] p-4 flex items-center justify-center gap-3 shadow-[0_8px_24px_rgba(37,99,235,0.25)] hover:shadow-[0_12px_32px_rgba(37,99,235,0.35)] hover:-translate-y-1 transition-all duration-300"
+          >
+            <Play size={20} className="fill-white" />
+            <span className="font-bold text-[16px]">
+              {previousAttempts.length > 0 ? "Qayta urinib ko'rish" : "Testni Boshlash"}
+            </span>
+          </Link>
+        </div>
+
+      </div>
+    </div>
+  );
 }
