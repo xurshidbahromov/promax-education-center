@@ -76,7 +76,7 @@ export default function TestResultsPage() {
  const performance = getPerformanceMessage();
 
  return (
- <div className="w-full max-w-full mx-auto py-8 px-4">
+ <div className="w-full max-w-full mx-auto py-4">
  {/* Back Button */}
  <Link
  href="/dashboard/tests"

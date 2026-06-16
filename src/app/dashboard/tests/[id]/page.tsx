@@ -78,7 +78,7 @@ export default function TestDetailsPage() {
         <div className="absolute bottom-[-15%] right-[-10%] w-[45%] h-[45%] rounded-full bg-violet-300/20 dark:bg-purple-500/10 blur-[130px]" />
       </div>
 
-      <div className="relative z-10 flex flex-col gap-6 max-w-2xl mx-auto pt-4 sm:pt-6 px-4 sm:px-0">
+      <div className="relative z-10 flex flex-col gap-6 max-w-2xl mx-auto pt-4 sm:pt-6">
         
         {/* Back Button */}
         <Link

@@ -74,14 +74,14 @@ function LessonsPageSkeleton() {
         <Skeleton className="h-3 w-28 rounded-full bg-slate-200/80 dark:bg-slate-700/50" />
         <Skeleton className="h-8 w-40 rounded-xl bg-slate-200/80 dark:bg-slate-700/50" />
       </div>
-      <div className="flex flex-col gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4">
         {[1, 2, 3, 4].map((i) => (
           <div
             key={i}
-            className="w-full rounded-[28px] overflow-hidden border border-gray-200/50 dark:border-slate-800/50"
+            className="w-full h-full flex flex-col rounded-[1.5rem] overflow-hidden border border-white/60 dark:border-slate-700/50 bg-white/60 dark:bg-slate-900/60 backdrop-blur-xl"
           >
             <Skeleton className="w-full h-36 bg-slate-200/80 dark:bg-slate-700/50 rounded-none" />
-            <div className="bg-white/80 dark:bg-slate-900/80 p-4 flex items-center gap-3">
+            <div className="p-4 flex items-center gap-3 flex-1">
               <Skeleton className="w-10 h-10 rounded-full bg-slate-200/80 dark:bg-slate-700/50 shrink-0" />
               <div className="flex-1 space-y-2">
                 <Skeleton className="h-4 w-1/2 rounded-md bg-slate-200/80 dark:bg-slate-700/50" />
@@ -118,7 +118,7 @@ export default function LessonsPage() {
         <div className="absolute bottom-[-15%] right-[-10%] w-[45%] h-[45%] rounded-full bg-violet-300/20 dark:bg-purple-500/10 blur-[130px]" />
       </div>
 
-      <div className="relative z-10 flex flex-col gap-6 max-w-md mx-auto pt-4 sm:pt-6">
+      <div className="relative z-10 flex flex-col gap-8 max-w-[1600px] mx-auto pt-4 sm:pt-6">
 
         {/* ── PAGE HEADER ── */}
         <motion.div
@@ -155,7 +155,7 @@ export default function LessonsPage() {
         )}
 
         {/* ── SUBJECT CARDS (image box style) ── */}
-        <div className="flex flex-col gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4">
           {subjects.map((subject, si) => {
             const meta = getSubjectMeta(subject.title);
             const SubjectIcon = meta.icon;
@@ -167,10 +167,11 @@ export default function LessonsPage() {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: si * 0.07, duration: 0.4 }}
                 whileTap={{ scale: 0.98 }}
+                className="h-full"
               >
                 <Link
                   href={`/dashboard/subjects/${subject.id}`}
-                  className="block w-full rounded-[28px] overflow-hidden border border-gray-200/50 dark:border-slate-700/50 shadow-sm hover:shadow-lg transition-all duration-300 group"
+                  className="flex flex-col w-full h-full rounded-[1.5rem] overflow-hidden border border-white/60 dark:border-slate-700/50 shadow-sm hover:shadow-lg transition-all duration-300 group bg-white/60 dark:bg-slate-900/60 backdrop-blur-xl"
                 >
                   {/* ── TOP: Image / Gradient — 40% height ── */}
                   <div className="relative w-full h-36 overflow-hidden">
@@ -199,7 +200,7 @@ export default function LessonsPage() {
                   </div>
 
                   {/* ── BOTTOM: Info row ── */}
-                  <div className="bg-white/90 dark:bg-slate-900/90 backdrop-blur-xl p-4 flex items-center gap-3">
+                  <div className="p-4 flex items-center gap-3 flex-1">
                     {/* Icon circle */}
                     <div
                       className={`w-11 h-11 rounded-full ${meta.bg} flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform duration-300`}

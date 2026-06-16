@@ -76,6 +76,38 @@ export async function getStudentResults(studentId: string): Promise<ExamResult[]
 }
 
 /**
+ * Get a specific exam result by its ID
+ */
+export async function getExamResultById(resultId: string): Promise<ExamResult | null> {
+ const supabase = createClient();
+
+ const { data, error } = await supabase
+ .from('results')
+ .select(`
+ *,
+ exam:exams (
+ title,
+ date,
+ type,
+ max_score
+ ),
+ direction:directions (
+ title,
+ code
+ )
+ `)
+ .eq('id', resultId)
+ .single();
+
+ if (error) {
+ console.error('Error fetching exam result:', error);
+ return null;
+ }
+
+ return data;
+}
+
+/**
  * Get available exams (for tests page)
  */
 export async function getAvailableExams(): Promise<Exam[]> {
