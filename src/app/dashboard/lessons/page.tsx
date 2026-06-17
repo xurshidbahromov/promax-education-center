@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import useSWR from "swr";
 import { getSubjects, type Subject } from "@/lib/supabase-queries";
 import { motion } from "framer-motion";
 import Link from "next/link";
@@ -98,15 +98,8 @@ function LessonsPageSkeleton() {
 
 // ── Main Component ────────────────────────────────────────────────────────────
 export default function LessonsPage() {
-  const [subjects, setSubjects] = useState<Subject[]>([]);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    getSubjects().then((data) => {
-      setSubjects(data);
-      setLoading(false);
-    });
-  }, []);
+  const fetcher = () => getSubjects();
+  const { data: subjects = [], isLoading: loading } = useSWR('subjects', fetcher);
 
   if (loading) return <LessonsPageSkeleton />;
 

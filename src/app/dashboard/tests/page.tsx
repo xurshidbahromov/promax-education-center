@@ -1,7 +1,8 @@
 "use client";
 
 import { useLanguage } from "@/context/LanguageContext";
-import { useState, useEffect } from "react";
+import { useState } from "react";
+import useSWR from "swr";
 import Link from "next/link";
 import {
   FileText,
@@ -21,35 +22,23 @@ import { TestCardSkeleton } from "@/components/ui/Skeleton";
 
 export default function OnlineTestsPage() {
   const { t } = useLanguage();
-  const [tests, setTests] = useState<Test[]>([]);
-  const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedSubject, setSelectedSubject] = useState<Subject | "all">("all");
   const [selectedType, setSelectedType] = useState<TestType | "all">("all");
 
-  useEffect(() => {
-    async function fetchTests() {
-      const filters: TestFilters = {};
+  const fetcher = async ([url, filters]: [string, TestFilters]) => {
+    return getPublishedTests(filters);
+  };
 
-      if (selectedSubject !== "all") {
-        filters.subject = selectedSubject;
-      }
+  const currentFilters: TestFilters = {};
+  if (selectedSubject !== "all") currentFilters.subject = selectedSubject;
+  if (selectedType !== "all") currentFilters.test_type = selectedType;
+  if (searchQuery.trim()) currentFilters.search = searchQuery;
 
-      if (selectedType !== "all") {
-        filters.test_type = selectedType;
-      }
-
-      if (searchQuery.trim()) {
-        filters.search = searchQuery;
-      }
-
-      const data = await getPublishedTests(filters);
-      setTests(data);
-      setLoading(false);
-    }
-
-    fetchTests();
-  }, [selectedSubject, selectedType, searchQuery]);
+  const { data: tests = [], isLoading: loading } = useSWR(
+    ['/api/tests/published', currentFilters],
+    fetcher
+  );
 
   const subjects = [
     { id: "all", label: t('tests.subjects.all'), color: "bg-gray-500" },

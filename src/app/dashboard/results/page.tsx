@@ -1,7 +1,8 @@
 "use client";
 
 import { useLanguage } from "@/context/LanguageContext";
-import { useState, useEffect } from "react";
+import { useState } from "react";
+import useSWR from "swr";
 import {
  Search,
  Filter,
@@ -25,30 +26,14 @@ export default function ResultsPage() {
  const [filterStatus, setFilterStatus] = useState("all");
  const [filterSubject, setFilterSubject] = useState("all");
  const [filterTestType, setFilterTestType] = useState("all");
- const [loading, setLoading] = useState(true);
- const [results, setResults] = useState<ExamResult[]>([]);
+  const fetcher = async () => {
+    const supabase = createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return [];
+    return getStudentResults(user.id);
+  };
 
- // Fetch results from Supabase
- useEffect(() => {
- async function fetchResults() {
- const supabase = createClient();
-
- // Get current user
- const { data: { user } } = await supabase.auth.getUser();
-
- if (!user) {
- setLoading(false);
- return;
- }
-
- // Fetch student results
- const studentResults = await getStudentResults(user.id);
- setResults(studentResults);
- setLoading(false);
- }
-
- fetchResults();
- }, []);
+  const { data: results = [], isLoading: loading } = useSWR('studentResults', fetcher);
 
  const filteredResults = results.filter(result => {
  const examTitle = result.exam?.title || "";

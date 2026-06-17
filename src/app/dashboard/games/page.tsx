@@ -2,6 +2,7 @@
 
 import { useLanguage } from "@/context/LanguageContext";
 import { useState, useEffect } from "react";
+import useSWR from "swr";
 import { getUserProfile } from "@/lib/profile";
 import { updateUserCoins } from "@/lib/supabase-queries";
 import {
@@ -30,17 +31,15 @@ export default function GameZonePage() {
  const [userAnswer, setUserAnswer] = useState("");
  const [feedback, setFeedback] = useState<'correct' | 'wrong' | null>(null);
 
- // Load user coins on mount
- useEffect(() => {
- const loadUserData = async () => {
- const profile = await getUserProfile();
- if (profile) {
- setCoins(profile.coins || 0);
- setUserId(profile.id);
- }
- };
- loadUserData();
- }, []);
+  const { data: profile } = useSWR('userProfileGame', getUserProfile);
+
+  // Sync SWR data to local state since the game needs to update coins locally
+  useEffect(() => {
+    if (profile) {
+      setCoins(profile.coins || 0);
+      setUserId(profile.id);
+    }
+  }, [profile]);
 
  // Math Game Logic
  const generateMathQuestion = () => {

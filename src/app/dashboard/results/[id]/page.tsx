@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
+import useSWR from "swr";
 import { useParams, useRouter } from "next/navigation";
 import { useLanguage } from "@/context/LanguageContext";
 import { getExamResultById, type ExamResult } from "@/lib/supabase-queries";
@@ -22,27 +23,14 @@ export default function ResultDetailPage() {
   const router = useRouter();
   const params = useParams();
 
-  const [loading, setLoading] = useState(true);
-  const [result, setResult] = useState<ExamResult | null>(null);
-
-  useEffect(() => {
-    if (params.id) {
-      fetchResult(params.id as string);
-    }
-  }, [params.id]);
-
-  const fetchResult = async (id: string) => {
-    try {
-      const data = await getExamResultById(id);
-      if (data) {
-        setResult(data);
-      }
-    } catch (error) {
-      console.error("Error fetching result:", error);
-    } finally {
-      setLoading(false);
-    }
+  const fetcher = async (id: string) => {
+    return await getExamResultById(id);
   };
+
+  const { data: result = null, isLoading: loading } = useSWR(
+    params.id ? `result-${params.id}` : null,
+    () => fetcher(params.id as string)
+  );
 
   if (loading) {
     return (

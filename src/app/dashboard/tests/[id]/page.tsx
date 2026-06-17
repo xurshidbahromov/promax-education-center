@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
+import useSWR from "swr";
 import { useParams, useRouter } from "next/navigation";
 import { useLanguage } from "@/context/LanguageContext";
 import Link from "next/link";
@@ -24,31 +25,19 @@ export default function TestDetailsPage() {
  const { t } = useLanguage();
  const testId = params.id as string;
 
- const [test, setTest] = useState<Test | null>(null);
- const [previousAttempts, setPreviousAttempts] = useState<any[]>([]);
- const [loading, setLoading] = useState(true);
+  const fetcher = async (id: string) => {
+    const testData = await getTestById(id);
+    let history: any[] = [];
+    const { data: user } = await (await import("@/lib/supabase")).supabase.auth.getUser();
+    if (user.user) {
+      history = await getStudentTestHistory(user.user.id, id);
+    }
+    return { test: testData, previousAttempts: history };
+  };
 
- useEffect(() => {
- async function loadTest() {
- try {
- const testData = await getTestById(testId);
- setTest(testData);
-
- // Get previous attempts
- const { data: user } = await (await import("@/lib/supabase")).supabase.auth.getUser();
- if (user.user) {
- const history = await getStudentTestHistory(user.user.id, testId);
- setPreviousAttempts(history);
- }
- } catch (error) {
- console.error("Error loading test:", error);
- } finally {
- setLoading(false);
- }
- }
-
- loadTest();
- }, [testId]);
+  const { data, isLoading: loading } = useSWR(testId ? `test-${testId}` : null, () => fetcher(testId));
+  const test = data?.test || null;
+  const previousAttempts = data?.previousAttempts || [];
 
   if (loading) {
     return <TestDetailSkeleton />;

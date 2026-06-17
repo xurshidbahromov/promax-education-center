@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
+import useSWR from "swr";
 import { useParams, useRouter } from "next/navigation";
 import { getSubjectById, getLessonsBySubjectId, type Subject, type Lesson } from "@/lib/supabase-queries";
 import { ArrowLeft, BookOpen, Clock, PlayCircle } from "lucide-react";
@@ -13,23 +14,18 @@ export default function SubjectDetailPage() {
  const router = useRouter();
  const subjectId = params.id as string;
 
- const [subject, setSubject] = useState<Subject | null>(null);
- const [lessons, setLessons] = useState<Lesson[]>([]);
- const [loading, setLoading] = useState(true);
+  const fetcher = async (id: string) => {
+    if (!id) return null;
+    const [subj, less] = await Promise.all([
+      getSubjectById(id),
+      getLessonsBySubjectId(id)
+    ]);
+    return { subject: subj, lessons: less };
+  };
 
- useEffect(() => {
- async function loadData() {
- if (!subjectId) return;
- const [subj, less] = await Promise.all([
- getSubjectById(subjectId),
- getLessonsBySubjectId(subjectId)
- ]);
- setSubject(subj);
- setLessons(less);
- setLoading(false);
- }
- loadData();
- }, [subjectId]);
+  const { data, isLoading: loading } = useSWR(subjectId ? `subject-${subjectId}` : null, () => fetcher(subjectId));
+  const subject = data?.subject || null;
+  const lessons = data?.lessons || [];
 
  if (loading) {
  return (

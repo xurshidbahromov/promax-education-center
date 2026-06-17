@@ -20,7 +20,8 @@ import {
   Zap,
   BarChart3
 } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useState } from "react";
+import useSWR from "swr";
 import { getSubjects, type Subject } from "@/lib/supabase-queries";
 import { DashboardHomeSkeleton } from "@/components/ui/Skeleton";
 
@@ -132,15 +133,7 @@ export default function DashboardPage() {
   const { data: stats } = useDashboardStats(user?.id);
   const { data: upcomingTests } = useUpcomingTests();
 
-  const [subjects, setSubjects] = useState<Subject[]>([]);
-  const [subjectsLoading, setSubjectsLoading] = useState(true);
-
-  useEffect(() => {
-    getSubjects().then(data => {
-      setSubjects(data);
-      setSubjectsLoading(false);
-    });
-  }, []);
+  const { data: subjects = [], isLoading: subjectsLoading } = useSWR('subjects', getSubjects);
 
   const isLoading = !user || subjectsLoading;
 
