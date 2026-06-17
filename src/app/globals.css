@@ -9,6 +9,7 @@
   --font-sans: 'DM Sans', var(--font-atkinson), sans-serif;
   --font-mono: monospace;
   --font-fredoka: var(--font-fredoka), sans-serif;
+  --font-sans-pro: var(--font-sans-pro), sans-serif;
 
   --color-brand-blue: #0056D2;
   --color-brand-orange: #F97316;

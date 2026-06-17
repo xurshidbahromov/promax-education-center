@@ -115,7 +115,7 @@ export default function DashboardLayout({
  {/* Logo */}
  <div className="h-20 flex items-center px-6 border-b border-gray-200/50 dark:border-slate-800/50">
  <Link href="/" className="flex items-center gap-3">
- <div className="relative w-12 h-8">
+ <div className="relative w-10 h-10 flex-shrink-0">
  <Image
  src="/favicon.ico"
  alt="Promax Logo"
@@ -123,9 +123,14 @@ export default function DashboardLayout({
  className="object-contain"
  />
  </div>
- <span className="text-2xl font-medium bg-gradient-to-r from-brand-blue to-brand-orange bg-clip-text text-transparent font-fredoka uppercase tracking-wide">
+ <div className="flex flex-col">
+ <span className="text-2xl font-black text-slate-800 dark:text-slate-100 font-sans-pro uppercase tracking-wider leading-none">
  Promax
  </span>
+ <span className="text-[9px] font-semibold text-brand-orange dark:text-brand-orange tracking-[0.35em] uppercase leading-none mt-1.5 pl-[1px]">
+ Education
+ </span>
+ </div>
  </Link>
  </div>
 
@@ -184,11 +189,18 @@ export default function DashboardLayout({
  {!isTakeTestPage && (
  <div className="lg:hidden absolute top-4 left-4 right-4 z-50 flex items-center justify-between pointer-events-none">
  {/* Logo Island */}
- <Link href="/dashboard" className="h-12 bg-white/80 dark:bg-slate-900/80 backdrop-blur-2xl border border-gray-200/50 dark:border-slate-800/50 rounded-full flex items-center justify-center gap-2 px-5 shadow-lg shadow-brand-blue/5 pointer-events-auto">
- <div className="relative w-6 h-5">
+ <Link href="/dashboard" className="h-12 bg-white/80 dark:bg-slate-900/80 backdrop-blur-2xl border border-gray-200/50 dark:border-slate-800/50 rounded-full flex items-center justify-center gap-2.5 px-5 shadow-lg shadow-brand-blue/5 pointer-events-auto">
+ <div className="relative w-6 h-5 flex-shrink-0">
  <Image src="/favicon.ico" alt="Logo" fill className="object-contain" />
  </div>
- <span className="font-fredoka font-medium text-lg text-slate-800 dark:text-slate-100 uppercase tracking-wide">Promax</span>
+ <div className="flex flex-col">
+ <span className="font-sans-pro font-black text-base text-slate-800 dark:text-slate-100 uppercase tracking-wider leading-none">
+ Promax
+ </span>
+ <span className="text-[7px] font-semibold text-brand-orange dark:text-brand-orange tracking-[0.25em] uppercase leading-none mt-0.5 pl-[0.5px]">
+ Education
+ </span>
+ </div>
  </Link>
  
  {/* Bell Island */}

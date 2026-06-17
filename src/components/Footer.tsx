@@ -36,9 +36,14 @@ const Footer = () => {
  className="object-contain dark:filter-none invert hue-rotate-180"
  />
  </div>
- <span className="text-2xl font-semibold tracking-tight text-slate-800 dark:text-slate-100 leading-tight">
- PROMAX <br /> <span className="text-brand-blue">EDUCATION</span>
- </span>
+  <div className="flex flex-col">
+  <span className="text-2xl font-black text-slate-800 dark:text-slate-100 font-sans-pro uppercase tracking-wider leading-none">
+  Promax
+  </span>
+  <span className="text-[10px] font-semibold text-brand-orange dark:text-brand-orange tracking-[0.35em] uppercase leading-none mt-1.5 pl-[1px]">
+  Education
+  </span>
+  </div>
  </div>
  </Link>
  <p className="text-gray-500 dark:text-gray-400 max-w-sm leading-relaxed text-base font-medium">

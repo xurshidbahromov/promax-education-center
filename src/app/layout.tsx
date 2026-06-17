@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Atkinson_Hyperlegible, Inter, Fredoka } from "next/font/google";
+import { Atkinson_Hyperlegible, Inter, Fredoka, Source_Sans_3 } from "next/font/google";
 import "./globals.css";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
@@ -31,6 +31,13 @@ const fredoka = Fredoka({
  display: "swap",
 });
 
+const sourceSans = Source_Sans_3({
+ variable: "--font-sans-pro",
+ subsets: ["latin"],
+ weight: ["300", "400", "500", "600", "700", "800", "900"],
+ display: "swap",
+});
+
 export const metadata: Metadata = {
  title: "Promax Education Center | Zamonaviy Ta'lim Markazi",
  description: "Xorazm Urganch shahridagi eng zamonaviy o'quv markazi. OTM larga, IELTS, SAT va Xalqaro Universitetlarga tayyorlov.",
@@ -58,7 +65,7 @@ export default function RootLayout({
  return (
  <html lang="en" className="scroll-smooth" suppressHydrationWarning>
  <body
- className={`${atkinson.variable} ${inter.variable} ${fredoka.variable} antialiased text-slate-800 dark:text-slate-50 min-h-screen flex flex-col font-sans selection:bg-brand-blue/20 transition-colors duration-300`}
+ className={`${atkinson.variable} ${inter.variable} ${fredoka.variable} ${sourceSans.variable} antialiased text-slate-800 dark:text-slate-50 min-h-screen flex flex-col font-sans selection:bg-brand-blue/20 transition-colors duration-300`}
  >
  <NextTopLoader color="#F97316" height={3} showSpinner={false} />
  <ThemeProvider

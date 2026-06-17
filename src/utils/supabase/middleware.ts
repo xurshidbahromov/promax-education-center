@@ -39,6 +39,9 @@ export async function updateSession(request: NextRequest) {
  !user &&
  !request.nextUrl.pathname.startsWith('/login') &&
  !request.nextUrl.pathname.startsWith('/auth') &&
+ !request.nextUrl.pathname.startsWith('/tg') &&
+ !request.nextUrl.pathname.startsWith('/api/telegram') &&
+ !request.nextUrl.pathname.startsWith('/register') &&
  // TEMPORARY: Allow admin access for development
  // request.nextUrl.pathname.startsWith('/admin')
  false
