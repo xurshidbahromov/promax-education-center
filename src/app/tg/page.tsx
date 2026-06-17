@@ -66,12 +66,18 @@ export default function TelegramMiniAppPage() {
 
     async function verifyAuth() {
       try {
-        const res = await fetch('/api/telegram/auth', {
+        const res = await fetch('/api/telegram/webapp-auth', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ initData }),
         });
         const data: TgAuthResponse = await res.json();
+        
+        if (data.linked) {
+          window.location.href = '/dashboard';
+          return; // Do not set loading to false so it stays on loading screen while redirecting
+        }
+
         setAuthState(data);
       } catch {
         // Dev mode fallback
