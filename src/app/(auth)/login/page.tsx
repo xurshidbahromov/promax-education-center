@@ -25,8 +25,8 @@ export default function LoginPage() {
  const [loading, setLoading] = useState(false);
  const [showForgotPassword, setShowForgotPassword] = useState(false);
 
- // Linking state
- const [linkingUser, setLinkingUser] = useState<TelegramUser | null>(null);
+ // Telegram Linking State
+ const [linkingUser, setLinkingUser] = useState<any>(null);
  const [linkPhone, setLinkPhone] = useState('');
  const [linkPassword, setLinkPassword] = useState('');
  const [showLinkPassword, setShowLinkPassword] = useState(false);
