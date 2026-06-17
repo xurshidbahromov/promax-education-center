@@ -3,6 +3,8 @@
 import { useEffect, useState } from 'react';
 import { useTelegramApp } from '@/hooks/useTelegramApp';
 import { BookOpen, ClipboardList, BarChart3, Trophy, User, Loader2, Link2, ExternalLink, Coins } from 'lucide-react';
+import { motion } from 'framer-motion';
+import SwipeToStart from '@/components/ui/SwipeToStart';
 
 interface Profile {
   id: string;
@@ -60,6 +62,26 @@ export default function TelegramMiniAppPage() {
   const { tgApp, tgUser, initData, isReady } = useTelegramApp();
   const [authState, setAuthState] = useState<TgAuthResponse | null>(null);
   const [loading, setLoading] = useState(true);
+  const [isSwiping, setIsSwiping] = useState(false);
+
+  const handleSwipeLogin = async () => {
+    setIsSwiping(true);
+    try {
+      const res = await fetch('/api/telegram/auth', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ initData, action: 'swipe_login' }),
+      });
+      const data = await res.json();
+      if (data.linked) {
+        setAuthState(data);
+      }
+    } catch (e) {
+      console.error('Login failed', e);
+    } finally {
+      setIsSwiping(false);
+    }
+  };
 
   useEffect(() => {
     if (!isReady) return;
@@ -115,75 +137,67 @@ export default function TelegramMiniAppPage() {
     || authState?.telegramUser?.first_name
     || 'Foydalanuvchi';
 
-  // ─── Not linked ─────────────────────────────────────────────────────────────
+  // ─── Not linked (Swipe to Start) ───────────────────────────────────────────
   if (!authState?.linked) {
     return (
-      <div style={{ minHeight: '100vh', background: 'var(--tg-theme-bg-color, #f8fafc)', padding: '24px 16px' }}>
-        {/* Header */}
-        <div style={{ textAlign: 'center', marginBottom: 32 }}>
-          <div style={{
-            width: 72, height: 72,
-            background: 'linear-gradient(135deg, #0056D2, #F97316)',
-            borderRadius: 20,
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-            margin: '0 auto 16px',
-          }}>
-            <span style={{ fontSize: 36 }}>🎓</span>
-          </div>
-          <div style={{ fontWeight: 900, fontSize: 24, letterSpacing: '0.05em', color: 'var(--tg-theme-text-color, #0f172a)' }}>
-            PROMAX
-          </div>
-          <div style={{ fontSize: 11, fontWeight: 600, color: '#F97316', letterSpacing: '0.3em', marginTop: 2 }}>
-            EDUCATION
-          </div>
+      <div className="min-h-[100vh] min-h-[100dvh] relative overflow-hidden bg-slate-900 flex flex-col items-center justify-between py-12 px-6">
+        {/* Background elements */}
+        <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] bg-brand-blue/30 blur-[120px] rounded-full pointer-events-none" />
+        <div className="absolute bottom-[-10%] right-[-10%] w-[50%] h-[50%] bg-brand-orange/20 blur-[120px] rounded-full pointer-events-none" />
+        
+        <div className="relative z-10 flex flex-col items-center mt-12 w-full">
+          <motion.div 
+             initial={{ scale: 0.8, opacity: 0 }}
+             animate={{ scale: 1, opacity: 1 }}
+             transition={{ duration: 0.5, type: "spring" }}
+             className="w-24 h-24 rounded-3xl bg-gradient-to-br from-brand-blue to-brand-orange p-[2px] shadow-[0_8px_32px_rgba(249,115,22,0.3)] mb-8"
+          >
+            <div className="w-full h-full bg-slate-900 rounded-[22px] flex items-center justify-center backdrop-blur-xl">
+               <span className="text-4xl">🎓</span>
+            </div>
+          </motion.div>
+          
+          <motion.div
+             initial={{ y: 20, opacity: 0 }}
+             animate={{ y: 0, opacity: 1 }}
+             transition={{ duration: 0.5, delay: 0.1 }}
+             className="text-center"
+          >
+            <h1 className="text-4xl font-black text-white tracking-wider uppercase mb-1">
+              PROMAX
+            </h1>
+            <h2 className="text-sm font-bold text-brand-orange tracking-[0.4em]">
+              EDUCATION
+            </h2>
+          </motion.div>
+
+          <motion.p
+             initial={{ y: 20, opacity: 0 }}
+             animate={{ y: 0, opacity: 1 }}
+             transition={{ duration: 0.5, delay: 0.2 }}
+             className="text-slate-400 text-center mt-6 max-w-[280px] leading-relaxed"
+          >
+            <strong className="text-white">{displayName}</strong>, ta'lim olishning eng zamonaviy va qulay usuliga xush kelibsiz.
+          </motion.p>
         </div>
 
-        {/* Welcome card */}
-        <div style={{
-          background: 'var(--tg-theme-secondary-bg-color, #ffffff)',
-          borderRadius: 20, padding: 24, marginBottom: 24,
-          boxShadow: '0 2px 12px rgba(0,86,210,0.08)',
-        }}>
-          <h2 style={{ fontSize: 18, fontWeight: 700, marginBottom: 8, color: 'var(--tg-theme-text-color, #0f172a)' }}>
-            👋 Salom, {displayName}!
-          </h2>
-          <p style={{ fontSize: 14, color: 'var(--tg-theme-hint-color, #64748b)', lineHeight: 1.6 }}>
-            Platformadan foydalanish uchun Telegram hisobingizni Promax Education akkauntingizga ulang.
-          </p>
-        </div>
-
-        {/* Features */}
-        {[
-          { emoji: '📝', text: 'Online testlar topshirish' },
-          { emoji: '📊', text: 'Natijalar va statistika' },
-          { emoji: '📚', text: 'Video darslar' },
-          { emoji: '🔔', text: 'Bildirishnomalar' },
-        ].map((f, i) => (
-          <div key={i} style={{
-            display: 'flex', alignItems: 'center', gap: 12,
-            padding: '12px 0',
-            borderBottom: i < 3 ? '1px solid rgba(0,0,0,0.06)' : 'none',
-          }}>
-            <span style={{ fontSize: 20 }}>{f.emoji}</span>
-            <span style={{ fontSize: 14, color: 'var(--tg-theme-text-color, #0f172a)' }}>{f.text}</span>
-          </div>
-        ))}
-
-        {/* Link button */}
-        <a
-          href="/tg/link"
-          style={{
-            display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
-            marginTop: 28, padding: '15px 24px',
-            background: 'linear-gradient(135deg, #0056D2, #0066ff)',
-            borderRadius: 14, color: '#fff',
-            fontWeight: 700, fontSize: 16, textDecoration: 'none',
-            boxShadow: '0 4px 16px rgba(0,86,210,0.3)',
-          }}
+        <motion.div 
+          initial={{ y: 40, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          transition={{ duration: 0.6, delay: 0.3 }}
+          className="w-full relative z-10 mb-8"
         >
-          <Link2 size={20} />
-          Hisobni ulash
-        </a>
+          <SwipeToStart 
+            isLoading={isSwiping}
+            onComplete={handleSwipeLogin} 
+          />
+          
+          <div className="mt-8 text-center">
+             <a href="/tg/link" className="text-xs text-slate-500 font-medium hover:text-slate-300 transition-colors">
+                Menda oldindan hisob bor (Web)
+             </a>
+          </div>
+        </motion.div>
       </div>
     );
   }
