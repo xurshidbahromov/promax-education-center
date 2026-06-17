@@ -78,13 +78,22 @@ export default function RegisterPage() {
       if (data.linked && !data.needsPassword) {
         toast.success("Telegram orqali muvaffaqiyatli kirdingiz");
         router.push('/dashboard');
-      } else if (data.linked && data.needsPassword) {
-        setLinkingUser(user);
-        setLinkPhone(data.phone || '');
-        setStep('link');
       } else {
-        setLinkingUser(user);
-        setStep('link');
+        const normalizedUser = {
+          id: user.user.id,
+          first_name: user.user.name,
+          username: user.user.preferred_username,
+          photo_url: user.user.picture,
+        };
+        
+        if (data.linked && data.needsPassword) {
+          setLinkingUser(normalizedUser);
+          setLinkPhone(data.phone || '');
+          setStep('link');
+        } else {
+          setLinkingUser(normalizedUser);
+          setStep('link');
+        }
       }
     } catch (err) {
       toast.error('Telegram orqali kirishda xatolik yuz berdi');

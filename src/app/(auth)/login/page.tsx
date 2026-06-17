@@ -87,15 +87,24 @@ export default function LoginPage() {
         // Logged in successfully via deterministic auth
         toast.success("Telegram orqali muvaffaqiyatli kirdingiz");
         router.push(data.profile?.role === 'student' ? '/dashboard' : '/dashboard');
-      } else if (data.linked && data.needsPassword) {
-        // Linked but needs password
-        setLinkingUser(user);
-        setLinkPhone(data.phone || '');
-        setStep('link');
       } else {
-        // Not linked, prompt to link
-        setLinkingUser(user);
-        setStep('link');
+        const normalizedUser = {
+          id: user.user.id,
+          first_name: user.user.name,
+          username: user.user.preferred_username,
+          photo_url: user.user.picture,
+        };
+        
+        if (data.linked && data.needsPassword) {
+          // Linked but needs password
+          setLinkingUser(normalizedUser);
+          setLinkPhone(data.phone || '');
+          setStep('link');
+        } else {
+          // Not linked, prompt to link
+          setLinkingUser(normalizedUser);
+          setStep('link');
+        }
       }
     } catch (err) {
       toast.error('Telegram orqali kirishda xatolik yuz berdi');

@@ -58,7 +58,11 @@ export default function TelegramLoginWidget({
         if (data && data.id_token && data.user) {
           onAuth(data);
         } else if (data && data.error) {
-          console.error("Telegram login error:", data.error);
+          if (data.error === "popup_closed") {
+            console.log("Telegram login popup was closed by the user.");
+          } else {
+            console.error("Telegram login error:", data.error);
+          }
         }
       }
     );
