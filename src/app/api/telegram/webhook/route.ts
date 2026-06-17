@@ -41,7 +41,7 @@ export async function POST(request: NextRequest) {
     // Find linked profile
     const { data: profile } = await supabase
       .from('profiles')
-      .select('full_name, coins, role, telegram_id')
+      .select('id, full_name, coins, role, telegram_id')
       .eq('telegram_id', telegramId)
       .single();
 
@@ -79,12 +79,12 @@ export async function POST(request: NextRequest) {
         }
       }
 
-      await sendMessage(chatId, buildWelcomeMessage(firstName, isLinked), {
-        reply_markup: buildMainMenuKeyboard(isLinked),
+      await sendMessage(chatId, buildWelcomeMessage(firstName, isLinked, profile?.role), {
+        reply_markup: buildMainMenuKeyboard(isLinked, profile?.role),
       });
     } else if (text === '/menu') {
       await sendMessage(chatId, `📋 <b>Asosiy menyu</b>\n\nQuyidagi bo'limlardan birini tanlang:`, {
-        reply_markup: buildMainMenuKeyboard(isLinked),
+        reply_markup: buildMainMenuKeyboard(isLinked, profile?.role),
       });
     } else if (text === '/mystats') {
       if (!isLinked || !profile) {
@@ -94,7 +94,30 @@ export async function POST(request: NextRequest) {
           { reply_markup: buildMainMenuKeyboard(false) }
         );
       } else {
-        await sendMessage(chatId, buildStatsMessage(profile), {
+        let additionalStats = undefined;
+        if (profile.role === 'student') {
+          // Fetch tests completed
+          const { count: testsCompleted } = await supabase
+            .from('test_results')
+            .select('*', { count: 'exact', head: true })
+            .eq('student_id', profile.id);
+
+          // Get rank (naïve approach: count how many students have more coins)
+          const { count: higherCoins } = await supabase
+            .from('profiles')
+            .select('*', { count: 'exact', head: true })
+            .eq('role', 'student')
+            .gt('coins', profile.coins || 0);
+          
+          const rank = (higherCoins || 0) + 1;
+          
+          additionalStats = {
+            testsCompleted: testsCompleted || 0,
+            rank
+          };
+        }
+
+        await sendMessage(chatId, buildStatsMessage(profile, additionalStats), {
           reply_markup: buildOpenAppKeyboard(),
         });
       }
@@ -113,7 +136,7 @@ export async function POST(request: NextRequest) {
       await sendMessage(
         chatId,
         `❓ Noma'lum buyruq.\n\n/menu — Asosiy menyu\n/help — Yordam`,
-        { reply_markup: buildMainMenuKeyboard(isLinked) }
+        { reply_markup: buildMainMenuKeyboard(isLinked, profile?.role) }
       );
     }
   }
@@ -129,6 +152,9 @@ export async function POST(request: NextRequest) {
       menu_results: `${APP_URL}/tg`,
       menu_lessons: `${APP_URL}/tg`,
       menu_profile: `${APP_URL}/tg`,
+      menu_students: `${APP_URL}/tg`,
+      menu_check_tests: `${APP_URL}/tg`,
+      menu_groups: `${APP_URL}/tg`,
     };
 
     const labels: Record<string, string> = {
@@ -136,6 +162,9 @@ export async function POST(request: NextRequest) {
       menu_results: '📊 Natijalar bo\'limi',
       menu_lessons: '📚 Darslar bo\'limi',
       menu_profile: '👤 Profil bo\'limi',
+      menu_students: '👥 O\'quvchilar bo\'limi',
+      menu_check_tests: '📝 Testlarni tekshirish',
+      menu_groups: '🏫 Guruhlar bo\'limi',
     };
 
     if (data && deepLinks[data]) {

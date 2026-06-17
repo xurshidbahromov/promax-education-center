@@ -6,7 +6,7 @@ const APP_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://promaxedu.uz';
 
 // ─── Keyboards ─────────────────────────────────────────────────────────────────
 
-export function buildMainMenuKeyboard(linked: boolean) {
+export function buildMainMenuKeyboard(linked: boolean, role: string = 'student') {
   if (!linked) {
     return {
       inline_keyboard: [
@@ -26,6 +26,40 @@ export function buildMainMenuKeyboard(linked: boolean) {
     };
   }
 
+  if (role === 'staff' || role === 'admin') {
+    return {
+      inline_keyboard: [
+        [
+          {
+            text: '📱 Mini App ochish',
+            web_app: { url: `${APP_URL}/tg` },
+          },
+        ],
+        [
+          {
+            text: '👥 O\'quvchilar',
+            callback_data: 'menu_students',
+          },
+          {
+            text: '📝 Testlarni tekshirish',
+            callback_data: 'menu_check_tests',
+          },
+        ],
+        [
+          {
+            text: '🏫 Guruhlar',
+            callback_data: 'menu_groups',
+          },
+          {
+            text: '👤 Profil',
+            callback_data: 'menu_profile',
+          },
+        ],
+      ],
+    };
+  }
+
+  // Default: Student
   return {
     inline_keyboard: [
       [
@@ -75,7 +109,8 @@ export function buildOpenAppKeyboard() {
 
 export function buildWelcomeMessage(
   firstName: string,
-  linked: boolean
+  linked: boolean,
+  role: string = 'student'
 ): string {
   if (!linked) {
     return (
@@ -93,6 +128,7 @@ export function buildWelcomeMessage(
   return (
     `👋 <b>Qaytib kelganingiz bilan, ${firstName}!</b>\n\n` +
     `🎓 <b>Promax Education</b> platformasiga xush kelibsiz!\n\n` +
+    `Siz tizimga <b>${role === 'staff' || role === 'admin' ? 'O\'qituvchi' : 'O\'quvchi'}</b> sifatida kirgansiz.\n\n` +
     `📱 Mini App-ni ochish yoki quyidagi bo'limlardan birini tanlang 👇`
   );
 }
@@ -101,12 +137,23 @@ export function buildStatsMessage(profile: {
   full_name: string;
   coins: number;
   role: string;
-}): string {
+}, additionalStats?: { testsCompleted?: number; rank?: number }): string {
+  if (profile.role === 'staff' || profile.role === 'admin') {
+    return (
+      `📊 <b>O'qituvchi Statistikasi</b>\n\n` +
+      `👤 Ism: <b>${profile.full_name || 'Noma\'lum'}</b>\n` +
+      `💼 Status: <b>O'qituvchi</b>\n\n` +
+      `📱 Guruhlar va o'quvchilarni boshqarish uchun Mini App-ni oching:`
+    );
+  }
+
   return (
     `📊 <b>Mening statistikam</b>\n\n` +
     `👤 Ism: <b>${profile.full_name || 'Noma\'lum'}</b>\n` +
-    `🪙 Tangalar: <b>${profile.coins || 0} ta</b>\n` +
-    `🎓 Status: <b>${profile.role === 'student' ? 'O\'quvchi' : profile.role}</b>\n\n` +
+    `🎓 Status: <b>O'quvchi</b>\n\n` +
+    `🪙 Tangalar: <b>${profile.coins || 0} Coin</b> 🟡\n` +
+    `📝 Yechilgan testlar: <b>${additionalStats?.testsCompleted || 0} ta</b>\n` +
+    `🏆 Reytingdagi o'rin: <b>${additionalStats?.rank ? additionalStats.rank + '-o\'rin' : 'Noma\'lum'}</b>\n\n` +
     `📱 Batafsil natijalar uchun Mini App-ni oching:`
   );
 }
