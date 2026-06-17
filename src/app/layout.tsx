@@ -9,8 +9,7 @@ import { Background } from "@/components/Background";
 import QueryProvider from "@/providers/QueryProvider";
 import { Toaster } from "react-hot-toast";
 import NextTopLoader from "nextjs-toploader";
-import Script from "next/script";
-import TelegramGlobalRedirect from "@/components/TelegramGlobalRedirect";
+
 
 const atkinson = Atkinson_Hyperlegible({
  variable: "--font-atkinson",
@@ -69,8 +68,6 @@ export default function RootLayout({
  <body
  className={`${atkinson.variable} ${inter.variable} ${fredoka.variable} ${sourceSans.variable} antialiased text-slate-800 dark:text-slate-50 min-h-screen flex flex-col font-sans selection:bg-brand-blue/20 transition-colors duration-300`}
  >
- <Script src="https://telegram.org/js/telegram-web-app.js" strategy="beforeInteractive" />
- <TelegramGlobalRedirect />
  <NextTopLoader color="#F97316" height={3} showSpinner={false} />
  <ThemeProvider
  attribute="class"

@@ -3,8 +3,6 @@
 import { useEffect, useState } from 'react';
 import { useTelegramApp } from '@/hooks/useTelegramApp';
 import { BookOpen, ClipboardList, BarChart3, Trophy, User, Loader2, Link2, ExternalLink, Coins } from 'lucide-react';
-import { motion } from 'framer-motion';
-import SwipeToStart from '@/components/ui/SwipeToStart';
 
 interface Profile {
   id: string;
@@ -62,26 +60,6 @@ export default function TelegramMiniAppPage() {
   const { tgApp, tgUser, initData, isReady } = useTelegramApp();
   const [authState, setAuthState] = useState<TgAuthResponse | null>(null);
   const [loading, setLoading] = useState(true);
-  const [isSwiping, setIsSwiping] = useState(false);
-
-  const handleSwipeLogin = async () => {
-    setIsSwiping(true);
-    try {
-      const res = await fetch('/api/telegram/auth', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ initData, action: 'swipe_login' }),
-      });
-      const data = await res.json();
-      if (data.linked) {
-        setAuthState(data);
-      }
-    } catch (e) {
-      console.error('Login failed', e);
-    } finally {
-      setIsSwiping(false);
-    }
-  };
 
   useEffect(() => {
     if (!isReady) return;
@@ -137,109 +115,75 @@ export default function TelegramMiniAppPage() {
     || authState?.telegramUser?.first_name
     || 'Foydalanuvchi';
 
-  // ─── Not linked (Swipe to Start) ───────────────────────────────────────────
+  // ─── Not linked ─────────────────────────────────────────────────────────────
   if (!authState?.linked) {
     return (
-      <div className="min-h-[100vh] min-h-[100dvh] flex bg-[#F6FAF8] dark:bg-slate-950 items-center justify-center p-4 relative overflow-hidden font-fredoka">
-        
-        {/* Soft Premium Background Orbs */}
-        <div className="absolute inset-0 z-0 overflow-hidden pointer-events-none">
-          <motion.div 
-            animate={{ scale: [1, 1.05, 1], rotate: [0, 5, 0] }}
-            transition={{ duration: 15, repeat: Infinity, ease: "easeInOut" }}
-            className="absolute top-[-10%] right-[-10%] w-[80%] h-[70%] rounded-full blur-[120px] opacity-70 bg-emerald-200/40 dark:bg-emerald-900/20" 
-          />
-          <motion.div 
-            animate={{ scale: [1, 1.1, 1], rotate: [0, -5, 0] }}
-            transition={{ duration: 18, repeat: Infinity, ease: "easeInOut", delay: 2 }}
-            className="absolute bottom-[-10%] left-[-15%] w-[70%] h-[60%] rounded-full blur-[120px] opacity-60 bg-teal-200/40 dark:bg-teal-900/10" 
-          />
+      <div style={{ minHeight: '100vh', background: 'var(--tg-theme-bg-color, #f8fafc)', padding: '24px 16px' }}>
+        {/* Header */}
+        <div style={{ textAlign: 'center', marginBottom: 32 }}>
+          <div style={{
+            width: 72, height: 72,
+            background: 'linear-gradient(135deg, #0056D2, #F97316)',
+            borderRadius: 20,
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            margin: '0 auto 16px',
+          }}>
+            <span style={{ fontSize: 36 }}>🎓</span>
+          </div>
+          <div style={{ fontWeight: 900, fontSize: 24, letterSpacing: '0.05em', color: 'var(--tg-theme-text-color, #0f172a)' }}>
+            PROMAX
+          </div>
+          <div style={{ fontSize: 11, fontWeight: 600, color: '#F97316', letterSpacing: '0.3em', marginTop: 2 }}>
+            EDUCATION
+          </div>
         </div>
 
-        <motion.div
-          initial={{ opacity: 0, y: 30 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
-          className="w-full max-w-[360px] relative z-10 flex flex-col items-center"
+        {/* Welcome card */}
+        <div style={{
+          background: 'var(--tg-theme-secondary-bg-color, #ffffff)',
+          borderRadius: 20, padding: 24, marginBottom: 24,
+          boxShadow: '0 2px 12px rgba(0,86,210,0.08)',
+        }}>
+          <h2 style={{ fontSize: 18, fontWeight: 700, marginBottom: 8, color: 'var(--tg-theme-text-color, #0f172a)' }}>
+            👋 Salom, {displayName}!
+          </h2>
+          <p style={{ fontSize: 14, color: 'var(--tg-theme-hint-color, #64748b)', lineHeight: 1.6 }}>
+            Platformadan foydalanish uchun Telegram hisobingizni Promax Education akkauntingizga ulang.
+          </p>
+        </div>
+
+        {/* Features */}
+        {[
+          { emoji: '📝', text: 'Online testlar topshirish' },
+          { emoji: '📊', text: 'Natijalar va statistika' },
+          { emoji: '📚', text: 'Video darslar' },
+          { emoji: '🔔', text: 'Bildirishnomalar' },
+        ].map((f, i) => (
+          <div key={i} style={{
+            display: 'flex', alignItems: 'center', gap: 12,
+            padding: '12px 0',
+            borderBottom: i < 3 ? '1px solid rgba(0,0,0,0.06)' : 'none',
+          }}>
+            <span style={{ fontSize: 20 }}>{f.emoji}</span>
+            <span style={{ fontSize: 14, color: 'var(--tg-theme-text-color, #0f172a)' }}>{f.text}</span>
+          </div>
+        ))}
+
+        {/* Link button */}
+        <a
+          href="/tg/link"
+          style={{
+            display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
+            marginTop: 28, padding: '15px 24px',
+            background: 'linear-gradient(135deg, #0056D2, #0066ff)',
+            borderRadius: 14, color: '#fff',
+            fontWeight: 700, fontSize: 16, textDecoration: 'none',
+            boxShadow: '0 4px 16px rgba(0,86,210,0.3)',
+          }}
         >
-          
-          {/* Top Logo / Icon Area */}
-          <div className="relative mb-12 w-full flex justify-center">
-            {/* Soft backdrop glow behind logo */}
-            <div className="absolute inset-0 bg-emerald-400/30 dark:bg-emerald-500/10 blur-[50px] rounded-full scale-125" />
-            
-            <motion.div 
-              initial={{ scale: 0.8 }}
-              animate={{ scale: 1 }}
-              transition={{ type: "spring", bounce: 0.4, delay: 0.2 }}
-              className="relative w-28 h-28 bg-white dark:bg-slate-900 rounded-[2.5rem] shadow-[0_20px_50px_rgba(16,185,129,0.15)] dark:shadow-[0_20px_50px_rgba(0,0,0,0.5)] border border-white dark:border-slate-800 flex items-center justify-center overflow-hidden group"
-            >
-              {/* Inner shiny gradient */}
-              <div className="absolute inset-0 bg-gradient-to-tr from-emerald-50 to-transparent dark:from-slate-800 dark:to-transparent opacity-60" />
-              <span className="text-[3.25rem] relative z-10 group-hover:scale-110 group-hover:-rotate-3 transition-transform duration-500">🎓</span>
-            </motion.div>
-          </div>
-
-          {/* Welcome Text */}
-          <div className="text-center mb-10 w-full px-2">
-            <motion.h1 
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.3 }}
-              className="text-[32px] font-semibold text-slate-800 dark:text-slate-100 mb-3 tracking-tight"
-            >
-              Xush kelibsiz
-            </motion.h1>
-            <motion.p 
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.4 }}
-              className="text-[16px] text-slate-500 dark:text-slate-400 leading-relaxed max-w-[280px] mx-auto"
-            >
-              <strong className="text-emerald-600 dark:text-emerald-400 font-semibold">{displayName}</strong>, ta'limning eng qulay usulini kashf eting.
-            </motion.p>
-          </div>
-
-          {/* Premium Glass Card containing features and swipe */}
-          <motion.div 
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.5 }}
-            className="w-full bg-white/70 dark:bg-slate-900/70 backdrop-blur-[24px] rounded-[2.5rem] p-6 sm:p-7 border border-white dark:border-slate-800 shadow-[0_16px_60px_rgba(16,185,129,0.06)] dark:shadow-none"
-          >
-            {/* Visual Grid */}
-            <div className="grid grid-cols-2 gap-3.5 mb-8">
-              {[
-                { icon: BookOpen, label: 'Darslar', color: 'text-blue-500', bg: 'bg-blue-50/80 dark:bg-blue-500/10' },
-                { icon: ClipboardList, label: 'Testlar', color: 'text-orange-500', bg: 'bg-orange-50/80 dark:bg-orange-500/10' },
-                { icon: BarChart3, label: 'Natijalar', color: 'text-emerald-500', bg: 'bg-emerald-50/80 dark:bg-emerald-500/10' },
-                { icon: Trophy, label: 'Reyting', color: 'text-purple-500', bg: 'bg-purple-50/80 dark:bg-purple-500/10' }
-              ].map((item, i) => (
-                <div key={i} className={`flex items-center gap-3 p-4 rounded-[1.25rem] ${item.bg} border border-white/50 dark:border-transparent hover:scale-[1.02] transition-transform`}>
-                  <item.icon className={`w-[22px] h-[22px] ${item.color}`} />
-                  <span className="text-[14px] font-medium text-slate-700 dark:text-slate-200">{item.label}</span>
-                </div>
-              ))}
-            </div>
-
-            <div className="w-full">
-              <SwipeToStart isLoading={isSwiping} onComplete={handleSwipeLogin} />
-            </div>
-          </motion.div>
-
-          {/* Subtle Bottom Link */}
-          <motion.div 
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.7 }}
-            className="mt-8"
-          >
-            <a href="/tg/link" className="text-[14px] text-slate-400 hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors font-medium flex items-center justify-center gap-2">
-               Oldindan hisobingiz bormi?
-            </a>
-          </motion.div>
-          
-        </motion.div>
+          <Link2 size={20} />
+          Hisobni ulash
+        </a>
       </div>
     );
   }
