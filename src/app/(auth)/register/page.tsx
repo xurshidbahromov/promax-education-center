@@ -183,7 +183,12 @@ export default function RegisterPage() {
  </div>
 
  {/* Right Side - Registration Form */}
- <div className="w-full lg:w-1/2 flex items-center justify-center p-6 sm:p-12 relative">
+ <div className="w-full lg:w-1/2 flex items-center justify-center p-6 sm:p-12 relative overflow-hidden">
+        {/* Mobile & Right side Ambient Background */}
+        <div className="absolute inset-0 z-0 overflow-hidden pointer-events-none">
+          <div className="absolute top-[-10%] right-[-10%] w-[60%] h-[60%] rounded-full bg-blue-300/60 blur-[130px] opacity-60" />
+          <div className="absolute bottom-[-10%] left-[-10%] w-[60%] h-[60%] rounded-full bg-purple-300/60 blur-[130px] opacity-60" />
+        </div>
  <Link href="/" className="absolute top-8 left-8 lg:hidden group flex items-center gap-2 text-gray-500 hover:text-brand-blue transition-colors">
  <ArrowLeft size={20} className="group-hover:-translate-x-1 transition-transform" />
  <span>{t('auth.back_to_home')}</span>
@@ -193,14 +198,14 @@ export default function RegisterPage() {
  initial={{ opacity: 0, x: 20 }}
  animate={{ opacity: 1, x: 0 }}
  transition={{ duration: 0.5 }}
- className="w-full max-w-md font-fredoka"
+ className="w-full max-w-md font-fredoka relative z-10"
  >
  <motion.form
  onSubmit={handleRegister}
  initial={{ opacity: 0, y: 20 }}
  animate={{ opacity: 1, y: 0 }}
  transition={{ delay: 0.2 }}
- className="space-y-6"
+ className="w-full bg-white/60 dark:bg-slate-900/60 backdrop-blur-xl rounded-[2rem] p-6 sm:p-10 shadow-sm border border-white/60 dark:border-slate-700/50 space-y-6"
  >
  <div className="text-center mb-8">
  <h2 className="text-3xl font-medium text-slate-800 dark:text-slate-100 mb-2">
@@ -222,7 +227,7 @@ export default function RegisterPage() {
  value={name}
  onChange={(e) => setName(e.target.value)}
  placeholder={t('auth.register.name_placeholder')}
- className="w-full pl-12 pr-4 py-3 border-2 border-gray-200 dark:border-slate-700 rounded-xl focus:outline-none focus:border-brand-blue bg-white dark:bg-slate-800/80 backdrop-blur-sm text-slate-800 dark:text-slate-100 placeholder-gray-400 transition-colors"
+ className="w-full pl-12 pr-4 py-3 border-2 border-gray-200 dark:border-slate-700 rounded-xl focus:outline-none focus:border-brand-blue bg-white/50 dark:bg-slate-800/50 backdrop-blur-sm text-slate-800 dark:text-slate-100 placeholder-gray-400 transition-colors"
  required
  />
  <div className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-brand-blue transition-colors pointer-events-none z-10">
@@ -241,7 +246,7 @@ export default function RegisterPage() {
  value={phone}
  onChange={handlePhoneChange}
  placeholder="+998 XX XXX XX XX"
- className="w-full pl-12 pr-4 py-3 border-2 border-gray-200 dark:border-slate-700 rounded-xl focus:outline-none focus:border-brand-blue bg-white dark:bg-slate-800/80 backdrop-blur-sm text-slate-800 dark:text-slate-100 placeholder-gray-400 transition-colors"
+ className="w-full pl-12 pr-4 py-3 border-2 border-gray-200 dark:border-slate-700 rounded-xl focus:outline-none focus:border-brand-blue bg-white/50 dark:bg-slate-800/50 backdrop-blur-sm text-slate-800 dark:text-slate-100 placeholder-gray-400 transition-colors"
  />
  <div className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-brand-blue transition-colors pointer-events-none z-10">
  <Phone size={20} />

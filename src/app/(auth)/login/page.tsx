@@ -171,20 +171,10 @@ export default function LoginPage() {
 
  {/* Right Side - Form */}
  <div className="w-full lg:w-1/2 flex items-center justify-center p-6 sm:p-12 relative overflow-hidden">
- <AnimatePresence>
- {loginAs && (
- <motion.div
- initial={{ opacity: 0 }}
- animate={{ opacity: 1 }}
- exit={{ opacity: 0 }}
- transition={{ duration: 0.8 }}
- className="pointer-events-none absolute inset-0 z-0"
- >
- <div className={`absolute -top-40 -right-40 w-96 h-96 rounded-full blur-[100px] opacity-20 transition-colors duration-700 ${loginAs === 'student' ? 'bg-brand-blue' : 'bg-brand-orange'}`} />
- <div className={`absolute -bottom-40 -left-40 w-96 h-96 rounded-full blur-[100px] opacity-20 transition-colors duration-700 ${loginAs === 'student' ? 'bg-brand-blue' : 'bg-brand-orange'}`} />
- </motion.div>
- )}
- </AnimatePresence>
+        <div className="absolute inset-0 z-0 overflow-hidden pointer-events-none">
+          <div className={`absolute top-[-10%] right-[-10%] w-[60%] h-[60%] rounded-full blur-[130px] opacity-60 transition-colors duration-700 ${loginAs === 'student' ? 'bg-blue-300' : loginAs === 'staff' ? 'bg-orange-300' : 'bg-blue-200'}`} />
+          <div className={`absolute bottom-[-10%] left-[-10%] w-[60%] h-[60%] rounded-full blur-[130px] opacity-60 transition-colors duration-700 ${loginAs === 'student' ? 'bg-purple-300' : loginAs === 'staff' ? 'bg-yellow-300' : 'bg-purple-200'}`} />
+        </div>
 
  <Link href="/" className="absolute top-8 left-8 lg:hidden group flex items-center gap-2 text-gray-500 hover:text-brand-blue transition-colors z-20">
  <ArrowLeft size={20} className="group-hover:-translate-x-1 transition-transform" />
@@ -206,7 +196,7 @@ export default function LoginPage() {
  animate={{ opacity: 1, y: 0 }}
  exit={{ opacity: 0, y: -20 }}
  transition={{ duration: 0.3 }}
- className="space-y-8"
+ className="w-full space-y-8 relative z-10"
  >
  <div className="text-center">
  <h1 className="text-4xl font-medium text-slate-800 dark:text-slate-100 mb-3">
@@ -372,7 +362,7 @@ export default function LoginPage() {
  animate={{ opacity: 1, x: 0 }}
  exit={{ opacity: 0, x: -50 }}
  transition={{ duration: 0.4 }}
- className="space-y-6"
+ className="w-full bg-white/60 dark:bg-slate-900/60 backdrop-blur-xl rounded-[2rem] p-6 sm:p-10 shadow-sm border border-white/60 dark:border-slate-700/50 space-y-6 relative z-10"
  >
  {/* Back Button + Role Badge */}
  <div className="flex items-center justify-between mb-6">
@@ -412,7 +402,7 @@ export default function LoginPage() {
  value={phone}
  onChange={handlePhoneChange}
  placeholder="+998 XX XXX XX XX"
- className={`w-full pl-12 pr-4 py-3 border-2 border-gray-200 dark:border-slate-700 rounded-xl focus:outline-none bg-white dark:bg-slate-800/80 backdrop-blur-sm text-slate-800 dark:text-slate-100 placeholder-gray-400 transition-colors ${loginAs === 'student' ? 'focus:border-brand-blue' : 'focus:border-brand-orange'}`}
+ className={`w-full pl-12 pr-12 py-3 border-2 border-gray-200 dark:border-slate-700 rounded-xl focus:outline-none bg-white/50 dark:bg-slate-800/50 backdrop-blur-sm text-slate-800 dark:text-slate-100 placeholder-gray-400 transition-colors ${loginAs === 'student' ? 'focus:border-brand-blue' : 'focus:border-brand-orange'}`}
  required
  />
  <div className={`absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 transition-colors pointer-events-none z-10 ${loginAs === 'student' ? 'group-focus-within:text-brand-blue' : 'group-focus-within:text-brand-orange'}`}>
