@@ -6,6 +6,68 @@ const APP_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://promaxedu.uz';
 
 // ─── Keyboards ─────────────────────────────────────────────────────────────────
 
+export function buildReplyKeyboard(linked: boolean, role: string = 'student') {
+  if (!linked) {
+    return {
+      keyboard: [
+        [
+          {
+            text: '🔗 Platformaga ulash',
+            web_app: { url: `${APP_URL}/tg/link` },
+          },
+        ]
+      ],
+      resize_keyboard: true,
+      is_persistent: true,
+    };
+  }
+
+  if (role === 'staff' || role === 'admin') {
+    return {
+      keyboard: [
+        [
+          {
+            text: '📱 Mini App ochish',
+            web_app: { url: `${APP_URL}/tg` },
+          },
+        ],
+        [
+          { text: '👥 O\'quvchilar' },
+          { text: '📝 Testlarni tekshirish' },
+        ],
+        [
+          { text: '🏫 Guruhlar' },
+          { text: '👤 Profil' },
+        ],
+      ],
+      resize_keyboard: true,
+      is_persistent: true,
+    };
+  }
+
+  // Default: Student
+  return {
+    keyboard: [
+      [
+        {
+          text: '📱 Mini App ochish',
+          web_app: { url: `${APP_URL}/tg` },
+        },
+      ],
+      [
+        { text: '📝 Testlar' },
+        { text: '📊 Natijalarim' },
+      ],
+      [
+        { text: '📚 Darslar' },
+        { text: '👤 Profil' },
+      ],
+    ],
+    resize_keyboard: true,
+    is_persistent: true,
+  };
+}
+
 export function buildMainMenuKeyboard(linked: boolean, role: string = 'student') {
   if (!linked) {
     return {

@@ -9,6 +9,7 @@ import {
   buildWelcomeMessage,
   buildStatsMessage,
   buildMainMenuKeyboard,
+  buildReplyKeyboard,
   buildOpenAppKeyboard,
 } from '@/lib/telegram/messages';
 
@@ -80,13 +81,13 @@ export async function POST(request: NextRequest) {
       }
 
       await sendMessage(chatId, buildWelcomeMessage(firstName, isLinked, profile?.role), {
-        reply_markup: buildMainMenuKeyboard(isLinked, profile?.role),
+        reply_markup: buildReplyKeyboard(isLinked, profile?.role),
       });
     } else if (text === '/menu') {
       await sendMessage(chatId, `📋 <b>Asosiy menyu</b>\n\nQuyidagi bo'limlardan birini tanlang:`, {
-        reply_markup: buildMainMenuKeyboard(isLinked, profile?.role),
+        reply_markup: buildReplyKeyboard(isLinked, profile?.role),
       });
-    } else if (text === '/mystats') {
+    } else if (text === '/mystats' || text === '👤 Profil') {
       if (!isLinked || !profile) {
         await sendMessage(
           chatId,
@@ -131,12 +132,24 @@ export async function POST(request: NextRequest) {
         `/help — Yordam\n\n` +
         `📱 Mini App orqali barcha funksiyalardan foydalaning!`
       );
+    } else if (['📝 Testlar', '📊 Natijalarim', '📚 Darslar', '👥 O\'quvchilar', '📝 Testlarni tekshirish', '🏫 Guruhlar'].includes(text)) {
+      await sendMessage(
+        chatId,
+        `${text.split(' ')[1]} bo'limini ochish uchun quyidagi tugmani bosing:`,
+        {
+          reply_markup: {
+            inline_keyboard: [
+              [{ text: `📱 Mini App'da ochish`, web_app: { url: `${APP_URL}/tg` } }],
+            ],
+          },
+        }
+      );
     } else {
       // Unknown command
       await sendMessage(
         chatId,
         `❓ Noma'lum buyruq.\n\n/menu — Asosiy menyu\n/help — Yordam`,
-        { reply_markup: buildMainMenuKeyboard(isLinked, profile?.role) }
+        { reply_markup: buildReplyKeyboard(isLinked, profile?.role) }
       );
     }
   }
