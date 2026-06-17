@@ -19,20 +19,11 @@ export default function SwipeToStart({ onComplete, isLoading = false }: SwipeToS
   // Calculate width constraints
   const containerWidth = 320;
   const buttonWidth = 62;
-  const padding = 6; // p-1.5 = 6px
+  const padding = 8; // p-2 = 8px
   const dragConstraints = { left: 0, right: containerWidth - buttonWidth - (padding * 2) };
 
-  const backgroundOpacity = useTransform(
-    x,
-    [0, dragConstraints.right],
-    [0.1, 1]
-  );
-  
-  const textOpacity = useTransform(
-    x,
-    [0, dragConstraints.right / 2],
-    [1, 0]
-  );
+  const backgroundOpacity = useTransform(x, [0, dragConstraints.right], [0, 1]);
+  const textOpacity = useTransform(x, [0, dragConstraints.right / 2], [1, 0]);
 
   const handleDragEnd = (event: any, info: any) => {
     if (info.offset.x >= dragConstraints.right - 20) {
@@ -47,7 +38,6 @@ export default function SwipeToStart({ onComplete, isLoading = false }: SwipeToS
 
   useEffect(() => {
     if (!completed && !isLoading) {
-      // Pulse animation to hint at swipe
       const interval = setInterval(() => {
         controls.start({
           x: [0, 15, 0],
@@ -59,11 +49,11 @@ export default function SwipeToStart({ onComplete, isLoading = false }: SwipeToS
   }, [completed, isLoading, controls]);
 
   return (
-    <div className="relative w-full max-w-[320px] mx-auto h-[74px] bg-slate-800/40 backdrop-blur-xl rounded-[37px] p-[6px] overflow-hidden border border-white/10 shadow-[0_8px_32px_rgba(0,0,0,0.3)] flex items-center">
+    <div className="relative w-full max-w-[320px] mx-auto h-[78px] bg-white dark:bg-slate-800 rounded-[39px] p-2 overflow-hidden border border-slate-100 dark:border-slate-700/60 shadow-[inset_0_4px_12px_rgba(0,0,0,0.02)] flex items-center group">
       
-      {/* Background fill that grows as you drag */}
+      {/* Background fill */}
       <motion.div 
-        className="absolute inset-0 bg-gradient-to-r from-brand-blue to-brand-orange"
+        className="absolute inset-0 bg-emerald-50 dark:bg-emerald-500/10"
         style={{ opacity: backgroundOpacity }}
       />
 
@@ -72,8 +62,8 @@ export default function SwipeToStart({ onComplete, isLoading = false }: SwipeToS
         className="absolute w-full text-center pointer-events-none"
         style={{ opacity: textOpacity }}
       >
-        <span className="text-white/70 font-medium text-[15px] tracking-wide pl-8">
-          Ushlab o'ngga suring
+        <span className="text-slate-400 dark:text-slate-500 font-medium text-[15px] tracking-wide pl-8">
+          Boshlash uchun suring
         </span>
       </motion.div>
 
@@ -85,12 +75,12 @@ export default function SwipeToStart({ onComplete, isLoading = false }: SwipeToS
         onDragEnd={handleDragEnd}
         animate={controls}
         style={{ x }}
-        className="relative z-10 w-[62px] h-[62px] bg-white rounded-full flex items-center justify-center shadow-[0_4px_12px_rgba(0,0,0,0.15)] cursor-grab active:cursor-grabbing"
+        className="relative z-10 w-[62px] h-[62px] bg-gradient-to-tr from-emerald-500 to-teal-400 rounded-full flex items-center justify-center shadow-[0_8px_20px_rgba(16,185,129,0.3)] dark:shadow-[0_8px_20px_rgba(16,185,129,0.1)] cursor-grab active:cursor-grabbing hover:scale-[1.02] transition-transform"
       >
         {isLoading ? (
-          <Loader2 className="w-6 h-6 text-brand-blue animate-spin" />
+          <Loader2 className="w-6 h-6 text-white animate-spin" />
         ) : (
-          <ArrowRight className="w-6 h-6 text-brand-blue" />
+          <ArrowRight className="w-6 h-6 text-white" />
         )}
       </motion.div>
     </div>
