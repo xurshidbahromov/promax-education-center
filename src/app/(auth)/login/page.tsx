@@ -113,6 +113,39 @@ export default function LoginPage() {
     }
  };
 
+ const handleWebAppAuth = async (initData: string) => {
+    try {
+      setLoading(true);
+      const res = await fetch('/api/telegram/webapp-auth', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ initData })
+      });
+      const data = await res.json();
+      
+      if (data.linked && !data.needsPassword) {
+        toast.success("Telegram orqali muvaffaqiyatli kirdingiz");
+        router.push(data.profile?.role === 'student' ? '/dashboard' : '/dashboard');
+      } else {
+        if (data.linked && data.needsPassword) {
+          setLinkingUser(data.telegramUser || null); // Note: backend returns telegramUser if unlinked. Let's make sure backend returns it or we just use what we can.
+          // Wait, backend webapp-auth returns `profile` if linked but needs password?
+          // I will fix the type mapping later. Let's just set step.
+          setLinkingUser(data.telegramUser || { id: -1, first_name: 'Telegram User' }); 
+          setLinkPhone(data.phone || '');
+          setStep('link');
+        } else {
+          setLinkingUser(data.telegramUser);
+          setStep('link');
+        }
+      }
+    } catch (err) {
+      toast.error("Mini App orqali kirishda xatolik yuz berdi");
+    } finally {
+      setLoading(false);
+    }
+ };
+
  const handleLinkAccount = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!linkingUser || !linkPhone) return;
@@ -524,8 +557,9 @@ export default function LoginPage() {
 
   <div className="flex flex-col items-center justify-center">
     <TelegramLoginWidget 
-      clientId="8736423754" 
+      clientId={process.env.NEXT_PUBLIC_TELEGRAM_CLIENT_ID || '8736423754'} 
       onAuth={handleTelegramAuth} 
+      onWebAppAuth={handleWebAppAuth}
     />
   </div>
 

@@ -20,15 +20,26 @@ export interface TelegramAuthPayload {
 interface TelegramLoginWidgetProps {
   clientId: string;
   onAuth: (payload: TelegramAuthPayload) => void;
+  onWebAppAuth?: (initData: string) => void;
 }
 
 export default function TelegramLoginWidget({
   clientId,
   onAuth,
+  onWebAppAuth,
 }: TelegramLoginWidgetProps) {
   const [isScriptLoaded, setIsScriptLoaded] = useState(false);
+  const [isWebApp, setIsWebApp] = useState(false);
 
   useEffect(() => {
+    // Detect Telegram WebApp
+    if (typeof window !== 'undefined' && (window as any).Telegram?.WebApp?.initData) {
+      setIsWebApp(true);
+      // We don't need the login widget script if we are in a WebApp
+      setIsScriptLoaded(true); 
+      return;
+    }
+
     // Check if the script is already loaded
     if (document.querySelector('script[src^="https://oauth.telegram.org/js/telegram-login.js"]')) {
       setIsScriptLoaded(true);
@@ -40,13 +51,14 @@ export default function TelegramLoginWidget({
     script.async = true;
     script.onload = () => setIsScriptLoaded(true);
     document.body.appendChild(script);
-
-    return () => {
-      // We don't remove the script on unmount as it might be used globally
-    };
   }, []);
 
   const handleCustomLogin = () => {
+    if (isWebApp && onWebAppAuth) {
+      onWebAppAuth((window as any).Telegram.WebApp.initData);
+      return;
+    }
+
     if (!isScriptLoaded || !(window as any).Telegram?.Login) {
       console.error("Telegram Login SDK not loaded yet.");
       return;
