@@ -140,62 +140,73 @@ export default function TelegramMiniAppPage() {
   // ─── Not linked (Swipe to Start) ───────────────────────────────────────────
   if (!authState?.linked) {
     return (
-      <div className="min-h-[100vh] min-h-[100dvh] relative overflow-hidden bg-slate-900 flex flex-col items-center justify-between py-12 px-6">
-        {/* Background elements */}
-        <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] bg-brand-blue/30 blur-[120px] rounded-full pointer-events-none" />
-        <div className="absolute bottom-[-10%] right-[-10%] w-[50%] h-[50%] bg-brand-orange/20 blur-[120px] rounded-full pointer-events-none" />
-        
-        <div className="relative z-10 flex flex-col items-center mt-12 w-full">
-          <motion.div 
-             initial={{ scale: 0.8, opacity: 0 }}
-             animate={{ scale: 1, opacity: 1 }}
-             transition={{ duration: 0.5, type: "spring" }}
-             className="w-24 h-24 rounded-3xl bg-gradient-to-br from-brand-blue to-brand-orange p-[2px] shadow-[0_8px_32px_rgba(249,115,22,0.3)] mb-8"
-          >
-            <div className="w-full h-full bg-slate-900 rounded-[22px] flex items-center justify-center backdrop-blur-xl">
-               <span className="text-4xl">🎓</span>
-            </div>
-          </motion.div>
-          
-          <motion.div
-             initial={{ y: 20, opacity: 0 }}
-             animate={{ y: 0, opacity: 1 }}
-             transition={{ duration: 0.5, delay: 0.1 }}
-             className="text-center"
-          >
-            <h1 className="text-4xl font-black text-white tracking-wider uppercase mb-1">
-              PROMAX
-            </h1>
-            <h2 className="text-sm font-bold text-brand-orange tracking-[0.4em]">
-              EDUCATION
-            </h2>
-          </motion.div>
-
-          <motion.p
-             initial={{ y: 20, opacity: 0 }}
-             animate={{ y: 0, opacity: 1 }}
-             transition={{ duration: 0.5, delay: 0.2 }}
-             className="text-slate-400 text-center mt-6 max-w-[280px] leading-relaxed"
-          >
-            <strong className="text-white">{displayName}</strong>, ta'lim olishning eng zamonaviy va qulay usuliga xush kelibsiz.
-          </motion.p>
+      <div className="min-h-[100vh] min-h-[100dvh] flex bg-gray-50 dark:bg-slate-800/80 backdrop-blur-sm items-center justify-center p-6 relative overflow-hidden">
+        {/* Background Elements */}
+        <div className="absolute inset-0 z-0 overflow-hidden pointer-events-none">
+          <div className="absolute top-[-10%] right-[-10%] w-[60%] h-[60%] rounded-full blur-[130px] opacity-60 transition-colors duration-700 bg-blue-300 dark:bg-brand-blue/30" />
+          <div className="absolute bottom-[-10%] left-[-10%] w-[60%] h-[60%] rounded-full blur-[130px] opacity-60 transition-colors duration-700 bg-orange-300 dark:bg-brand-orange/20" />
         </div>
 
-        <motion.div 
-          initial={{ y: 40, opacity: 0 }}
-          animate={{ y: 0, opacity: 1 }}
-          transition={{ duration: 0.6, delay: 0.3 }}
-          className="w-full relative z-10 mb-8"
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5 }}
+          className="w-full max-w-md font-fredoka relative z-10 flex flex-col space-y-8"
         >
-          <SwipeToStart 
-            isLoading={isSwiping}
-            onComplete={handleSwipeLogin} 
-          />
-          
-          <div className="mt-8 text-center">
-             <a href="/tg/link" className="text-xs text-slate-500 font-medium hover:text-slate-300 transition-colors">
-                Menda oldindan hisob bor (Web)
-             </a>
+          {/* Header */}
+          <div className="text-center space-y-4">
+            <div className="w-24 h-24 mx-auto relative flex items-center justify-center bg-white dark:bg-slate-900 rounded-3xl shadow-[0_8px_30px_rgb(0,0,0,0.08)] p-4 border border-slate-100 dark:border-slate-800">
+               {/* Custom CSS gradient text for Logo */}
+               <span className="text-4xl">🎓</span>
+            </div>
+            
+            <div>
+              <h1 className="text-3xl font-medium text-slate-800 dark:text-slate-100 mb-2">
+                Xush kelibsiz
+              </h1>
+              <p className="text-gray-600 dark:text-gray-400 text-base max-w-[280px] mx-auto leading-relaxed">
+                <strong className="text-brand-blue dark:text-white font-medium">{displayName}</strong>, Promax platformasiga bitta surish orqali kiring.
+              </p>
+            </div>
+          </div>
+
+          {/* Glass Card */}
+          <div className="bg-white/70 dark:bg-slate-900/70 backdrop-blur-xl rounded-[2rem] p-6 sm:p-8 border border-slate-100 dark:border-slate-800/60 shadow-[0_8px_30px_rgb(0,0,0,0.04)] relative overflow-hidden">
+            
+            {/* Inner background glow */}
+            <div className="absolute top-0 right-0 w-32 h-32 bg-brand-blue/5 rounded-full blur-2xl" />
+            
+            {/* Visual Info Grid */}
+            <div className="grid grid-cols-2 gap-4 mb-10 relative z-10">
+              <div className="flex flex-col items-center justify-center p-4 rounded-2xl bg-brand-blue/5 dark:bg-brand-blue/10 text-brand-blue hover:bg-brand-blue/10 transition-colors border border-brand-blue/10">
+                <BookOpen className="w-7 h-7 mb-3" />
+                <span className="text-[13px] font-medium">Video Darslar</span>
+              </div>
+              <div className="flex flex-col items-center justify-center p-4 rounded-2xl bg-brand-orange/5 dark:bg-brand-orange/10 text-brand-orange hover:bg-brand-orange/10 transition-colors border border-brand-orange/10">
+                <ClipboardList className="w-7 h-7 mb-3" />
+                <span className="text-[13px] font-medium">Online Testlar</span>
+              </div>
+              <div className="flex flex-col items-center justify-center p-4 rounded-2xl bg-emerald-500/5 dark:bg-emerald-500/10 text-emerald-500 hover:bg-emerald-500/10 transition-colors border border-emerald-500/10">
+                <BarChart3 className="w-7 h-7 mb-3" />
+                <span className="text-[13px] font-medium">Natijalar</span>
+              </div>
+              <div className="flex flex-col items-center justify-center p-4 rounded-2xl bg-purple-500/5 dark:bg-purple-500/10 text-purple-500 hover:bg-purple-500/10 transition-colors border border-purple-500/10">
+                <Trophy className="w-7 h-7 mb-3" />
+                <span className="text-[13px] font-medium">Reyting</span>
+              </div>
+            </div>
+
+            {/* SwipeToStart */}
+            <div className="w-full relative z-10">
+              <SwipeToStart isLoading={isSwiping} onComplete={handleSwipeLogin} />
+            </div>
+          </div>
+
+          {/* Footer Link */}
+          <div className="text-center relative z-10">
+            <a href="/tg/link" className="text-[13px] text-gray-500 hover:text-brand-blue transition-colors font-medium flex items-center justify-center gap-2 bg-white/50 dark:bg-slate-800/50 backdrop-blur-sm py-2 px-4 rounded-full inline-flex border border-slate-200 dark:border-slate-700/50">
+               Menda oldindan hisob bor (Web) <ExternalLink size={14} />
+            </a>
           </div>
         </motion.div>
       </div>
