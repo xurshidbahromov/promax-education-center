@@ -402,7 +402,7 @@ export default function LoginPage() {
  value={phone}
  onChange={handlePhoneChange}
  placeholder="+998 XX XXX XX XX"
- className={`w-full pl-12 pr-12 py-3 border-2 border-gray-200 dark:border-slate-700 rounded-xl focus:outline-none bg-white/50 dark:bg-slate-800/50 backdrop-blur-sm text-slate-800 dark:text-slate-100 placeholder-gray-400 transition-colors ${loginAs === 'student' ? 'focus:border-brand-blue' : 'focus:border-brand-orange'}`}
+ className={`w-full pl-12 pr-12 py-3 border-2 border-gray-200 dark:border-slate-700 rounded-xl outline-none focus:!outline-none focus:!ring-0 focus:!shadow-none bg-white/50 dark:bg-slate-800/50 backdrop-blur-sm text-slate-800 dark:text-slate-100 placeholder-gray-400 transition-colors ${loginAs === 'student' ? 'focus:!border-brand-blue' : 'focus:!border-brand-orange'}`}
  required
  />
  <div className={`absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 transition-colors pointer-events-none z-10 ${loginAs === 'student' ? 'group-focus-within:text-brand-blue' : 'group-focus-within:text-brand-orange'}`}>
@@ -430,7 +430,7 @@ export default function LoginPage() {
  value={password}
  onChange={(e) => setPassword(e.target.value)}
  placeholder="••••••••"
- className={`w-full pl-12 pr-12 py-3 border-2 border-gray-200 dark:border-slate-700 rounded-xl focus:outline-none bg-white dark:bg-slate-800/80 backdrop-blur-sm text-slate-800 dark:text-slate-100 placeholder-gray-400 transition-colors ${loginAs === 'student' ? 'focus:border-brand-blue' : 'focus:border-brand-orange'}`}
+ className={`w-full pl-12 pr-12 py-3 border-2 border-gray-200 dark:border-slate-700 rounded-xl outline-none focus:!outline-none focus:!ring-0 focus:!shadow-none bg-white/50 dark:bg-slate-800/50 backdrop-blur-sm text-slate-800 dark:text-slate-100 placeholder-gray-400 transition-colors ${loginAs === 'student' ? 'focus:!border-brand-blue' : 'focus:!border-brand-orange'}`}
  required
  />
  <div className={`absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 transition-colors pointer-events-none z-10 ${loginAs === 'student' ? 'group-focus-within:text-brand-blue' : 'group-focus-within:text-brand-orange'}`}>

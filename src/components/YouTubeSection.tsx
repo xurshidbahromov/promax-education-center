@@ -82,48 +82,60 @@ const YouTubeSection = () => {
  {/* Playlist Grid */}
  <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 md:gap-8">
  {playlists.map((playlist, index) => (
- <motion.a
- key={playlist.id}
- href={playlist.url}
- target="_blank"
- rel="noopener noreferrer"
- initial={{ opacity: 0, y: 30 }}
- whileInView={{ opacity: 1, y: 0 }}
- viewport={{ once: true }}
- transition={{ delay: index * 0.15 }}
- className="group relative h-[400px] lg:h-[500px] rounded-3xl overflow-hidden block shadow-md [-webkit-mask-image:-webkit-radial-gradient(white,black)]"
- >
- <Image
- src={playlist.image}
- alt="Playlist Thumbnail"
- fill
- className="object-cover transition-transform duration-700 group-hover:scale-[1.03]"
- />
- 
- {/* Gradients */}
- <div className="absolute inset-0 bg-gradient-to-t from-slate-900 via-slate-900/40 to-transparent" />
- <div className="absolute inset-0 bg-gradient-to-tr from-brand-blue/60 via-slate-900/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+          <motion.a
+            key={playlist.id}
+            href={playlist.url}
+            target="_blank"
+            rel="noopener noreferrer"
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ delay: index * 0.15 }}
+            className="group block w-full mt-8 relative"
+          >
+            {/* Stack Layers (Behind the entire card) */}
+            <div className="absolute -top-4 left-6 right-6 bottom-0 bg-slate-200/60 dark:bg-slate-800/60 rounded-[2rem] transition-all duration-300 group-hover:-top-6 opacity-40 z-0" />
+            <div className="absolute -top-2 left-3 right-3 bottom-0 bg-slate-300/60 dark:bg-slate-700/60 rounded-[2rem] transition-all duration-300 group-hover:-top-3 opacity-60 z-0" />
 
- {/* Content */}
- <div className="absolute inset-0 p-8 flex flex-col">
- {/* Top Badge */}
- <div className="self-end bg-black/60 backdrop-blur-md px-4 py-2 rounded-full border border-white/10 flex items-center gap-2 transform translate-y-4 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-300">
- <ListVideo className="w-4 h-4 text-white" />
- <span className="text-white font-medium text-sm">{playlist.count} Videos</span>
- </div>
+            {/* Main Card (Integrates both thumbnail and text) */}
+            <div className="relative w-full rounded-[2rem] overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-300 z-10 bg-white/70 dark:bg-slate-900/70 backdrop-blur-xl border border-white/60 dark:border-slate-800/50 group-hover:border-red-500/30 dark:group-hover:border-red-500/30">
+              {/* Thumbnail area */}
+              <div className="relative w-full aspect-[16/10] sm:aspect-video overflow-hidden bg-slate-100 dark:bg-slate-800">
+                <Image
+                  src={playlist.image}
+                  alt="Playlist Thumbnail"
+                  fill
+                  className="object-cover transition-transform duration-700 group-hover:scale-105"
+                />
+                
+                {/* Right Side Overlay (YouTube Style) */}
+                <div className="absolute top-0 right-0 bottom-0 w-[35%] sm:w-[30%] bg-black/60 backdrop-blur-md flex flex-col items-center justify-center text-white transition-all duration-300 group-hover:bg-black/70 border-l border-white/10">
+                  <ListVideo className="w-8 h-8 sm:w-10 sm:h-10 mb-2 opacity-90" />
+                  <span className="font-bold text-lg sm:text-xl">{playlist.count}</span>
+                  <span className="text-[10px] sm:text-xs font-medium uppercase tracking-widest opacity-80 mt-1">Videolar</span>
+                </div>
 
- {/* Bottom Info */}
- <div className="mt-auto">
- <div className="w-16 h-16 bg-brand-blue text-white rounded-full flex items-center justify-center shadow-sm transform translate-y-4 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-500 mb-6 group-hover:bg-brand-blue/90">
- <Play className="w-6 h-6 ml-1" fill="currentColor" />
- </div>
+                {/* Hover Play All Overlay */}
+                <div className="absolute inset-0 bg-black/30 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300 backdrop-blur-[2px]">
+                  <div className="flex items-center gap-2 bg-red-600 text-white px-6 py-3 rounded-full font-bold tracking-wider transform translate-y-4 group-hover:translate-y-0 transition-all duration-300 shadow-lg shadow-red-600/30">
+                    <Play className="w-5 h-5" fill="currentColor" />
+                    PLAY ALL
+                  </div>
+                </div>
+              </div>
 
- <h3 className="text-2xl font-semibold text-white uppercase tracking-wide leading-tight transition-colors duration-300">
- {t(playlist.titleKey)}
- </h3>
- </div>
- </div>
- </motion.a>
+              {/* Integrated Text Information */}
+              <div className="p-6">
+                <h3 className="text-xl font-bold text-slate-800 dark:text-slate-100 leading-tight transition-colors duration-300 group-hover:text-red-600 dark:group-hover:text-red-500 font-fredoka line-clamp-2">
+                  {t(playlist.titleKey)}
+                </h3>
+                <p className="text-xs font-medium text-slate-500 dark:text-slate-400 mt-3 flex items-center gap-2">
+                  <span className="w-2 h-2 rounded-full bg-red-600 shadow-[0_0_8px_rgba(220,38,38,0.8)]"></span>
+                  YouTube Playlist
+                </p>
+              </div>
+            </div>
+          </motion.a>
  ))}
  </div>
 

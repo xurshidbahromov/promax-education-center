@@ -110,6 +110,7 @@ export default function AdminCoursesPage() {
  .from("subjects")
  .update({
  title: formData.title,
+ name: formData.title,
  description: formData.description,
  cover_image: coverImageUrl || null
  })
@@ -120,6 +121,7 @@ export default function AdminCoursesPage() {
  .from("subjects")
  .insert({
  title: formData.title,
+ name: formData.title,
  description: formData.description,
  cover_image: coverImageUrl || null
  });
@@ -127,9 +129,9 @@ export default function AdminCoursesPage() {
  }
  await loadSubjects();
  closeModal();
- } catch (error) {
+ } catch (error: any) {
  console.error("Error saving subject:", error);
- alert("Xatolik yuz berdi. Iltimos qayta urinib ko'ring.");
+ alert(`Xatolik yuz berdi: ${error.message || JSON.stringify(error)}`);
  } finally {
  setIsSubmitting(false);
  }

@@ -222,14 +222,14 @@ export default function RegisterPage() {
  {t('auth.register.name')}
  </label>
  <div className="relative group">
- <input
- type="text"
- value={name}
- onChange={(e) => setName(e.target.value)}
- placeholder={t('auth.register.name_placeholder')}
- className="w-full pl-12 pr-4 py-3 border-2 border-gray-200 dark:border-slate-700 rounded-xl focus:outline-none focus:border-brand-blue bg-white/50 dark:bg-slate-800/50 backdrop-blur-sm text-slate-800 dark:text-slate-100 placeholder-gray-400 transition-colors"
- required
- />
+  <input
+    type="text"
+    value={name}
+    onChange={(e) => setName(e.target.value)}
+    placeholder={t('auth.register.name_placeholder')}
+    className="w-full pl-12 pr-4 py-3 border-2 border-gray-200 dark:border-slate-700 rounded-xl outline-none focus:!outline-none focus:!ring-0 focus:!shadow-none focus:!border-brand-blue bg-white/50 dark:bg-slate-800/50 backdrop-blur-sm text-slate-800 dark:text-slate-100 placeholder-gray-400 transition-colors"
+    required
+  />
  <div className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-brand-blue transition-colors pointer-events-none z-10">
  <User size={20} />
  </div>
@@ -241,13 +241,13 @@ export default function RegisterPage() {
  {t('auth.register.phone')}
  </label>
  <div className="relative group">
- <input
- type="tel"
- value={phone}
- onChange={handlePhoneChange}
- placeholder="+998 XX XXX XX XX"
- className="w-full pl-12 pr-4 py-3 border-2 border-gray-200 dark:border-slate-700 rounded-xl focus:outline-none focus:border-brand-blue bg-white/50 dark:bg-slate-800/50 backdrop-blur-sm text-slate-800 dark:text-slate-100 placeholder-gray-400 transition-colors"
- />
+  <input
+    type="tel"
+    value={phone}
+    onChange={handlePhoneChange}
+    placeholder="+998 XX XXX XX XX"
+    className="w-full pl-12 pr-4 py-3 border-2 border-gray-200 dark:border-slate-700 rounded-xl outline-none focus:!outline-none focus:!ring-0 focus:!shadow-none focus:!border-brand-blue bg-white/50 dark:bg-slate-800/50 backdrop-blur-sm text-slate-800 dark:text-slate-100 placeholder-gray-400 transition-colors"
+  />
  <div className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-brand-blue transition-colors pointer-events-none z-10">
  <Phone size={20} />
  </div>
@@ -261,14 +261,14 @@ export default function RegisterPage() {
  {t('auth.register.password')}
  </label>
  <div className="relative group">
- <input
- type={showPassword ? "text" : "password"}
- value={password}
- onChange={(e) => setPassword(e.target.value)}
- placeholder="••••••••"
- className="w-full pl-12 pr-12 py-3 border-2 border-gray-200 dark:border-slate-700 rounded-xl focus:outline-none focus:border-brand-blue bg-white dark:bg-slate-800/80 backdrop-blur-sm text-slate-800 dark:text-slate-100 placeholder-gray-400 transition-colors"
- required
- />
+  <input
+    type={showPassword ? "text" : "password"}
+    value={password}
+    onChange={(e) => setPassword(e.target.value)}
+    placeholder="••••••••"
+    className="w-full pl-12 pr-12 py-3 border-2 border-gray-200 dark:border-slate-700 rounded-xl outline-none focus:!outline-none focus:!ring-0 focus:!shadow-none focus:!border-brand-blue bg-white/50 dark:bg-slate-800/50 backdrop-blur-sm text-slate-800 dark:text-slate-100 placeholder-gray-400 transition-colors"
+    required
+  />
  <div className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-brand-blue transition-colors pointer-events-none z-10">
  <Lock size={20} />
  </div>
