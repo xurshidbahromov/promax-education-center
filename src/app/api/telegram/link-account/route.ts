@@ -1,82 +1,106 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/utils/supabase/server';
-import { verifyInitData } from '@/lib/telegram/miniapp';
-import { sendMessage } from '@/lib/telegram/bot';
+import crypto from 'crypto';
+
+function generateDeterministicAuth(telegramId: number) {
+  const secret = process.env.TELEGRAM_WEBHOOK_SECRET || 'fallback_secret';
+  const email = `tg_${telegramId}@promax.uz`;
+  const password = crypto.createHmac('sha256', secret).update(telegramId.toString()).digest('hex');
+  return { email, password };
+}
 
 export async function POST(request: NextRequest) {
-  const body = await request.json();
-  const { phone, password, initData, telegramId, telegramUsername } = body;
-
-  if (!phone || !password || !telegramId) {
-    return NextResponse.json({ error: 'Telefon, parol va Telegram ID talab qilinadi' }, { status: 400 });
-  }
-
-  // Verify initData signature (skip in dev with empty initData)
-  if (initData) {
-    const parsed = verifyInitData(initData);
-    if (!parsed) {
-      return NextResponse.json({ error: "Telegram ma'lumotlari noto'g'ri" }, { status: 401 });
-    }
-  }
-
-  const supabase = await createClient();
-  const generatedEmail = `${phone}@promax.uz`;
-
-  const { data: authData, error: authError } = await supabase.auth.signInWithPassword({
-    email: generatedEmail,
-    password,
-  });
-
-  if (authError || !authData.user) {
-    return NextResponse.json({ error: "Telefon yoki parol noto'g'ri" }, { status: 401 });
-  }
-
-  const userId = authData.user.id;
-
-  // Check if telegram_id is already linked to another account
-  const { data: existingLink } = await supabase
-    .from('profiles')
-    .select('id')
-    .eq('telegram_id', telegramId)
-    .neq('id', userId)
-    .single();
-
-  if (existingLink) {
-    return NextResponse.json({ error: 'Bu Telegram hisob boshqa akkauntga ulangan' }, { status: 409 });
-  }
-
-  // Link telegram_id to profile
-  const { data: profile, error: updateError } = await supabase
-    .from('profiles')
-    .update({ telegram_id: telegramId, telegram_username: telegramUsername || null })
-    .eq('id', userId)
-    .select('id, full_name, phone, role, coins')
-    .single();
-
-  if (updateError || !profile) {
-    return NextResponse.json({ error: 'Profil yangilanishida xatolik' }, { status: 500 });
-  }
-
-  // Send confirmation message via bot
   try {
-    const APP_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://promaxedu.uz';
-    await sendMessage(
-      telegramId,
-      `✅ <b>Muvaffaqiyatli ulandi!</b>\n\nSalom, <b>${profile.full_name || "O'quvchi"}</b>! Telegram hisobingiz Promax Education platformasiga ulandi. 🎉`,
-      {
-        reply_markup: {
-          inline_keyboard: [[{ text: '📱 Mini App ochish', web_app: { url: `${APP_URL}/tg` } }]],
-        },
+    const { phone, password, telegramUser } = await request.json();
+
+    if (!phone || !telegramUser || !telegramUser.id) {
+      return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
+    }
+
+    const supabase = await createClient();
+    const cleanPhone = phone.replace(/\D/g, '');
+    const phoneEmail = `${cleanPhone}@promax.uz`;
+
+    // Check if phone exists
+    const { data: existingProfile } = await supabase
+      .from('profiles')
+      .select('id')
+      .eq('phone', cleanPhone)
+      .maybeSingle();
+
+    if (existingProfile) {
+      // LINK EXISTING ACCOUNT
+      if (!password) {
+        return NextResponse.json({ error: 'Password required to link existing account', needsPassword: true }, { status: 400 });
       }
-    );
-  } catch (e) {
-    console.error('[Telegram] link confirmation failed:', e);
+
+      // Verify ownership by logging in
+      const { data: authData, error: authError } = await supabase.auth.signInWithPassword({
+        email: phoneEmail,
+        password,
+      });
+
+      if (authError || !authData.user) {
+        return NextResponse.json({ error: 'Noto\'g\'ri parol', wrongPassword: true }, { status: 401 });
+      }
+
+      // Link Telegram to this profile
+      const { error: updateError } = await supabase
+        .from('profiles')
+        .update({
+          telegram_id: telegramUser.id,
+          telegram_username: telegramUser.username || null,
+        })
+        .eq('id', authData.user.id);
+
+      if (updateError) {
+        return NextResponse.json({ error: 'Profilni ulashda xatolik yuz berdi' }, { status: 500 });
+      }
+
+      return NextResponse.json({ success: true, linked: true });
+
+    } else {
+      // CREATE NEW ACCOUNT LINKED TO TELEGRAM
+      const { email: detEmail, password: detPassword } = generateDeterministicAuth(telegramUser.id);
+      
+      const { data: authData, error: authError } = await supabase.auth.signUp({
+        email: detEmail,
+        password: detPassword,
+        options: {
+          data: {
+            full_name: telegramUser.first_name + (telegramUser.last_name ? ` ${telegramUser.last_name}` : ''),
+            role: 'student',
+            phone: cleanPhone
+          }
+        }
+      });
+
+      if (authError || !authData.user) {
+        return NextResponse.json({ error: 'Ro\'yxatdan o\'tishda xatolik', details: authError }, { status: 500 });
+      }
+
+      // Supabase trigger created profile. Update additional details.
+      const { error: updateError } = await supabase
+        .from('profiles')
+        .update({ 
+          telegram_id: telegramUser.id, 
+          telegram_username: telegramUser.username || null,
+          avatar_url: telegramUser.photo_url || null,
+          phone: cleanPhone
+        })
+        .eq('id', authData.user.id);
+
+      if (updateError) {
+        console.error('Update error:', updateError);
+      }
+
+      // Explicitly sign in to set the session cookie
+      await supabase.auth.signInWithPassword({ email: detEmail, password: detPassword });
+
+      return NextResponse.json({ success: true, created: true });
+    }
+  } catch (error: any) {
+    console.error('Link Account Error:', error);
+    return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
   }
-
-  await supabase.auth.signOut();
-
-  return NextResponse.json({
-    success: true,
-    profile: { id: profile.id, full_name: profile.full_name, role: profile.role, coins: profile.coins },
-  });
 }

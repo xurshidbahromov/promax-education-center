@@ -7,22 +7,29 @@ import Image from 'next/image';
 import { useLanguage } from '@/context/LanguageContext';
 import { createClient } from '@/utils/supabase/client';
 import { getUserRole, getRedirectPath } from '@/lib/auth-helpers';
-import { Lock, ArrowRight, Loader2, ArrowLeft, Eye, EyeOff, GraduationCap, Users } from 'lucide-react';
+import { Lock, ArrowRight, Loader2, ArrowLeft, Eye, EyeOff, GraduationCap, Users, Link2, Send } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import toast from 'react-hot-toast';
+import TelegramLoginWidget, { TelegramAuthPayload } from '@/components/auth/TelegramLoginWidget';
 
 export default function LoginPage() {
  const { t } = useLanguage();
  const router = useRouter();
  const supabase = createClient();
 
- const [step, setStep] = useState<'role' | 'form'>('role'); // Two-step flow
+ const [step, setStep] = useState<'role' | 'form' | 'link'>('role'); // Two-step flow + linking
  const [loginAs, setLoginAs] = useState<'student' | 'staff' | null>(null);
  const [phone, setPhone] = useState('');
  const [password, setPassword] = useState('');
  const [showPassword, setShowPassword] = useState(false);
  const [loading, setLoading] = useState(false);
  const [showForgotPassword, setShowForgotPassword] = useState(false);
+
+ // Linking state
+ const [linkingUser, setLinkingUser] = useState<TelegramUser | null>(null);
+ const [linkPhone, setLinkPhone] = useState('');
+ const [linkPassword, setLinkPassword] = useState('');
+ const [showLinkPassword, setShowLinkPassword] = useState(false);
 
  // Phone number formatting
  const formatPhoneNumber = (value: string) => {
@@ -57,8 +64,82 @@ export default function LoginPage() {
  };
 
  const handleBack = () => {
- setStep('role');
- setLoginAs(null);
+    if (step === 'link') {
+      setStep('role');
+      setLinkingUser(null);
+    } else {
+      setStep('role');
+      setLoginAs(null);
+    }
+ };
+
+ const handleTelegramAuth = async (user: TelegramAuthPayload) => {
+    try {
+      setLoading(true);
+      const res = await fetch('/api/telegram/widget-auth', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(user)
+      });
+      const data = await res.json();
+      
+      if (data.linked && !data.needsPassword) {
+        // Logged in successfully via deterministic auth
+        toast.success("Telegram orqali muvaffaqiyatli kirdingiz");
+        router.push(data.profile?.role === 'student' ? '/dashboard' : '/dashboard');
+      } else if (data.linked && data.needsPassword) {
+        // Linked but needs password
+        setLinkingUser(user);
+        setLinkPhone(data.phone || '');
+        setStep('link');
+      } else {
+        // Not linked, prompt to link
+        setLinkingUser(user);
+        setStep('link');
+      }
+    } catch (err) {
+      toast.error('Telegram orqali kirishda xatolik yuz berdi');
+    } finally {
+      setLoading(false);
+    }
+ };
+
+ const handleLinkAccount = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!linkingUser || !linkPhone) return;
+    
+    setLoading(true);
+    try {
+      const res = await fetch('/api/telegram/link-account', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          phone: linkPhone,
+          password: linkPassword,
+          telegramUser: linkingUser
+        })
+      });
+      const data = await res.json();
+      
+      if (!res.ok) {
+        if (data.needsPassword) {
+          toast.error("Bu raqam band. Iltimos, parolingizni kiriting!");
+          return;
+        }
+        if (data.wrongPassword) {
+          toast.error("Parol noto'g'ri. Qaytadan urinib ko'ring.");
+          return;
+        }
+        throw new Error(data.error || "Xatolik yuz berdi");
+      }
+      
+      toast.success(data.created ? "Yangi hisob yaratildi va Telegram ulandi" : "Hisobingiz Telegram bilan bog'landi");
+      router.push('/dashboard');
+    } catch (error: any) {
+      toast.error(error.message);
+    } finally {
+      setLoading(false);
+    }
  };
 
  const handleLogin = async (e: React.FormEvent) => {
@@ -170,22 +251,25 @@ export default function LoginPage() {
  </div>
 
  {/* Right Side - Form */}
- <div className="w-full lg:w-1/2 flex items-center justify-center p-6 sm:p-12 relative overflow-hidden">
-        <div className="absolute inset-0 z-0 overflow-hidden pointer-events-none">
+ <div className="w-full lg:w-1/2 h-screen overflow-y-auto relative bg-transparent flex flex-col">
+        <div className="absolute inset-0 z-0 overflow-hidden pointer-events-none fixed">
           <div className={`absolute top-[-10%] right-[-10%] w-[60%] h-[60%] rounded-full blur-[130px] opacity-60 transition-colors duration-700 ${loginAs === 'student' ? 'bg-blue-300' : loginAs === 'staff' ? 'bg-orange-300' : 'bg-blue-200'}`} />
           <div className={`absolute bottom-[-10%] left-[-10%] w-[60%] h-[60%] rounded-full blur-[130px] opacity-60 transition-colors duration-700 ${loginAs === 'student' ? 'bg-purple-300' : loginAs === 'staff' ? 'bg-yellow-300' : 'bg-purple-200'}`} />
         </div>
 
- <Link href="/" className="absolute top-8 left-8 lg:hidden group flex items-center gap-2 text-gray-500 hover:text-brand-blue transition-colors z-20">
- <ArrowLeft size={20} className="group-hover:-translate-x-1 transition-transform" />
- <span>{t('auth.back_to_home')}</span>
- </Link>
+ {step === 'role' && (
+   <Link href="/" className="absolute top-8 left-8 lg:hidden group flex items-center gap-2 text-gray-500 hover:text-brand-blue transition-colors z-20">
+   <ArrowLeft size={20} className="group-hover:-translate-x-1 transition-transform" />
+   <span>{t('auth.back_to_home')}</span>
+   </Link>
+ )}
 
+  <div className="flex-1 flex flex-col items-center justify-center p-6 pt-24 sm:p-12 sm:pt-24 min-h-full relative">
  <motion.div
  initial={{ opacity: 0, x: 20 }}
  animate={{ opacity: 1, x: 0 }}
  transition={{ duration: 0.5 }}
- className="w-full max-w-md font-fredoka relative z-10"
+ className="w-full max-w-md font-fredoka relative z-10 my-auto"
  >
  <AnimatePresence mode="wait">
  {step === 'role' ? (
@@ -237,31 +321,6 @@ export default function LoginPage() {
  <GraduationCap className="w-32 h-32" />
  </motion.div>
 
- {/* Floating Mini Icons (Bubbles) */}
- <div className="absolute inset-0 overflow-hidden pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-500">
- <motion.div
- animate={{ y: [40, -150], opacity: [0, 1, 0], x: [0, -15, 10] }}
- transition={{ duration: 3, repeat: Infinity, ease: "linear", delay: 0.2 }}
- className="absolute right-12 bottom-0 z-0 text-brand-blue/20"
- >
- <GraduationCap className="w-6 h-6 rotate-12" />
- </motion.div>
- <motion.div
- animate={{ y: [40, -150], opacity: [0, 1, 0], x: [0, 15, -5] }}
- transition={{ duration: 4, repeat: Infinity, ease: "linear", delay: 1.5 }}
- className="absolute right-24 bottom-0 z-0 text-brand-blue/15"
- >
- <GraduationCap className="w-5 h-5 -rotate-12" />
- </motion.div>
- <motion.div
- animate={{ y: [40, -150], opacity: [0, 1, 0], x: [0, -10, 20] }}
- transition={{ duration: 3.5, repeat: Infinity, ease: "linear", delay: 2.5 }}
- className="absolute right-4 bottom-0 z-0 text-brand-blue/10"
- >
- <GraduationCap className="w-4 h-4 rotate-45" />
- </motion.div>
- </div>
-
  <div className="relative z-10 flex flex-col items-center gap-3">
  <div className="w-14 h-14 rounded-2xl bg-brand-blue/10 group-hover:bg-brand-blue flex items-center justify-center transition-all duration-300 group-hover:shadow-lg group-hover:shadow-brand-blue/20 group-hover:scale-110">
  <GraduationCap className="text-brand-blue group-hover:text-white transition-colors duration-300" size={26} />
@@ -305,31 +364,6 @@ export default function LoginPage() {
  <Users className="w-32 h-32" />
  </motion.div>
 
- {/* Floating Mini Icons (Bubbles) */}
- <div className="absolute inset-0 overflow-hidden pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-500">
- <motion.div
- animate={{ y: [40, -150], opacity: [0, 1, 0], x: [0, -15, 10] }}
- transition={{ duration: 3.5, repeat: Infinity, ease: "linear", delay: 0.3 }}
- className="absolute right-12 bottom-0 z-0 text-brand-orange/20"
- >
- <Users className="w-6 h-6 rotate-12" />
- </motion.div>
- <motion.div
- animate={{ y: [40, -150], opacity: [0, 1, 0], x: [0, 15, -5] }}
- transition={{ duration: 4.5, repeat: Infinity, ease: "linear", delay: 1.8 }}
- className="absolute right-24 bottom-0 z-0 text-brand-orange/15"
- >
- <Users className="w-5 h-5 -rotate-12" />
- </motion.div>
- <motion.div
- animate={{ y: [40, -150], opacity: [0, 1, 0], x: [0, -10, 20] }}
- transition={{ duration: 3.8, repeat: Infinity, ease: "linear", delay: 2.8 }}
- className="absolute right-4 bottom-0 z-0 text-brand-orange/10"
- >
- <Users className="w-4 h-4 rotate-45" />
- </motion.div>
- </div>
-
  <div className="relative z-10 flex flex-col items-center gap-3">
  <div className="w-14 h-14 rounded-2xl bg-brand-orange/10 group-hover:bg-brand-orange flex items-center justify-center transition-all duration-300 group-hover:shadow-lg group-hover:shadow-brand-orange/20 group-hover:scale-110">
  <Users className="text-brand-orange group-hover:text-white transition-colors duration-300" size={26} />
@@ -346,14 +380,16 @@ export default function LoginPage() {
  </motion.button>
  </div>
 
- <p className="text-center text-sm text-gray-500 dark:text-gray-400">
+
+
+ <p className="text-center text-sm text-gray-500 dark:text-gray-400 mt-6">
  {t('auth.login.no_account') || "Akkauntingiz yo'qmi?"}{' '}
  <Link href="/register" className="text-brand-blue hover:underline font-medium">
  {t('auth.login.register') || "Ro'yxatdan o'tish"}
  </Link>
  </p>
  </motion.div>
- ) : (
+ ) : step === 'form' ? (
  // STEP 2: Login Form
  <motion.form
  key="login-form"
@@ -468,16 +504,121 @@ export default function LoginPage() {
  </span>
  </motion.button>
 
- <p className="text-center text-sm text-gray-500 dark:text-gray-400">
+  <div className="relative mt-8 mb-6">
+    <div className="absolute inset-0 flex items-center">
+      <div className="w-full border-t border-slate-200 dark:border-slate-800"></div>
+    </div>
+    <div className="relative flex justify-center text-sm">
+      <span className="px-4 bg-slate-50 dark:bg-[#0B1120] text-gray-400">Yoki</span>
+    </div>
+  </div>
+
+  <div className="flex flex-col items-center justify-center">
+    <TelegramLoginWidget 
+      clientId="8736423754" 
+      onAuth={handleTelegramAuth} 
+    />
+  </div>
+
+ <p className="text-center text-sm text-gray-500 dark:text-gray-400 mt-6">
  {t('auth.login.no_account')}{' '}
  <Link href="/register" className="text-brand-blue font-medium hover:underline">
  {t('auth.login.register')}
  </Link>
  </p>
  </motion.form>
+ ) : (
+    // STEP 3: Link Account Form
+    <motion.form
+      key="link-form"
+      onSubmit={handleLinkAccount}
+      initial={{ opacity: 0, x: 50 }}
+      animate={{ opacity: 1, x: 0 }}
+      exit={{ opacity: 0, x: -50 }}
+      transition={{ duration: 0.4 }}
+      className="w-full bg-white/60 dark:bg-slate-900/60 backdrop-blur-xl rounded-[2rem] p-6 sm:p-10 shadow-sm border border-white/60 dark:border-slate-700/50 space-y-6 relative z-10"
+    >
+      <div className="flex items-center justify-between mb-6">
+        <button
+          type="button"
+          onClick={handleBack}
+          className="p-2 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 text-gray-500 transition-colors"
+        >
+          <ArrowLeft size={20} />
+        </button>
+        <div className="px-4 py-1.5 rounded-full text-sm font-medium bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 border border-blue-100 dark:border-blue-800 flex items-center gap-2">
+          <Link2 size={16} /> Telegramni ulash
+        </div>
+      </div>
+
+      <div className="text-center mb-8">
+        <div className="w-16 h-16 mx-auto rounded-full overflow-hidden mb-4 border-2 border-brand-blue/20">
+          {linkingUser?.photo_url ? (
+            <img src={linkingUser.photo_url} alt="Telegram Avatar" className="w-full h-full object-cover" />
+          ) : (
+            <div className="w-full h-full bg-brand-blue flex items-center justify-center text-white text-xl font-bold">
+              {linkingUser?.first_name?.[0] || 'T'}
+            </div>
+          )}
+        </div>
+        <h2 className="text-2xl font-semibold text-slate-800 dark:text-slate-100">
+          {linkingUser?.first_name} {linkingUser?.last_name}
+        </h2>
+        <p className="text-gray-500 dark:text-gray-400 mt-2 text-sm">
+          Akkauntni yakunlash uchun telefon raqamingizni kiriting.
+        </p>
+      </div>
+
+      <div className="space-y-4">
+        <div>
+          <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">
+            Telefon raqam
+          </label>
+          <input
+            type="tel"
+            value={linkPhone}
+            onChange={(e) => setLinkPhone(formatPhoneNumber(e.target.value))}
+            placeholder="+998 90 123 45 67"
+            required
+            className="w-full px-4 py-3 bg-white/50 dark:bg-[#0B1120]/50 border border-slate-200 dark:border-slate-800 rounded-xl focus:ring-2 focus:ring-brand-blue focus:border-brand-blue transition-all outline-none"
+          />
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">
+            Parol (Mavjud bo'lsa)
+          </label>
+          <div className="relative">
+            <input
+              type={showLinkPassword ? "text" : "password"}
+              value={linkPassword}
+              onChange={(e) => setLinkPassword(e.target.value)}
+              placeholder="Agar raqamingiz tizimda bo'lsa, parolni kiriting"
+              className="w-full px-4 py-3 bg-white/50 dark:bg-[#0B1120]/50 border border-slate-200 dark:border-slate-800 rounded-xl focus:ring-2 focus:ring-brand-blue focus:border-brand-blue transition-all outline-none pr-10"
+            />
+            <button
+              type="button"
+              onClick={() => setShowLinkPassword(!showLinkPassword)}
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 p-1"
+            >
+              {showLinkPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <button
+        type="submit"
+        disabled={loading || !linkPhone}
+        className="w-full py-3.5 bg-brand-blue hover:bg-brand-blue/90 text-white rounded-xl font-medium transition-all shadow-lg shadow-brand-blue/20 hover:shadow-brand-blue/40 disabled:opacity-70 disabled:cursor-not-allowed flex items-center justify-center gap-2 mt-4"
+      >
+        {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : <><Send size={18} /> Ulash va Kirish</>}
+      </button>
+    </motion.form>
  )}
  </AnimatePresence>
  </motion.div>
+ </div>
 
  {/* Forgot Password Modal */}
  {showForgotPassword && (
