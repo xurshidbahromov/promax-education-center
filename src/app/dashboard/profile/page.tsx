@@ -643,7 +643,7 @@ export default function ProfilePage() {
       </div>
 
       <div className="relative z-10 w-full max-w-3xl mx-auto pt-4 sm:pt-6 pb-10 overflow-x-hidden min-h-[400px]">
-        <AnimatePresence mode="wait" custom={direction}>
+        <AnimatePresence mode="wait" custom={direction} initial={false}>
           {activeView === 'main' && renderAnimatedView(renderMain(), 'main')}
           {activeView === 'statistics' && renderAnimatedView(renderStatistics(), 'statistics')}
           {activeView === 'profile' && renderAnimatedView(renderProfileEdit(), 'profile')}
