@@ -5,18 +5,16 @@ import { createClient } from "@/utils/supabase/client";
 import { useRouter } from "next/navigation";
 import { useLanguage } from "@/context/LanguageContext";
 import {
- Loader2,
- BookOpen,
- GraduationCap,
- LayoutDashboard,
- Settings,
- LogOut,
- Menu,
- X,
- Bell,
- User,
- Gamepad2,
- PlayCircle
+  Home,
+  PlaySquare,
+  FileText,
+  BarChart3,
+  Gamepad2,
+  UserCircle2,
+  LogOut,
+  Menu,
+  X,
+  Bell
 } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
@@ -85,14 +83,14 @@ export default function DashboardLayout({
  router.push("/login");
  };
 
- const menuItems = [
- { icon: LayoutDashboard, label: t('sidebar.dashboard'), href: "/dashboard" },
- { icon: PlayCircle, label: "Darslar", href: "/dashboard/lessons" },
- { icon: BookOpen, label: t('sidebar.onlinetests'), href: "/dashboard/tests" },
- { icon: GraduationCap, label: t('sidebar.results'), href: "/dashboard/results" },
- { icon: Gamepad2, label: t('sidebar.games'), href: "/dashboard/games" },
- { icon: User, label: t('sidebar.profile'), href: "/dashboard/profile" },
- ];
+  const menuItems = [
+    { icon: Home, label: t('sidebar.dashboard'), href: "/dashboard" },
+    { icon: PlaySquare, label: "Darslar", href: "/dashboard/lessons" },
+    { icon: FileText, label: t('sidebar.onlinetests'), href: "/dashboard/tests" },
+    { icon: BarChart3, label: t('sidebar.results'), href: "/dashboard/results" },
+    { icon: Gamepad2, label: t('sidebar.games'), href: "/dashboard/games" },
+    { icon: UserCircle2, label: t('sidebar.profile'), href: "/dashboard/profile" },
+  ];
 
  const isTakeTestPage = pathname.includes('/take');
 
@@ -143,11 +141,11 @@ export default function DashboardLayout({
  key={item.href}
  href={item.href}
  className={`
- flex items-center gap-3 px-4 py-3.5 rounded-2xl transition-all duration-300 group relative overflow-hidden
- ${isActive
- ? "text-white shadow-lg shadow-brand-blue/20 bg-brand-blue"
- : "text-gray-600 dark:text-gray-400 hover:bg-gray-100/50 dark:hover:bg-slate-800/50 hover:text-brand-blue"
- }
+                          flex items-center gap-3 px-4 py-3.5 rounded-[1.25rem] transition-all duration-300 group relative overflow-hidden
+                          ${isActive
+                            ? "text-brand-blue bg-brand-blue/10 dark:bg-brand-blue/20 shadow-sm border border-brand-blue/20"
+                            : "text-slate-500 dark:text-slate-400 hover:bg-slate-100/60 dark:hover:bg-slate-800/60 hover:text-slate-800 dark:hover:text-slate-200"
+                          }
  `}
  >
  <item.icon size={20} className={isActive ? "" : "group-hover:scale-110 transition-transform"} />
@@ -221,26 +219,33 @@ export default function DashboardLayout({
  {/* Mobile Bottom Navigation */}
  {!isTakeTestPage && (
  <div className="lg:hidden fixed bottom-3 left-4 right-4 z-50 flex justify-center pointer-events-none">
- <nav className="bg-white/90 dark:bg-slate-900/90 backdrop-blur-3xl border border-white/70 dark:border-slate-700/60 px-2 py-1.5 rounded-full shadow-[0_8px_30px_rgb(0,86,210,0.15)] dark:shadow-[0_8px_30px_rgb(0,0,0,0.3)] w-full max-w-md pointer-events-auto safe-area-pb">
- <div className="flex items-center justify-between gap-1">
- {menuItems.map((item) => {
- const isActive = pathname === item.href;
- return (
- <Link
- key={item.href}
- href={item.href}
- className={`flex items-center justify-center flex-1 h-12 rounded-full transition-transform active:scale-90 ${
- isActive ? "text-brand-blue" : "text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300"
- }`}
- >
- <div className="relative z-10 flex items-center justify-center">
- <item.icon size={24} className={isActive ? "stroke-[2.5px] fill-current" : "stroke-[2px]"} />
- </div>
- </Link>
- );
- })}
- </div>
- </nav>
+        <nav className="bg-white/70 dark:bg-slate-900/70 backdrop-blur-3xl border border-white/50 dark:border-slate-700/50 px-1.5 py-1.5 rounded-[2rem] shadow-[0_8px_30px_rgb(0,86,210,0.1)] dark:shadow-[0_8px_30px_rgb(0,0,0,0.4)] w-full max-w-md pointer-events-auto safe-area-pb">
+          <div className="flex items-center justify-between gap-1 relative">
+            {menuItems.map((item) => {
+              const isActive = pathname === item.href;
+              return (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  className={`relative flex items-center justify-center flex-1 h-12 rounded-full transition-all duration-300 active:scale-95 ${
+                    isActive ? "text-brand-blue" : "text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300"
+                  }`}
+                >
+                  {isActive && (
+                    <motion.div
+                      layoutId="mobile-nav-active-pill"
+                      className="absolute inset-0 bg-brand-blue/10 dark:bg-brand-blue/20 rounded-full"
+                      transition={{ type: "spring", stiffness: 400, damping: 30 }}
+                    />
+                  )}
+                  <div className="relative z-10 flex items-center justify-center">
+                    <item.icon size={22} className={isActive ? "stroke-[2.5px]" : "stroke-[2px]"} />
+                  </div>
+                </Link>
+              );
+            })}
+          </div>
+        </nav>
  </div>
  )}
  </div>
