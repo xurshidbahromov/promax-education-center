@@ -74,6 +74,13 @@ export default function TelegramMiniAppPage() {
         const data: TgAuthResponse = await res.json();
         
         if (data.linked) {
+          if (data.needsPassword) {
+            // They have a custom password and lost their session cookies.
+            // We must ask them for their password ONCE to restore the session.
+            window.location.href = '/tg/link';
+            return;
+          }
+          // Successfully auto-logged in (via session, deterministic auth, or auto-register)
           window.location.href = '/dashboard';
           return; // Do not set loading to false so it stays on loading screen while redirecting
         }
