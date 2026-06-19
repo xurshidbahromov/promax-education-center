@@ -9,6 +9,7 @@ import { useState, useEffect, useRef } from 'react';
 import { Menu, X, Globe, Moon, Sun, Monitor, ChevronDown, Check } from 'lucide-react';
 import { useTheme } from 'next-themes';
 import { motion, AnimatePresence } from 'framer-motion';
+import { createClient } from '@/utils/supabase/client';
 
 const Navbar = () => {
  const { language, setLanguage, t } = useLanguage();
@@ -23,6 +24,7 @@ const Navbar = () => {
  const [themeOpen, setThemeOpen] = useState(false);
  const [langOpen, setLangOpen] = useState(false);
  const [mounted, setMounted] = useState(false);
+ const [user, setUser] = useState<any>(null);
 
  // Close dropdowns on click outside
  const themeRef = useRef<HTMLDivElement>(null);
@@ -39,6 +41,14 @@ const Navbar = () => {
  }
  };
  document.addEventListener('mousedown', handleClickOutside);
+ 
+ const supabase = createClient();
+ supabase.auth.getUser().then(({ data }) => {
+   if (data.user) {
+     setUser(data.user);
+   }
+ });
+
  return () => {
  document.removeEventListener('mousedown', handleClickOutside);
  };
@@ -191,19 +201,30 @@ const Navbar = () => {
 
  <div className="h-6 w-px bg-gray-300 dark:bg-slate-700 mx-1"></div>
 
- <Link
- href="/login"
- className="text-sm font-semibold text-gray-800 dark:text-gray-200 hover:text-brand-blue dark:hover:text-blue-400 transition-colors px-2"
- >
- {t('nav.login')}
- </Link>
+ {user ? (
+  <Link
+    href="/dashboard"
+    className="bg-brand-blue text-white px-6 h-10 flex items-center justify-center rounded-full text-sm font-medium hover:bg-brand-blue/90 transition-colors active:scale-[0.98] ml-1 shadow-sm"
+  >
+    Dashboard
+  </Link>
+) : (
+  <>
+    <Link
+      href="/login"
+      className="text-sm font-semibold text-gray-800 dark:text-gray-200 hover:text-brand-blue dark:hover:text-blue-400 transition-colors px-2"
+    >
+      {t('nav.login')}
+    </Link>
 
- <Link
- href="/register"
- className="bg-brand-blue text-white px-6 h-10 flex items-center justify-center rounded-full text-sm font-medium hover:bg-brand-blue/90 transition-colors active:scale-[0.98] ml-1 shadow-sm"
- >
- {t('hero.cta.primary')}
- </Link>
+    <Link
+      href="/register"
+      className="bg-brand-blue text-white px-6 h-10 flex items-center justify-center rounded-full text-sm font-medium hover:bg-brand-blue/90 transition-colors active:scale-[0.98] ml-1 shadow-sm"
+    >
+      {t('hero.cta.primary')}
+    </Link>
+  </>
+)}
  </div>
  </div>
 

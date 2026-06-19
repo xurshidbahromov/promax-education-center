@@ -49,9 +49,8 @@ export async function updateSession(request: NextRequest) {
     return NextResponse.redirect(url)
   }
 
-  // If user is logged in and tries to access login/register/root, redirect to dashboard
+  // If user is logged in and tries to access login/register, redirect to dashboard
   if (user && (
-    request.nextUrl.pathname === '/' ||
     request.nextUrl.pathname.startsWith('/login') ||
     request.nextUrl.pathname.startsWith('/register')
   )) {
