@@ -208,8 +208,8 @@ export default function DashboardPage() {
                         className="bg-white/60 dark:bg-slate-900/60 backdrop-blur-xl rounded-[1.5rem] p-4 border border-white/60 dark:border-slate-700/50 shadow-sm hover:shadow-md hover:bg-white/80 dark:hover:bg-slate-800/80 transition-all duration-300 flex flex-col gap-3 group block"
                       >
                         <div className="flex items-center justify-between">
-                          <div className={`w-11 h-11 rounded-2xl ${meta.bg} flex items-center justify-center`}>
-                            <Icon size={22} className={meta.color} />
+                          <div className="flex items-center justify-center transition-transform group-hover:scale-110">
+                            <Icon size={28} className={meta.color} />
                           </div>
                           <span className="text-[13px] font-bold text-slate-400 dark:text-slate-500">
                             {done}<span className="text-slate-300 dark:text-slate-600 font-medium">/{total}</span>
@@ -264,8 +264,8 @@ export default function DashboardPage() {
                     href={card.href}
                     className="bg-white/60 dark:bg-slate-900/60 backdrop-blur-xl rounded-[1.5rem] p-4 border border-white/60 dark:border-slate-700/50 shadow-sm hover:shadow-lg hover:-translate-y-0.5 transition-all duration-300 flex items-center gap-4 group block"
                   >
-                    <div className={`w-12 h-12 rounded-2xl bg-gradient-to-br ${card.gradient} flex items-center justify-center shadow-md shrink-0 group-hover:scale-105 transition-transform`}>
-                      <Icon size={22} className="text-white" />
+                    <div className={`flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform`}>
+                      <Icon size={28} className={card.bg.replace("bg-", "text-")} />
                     </div>
                     <div className="flex-1 min-w-0">
                       <p className="text-[15px] font-bold text-slate-800 dark:text-slate-100 leading-tight">{card.label}</p>
@@ -297,8 +297,8 @@ export default function DashboardPage() {
                 key={s.label}
                 className="bg-white/60 dark:bg-slate-900/60 backdrop-blur-xl rounded-[1.5rem] p-4 border border-white/60 dark:border-slate-700/50 shadow-sm flex flex-col items-center gap-2 text-center"
               >
-                <div className={`w-10 h-10 rounded-xl ${s.bg} flex items-center justify-center`}>
-                  <Icon size={20} className={s.color} />
+                <div className={`flex items-center justify-center mb-1 transition-transform hover:scale-110`}>
+                  <Icon size={28} className={s.color} />
                 </div>
                 <p className="text-xl font-bold font-fredoka text-slate-800 dark:text-white">{s.isStr ? s.value : s.value}</p>
                 <p className="text-[11px] text-slate-500 dark:text-slate-400 font-medium">{s.label}</p>
@@ -331,8 +331,8 @@ export default function DashboardPage() {
                   href={`/dashboard/tests/${test.id}`}
                   className="bg-white/60 dark:bg-slate-900/60 backdrop-blur-xl rounded-[1.5rem] p-4 border border-white/60 dark:border-slate-700/50 shadow-sm hover:shadow-md hover:bg-white/80 dark:hover:bg-slate-800/80 transition-all flex items-center gap-4 group"
                 >
-                  <div className="w-11 h-11 rounded-2xl bg-violet-100 dark:bg-violet-900/40 flex items-center justify-center shrink-0">
-                    <ClipboardList size={20} className="text-violet-600" />
+                  <div className="flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform">
+                    <ClipboardList size={28} className="text-violet-600" />
                   </div>
                   <div className="flex-1 min-w-0">
                     <p className="text-[14px] font-bold text-slate-800 dark:text-slate-100 line-clamp-1">{test.title}</p>

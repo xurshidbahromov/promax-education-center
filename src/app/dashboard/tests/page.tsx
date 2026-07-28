@@ -188,8 +188,8 @@ export default function OnlineTestsPage() {
                   className="w-full h-full bg-white/60 dark:bg-slate-900/60 backdrop-blur-xl rounded-[1.5rem] p-4 flex items-center gap-4 shadow-sm border border-white/60 dark:border-slate-700/50 hover:shadow-lg hover:-translate-y-0.5 transition-all duration-300 group"
                 >
                   {/* Icon Badge */}
-                  <div className={`w-12 h-12 rounded-2xl ${colors.light} flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform duration-300`}>
-                    <FileText size={20} className="text-brand-blue" />
+                  <div className={`flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform duration-300`}>
+                    <FileText size={32} className={colors.text} />
                   </div>
 
                   {/* Text */}

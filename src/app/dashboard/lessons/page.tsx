@@ -194,11 +194,11 @@ export default function LessonsPage() {
 
                   {/* ── BOTTOM: Info row ── */}
                   <div className="p-4 flex items-center gap-3 flex-1">
-                    {/* Icon circle */}
+                    {/* Free icon */}
                     <div
-                      className={`w-11 h-11 rounded-full ${meta.bg} flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform duration-300`}
+                      className="flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform duration-300"
                     >
-                      <SubjectIcon size={20} className={meta.color} />
+                      <SubjectIcon size={28} className={meta.color} />
                     </div>
 
                     {/* Text */}
