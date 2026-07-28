@@ -89,10 +89,10 @@ const CoursesPreview = () => {
  >
  <Link
  href="/courses"
- className="inline-flex items-center gap-2 font-medium uppercase tracking-wider text-brand-blue dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 transition-colors group"
+ className="inline-flex items-center gap-2 font-medium uppercase tracking-wider text-brand-blue dark:text-blue-400 hover:text-blue-700 active:text-blue-700 dark:hover:text-blue-300 active:text-blue-300 transition-colors group"
  >
  {t('courses.view_all')}
- <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform duration-300 ease-out" />
+ <ArrowRight className="w-5 h-5 group-hover:translate-x-1 active:scale-95 transition-transform duration-300 ease-out" />
  </Link>
  </motion.div>
  </div>
@@ -116,23 +116,23 @@ const CoursesPreview = () => {
  src={cat.image}
  alt={cat.id}
  fill
- className="object-cover transition-transform duration-700 group-hover:scale-[1.03]"
+ className="object-cover transition-transform duration-700 group-hover:scale-[1.03] group-active:scale-95"
  />
  
  {/* Gradient Overlay */}
- <div className="absolute inset-0 bg-gradient-to-t from-slate-900 via-slate-900/40 to-transparent transition-opacity duration-300 group-hover:opacity-90" />
- <div className="absolute inset-0 bg-brand-blue/20 opacity-0 group-hover:opacity-100 transition-opacity duration-500 mix-blend-multiply" />
+ <div className="absolute inset-0 bg-gradient-to-t from-slate-900 via-slate-900/40 to-transparent transition-opacity duration-300 group-hover:opacity-90 group-active:opacity-90 active:opacity-90" />
+ <div className="absolute inset-0 bg-brand-blue/20 opacity-0 group-hover:opacity-100 group-active:opacity-100 active:opacity-100 transition-opacity duration-500 mix-blend-multiply" />
 
  {/* Content */}
  <div className="absolute inset-0 p-6 sm:p-8 flex flex-col justify-end">
- <div className="w-14 h-14 rounded-2xl bg-brand-orange/90 backdrop-blur-sm flex items-center justify-center mb-4 transform translate-y-4 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-300">
+ <div className="w-14 h-14 rounded-2xl bg-brand-orange/90 backdrop-blur-sm flex items-center justify-center mb-4 transform translate-y-4 opacity-0 group-hover:translate-y-0 active:scale-95 group-hover:opacity-100 group-active:opacity-100 active:opacity-100 transition-all duration-300">
  <cat.icon className="w-7 h-7 text-white" />
  </div>
 
- <h3 className="text-2xl sm:text-3xl font-semibold text-white mb-2 uppercase tracking-wide transform translate-y-4 group-hover:translate-y-0 transition-transform duration-300">
+ <h3 className="text-2xl sm:text-3xl font-semibold text-white mb-2 uppercase tracking-wide transform translate-y-4 group-hover:translate-y-0 active:scale-95 transition-transform duration-300">
  {t(`courses.cat.${cat.id}`)}
  </h3>
- <p className="text-white/90 font-medium line-clamp-2 transform translate-y-8 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-300 delay-75">
+ <p className="text-white/90 font-medium line-clamp-2 transform translate-y-8 opacity-0 group-hover:translate-y-0 active:scale-95 group-hover:opacity-100 group-active:opacity-100 active:opacity-100 transition-all duration-300 delay-75">
  {t(`courses.cat.${cat.id}.desc`)}
  </p>
  </div>
@@ -144,10 +144,10 @@ const CoursesPreview = () => {
  <div className="mt-8 text-center md:hidden">
  <Link
  href="/courses"
- className="w-full py-4 rounded-full border-2 border-brand-blue text-brand-blue font-medium text-center flex items-center justify-center gap-2 hover:bg-brand-blue hover:text-white transition-all active:scale-95 group"
+ className="w-full py-4 rounded-full border-2 border-brand-blue text-brand-blue font-medium text-center flex items-center justify-center gap-2 hover:bg-brand-blue active:bg-brand-blue hover:text-white active:text-white transition-all active:scale-95 group"
  >
  {t('courses.view_all')}
- <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform duration-300 ease-out" />
+ <ArrowRight className="w-5 h-5 group-hover:translate-x-1 active:scale-95 transition-transform duration-300 ease-out" />
  </Link>
  </div>
 

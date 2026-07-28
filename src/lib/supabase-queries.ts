@@ -167,11 +167,11 @@ export async function getDashboardStats(studentId: string): Promise<DashboardSta
  }
 
  const totalTests = allScores.length;
- const averageScore = allScores.reduce((a, b) => a + b, 0) / totalTests;
+ const averageScore = allScores.reduce((a, b) => a+ b, 0) / totalTests;
  const bestScore = Math.max(...allScores);
 
  // Calculate coins (1 coin per 10 points)
- const totalCoins = Math.floor(allScores.reduce((a, b) => a + b, 0) / 10);
+ const totalCoins = Math.floor(allScores.reduce((a, b) => a+ b, 0) / 10);
 
  return {
  totalTests,
@@ -229,7 +229,7 @@ export async function getRecentResultsForChart(studentId: string) {
  // Reverse to show oldest to newest in chart
  return combined.reverse().map((result: any) => {
  const day = result.date.getDate().toString().padStart(2, '0');
- const month = (result.date.getMonth() + 1).toString().padStart(2, '0');
+ const month = (result.date.getMonth()+ 1).toString().padStart(2, '0');
 
  return {
  date: `${day}.${month}`,
@@ -315,7 +315,7 @@ export async function updateUserCoins(userId: string, amount: number) {
  }
 
  const currentCoins = profile?.coins || 0;
- const newBalance = currentCoins + amount;
+ const newBalance = currentCoins+ amount;
 
  // 2. Update coins
  const { error: updateError } = await supabase

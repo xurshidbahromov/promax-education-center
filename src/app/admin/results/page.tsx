@@ -90,14 +90,14 @@ export default function ResultsListPage() {
  <button
  onClick={handleExport}
  disabled={isExporting}
- className="h-10 px-4 flex items-center gap-2 bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-800 rounded-xl text-sm font-medium text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-slate-800 transition-colors disabled:opacity-50"
+ className="h-10 px-4 flex items-center gap-2 bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-800 rounded-xl text-sm font-medium text-gray-600 dark:text-gray-300 active:bg-gray-50 dark:active:bg-slate-800 transition-colors disabled:opacity-50"
  >
  <Download size={18} className={isExporting ? "animate-bounce" : ""} />
  <span className="hidden sm:inline">{isExporting ? "Yuklanmoqda..." : t('admin.results.export')}</span>
  </button>
  <Link
  href="/admin/results/new"
- className="h-10 px-4 bg-brand-blue text-white rounded-xl text-sm font-medium flex items-center gap-2 hover:bg-blue-600 transition-colors shadow-sm"
+ className="h-10 px-4 bg-brand-blue text-white rounded-xl text-sm font-medium flex items-center gap-2 active:bg-blue-600 transition-colors shadow-sm"
  >
  <Plus size={18} />
  Yangi Natija
@@ -216,7 +216,7 @@ export default function ResultsListPage() {
  const percentage = (result.total_score / 189) * 100;
 
  return (
- <tr key={result.id} className="hover:bg-gray-50 dark:hover:bg-slate-800/50 transition-colors group">
+ <tr key={result.id} className="active:bg-gray-50 dark:active:bg-slate-800/50 transition-colors group">
  <td className="px-6 py-4">
  <div className="font-medium text-slate-800 dark:text-slate-100">
  {result.student?.full_name || "Unknown"}
@@ -254,7 +254,7 @@ export default function ResultsListPage() {
  </div>
  </td>
  {/* <td className="px-6 py-4">
- <button className="h-8 w-8 flex items-center justify-center text-gray-400 hover:text-brand-blue hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-lg transition-colors">
+ <button className="h-8 w-8 flex items-center justify-center text-gray-400 active:text-brand-blue active:bg-blue-50 dark:active:bg-blue-900/20 rounded-lg transition-colors">
  <Eye size={16} />
  </button>
  </td> */}

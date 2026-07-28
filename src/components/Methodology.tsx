@@ -65,10 +65,10 @@ const Methodology = () => {
  >
  <Link
  href="/methodology"
- className="inline-flex items-center gap-2 font-medium uppercase tracking-wider text-brand-blue dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 transition-colors group"
+ className="inline-flex items-center gap-2 font-medium uppercase tracking-wider text-brand-blue dark:text-blue-400 hover:text-blue-700 active:text-blue-700 dark:hover:text-blue-300 active:text-blue-300 transition-colors group"
  >
  {t('methodology.home.cta')}
- <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform duration-300 ease-out" />
+ <ArrowRight className="w-5 h-5 group-hover:translate-x-1 active:scale-95 transition-transform duration-300 ease-out" />
  </Link>
  </motion.div>
  </div>
@@ -172,7 +172,7 @@ function MobileZigZag({ steps, t }: { steps: StepItem[]; t: (k: string) => strin
  className="group cursor-default"
  >
   <div
-  className="w-full h-full rounded-full flex flex-col items-center justify-center text-center bg-white dark:bg-slate-800 shadow-lg dark:shadow-2xl dark:shadow-black/30 border border-slate-100 dark:border-slate-700/60 transition-all duration-300 group-hover:-translate-y-1.5 group-hover:border-amber-500/30 group-hover:shadow-xl p-5"
+  className="w-full h-full rounded-full flex flex-col items-center justify-center text-center bg-white dark:bg-slate-800 shadow-lg dark:shadow-2xl dark:shadow-black/30 border border-slate-100 dark:border-slate-700/60 transition-all duration-300 group-hover:-translate-y-1.5 active:scale-95 group-hover:border-amber-500/30 group-active:border-amber-500/30 active:border-amber-500/30 group-hover:shadow-xl p-5"
   >
  <span className="text-[11px] font-semibold uppercase tracking-[0.2em] text-amber-500 mb-1">STEP</span>
  <div className="flex items-center gap-1.5 mb-1">
@@ -181,7 +181,7 @@ function MobileZigZag({ steps, t }: { steps: StepItem[]; t: (k: string) => strin
  {step.num}
  </span>
  </div>
- <h3 className="text-base sm:text-lg font-medium text-slate-800 dark:text-slate-100 uppercase tracking-tight px-4 mb-2 leading-tight group-hover:text-amber-600 transition-colors duration-300">
+ <h3 className="text-base sm:text-lg font-medium text-slate-800 dark:text-slate-100 uppercase tracking-tight px-4 mb-2 leading-tight group-hover:text-amber-600 group-active:text-amber-600 active:text-amber-600 transition-colors duration-300">
  {t(`methodology.${step.id}.title`)}
  </h3>
  <p className="text-xs sm:text-sm text-slate-400 dark:text-slate-500 leading-relaxed px-5 line-clamp-3">
@@ -299,7 +299,7 @@ function DesktopZigZag({ steps, t }: { steps: StepItem[]; t: (k: string) => stri
  className="group cursor-default"
  >
   <div
-  className="w-full h-full rounded-full flex flex-col items-center justify-center text-center bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700/60 transition-all duration-300 group-hover:-translate-y-1.5 shadow-lg dark:shadow-2xl dark:shadow-black/30 group-hover:border-amber-500/30 group-hover:shadow-xl p-5"
+  className="w-full h-full rounded-full flex flex-col items-center justify-center text-center bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700/60 transition-all duration-300 group-hover:-translate-y-1.5 active:scale-95 shadow-lg dark:shadow-2xl dark:shadow-black/30 group-hover:border-amber-500/30 group-active:border-amber-500/30 active:border-amber-500/30 group-hover:shadow-xl p-5"
   >
  {/* STEP label */}
  <span className="text-[11px] font-semibold uppercase tracking-[0.3em] text-amber-500 mb-1.5">STEP</span>
@@ -317,7 +317,7 @@ function DesktopZigZag({ steps, t }: { steps: StepItem[]; t: (k: string) => stri
  </div>
 
  {/* Title */}
- <h3 className="text-lg font-medium text-slate-800 dark:text-slate-100 uppercase tracking-tight px-8 mb-2.5 leading-tight group-hover:text-amber-600 dark:group-hover:text-amber-400 transition-colors duration-300">
+ <h3 className="text-lg font-medium text-slate-800 dark:text-slate-100 uppercase tracking-tight px-8 mb-2.5 leading-tight group-hover:text-amber-600 group-active:text-amber-600 active:text-amber-600 dark:group-hover:text-amber-400 group-active:text-amber-400 active:text-amber-400 transition-colors duration-300">
  {t(`methodology.${step.id}.title`)}
  </h3>
 

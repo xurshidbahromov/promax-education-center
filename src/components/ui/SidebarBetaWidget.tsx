@@ -23,7 +23,7 @@ export default function SidebarBetaWidget() {
  href="https://t.me/xurshidbahromov"
  target="_blank"
  rel="noopener noreferrer"
- className="text-xs font-semibold text-brand-blue hover:text-brand-blue/80 flex items-center gap-1.5 transition-colors"
+ className="text-xs font-semibold text-brand-blue active:text-brand-blue/80 flex items-center gap-1.5 transition-colors"
  >
  <MessageSquare size={14} />
  {t('beta.action') || "Xabar berish"}

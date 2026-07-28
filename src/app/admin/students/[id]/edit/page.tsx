@@ -104,7 +104,7 @@ export default function EditStudentPage() {
  <div className="max-w-2xl mx-auto text-center py-12">
  <AlertCircle className="w-16 h-16 text-red-500 mx-auto mb-4" />
  <h2 className="text-2xl font-medium text-slate-800 dark:text-slate-100">O'quvchi topilmadi</h2>
- <Link href="/admin/students" className="text-brand-blue hover:underline mt-4 inline-block">
+ <Link href="/admin/students" className="text-brand-blue active:underline mt-4 inline-block">
  Ortga qaytish
  </Link>
  </div>
@@ -117,7 +117,7 @@ export default function EditStudentPage() {
  <div>
  <Link
  href="/admin/students"
- className="inline-flex items-center gap-2 text-gray-500 hover:text-brand-blue mb-4 transition-colors"
+ className="inline-flex items-center gap-2 text-gray-500 active:text-brand-blue mb-4 transition-colors"
  >
  <ArrowLeft size={20} />
  Ortga qaytish
@@ -181,7 +181,7 @@ export default function EditStudentPage() {
  <button
  type="submit"
  disabled={saving}
- className="w-full py-4 bg-brand-blue text-white rounded-xl font-medium text-lg hover:bg-blue-600 transition-colors shadow-lg shadow-blue-500/30 flex items-center justify-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed mt-8"
+ className="w-full py-4 bg-brand-blue text-white rounded-xl font-medium text-lg active:bg-blue-600 transition-colors shadow-lg shadow-blue-500/30 flex items-center justify-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed mt-8"
  >
  {saving ? (
  <span className="w-6 h-6 border-2 border-white/30 border-t-white rounded-full animate-spin" />

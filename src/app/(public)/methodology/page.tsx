@@ -125,14 +125,14 @@ const MethodologyPage = () => {
  {/* Visual/Image (Premium Glassmorphism Card) */}
  <div className="flex-1 w-full relative group">
  {/* Glow behind image */}
- <div className={`absolute -inset-4 bg-gradient-to-r ${step.glow} rounded-[3rem] blur-2xl opacity-50 group-hover:opacity-100 transition-opacity duration-700`} />
+ <div className={`absolute -inset-4 bg-gradient-to-r ${step.glow} rounded-[3rem] blur-2xl opacity-50 group-hover:opacity-100 group-active:opacity-100 active:opacity-100 transition-opacity duration-700`} />
  
  <div className={`relative aspect-[4/3] rounded-[2.5rem] overflow-hidden shadow-2xl ${step.border} border-4 bg-white dark:bg-slate-900`}>
  <Image
  src={step.image}
  alt={t(`methodology.${step.id}.title`)}
  fill
- className="object-cover transition-transform duration-700 group-hover:scale-105"
+ className="object-cover transition-transform duration-700 group-hover:scale-105 group-active:scale-95"
  />
  {/* Overlay to ensure text readability if needed */}
  <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-80" />

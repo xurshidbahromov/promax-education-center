@@ -42,7 +42,7 @@ export default function AdminPaymentsPage() {
 
  // Filters
  const [searchTerm, setSearchTerm] = useState("");
- const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth() + 1);
+ const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth()+ 1);
  const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
 
  useEffect(() => {
@@ -62,7 +62,7 @@ export default function AdminPaymentsPage() {
  const { data: allPayments } = await supabase
  .from('payment_transactions')
  .select('amount');
- const total = allPayments?.reduce((sum, p) => sum + Number(p.amount), 0) || 0;
+ const total = allPayments?.reduce((sum, p) => sum+ Number(p.amount), 0) || 0;
  setTotalRevenue(total);
 
  // Get recent payments with student names
@@ -85,7 +85,7 @@ export default function AdminPaymentsPage() {
 
  // Get overdue payments
  const overdue = await getOverduePayments();
- setOverdueAmount(overdue.reduce((sum, p) => sum + Number(p.remaining_amount), 0));
+ setOverdueAmount(overdue.reduce((sum, p) => sum+ Number(p.remaining_amount), 0));
 
  // Fetch student names for overdue
  const overdueWithNames = await Promise.all(
@@ -104,8 +104,8 @@ export default function AdminPaymentsPage() {
  );
  setOverduePayments(overdueWithNames);
 
- // Calculate payment rate (simple: paid / (paid + overdue))
- const totalExpected = total + overdueAmount;
+ // Calculate payment rate (simple: paid / (paid+ overdue))
+ const totalExpected = total+ overdueAmount;
  const rate = totalExpected > 0 ? Math.round((total / totalExpected) * 100) : 100;
  setPaymentRate(rate);
 
@@ -118,7 +118,7 @@ export default function AdminPaymentsPage() {
  };
 
  const formatCurrency = (amount: number) => {
- return new Intl.NumberFormat('uz-UZ').format(amount) + ' so\'m';
+ return new Intl.NumberFormat('uz-UZ').format(amount)+ ' so\'m';
  };
 
  const handleExportPayments = async () => {
@@ -205,7 +205,7 @@ export default function AdminPaymentsPage() {
  onChange={(e) => setSelectedMonth(Number(e.target.value))}
  className="px-4 py-2 rounded-lg border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-100"
  >
- {Array.from({ length: 12 }, (_, i) => i + 1).map(month => (
+ {Array.from({ length: 12 }, (_, i) => i+ 1).map(month => (
  <option key={month} value={month}>
  {new Date(2024, month - 1).toLocaleDateString('uz-UZ', { month: 'long' })}
  </option>
@@ -321,7 +321,7 @@ export default function AdminPaymentsPage() {
  </div>
  {overduePayments.length > 5 && (
  <p className="text-sm text-red-600 dark:text-red-400 mt-2">
- +{overduePayments.length - 5} ta boshqa to'lov
++{overduePayments.length - 5} ta boshqa to'lov
  </p>
  )}
  </div>
@@ -338,7 +338,7 @@ export default function AdminPaymentsPage() {
  <div className="flex gap-2">
  <button
  onClick={handleExportPayments}
- className="flex items-center gap-2 px-4 py-2 border border-gray-200 dark:border-slate-700 rounded-lg hover:bg-gray-50 dark:hover:bg-slate-800 transition-colors"
+ className="flex items-center gap-2 px-4 py-2 border border-gray-200 dark:border-slate-700 rounded-lg active:bg-gray-50 dark:active:bg-slate-800 transition-colors"
  >
  <Download size={18} />
  <span className="text-sm font-medium">Export</span>
@@ -379,7 +379,7 @@ export default function AdminPaymentsPage() {
  recentPayments.map((payment) => (
  <tr
  key={payment.id}
- className="border-b border-gray-100 dark:border-slate-800 hover:bg-gray-50 dark:hover:bg-slate-800/50 transition-colors"
+ className="border-b border-gray-100 dark:border-slate-800 active:bg-gray-50 dark:active:bg-slate-800/50 transition-colors"
  >
  <td className="py-4 px-4 text-sm text-slate-800 dark:text-slate-100">
  {formatDate(payment.payment_date)}

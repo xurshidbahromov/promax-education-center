@@ -137,7 +137,7 @@ export default function CreateTestPage() {
  <div className="mb-8">
  <button
  onClick={() => router.push("/admin/tests")}
- className="flex items-center gap-2 text-gray-600 dark:text-gray-400 hover:text-brand-blue mb-4"
+ className="flex items-center gap-2 text-gray-600 dark:text-gray-400 active:text-brand-blue mb-4"
  >
  <ArrowLeft size={20} />
  Orqaga
@@ -284,7 +284,7 @@ export default function CreateTestPage() {
  </h2>
  <button
  onClick={addQuestion}
- className="px-4 py-2 bg-brand-blue text-white rounded-xl flex items-center gap-2 hover:shadow-lg transition-all"
+ className="px-4 py-2 bg-brand-blue text-white rounded-xl flex items-center gap-2 transition-all"
  >
  <Plus size={20} />
  Savol Qo'shish
@@ -310,7 +310,7 @@ export default function CreateTestPage() {
  <div className="flex-1">
  <div className="flex items-center gap-2 mb-2">
  <span className="px-2 py-1 bg-brand-blue text-white text-xs font-medium rounded">
- {index + 1}
+ {index+ 1}
  </span>
  <span className="px-2 py-1 bg-gray-200 dark:bg-slate-700 text-xs font-medium rounded">
  {q.question_type === "multiple_choice" ? "Ko'p tanlov" : q.question_type === "true_false" ? "To'g'ri/Noto'g'ri" : "Qisqa javob"}
@@ -341,13 +341,13 @@ export default function CreateTestPage() {
  <div className="flex items-center gap-2">
  <button
  onClick={() => setEditingQuestion(q)}
- className="p-2 text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-lg"
+ className="p-2 text-blue-600 active:bg-blue-50 dark:active:bg-blue-900/20 rounded-lg"
  >
  <Eye size={18} />
  </button>
  <button
  onClick={() => deleteQuestion(q.id)}
- className="p-2 text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg"
+ className="p-2 text-red-600 active:bg-red-50 dark:active:bg-red-900/20 rounded-lg"
  >
  <Trash2 size={18} />
  </button>
@@ -484,13 +484,13 @@ export default function CreateTestPage() {
  <button
  onClick={saveQuestion}
  disabled={!editingQuestion.question_text || !editingQuestion.correct_answer}
- className="flex-1 px-4 py-3 bg-brand-blue text-white rounded-xl font-semibold hover:shadow-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+ className="flex-1 px-4 py-3 bg-brand-blue text-white rounded-xl font-semibold transition-all disabled:opacity-50 disabled:cursor-not-allowed"
  >
  Saqlash
  </button>
  <button
  onClick={() => setEditingQuestion(null)}
- className="px-4 py-3 bg-gray-200 dark:bg-slate-800 text-gray-700 dark:text-gray-300 rounded-xl font-semibold hover:bg-gray-300 dark:hover:bg-slate-700"
+ className="px-4 py-3 bg-gray-200 dark:bg-slate-800 text-gray-700 dark:text-gray-300 rounded-xl font-semibold active:bg-gray-300 dark:active:bg-slate-700"
  >
  Bekor Qilish
  </button>
@@ -556,7 +556,7 @@ export default function CreateTestPage() {
  <div key={q.id} className="p-4 border border-gray-200 dark:border-slate-700 rounded-xl">
  <div className="flex items-start gap-3">
  <span className="px-2 py-1 bg-brand-blue text-white text-sm font-medium rounded">
- {index + 1}
+ {index+ 1}
  </span>
  <div className="flex-1">
  <p className="text-slate-800 dark:text-slate-100 mb-2">{q.question_text}</p>
@@ -592,7 +592,7 @@ export default function CreateTestPage() {
  else if (currentStep === "preview") setCurrentStep("questions");
  }}
  disabled={currentStep === "basic"}
- className="px-6 py-3 bg-gray-200 dark:bg-slate-800 text-gray-700 dark:text-gray-300 rounded-xl font-semibold flex items-center gap-2 hover:bg-gray-300 dark:hover:bg-slate-700 disabled:opacity-50 disabled:cursor-not-allowed"
+ className="px-6 py-3 bg-gray-200 dark:bg-slate-800 text-gray-700 dark:text-gray-300 rounded-xl font-semibold flex items-center gap-2 active:bg-gray-300 dark:active:bg-slate-700 disabled:opacity-50 disabled:cursor-not-allowed"
  >
  <ArrowLeft size={20} />
  Orqaga
@@ -604,7 +604,7 @@ export default function CreateTestPage() {
  <button
  onClick={() => handleSubmit(false)}
  disabled={saving}
- className="px-6 py-3 bg-gray-200 dark:bg-slate-800 text-gray-700 dark:text-gray-300 rounded-xl font-semibold flex items-center gap-2 hover:bg-gray-300 dark:hover:bg-slate-700 disabled:opacity-50"
+ className="px-6 py-3 bg-gray-200 dark:bg-slate-800 text-gray-700 dark:text-gray-300 rounded-xl font-semibold flex items-center gap-2 active:bg-gray-300 dark:active:bg-slate-700 disabled:opacity-50"
  >
  <Save size={20} />
  Qoralama
@@ -612,7 +612,7 @@ export default function CreateTestPage() {
  <button
  onClick={() => handleSubmit(true)}
  disabled={saving}
- className="px-6 py-3 bg-gradient-to-r from-brand-blue to-cyan-500 text-white rounded-xl font-semibold flex items-center gap-2 hover:shadow-lg disabled:opacity-50"
+ className="px-6 py-3 bg-gradient-to-r from-brand-blue to-cyan-500 text-white rounded-xl font-semibold flex items-center gap-2 disabled:opacity-50"
  >
  <CheckCircle size={20} />
  Chop Etish
@@ -625,7 +625,7 @@ export default function CreateTestPage() {
  else if (currentStep === "questions") setCurrentStep("preview");
  }}
  disabled={!canProceed()}
- className="px-6 py-3 bg-brand-blue text-white rounded-xl font-semibold flex items-center gap-2 hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
+ className="px-6 py-3 bg-brand-blue text-white rounded-xl font-semibold flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
  >
  Keyingi
  <ArrowRight size={20} />

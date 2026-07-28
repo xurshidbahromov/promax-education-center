@@ -9,10 +9,10 @@ const Footer = () => {
  const { t } = useLanguage();
 
  const socialLinks = [
- { icon: Instagram, href: "https://instagram.com/promax_education", label: "Instagram", color: "hover:bg-pink-500 hover:text-white hover:border-pink-500" },
- { icon: Send, href: "https://t.me/promax_edu", label: "Telegram", color: "hover:bg-blue-500 hover:text-white hover:border-blue-500" },
- { icon: Facebook, href: "https://facebook.com/Promaxeducation", label: "Facebook", color: "hover:bg-blue-600 hover:text-white hover:border-blue-600" },
- { icon: Youtube, href: "https://www.youtube.com/@PROMAXEDUCATION", label: "YouTube", color: "hover:bg-red-600 hover:text-white hover:border-red-600" },
+ { icon: Instagram, href: "https://instagram.com/promax_education", label: "Instagram", color: "hover:bg-pink-500 active:bg-pink-500 hover:text-white active:text-white hover:border-pink-500 active:border-pink-500" },
+ { icon: Send, href: "https://t.me/promax_edu", label: "Telegram", color: "hover:bg-blue-500 active:bg-blue-500 hover:text-white active:text-white hover:border-blue-500 active:border-blue-500" },
+ { icon: Facebook, href: "https://facebook.com/Promaxeducation", label: "Facebook", color: "hover:bg-blue-600 active:bg-blue-600 hover:text-white active:text-white hover:border-blue-600 active:border-blue-600" },
+ { icon: Youtube, href: "https://www.youtube.com/@PROMAXEDUCATION", label: "YouTube", color: "hover:bg-red-600 active:bg-red-600 hover:text-white active:text-white hover:border-red-600 active:border-red-600" },
  ];
 
  return (
@@ -27,7 +27,7 @@ const Footer = () => {
  <div className="lg:col-span-5 space-y-6">
  <Link href="/" className="inline-block group">
  <div className="flex items-center gap-4">
- <div className="relative w-14 h-14 flex items-center justify-center group-hover:scale-105 transition-transform duration-300">
+ <div className="relative w-14 h-14 flex items-center justify-center group-hover:scale-105 group-active:scale-95 transition-transform duration-300">
  <Image
  src="/favicon.ico"
  alt="Promax Education Center Logo"
@@ -56,7 +56,7 @@ const Footer = () => {
  href={social.href}
  target="_blank"
  rel="noopener noreferrer"
- className={`w-10 h-10 flex items-center justify-center rounded-xl bg-white/40 dark:bg-slate-900/40 text-gray-500 dark:text-gray-400 border border-white/20 dark:border-white/5 shadow-sm transition-all duration-300 hover:-translate-y-0.5 active:scale-[0.98] ${social.color}`}
+ className={`w-10 h-10 flex items-center justify-center rounded-xl bg-white/40 dark:bg-slate-900/40 text-gray-500 dark:text-gray-400 border border-white/20 dark:border-white/5 shadow-sm transition-all duration-300 hover:-translate-y-0.5 active:scale-95 active:scale-[0.98] ${social.color}`}
  aria-label={social.label}
  >
  <social.icon size={18} />
@@ -81,7 +81,7 @@ const Footer = () => {
  { name: t('nav.contact'), href: "#contact" }
  ].map((link, i) => (
  <li key={i}>
- <Link href={link.href} className="text-gray-500 dark:text-gray-400 hover:text-brand-blue dark:hover:text-blue-400 font-medium hover:translate-x-2 transition-transform duration-300 inline-block">
+ <Link href={link.href} className="text-gray-500 dark:text-gray-400 hover:text-brand-blue active:text-brand-blue dark:hover:text-blue-400 active:text-blue-400 font-medium hover:translate-x-2 active:scale-95 transition-transform duration-300 inline-block">
  {link.name}
  </Link>
  </li>
@@ -94,8 +94,8 @@ const Footer = () => {
  <h3 className="text-xl font-medium mb-6 text-slate-800 dark:text-slate-100">{t('footer.contact')}</h3>
  <ul className="space-y-5">
  <li className="flex items-start gap-4 group cursor-pointer">
- <div className="w-10 h-10 rounded-xl bg-white/40 dark:bg-slate-900/40 border border-white/20 dark:border-white/5 flex items-center justify-center flex-shrink-0 transition-all duration-300 group-hover:bg-brand-blue group-hover:text-white group-hover:scale-[1.02]">
- <MapPin className="w-5 h-5 text-brand-blue group-hover:text-white transition-colors" />
+ <div className="w-10 h-10 rounded-xl bg-white/40 dark:bg-slate-900/40 border border-white/20 dark:border-white/5 flex items-center justify-center flex-shrink-0 transition-all duration-300 group-hover:bg-brand-blue group-active:bg-brand-blue active:bg-brand-blue group-hover:text-white group-active:text-white active:text-white group-hover:scale-[1.02] group-active:scale-95">
+ <MapPin className="w-5 h-5 text-brand-blue group-hover:text-white group-active:text-white active:text-white transition-colors" />
  </div>
  <div className="pt-0.5">
  <p className="text-sm font-medium text-slate-800 dark:text-slate-100 mb-0.5">Manzil</p>
@@ -103,21 +103,21 @@ const Footer = () => {
  </div>
  </li>
  <li className="flex items-center gap-4 group cursor-pointer">
- <div className="w-10 h-10 rounded-xl bg-white/40 dark:bg-slate-900/40 border border-white/20 dark:border-white/5 flex items-center justify-center flex-shrink-0 transition-all duration-300 group-hover:bg-brand-orange group-hover:text-white group-hover:scale-[1.02]">
- <Phone className="w-5 h-5 text-brand-orange group-hover:text-white transition-colors" />
+ <div className="w-10 h-10 rounded-xl bg-white/40 dark:bg-slate-900/40 border border-white/20 dark:border-white/5 flex items-center justify-center flex-shrink-0 transition-all duration-300 group-hover:bg-brand-orange group-active:bg-brand-orange active:bg-brand-orange group-hover:text-white group-active:text-white active:text-white group-hover:scale-[1.02] group-active:scale-95">
+ <Phone className="w-5 h-5 text-brand-orange group-hover:text-white group-active:text-white active:text-white transition-colors" />
  </div>
  <div>
  <p className="text-sm font-medium text-slate-800 dark:text-slate-100 mb-0.5">Telefon</p>
- <a href="tel:+998955137776" className="text-sm text-gray-500 dark:text-gray-400 font-medium hover:text-brand-orange transition-colors">+998 95 513 77 76</a>
+ <a href="tel:+998955137776" className="text-sm text-gray-500 dark:text-gray-400 font-medium hover:text-brand-orange active:text-brand-orange transition-colors">+998 95 513 77 76</a>
  </div>
  </li>
  <li className="flex items-center gap-4 group cursor-pointer">
- <div className="w-10 h-10 rounded-xl bg-white/40 dark:bg-slate-900/40 border border-white/20 dark:border-white/5 flex items-center justify-center flex-shrink-0 transition-all duration-300 group-hover:bg-green-500 group-hover:text-white group-hover:scale-[1.02]">
- <Mail className="w-5 h-5 text-green-600 dark:text-green-400 group-hover:text-white transition-colors" />
+ <div className="w-10 h-10 rounded-xl bg-white/40 dark:bg-slate-900/40 border border-white/20 dark:border-white/5 flex items-center justify-center flex-shrink-0 transition-all duration-300 group-hover:bg-green-500 group-active:bg-green-500 active:bg-green-500 group-hover:text-white group-active:text-white active:text-white group-hover:scale-[1.02] group-active:scale-95">
+ <Mail className="w-5 h-5 text-green-600 dark:text-green-400 group-hover:text-white group-active:text-white active:text-white transition-colors" />
  </div>
  <div>
  <p className="text-sm font-medium text-slate-800 dark:text-slate-100 mb-0.5">Email</p>
- <a href="mailto:info@promax.uz" className="text-sm text-gray-500 dark:text-gray-400 font-medium hover:text-green-500 transition-colors">info@promax.uz</a>
+ <a href="mailto:info@promax.uz" className="text-sm text-gray-500 dark:text-gray-400 font-medium hover:text-green-500 active:text-green-500 transition-colors">info@promax.uz</a>
  </div>
  </li>
  </ul>
@@ -129,9 +129,9 @@ const Footer = () => {
  © {new Date().getFullYear()} Promax Education Center. {t('footer.rights')}
  </p>
  <div className="flex items-center gap-6 text-sm font-medium text-gray-500 dark:text-gray-400">
- <Link href="/methodology" className="hover:text-brand-blue transition-colors">Methodology</Link>
- <Link href="/courses" className="hover:text-brand-blue transition-colors">Courses</Link>
- <Link href="/results" className="hover:text-brand-blue transition-colors">Results</Link>
+ <Link href="/methodology" className="hover:text-brand-blue active:text-brand-blue transition-colors">Methodology</Link>
+ <Link href="/courses" className="hover:text-brand-blue active:text-brand-blue transition-colors">Courses</Link>
+ <Link href="/results" className="hover:text-brand-blue active:text-brand-blue transition-colors">Results</Link>
  </div>
  </div>
  </div>

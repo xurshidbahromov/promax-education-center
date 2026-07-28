@@ -256,7 +256,7 @@ export async function saveExamResult(
  .select()
  .single();
 
- if (createExamError) throw new Error('Error creating exam: ' + createExamError.message);
+ if (createExamError) throw new Error('Error creating exam: '+ createExamError.message);
  examId = newExam.id;
  }
 
@@ -284,7 +284,7 @@ export async function saveExamResult(
  .select()
  .single();
 
- if (createDirError) throw new Error('Error creating direction: ' + createDirError.message);
+ if (createDirError) throw new Error('Error creating direction: '+ createDirError.message);
  directionId = newDirection.id;
  }
 

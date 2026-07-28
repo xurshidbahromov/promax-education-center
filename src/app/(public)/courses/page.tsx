@@ -68,8 +68,8 @@ export default function CoursesPage() {
  >
  {/* Banner Image - Taller height for desktop */}
  <div className="relative w-full h-32 sm:h-40 md:h-48 overflow-hidden shrink-0 bg-slate-100 dark:bg-slate-800">
- <Image src={course.image} alt={t(`courses.${course.id}`)} fill className="object-cover group-hover:scale-[1.03] transition-transform duration-700" />
- <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent group-hover:opacity-50 transition-opacity duration-500" />
+ <Image src={course.image} alt={t(`courses.${course.id}`)} fill className="object-cover group-hover:scale-[1.03] group-active:scale-95 transition-transform duration-700" />
+ <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent group-hover:opacity-50 group-active:opacity-50 active:opacity-50 transition-opacity duration-500" />
  </div>
  
  {/* Card Content */}
@@ -98,7 +98,7 @@ export default function CoursesPage() {
  </div>
  <div className="flex items-center text-brand-blue font-medium text-sm transition-transform duration-300">
  {t('courses.more')}
- <ArrowRight className="w-4 h-4 ml-1 group-hover:translate-x-1 transition-transform duration-300 ease-out" />
+ <ArrowRight className="w-4 h-4 ml-1 group-hover:translate-x-1 active:scale-95 transition-transform duration-300 ease-out" />
  </div>
  </div>
  </div>
@@ -130,8 +130,8 @@ export default function CoursesPage() {
  className="group flex flex-col bg-white/70 dark:bg-slate-900/70 backdrop-blur-xl rounded-[2rem] shadow-md border border-white/40 dark:border-white/10 hover:shadow-lg transition-shadow duration-300 h-full overflow-hidden [-webkit-mask-image:-webkit-radial-gradient(white,black)]"
  >
  <div className="relative w-full h-32 sm:h-40 md:h-48 overflow-hidden shrink-0 bg-slate-100 dark:bg-slate-800">
- <Image src={course.image} alt={t(`courses.${course.id}`)} fill className="object-cover group-hover:scale-[1.03] transition-transform duration-700" />
- <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent group-hover:opacity-50 transition-opacity duration-500" />
+ <Image src={course.image} alt={t(`courses.${course.id}`)} fill className="object-cover group-hover:scale-[1.03] group-active:scale-95 transition-transform duration-700" />
+ <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent group-hover:opacity-50 group-active:opacity-50 active:opacity-50 transition-opacity duration-500" />
  </div>
  
  <div className="p-5 sm:p-6 flex-grow flex flex-col relative z-10 bg-white/40 dark:bg-slate-900/40">
@@ -154,7 +154,7 @@ export default function CoursesPage() {
  </div>
  <div className="flex items-center text-purple-600 dark:text-purple-400 font-medium text-sm transition-transform duration-300">
  {t('courses.more')}
- <ArrowRight className="w-4 h-4 ml-1 group-hover:translate-x-1 transition-transform duration-300 ease-out" />
+ <ArrowRight className="w-4 h-4 ml-1 group-hover:translate-x-1 active:scale-95 transition-transform duration-300 ease-out" />
  </div>
  </div>
  </div>
@@ -186,8 +186,8 @@ export default function CoursesPage() {
  className="group flex flex-col bg-white/70 dark:bg-slate-900/70 backdrop-blur-xl rounded-[2rem] shadow-md border border-white/40 dark:border-white/10 hover:shadow-lg transition-shadow duration-300 h-full overflow-hidden [-webkit-mask-image:-webkit-radial-gradient(white,black)]"
  >
  <div className="relative w-full h-40 sm:h-48 md:h-56 overflow-hidden shrink-0 bg-slate-100 dark:bg-slate-800">
- <Image src={course.image} alt={t(`courses.${course.id}`)} fill className="object-cover group-hover:scale-[1.03] transition-transform duration-700" />
- <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent group-hover:opacity-50 transition-opacity duration-500" />
+ <Image src={course.image} alt={t(`courses.${course.id}`)} fill className="object-cover group-hover:scale-[1.03] group-active:scale-95 transition-transform duration-700" />
+ <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent group-hover:opacity-50 group-active:opacity-50 active:opacity-50 transition-opacity duration-500" />
  </div>
  
  <div className="p-6 sm:p-8 flex-grow flex flex-col relative z-10 bg-white/40 dark:bg-slate-900/40">
@@ -210,7 +210,7 @@ export default function CoursesPage() {
  </div>
  <div className="flex items-center text-brand-orange font-medium text-base transition-transform duration-300">
  {t('courses.more')}
- <ArrowRight className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform duration-300 ease-out" />
+ <ArrowRight className="w-5 h-5 ml-2 group-hover:translate-x-1 active:scale-95 transition-transform duration-300 ease-out" />
  </div>
  </div>
  </div>

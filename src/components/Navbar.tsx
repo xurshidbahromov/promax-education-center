@@ -83,7 +83,7 @@ const Navbar = () => {
  alt="Promax Education Center Logo"
  width={256}
  height={256}
- className="w-full h-full object-contain dark:filter-none invert hue-rotate-180 opacity-85 hover:opacity-100 transition-opacity duration-300"
+ className="w-full h-full object-contain dark:filter-none invert hue-rotate-180 opacity-85 hover:opacity-100 active:opacity-100 transition-opacity duration-300"
  />
  </div>
  </Link>
@@ -101,7 +101,7 @@ const Navbar = () => {
  "text-sm font-semibold transition-colors relative group py-2",
  isActive(item)
  ? "text-brand-blue dark:text-blue-400"
- : "text-gray-700 dark:text-gray-300 hover:text-brand-blue dark:hover:text-blue-400"
+ : "text-gray-700 dark:text-gray-300 hover:text-brand-blue active:text-brand-blue dark:hover:text-blue-400 active:text-blue-400"
  )}
  >
  {t(`nav.${item}`)}
@@ -123,7 +123,7 @@ const Navbar = () => {
  <div className="relative" ref={themeRef}>
  <button
  onClick={() => setThemeOpen(!themeOpen)}
- className="flex items-center justify-center w-10 h-10 rounded-full text-gray-700 dark:text-gray-300 hover:bg-black/5 dark:hover:bg-white/10 transition-colors"
+ className="flex items-center justify-center w-10 h-10 rounded-full text-gray-700 dark:text-gray-300 hover:bg-black/5 active:bg-black/5 dark:hover:bg-white/10 active:bg-white/10 transition-colors"
  aria-label="Theme Menu"
  >
  <ThemeIcon />
@@ -147,7 +147,7 @@ const Navbar = () => {
  key={option.value}
  onClick={() => { setTheme(option.value); setThemeOpen(false); }}
  className={cn(
- "w-full flex items-center gap-3 px-4 py-3 text-sm font-medium transition-colors hover:bg-black/5 dark:hover:bg-white/5",
+ "w-full flex items-center gap-3 px-4 py-3 text-sm font-medium transition-colors hover:bg-black/5 active:bg-black/5 dark:hover:bg-white/5 active:bg-white/5",
  theme === option.value ? "text-brand-blue" : "text-gray-700 dark:text-gray-300"
  )}
  >
@@ -165,7 +165,7 @@ const Navbar = () => {
  <div className="relative" ref={langRef}>
  <button
  onClick={() => setLangOpen(!langOpen)}
- className="flex items-center gap-1.5 px-3 h-10 rounded-full text-gray-700 dark:text-gray-300 hover:bg-black/5 dark:hover:bg-white/10 transition-colors font-semibold text-sm"
+ className="flex items-center gap-1.5 px-3 h-10 rounded-full text-gray-700 dark:text-gray-300 hover:bg-black/5 active:bg-black/5 dark:hover:bg-white/10 active:bg-white/10 transition-colors font-semibold text-sm"
  aria-label="Language Menu"
  >
  <Globe className="w-4 h-4" />
@@ -186,7 +186,7 @@ const Navbar = () => {
  key={lang}
  onClick={() => { setLanguage(lang); setLangOpen(false); }}
  className={cn(
- "w-full flex items-center justify-between px-4 py-3 text-sm font-medium transition-colors hover:bg-black/5 dark:hover:bg-white/5",
+ "w-full flex items-center justify-between px-4 py-3 text-sm font-medium transition-colors hover:bg-black/5 active:bg-black/5 dark:hover:bg-white/5 active:bg-white/5",
  language === lang ? "text-brand-blue" : "text-gray-700 dark:text-gray-300"
  )}
  >
@@ -204,7 +204,7 @@ const Navbar = () => {
  {user ? (
   <Link
     href="/dashboard"
-    className="bg-brand-blue text-white px-6 h-10 flex items-center justify-center rounded-full text-sm font-medium hover:bg-brand-blue/90 transition-colors active:scale-[0.98] ml-1 shadow-sm"
+    className="bg-brand-blue text-white px-6 h-10 flex items-center justify-center rounded-full text-sm font-medium hover:bg-brand-blue/90 active:bg-brand-blue/90 transition-colors active:scale-[0.98] ml-1 shadow-sm"
   >
     Dashboard
   </Link>
@@ -212,14 +212,14 @@ const Navbar = () => {
   <>
     <Link
       href="/login"
-      className="text-sm font-semibold text-gray-800 dark:text-gray-200 hover:text-brand-blue dark:hover:text-blue-400 transition-colors px-2"
+      className="text-sm font-semibold text-gray-800 dark:text-gray-200 hover:text-brand-blue active:text-brand-blue dark:hover:text-blue-400 active:text-blue-400 transition-colors px-2"
     >
       {t('nav.login')}
     </Link>
 
     <Link
       href="/register"
-      className="bg-brand-blue text-white px-6 h-10 flex items-center justify-center rounded-full text-sm font-medium hover:bg-brand-blue/90 transition-colors active:scale-[0.98] ml-1 shadow-sm"
+      className="bg-brand-blue text-white px-6 h-10 flex items-center justify-center rounded-full text-sm font-medium hover:bg-brand-blue/90 active:bg-brand-blue/90 transition-colors active:scale-[0.98] ml-1 shadow-sm"
     >
       {t('hero.cta.primary')}
     </Link>
@@ -261,7 +261,7 @@ const Navbar = () => {
  "text-lg font-medium px-4 py-3 rounded-2xl transition-colors",
  isActive(item)
  ? "bg-brand-blue/10 text-brand-blue dark:text-blue-400"
- : "text-gray-800 dark:text-gray-200 hover:bg-black/5 dark:hover:bg-white/5"
+ : "text-gray-800 dark:text-gray-200 hover:bg-black/5 active:bg-black/5 dark:hover:bg-white/5 active:bg-white/5"
  )}
  onClick={() => setMobileMenuOpen(false)}
  >
@@ -282,7 +282,7 @@ const Navbar = () => {
  onClick={() => setTheme(mode)}
  className={cn(
  "p-3 rounded-xl transition-all flex-1 flex justify-center",
- theme === mode ? "bg-black/10 dark:bg-white/10 text-slate-800 dark:text-slate-100" : "text-gray-500 hover:bg-black/5 dark:hover:bg-white/5"
+ theme === mode ? "bg-black/10 dark:bg-white/10 text-slate-800 dark:text-slate-100" : "text-gray-500 hover:bg-black/5 active:bg-black/5 dark:hover:bg-white/5 active:bg-white/5"
  )}
  >
  {mode === 'light' && <Sun size={18} />}
@@ -317,14 +317,14 @@ const Navbar = () => {
  <div className="flex flex-col gap-3 mt-2">
  <Link
  href="/login"
- className="w-full py-4 text-center rounded-full font-medium text-gray-800 dark:text-gray-200 bg-black/5 dark:bg-white/5 hover:bg-black/10 transition-colors"
+ className="w-full py-4 text-center rounded-full font-medium text-gray-800 dark:text-gray-200 bg-black/5 dark:bg-white/5 hover:bg-black/10 active:bg-black/10 transition-colors"
  onClick={() => setMobileMenuOpen(false)}
  >
  {t('auth.login.title')}
  </Link>
  <Link
  href="/register"
- className="w-full py-4 text-center rounded-full font-medium text-white bg-brand-blue hover:bg-blue-700 shadow-xl shadow-brand-blue/20 transition-all active:scale-95"
+ className="w-full py-4 text-center rounded-full font-medium text-white bg-brand-blue hover:bg-blue-700 active:bg-blue-700 shadow-xl shadow-brand-blue/20 transition-all active:scale-95"
  onClick={() => setMobileMenuOpen(false)}
  >
  {t('auth.register.button')}

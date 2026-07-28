@@ -53,14 +53,14 @@ const CallToAction = () => {
  <div className="flex flex-col sm:flex-row gap-4 pt-6">
  <Link
  href="/register"
- className="group px-8 py-4 bg-brand-orange text-white font-semibold rounded-full text-lg hover:bg-orange-600 transition-colors shadow-sm active:scale-[0.98] flex items-center justify-center gap-3 uppercase tracking-wider"
+ className="group px-8 py-4 bg-brand-orange text-white font-semibold rounded-full text-lg hover:bg-orange-600 active:bg-orange-600 transition-colors shadow-sm active:scale-[0.98] flex items-center justify-center gap-3 uppercase tracking-wider"
  >
  {t('cta.button.primary')}
- <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform duration-300 ease-out" />
+ <ArrowRight className="w-5 h-5 group-hover:translate-x-1 active:scale-95 transition-transform duration-300 ease-out" />
  </Link>
  <Link
  href="/courses"
- className="px-8 py-4 bg-white/5 border border-white/10 text-white font-medium rounded-full text-lg hover:bg-white/10 transition-colors backdrop-blur-sm active:scale-[0.98] flex items-center justify-center uppercase tracking-wider"
+ className="px-8 py-4 bg-white/5 border border-white/10 text-white font-medium rounded-full text-lg hover:bg-white/10 active:bg-white/10 transition-colors backdrop-blur-sm active:scale-[0.98] flex items-center justify-center uppercase tracking-wider"
  >
  {t('cta.button.secondary')}
  </Link>

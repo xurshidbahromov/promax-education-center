@@ -44,7 +44,7 @@ export default function AnnouncementModal({
  <h2 className="text-2xl font-medium text-slate-800 dark:text-slate-100">
  {editingId ? t('admin.announcements.modal.edit_title') : t('admin.announcements.modal.create_title')}
  </h2>
- <button onClick={onClose} className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200">
+ <button onClick={onClose} className="text-gray-500 active:text-gray-700 dark:text-gray-400 dark:active:text-gray-200">
  <X size={24} />
  </button>
  </div>
@@ -139,14 +139,14 @@ export default function AnnouncementModal({
  <button
  type="button"
  onClick={onClose}
- className="px-4 py-2 rounded-xl bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
+ className="px-4 py-2 rounded-xl bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 active:bg-gray-200 dark:active:bg-gray-700 transition-colors"
  >
  {t('admin.announcements.form.cancel')}
  </button>
  <button
  type="submit"
  disabled={loading}
- className="px-4 py-2 rounded-xl bg-brand-blue hover:bg-brand-blue/90 text-white font-medium transition-colors disabled:opacity-50"
+ className="px-4 py-2 rounded-xl bg-brand-blue active:bg-brand-blue/90 text-white font-medium transition-colors disabled:opacity-50"
  >
  {loading ? t('admin.announcements.form.saving') : editingId ? t('admin.announcements.form.update') : t('admin.announcements.form.create')}
  </button>

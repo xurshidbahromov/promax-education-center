@@ -256,7 +256,7 @@ export default function AdminAnnouncementsPage() {
 
  <button
  onClick={() => { resetForm(); setShowModal(true); }}
- className="h-10 px-4 flex items-center gap-2 bg-brand-blue hover:bg-brand-blue/90 text-white rounded-xl text-sm font-medium transition-colors shadow-sm"
+ className="h-10 px-4 flex items-center gap-2 bg-brand-blue active:bg-brand-blue/90 text-white rounded-xl text-sm font-medium transition-colors shadow-sm"
  >
  <Plus size={18} />
  {t('admin.announcements.new')}
@@ -305,7 +305,7 @@ export default function AdminAnnouncementsPage() {
  {filteredAnnouncements.map((announcement) => (
  <div
  key={announcement.id}
- className="bg-white dark:bg-slate-900 p-6 rounded-2xl border border-gray-200 dark:border-slate-800 shadow-sm hover:shadow-md transition-shadow"
+ className="bg-white dark:bg-slate-900 p-6 rounded-2xl border border-gray-200 dark:border-slate-800 shadow-sm transition-shadow"
  >
  <div className="flex items-start justify-between gap-4">
  <div className="flex-1">
@@ -340,8 +340,8 @@ export default function AdminAnnouncementsPage() {
  <button
  onClick={() => toggleActive(announcement.id, announcement.is_active)}
  className={`p-2 rounded-xl transition-colors ${announcement.is_active
- ? 'bg-green-100 text-green-600 hover:bg-green-200 dark:bg-green-900 dark:text-green-300'
- : 'bg-gray-100 text-gray-600 hover:bg-gray-200 dark:bg-gray-800 dark:text-gray-400'
+ ? 'bg-green-100 text-green-600 active:bg-green-200 dark:bg-green-900 dark:text-green-300'
+ : 'bg-gray-100 text-gray-600 active:bg-gray-200 dark:bg-gray-800 dark:text-gray-400'
  }`}
  title={announcement.is_active ? t('admin.announcements.actions.deactivate') : t('admin.announcements.actions.activate')}
  >
@@ -349,13 +349,13 @@ export default function AdminAnnouncementsPage() {
  </button>
  <button
  onClick={() => handleEdit(announcement)}
- className="p-2 rounded-xl bg-blue-100 text-blue-600 hover:bg-blue-200 dark:bg-blue-900 dark:text-blue-300 transition-colors"
+ className="p-2 rounded-xl bg-blue-100 text-blue-600 active:bg-blue-200 dark:bg-blue-900 dark:text-blue-300 transition-colors"
  >
  <Edit size={18} />
  </button>
  <button
  onClick={() => handleDelete(announcement.id)}
- className="p-2 rounded-xl bg-red-100 text-red-600 hover:bg-red-200 dark:bg-red-900 dark:text-red-300 transition-colors"
+ className="p-2 rounded-xl bg-red-100 text-red-600 active:bg-red-200 dark:bg-red-900 dark:text-red-300 transition-colors"
  >
  <Trash2 size={18} />
  </button>

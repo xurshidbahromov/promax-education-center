@@ -247,7 +247,7 @@ export const en = {
  "courses.cert.sat.teacher_name": "Mr. Sarvar",
  "courses.cert.sat.teacher_bio": "Scored 1500+ on SAT.",
  "courses.cert.sat.program.main.title": "SAT Intensive",
- "courses.cert.sat.program.main.features": "3 lessons per week (2 hours each) + Sunday review|2 trial lessons (Registration starts from the 1st lesson if satisfied)|Bi-weekly internal exams|Monthly MOCK EXAM on covered topics|Course duration: 8 months (6 months intensive topics + 2 months SAT*GMAT practice)|100% Quality Guarantee (Minimum 690+ in Math section)",
+ "courses.cert.sat.program.main.features": "3 lessons per week (2 hours each)+ Sunday review|2 trial lessons (Registration starts from the 1st lesson if satisfied)|Bi-weekly internal exams|Monthly MOCK EXAM on covered topics|Course duration: 8 months (6 months intensive topics+ 2 months SAT*GMAT practice)|100% Quality Guarantee (Minimum 690+ in Math section)",
 
  "courses.prep.inha.long_desc": "Targeted preparation for Inha University entrance exams (Math & Physics).",
  "courses.prep.inha.materials": "Inha past papers, Calculus books.",
@@ -275,7 +275,7 @@ export const en = {
  "auth.error_invalid_credentials": "Invalid email or password.",
  "auth.error_email_not_confirmed": "Email not confirmed. Please confirm your email.",
  "auth.error_fill_all_fields": "Please fill in all required fields.",
- "auth.error_invalid_phone": "Invalid phone format. Example: +998 90 123 45 67",
+ "auth.error_invalid_phone": "Invalid phone format. Example:+998 90 123 45 67",
  "auth.error_password_too_short": "Password must be at least 6 characters.",
  "auth.welcome": "Welcome Back",
  "auth.welcome_subtitle_login": "Sign in to your learning platform and continue your lessons.",
@@ -289,6 +289,7 @@ export const en = {
 
  // Dashboard Keys
  "sidebar.dashboard": "Dashboard",
+ "sidebar.lessons": "Lessons",
  "sidebar.onlinetests": "Online Tests",
  "sidebar.results": "Practice test",
  "sidebar.games": "Game Zone",

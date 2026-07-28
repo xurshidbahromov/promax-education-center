@@ -62,7 +62,7 @@ export default function AdminStudentsPage() {
  queryClient.invalidateQueries({ queryKey: ['paymentSummaries'] });
  toast.success("Student muvaffaqiyatli o'chirildi");
  } else {
- toast.error("Xatolik: " + result.error);
+ toast.error("Xatolik: "+ result.error);
  }
  } catch (error) {
  console.error("Delete error:", error);
@@ -112,7 +112,7 @@ export default function AdminStudentsPage() {
  </div>
 
  <div className="flex items-center gap-3">
- <button onClick={handleExportStudents} disabled={isExporting} className="h-10 px-4 flex items-center gap-2 bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-800 rounded-xl text-sm font-medium text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-slate-800 transition-colors disabled:opacity-50">
+ <button onClick={handleExportStudents} disabled={isExporting} className="h-10 px-4 flex items-center gap-2 bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-800 rounded-xl text-sm font-medium text-gray-600 dark:text-gray-300 active:bg-gray-50 dark:active:bg-slate-800 transition-colors disabled:opacity-50">
  <Download size={18} className={isExporting ? "animate-bounce" : ""} />
  <span className="hidden sm:inline">{isExporting ? "Yuklanmoqda..." : "Export"}</span>
  </button>
@@ -218,21 +218,21 @@ export default function AdminStudentsPage() {
  <div className="flex gap-2">
  <Link
  href={`/admin/students/${student.id}`}
- className="flex-1 h-10 flex items-center justify-center gap-2 text-green-600 bg-green-50 dark:bg-green-900/20 rounded-lg font-medium text-sm transition-colors hover:bg-green-100 dark:hover:bg-green-900/30"
+ className="flex-1 h-10 flex items-center justify-center gap-2 text-green-600 bg-green-50 dark:bg-green-900/20 rounded-lg font-medium text-sm transition-colors active:bg-green-100 dark:active:bg-green-900/30"
  >
  <FileText size={16} />
  Results
  </Link>
  <Link
  href={`/admin/students/${student.id}/edit`}
- className="flex-1 h-10 flex items-center justify-center gap-2 text-blue-600 bg-blue-50 dark:bg-blue-900/20 rounded-lg font-medium text-sm transition-colors hover:bg-blue-100 dark:hover:bg-blue-900/30"
+ className="flex-1 h-10 flex items-center justify-center gap-2 text-blue-600 bg-blue-50 dark:bg-blue-900/20 rounded-lg font-medium text-sm transition-colors active:bg-blue-100 dark:active:bg-blue-900/30"
  >
  <Edit size={16} />
  Edit
  </Link>
  <button
  onClick={() => handleDelete(student.id)}
- className="h-10 px-4 flex items-center justify-center text-red-600 bg-red-50 dark:bg-red-900/20 rounded-lg transition-colors hover:bg-red-100 dark:hover:bg-red-900/30"
+ className="h-10 px-4 flex items-center justify-center text-red-600 bg-red-50 dark:bg-red-900/20 rounded-lg transition-colors active:bg-red-100 dark:active:bg-red-900/30"
  title="Delete"
  >
  <Trash2 size={16} />
@@ -282,7 +282,7 @@ export default function AdminStudentsPage() {
  }
 
  return filteredStudents.map((student) => (
- <tr key={student.id} className="hover:bg-gray-50 dark:hover:bg-slate-800/50 transition-colors group">
+ <tr key={student.id} className="active:bg-gray-50 dark:active:bg-slate-800/50 transition-colors group">
  <td className="px-6 py-4">
  <div className="flex items-center gap-3">
  <div className="w-10 h-10 rounded-full bg-brand-blue/10 flex items-center justify-center text-brand-blue font-medium uppercase">
@@ -325,21 +325,21 @@ export default function AdminStudentsPage() {
  <Link
  href={`/admin/students/${student.id}`}
  title="Natijalarni ko'rish"
- className="h-8 w-8 flex items-center justify-center text-gray-400 hover:text-green-600 hover:bg-green-50 dark:hover:bg-green-900/20 rounded-lg transition-colors"
+ className="h-8 w-8 flex items-center justify-center text-gray-400 active:text-green-600 active:bg-green-50 dark:active:bg-green-900/20 rounded-lg transition-colors"
  >
  <FileText size={16} />
  </Link>
  <Link
  href={`/admin/students/${student.id}/edit`}
  title="Tahrirlash"
- className="h-8 w-8 flex items-center justify-center text-gray-400 hover:text-brand-blue hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-lg transition-colors"
+ className="h-8 w-8 flex items-center justify-center text-gray-400 active:text-brand-blue active:bg-blue-50 dark:active:bg-blue-900/20 rounded-lg transition-colors"
  >
  <Edit size={16} />
  </Link>
  <button
  onClick={() => handleDelete(student.id)}
  title="O'chirib yuborish"
- className="h-8 w-8 flex items-center justify-center text-gray-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"
+ className="h-8 w-8 flex items-center justify-center text-gray-400 active:text-red-600 active:bg-red-50 dark:active:bg-red-900/20 rounded-lg transition-colors"
  >
  <Trash2 size={16} />
  </button>

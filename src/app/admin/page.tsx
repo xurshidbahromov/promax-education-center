@@ -82,7 +82,7 @@ export default function AdminDashboardPage() {
  ))
  ) : (
  statCards.map((stat, index) => (
- <div key={index} className="bg-white dark:bg-slate-900 p-6 rounded-2xl border border-gray-200 dark:border-slate-800 shadow-sm hover:shadow-md transition-shadow">
+ <div key={index} className="bg-white dark:bg-slate-900 p-6 rounded-2xl border border-gray-200 dark:border-slate-800 shadow-sm transition-shadow">
  <div className="flex items-center justify-between mb-4">
  <div className={`p-3 rounded-xl ${stat.bg} ${stat.color}`}>
  <stat.icon size={24} />
@@ -102,7 +102,7 @@ export default function AdminDashboardPage() {
  <div className="bg-white dark:bg-slate-900 rounded-2xl border border-gray-200 dark:border-slate-800 shadow-sm overflow-hidden">
  <div className="p-6 border-b border-gray-200 dark:border-slate-800 flex items-center justify-between">
  <h2 className="text-lg font-medium text-slate-800 dark:text-slate-100">So'nggi Faoliyat</h2>
- <Link href="/admin/results" className="text-sm text-brand-blue hover:text-blue-700 font-medium">Barchasini ko'rish</Link>
+ <Link href="/admin/results" className="text-sm text-brand-blue active:text-blue-700 font-medium">Barchasini ko'rish</Link>
  </div>
  {activityLoading ? (
  <div className="p-6">
@@ -126,7 +126,7 @@ export default function AdminDashboardPage() {
  </tr>
  ) : (
  activityList.map((item: any, index: number) => (
- <tr key={index} className="hover:bg-gray-50 dark:hover:bg-slate-800/50 transition-colors">
+ <tr key={index} className="active:bg-gray-50 dark:active:bg-slate-800/50 transition-colors">
  <td className="px-6 py-4 font-medium text-slate-800 dark:text-slate-100">{item.user}</td>
  <td className="px-6 py-4 text-gray-600 dark:text-gray-400">{item.action}</td>
  <td className="px-6 py-4 text-gray-500 text-sm">{new Date(item.date).toLocaleString()}</td>

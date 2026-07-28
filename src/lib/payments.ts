@@ -303,7 +303,7 @@ export async function getMonthlyRevenue(month: number, year: number): Promise<nu
  return 0;
  }
 
- const total = data?.reduce((sum, payment) => sum + Number(payment.amount), 0) || 0;
+ const total = data?.reduce((sum, payment) => sum+ Number(payment.amount), 0) || 0;
  return total;
 }
 
@@ -342,7 +342,7 @@ export async function getStudentPaymentSummary(studentId: string): Promise<Stude
  const supabase = createClient();
 
  const currentDate = new Date();
- const currentMonth = currentDate.getMonth() + 1;
+ const currentMonth = currentDate.getMonth()+ 1;
  const currentYear = currentDate.getFullYear();
 
  // Get all active courses for student
@@ -386,7 +386,7 @@ export async function getStudentPaymentSummary(studentId: string): Promise<Stude
  partialCourses++;
  } else if (status.status === 'overdue') {
  overdueCourses++;
- totalOverdue += Number(status.remaining_amount);
+ totalOverdue+= Number(status.remaining_amount);
  }
  }
  }
@@ -416,7 +416,7 @@ export async function getStudentPaymentSummary(studentId: string): Promise<Stude
 export async function getPaymentSummariesForStudents(studentIds: string[]): Promise<Map<string, StudentPaymentSummary>> {
  const supabase = createClient();
  const currentDate = new Date();
- const currentMonth = currentDate.getMonth() + 1;
+ const currentMonth = currentDate.getMonth()+ 1;
  const currentYear = currentDate.getFullYear();
  const summaries = new Map<string, StudentPaymentSummary>();
 
@@ -503,7 +503,7 @@ export async function getPaymentSummariesForStudents(studentIds: string[]): Prom
  partialCourses++;
  } else if (status.status === 'overdue') {
  overdueCourses++;
- totalOverdue += Number(status.remaining_amount);
+ totalOverdue+= Number(status.remaining_amount);
  }
  }
  });

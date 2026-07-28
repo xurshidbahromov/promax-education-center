@@ -29,7 +29,7 @@ export default function MyCourses() {
  const studentCourses = await getActiveStudentCourses(user.id);
  setCourses(studentCourses);
 
- const currentMonth = new Date().getMonth() + 1;
+ const currentMonth = new Date().getMonth()+ 1;
  const currentYear = new Date().getFullYear();
  const statuses = await getMonthlyPaymentStatus(user.id, currentMonth, currentYear);
 
@@ -106,16 +106,16 @@ export default function MyCourses() {
  animate={{ opacity: 1, y: 0 }}
  transition={{ delay: index * 0.1 }}
  key={course.id}
- className={`bg-white/40 dark:bg-slate-900/40 backdrop-blur-xl rounded-3xl border p-5 sm:p-6 shadow-lg hover:shadow-xl hover:-translate-y-1 transition-all duration-300 group ${
+ className={`bg-white/40 dark:bg-slate-900/40 backdrop-blur-xl rounded-3xl border p-5 sm:p-6 shadow-lg active:scale-95 transition-all duration-300 group ${
  status?.status === 'overdue'
- ? 'border-red-400/50 dark:border-red-800/50 bg-red-50/40 dark:bg-red-900/10 hover:border-red-500'
- : 'border-white/60 dark:border-slate-800/60 hover:border-brand-blue/40 dark:hover:border-slate-600'
+ ? 'border-red-400/50 dark:border-red-800/50 bg-red-50/40 dark:bg-red-900/10 active:border-red-500'
+ : 'border-white/60 dark:border-slate-800/60 active:border-brand-blue/40 dark:active:border-slate-600'
  }`}
  >
  <div className="flex flex-col lg:flex-row lg:items-center gap-5 sm:gap-6">
  {/* Icon & Subject */}
  <div className="flex items-center gap-4 flex-shrink-0">
- <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-brand-blue to-brand-blue/70 flex items-center justify-center text-white shadow-lg shadow-brand-blue/30 group-hover:scale-110 transition-transform duration-500">
+ <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-brand-blue to-brand-blue/70 flex items-center justify-center text-white shadow-lg shadow-brand-blue/30 group-active:scale-95 transition-transform duration-500">
  <BookOpen size={24} />
  </div>
  <div className="min-w-[160px]">

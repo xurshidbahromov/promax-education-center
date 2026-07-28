@@ -59,7 +59,7 @@ export default function AdminTeachersPage() {
  queryClient.invalidateQueries({ queryKey: ['teachers'] });
  toast.success("O'qituvchi muvaffaqiyatli o'chirildi");
  } else {
- toast.error("Xatolik: " + result.error);
+ toast.error("Xatolik: "+ result.error);
  }
  } catch (error) {
  console.error("Delete error:", error);
@@ -99,7 +99,7 @@ export default function AdminTeachersPage() {
 
  <Link
  href="/admin/teachers/create"
- className="h-10 px-4 bg-brand-blue text-white rounded-xl text-sm font-medium flex items-center gap-2 hover:bg-blue-600 transition-colors shadow-sm"
+ className="h-10 px-4 bg-brand-blue text-white rounded-xl text-sm font-medium flex items-center gap-2 active:bg-blue-600 transition-colors shadow-sm"
  >
  <UserPlus size={18} />
  Yangi O'qituvchi
@@ -141,7 +141,7 @@ export default function AdminTeachersPage() {
  {teachers.length === 0 && (
  <Link
  href="/admin/teachers/create"
- className="inline-flex items-center gap-2 h-10 px-6 bg-brand-blue text-white rounded-xl text-sm font-medium hover:bg-blue-600 transition-colors shadow-sm"
+ className="inline-flex items-center gap-2 h-10 px-6 bg-brand-blue text-white rounded-xl text-sm font-medium active:bg-blue-600 transition-colors shadow-sm"
  >
  <UserPlus size={18} />
  Yangi O'qituvchi Qo'shish
@@ -153,7 +153,7 @@ export default function AdminTeachersPage() {
  {filteredTeachers.map((teacher) => (
  <div
  key={teacher.id}
- className="bg-white dark:bg-slate-900 rounded-2xl p-6 border border-gray-200 dark:border-slate-800 shadow-sm hover:shadow-lg transition-all group"
+ className="bg-white dark:bg-slate-900 rounded-2xl p-6 border border-gray-200 dark:border-slate-800 shadow-sm transition-all group"
  >
  {/* Avatar & Name */}
  <div className="flex items-start justify-between mb-4">
@@ -162,7 +162,7 @@ export default function AdminTeachersPage() {
  {(teacher.full_name || "U").charAt(0)}
  </div>
  <div>
- <h3 className="font-medium text-slate-800 dark:text-slate-100 group-hover:text-brand-blue transition-colors">
+ <h3 className="font-medium text-slate-800 dark:text-slate-100 group-active:text-brand-blue transition-colors">
  {teacher.full_name || "Noma'lum o'qituvchi"}
  </h3>
  <p className="text-sm text-gray-500 dark:text-gray-400">O'qituvchi</p>
@@ -172,13 +172,13 @@ export default function AdminTeachersPage() {
  <div className="flex items-center gap-1">
  <Link
  href={`/admin/teachers/${teacher.id}/edit`}
- className="h-8 w-8 flex items-center justify-center text-gray-400 hover:text-brand-blue hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-lg transition-colors"
+ className="h-8 w-8 flex items-center justify-center text-gray-400 active:text-brand-blue active:bg-blue-50 dark:active:bg-blue-900/20 rounded-lg transition-colors"
  >
  <Edit size={16} />
  </Link>
  <button
  onClick={() => handleDelete(teacher.id)}
- className="h-8 w-8 flex items-center justify-center text-gray-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"
+ className="h-8 w-8 flex items-center justify-center text-gray-400 active:text-red-600 active:bg-red-50 dark:active:bg-red-900/20 rounded-lg transition-colors"
  >
  <Trash2 size={16} />
  </button>
@@ -220,7 +220,7 @@ export default function AdminTeachersPage() {
  </div>
  <Link
  href={`/admin/teachers/${teacher.id}`}
- className="text-sm text-brand-blue hover:underline font-medium"
+ className="text-sm text-brand-blue active:underline font-medium"
  >
  Batafsil →
  </Link>
@@ -252,7 +252,7 @@ export default function AdminTeachersPage() {
  <span className="text-gray-500 dark:text-gray-400 text-sm">Jami Testlar</span>
  </div>
  <div className="text-3xl font-medium text-slate-800 dark:text-slate-100">
- {teachers.reduce((sum, t) => sum + t.total_tests, 0)}
+ {teachers.reduce((sum, t) => sum+ t.total_tests, 0)}
  </div>
  </div>
 
@@ -264,7 +264,7 @@ export default function AdminTeachersPage() {
  <span className="text-gray-500 dark:text-gray-400 text-sm">O'rtacha Testlar</span>
  </div>
  <div className="text-3xl font-medium text-slate-800 dark:text-slate-100">
- {teachers.length > 0 ? Math.round(teachers.reduce((sum, t) => sum + t.total_tests, 0) / teachers.length) : 0}
+ {teachers.length > 0 ? Math.round(teachers.reduce((sum, t) => sum+ t.total_tests, 0) / teachers.length) : 0}
  </div>
  </div>
  </div>

@@ -73,14 +73,14 @@ const AdmissionAnnouncement = () => {
  <div className="flex items-center gap-2">
  <a
  href="tel:+998955137776"
- className="flex items-center justify-center w-10 h-10 rounded-full bg-green-500 text-white shadow-lg hover:bg-green-600 hover:scale-110 transition-all duration-300"
+ className="flex items-center justify-center w-10 h-10 rounded-full bg-green-500 text-white shadow-lg active:bg-green-600 active:scale-95 transition-all duration-300"
  aria-label="Call Now"
  >
  <Phone size={20} />
  </a>
  <button
  onClick={() => setIsVisible(false)}
- className="p-1 rounded-full text-gray-400 hover:bg-gray-100 dark:hover:bg-slate-800 transition-colors"
+ className="p-1 rounded-full text-gray-400 active:bg-gray-100 dark:active:bg-slate-800 transition-colors"
  >
  <X size={16} />
  </button>

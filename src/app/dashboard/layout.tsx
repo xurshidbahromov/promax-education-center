@@ -5,16 +5,16 @@ import { createClient } from "@/utils/supabase/client";
 import { useRouter } from "next/navigation";
 import { useLanguage } from "@/context/LanguageContext";
 import {
-  Home,
-  PlaySquare,
-  FileText,
-  BarChart3,
+  LayoutDashboard,
+  LibraryBig,
+  FileCheck,
+  TrendingUp,
   Gamepad2,
-  UserCircle2,
+  CircleUserRound,
   LogOut,
   Menu,
   X,
-  Bell
+  BellRing
 } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
@@ -83,14 +83,14 @@ export default function DashboardLayout({
  router.push("/login");
  };
 
-  const menuItems = [
-    { icon: Home, label: t('sidebar.dashboard'), href: "/dashboard" },
-    { icon: PlaySquare, label: "Darslar", href: "/dashboard/lessons" },
-    { icon: FileText, label: t('sidebar.onlinetests'), href: "/dashboard/tests" },
-    { icon: BarChart3, label: t('sidebar.results'), href: "/dashboard/results" },
-    { icon: Gamepad2, label: t('sidebar.games'), href: "/dashboard/games" },
-    { icon: UserCircle2, label: t('sidebar.profile'), href: "/dashboard/profile" },
-  ];
+ const menuItems = [
+    { name: t('sidebar.dashboard'), href: '/dashboard', icon: LayoutDashboard },
+    { name: t('sidebar.lessons') || 'Darslar', href: '/dashboard/lessons', icon: LibraryBig },
+    { name: t('sidebar.onlinetests'), href: '/dashboard/tests', icon: FileCheck },
+    { name: t('sidebar.results'), href: '/dashboard/results', icon: TrendingUp },
+    { name: t('sidebar.games'), href: '/dashboard/games', icon: Gamepad2, beta: true },
+    { name: t('sidebar.profile'), href: '/dashboard/profile', icon: CircleUserRound },
+ ];
 
  const isTakeTestPage = pathname.includes('/take');
 
@@ -141,15 +141,15 @@ export default function DashboardLayout({
  key={item.href}
  href={item.href}
  className={`
-                          flex items-center gap-3 px-4 py-3.5 rounded-[1.25rem] transition-all duration-300 group relative overflow-hidden
-                          ${isActive
-                            ? "text-brand-blue bg-brand-blue/10 dark:bg-brand-blue/20 shadow-sm border border-brand-blue/20"
-                            : "text-slate-500 dark:text-slate-400 hover:bg-slate-100/60 dark:hover:bg-slate-800/60 hover:text-slate-800 dark:hover:text-slate-200"
-                          }
+ flex items-center gap-3 px-4 py-3.5 rounded-[1.25rem] transition-all duration-300 group relative overflow-hidden
+ ${isActive
+ ? "text-brand-blue bg-brand-blue/10 dark:bg-brand-blue/20 shadow-sm border border-brand-blue/20"
+ : "text-slate-500 dark:text-slate-400 active:bg-slate-100/60 dark:active:bg-slate-800/60 active:text-slate-800 dark:active:text-slate-200"
+ }
  `}
  >
- <item.icon size={20} className={isActive ? "" : "group-hover:scale-110 transition-transform"} />
- <span className="font-medium">{item.label}</span>
+ <item.icon size={20} className={isActive ? "" : "group-active:scale-95 transition-transform"} />
+ <span className="font-medium">{item.name}</span>
  </Link>
  );
  })}
@@ -162,7 +162,7 @@ export default function DashboardLayout({
  <div className="p-4 border-t border-gray-200/50 dark:border-slate-800/50">
  <button
  onClick={handleLogout}
- className="flex items-center gap-3 px-4 py-3 text-red-500 hover:bg-red-50 dark:hover:bg-red-900/10 rounded-xl w-full transition-colors"
+ className="flex items-center gap-3 px-4 py-3 text-red-500 active:bg-red-50 dark:active:bg-red-900/10 rounded-xl w-full transition-colors"
  >
  <LogOut size={20} />
  <span className="font-medium">{t('sidebar.logout')}</span>
@@ -177,7 +177,7 @@ export default function DashboardLayout({
  {/* Desktop Header (Island Style) */}
  {!isTakeTestPage && (
  <div className="hidden lg:flex absolute top-4 right-8 z-50 justify-end pointer-events-none">
- <div className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-2xl border border-gray-200/50 dark:border-slate-800/50 rounded-full flex items-center gap-2 px-4 py-2 shadow-xl shadow-brand-blue/5 pointer-events-auto transition-all duration-300 hover:shadow-2xl hover:shadow-brand-blue/10">
+ <div className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-2xl border border-gray-200/50 dark:border-slate-800/50 rounded-full flex items-center gap-2 px-4 py-2 shadow-xl shadow-brand-blue/5 pointer-events-auto transition-all duration-300 ">
  <NotificationBell />
  </div>
  </div>
@@ -219,33 +219,33 @@ export default function DashboardLayout({
  {/* Mobile Bottom Navigation */}
  {!isTakeTestPage && (
  <div className="lg:hidden fixed bottom-3 left-4 right-4 z-50 flex justify-center pointer-events-none">
-        <nav className="bg-white/70 dark:bg-slate-900/70 backdrop-blur-3xl border border-white/50 dark:border-slate-700/50 px-1.5 py-1.5 rounded-[2rem] shadow-[0_8px_30px_rgb(0,86,210,0.1)] dark:shadow-[0_8px_30px_rgb(0,0,0,0.4)] w-full max-w-md pointer-events-auto safe-area-pb">
-          <div className="flex items-center justify-between gap-1 relative">
-            {menuItems.map((item) => {
-              const isActive = pathname === item.href;
-              return (
-                <Link
-                  key={item.href}
-                  href={item.href}
-                  className={`relative flex items-center justify-center flex-1 h-12 rounded-full transition-all duration-300 active:scale-95 ${
-                    isActive ? "text-brand-blue" : "text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300"
-                  }`}
-                >
-                  {isActive && (
-                    <motion.div
-                      layoutId="mobile-nav-active-pill"
-                      className="absolute inset-0 bg-brand-blue/10 dark:bg-brand-blue/20 rounded-full"
-                      transition={{ type: "spring", stiffness: 400, damping: 30 }}
-                    />
-                  )}
-                  <div className="relative z-10 flex items-center justify-center">
-                    <item.icon size={22} className={isActive ? "stroke-[2.5px]" : "stroke-[2px]"} />
-                  </div>
-                </Link>
-              );
-            })}
-          </div>
-        </nav>
+ <nav className="bg-white/70 dark:bg-slate-900/70 backdrop-blur-3xl border border-white/50 dark:border-slate-700/50 px-1.5 py-1.5 rounded-[2rem] shadow-[0_8px_30px_rgb(0,86,210,0.1)] dark:shadow-[0_8px_30px_rgb(0,0,0,0.4)] w-full max-w-md pointer-events-auto safe-area-pb">
+ <div className="flex items-center justify-between gap-1 relative">
+ {menuItems.map((item) => {
+ const isActive = pathname === item.href;
+ return (
+ <Link
+ key={item.href}
+ href={item.href}
+ className={`relative flex items-center justify-center flex-1 h-12 rounded-full transition-all duration-300 active:scale-95 ${
+ isActive ? "text-brand-blue" : "text-slate-400 dark:text-slate-500 active:text-slate-600 dark:active:text-slate-300"
+ }`}
+ >
+ {isActive && (
+ <motion.div
+ layoutId="mobile-nav-active-pill"
+ className="absolute inset-0 bg-brand-blue/10 dark:bg-brand-blue/20 rounded-full"
+ transition={{ type: "spring", stiffness: 400, damping: 30 }}
+ />
+ )}
+ <div className="relative z-10 flex items-center justify-center">
+ <item.icon size={22} className={isActive ? "stroke-[2.5px]" : "stroke-[2px]"} />
+ </div>
+ </Link>
+ );
+ })}
+ </div>
+ </nav>
  </div>
  )}
  </div>

@@ -59,7 +59,7 @@ export default function StudentDetailPage() {
 
  const [paymentForm, setPaymentForm] = useState({
  amount: "",
- payment_month: new Date().getMonth() + 1,
+ payment_month: new Date().getMonth()+ 1,
  payment_year: new Date().getFullYear(),
  payment_method: "cash" as "cash" | "card" | "transfer" | "other",
  notes: ""
@@ -83,7 +83,7 @@ export default function StudentDetailPage() {
  const studentCourses = await getStudentCourses(studentId);
  setCourses(studentCourses);
 
- const currentMonth = new Date().getMonth() + 1;
+ const currentMonth = new Date().getMonth()+ 1;
  const currentYear = new Date().getFullYear();
  const statuses = await getMonthlyPaymentStatus(studentId, currentMonth, currentYear);
  setPaymentStatuses(statuses);
@@ -107,7 +107,7 @@ export default function StudentDetailPage() {
  setShowEnrollModal(false);
  setEnrollForm({ subject: "", monthly_fee: "", start_date: new Date().toISOString().split('T')[0] });
  } else {
- toast.error("Xatolik: " + result.error);
+ toast.error("Xatolik: "+ result.error);
  }
  }
 
@@ -131,13 +131,13 @@ export default function StudentDetailPage() {
  setShowPaymentModal(false);
  setPaymentForm({
  amount: "",
- payment_month: new Date().getMonth() + 1,
+ payment_month: new Date().getMonth()+ 1,
  payment_year: new Date().getFullYear(),
  payment_method: "cash",
  notes: ""
  });
  } else {
- toast.error("Xatolik: " + result.error);
+ toast.error("Xatolik: "+ result.error);
  }
  }
 
@@ -177,7 +177,7 @@ export default function StudentDetailPage() {
  <div className="p-8 space-y-6">
  {/* Header */}
  <div className="flex items-center gap-4">
- <button onClick={() => router.back()} className="p-2 hover:bg-gray-100 rounded-lg">
+ <button onClick={() => router.back()} className="p-2 active:bg-gray-100 rounded-lg">
  <ArrowLeft size={20} />
  </button>
  <div>
@@ -229,7 +229,7 @@ export default function StudentDetailPage() {
  </h2>
  <button
  onClick={() => setShowEnrollModal(true)}
- className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 flex items-center gap-2"
+ className="px-4 py-2 bg-blue-600 text-white rounded-lg active:bg-blue-700 flex items-center gap-2"
  >
  <Plus size={18} />
  Kursga yozish
@@ -289,7 +289,7 @@ export default function StudentDetailPage() {
  setSelectedCourse(course);
  setShowPaymentModal(true);
  }}
- className="w-full px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 flex items-center justify-center gap-2"
+ className="w-full px-4 py-2 bg-green-600 text-white rounded-lg active:bg-green-700 flex items-center justify-center gap-2"
  >
  <CreditCard size={18} />
  To'lov qo'shish
@@ -307,7 +307,7 @@ export default function StudentDetailPage() {
  <div className="bg-white rounded-xl p-6 w-full max-w-md">
  <div className="flex items-center justify-between mb-4">
  <h3 className="text-xl font-medium">Kursga yozish</h3>
- <button onClick={() => setShowEnrollModal(false)} className="p-2 hover:bg-gray-100 rounded-lg">
+ <button onClick={() => setShowEnrollModal(false)} className="p-2 active:bg-gray-100 rounded-lg">
  <X size={20} />
  </button>
  </div>
@@ -374,7 +374,7 @@ export default function StudentDetailPage() {
  <div className="bg-white rounded-xl p-6 w-full max-w-md">
  <div className="flex items-center justify-between mb-4">
  <h3 className="text-xl font-medium">To'lov qo'shish</h3>
- <button onClick={() => { setShowPaymentModal(false); setSelectedCourse(null); }} className="p-2 hover:bg-gray-100 rounded-lg">
+ <button onClick={() => { setShowPaymentModal(false); setSelectedCourse(null); }} className="p-2 active:bg-gray-100 rounded-lg">
  <X size={20} />
  </button>
  </div>

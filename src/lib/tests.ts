@@ -219,7 +219,7 @@ export async function startTestAttempt(testId: string): Promise<{ id: string; st
  .select('points')
  .eq('test_id', testId);
 
- const maxScore = questions?.reduce((sum, q) => sum + q.points, 0) || 0;
+ const maxScore = questions?.reduce((sum, q) => sum+ q.points, 0) || 0;
 
  const { data: attempt, error } = await supabase
  .from('test_attempts')
@@ -320,7 +320,7 @@ export async function completeTestAttempt(attemptId: string, totalTimeSpent?: nu
 
  // 4. Calculate Score
  let totalScore = 0;
- const maxScore = questions.reduce((sum, q) => sum + q.points, 0);
+ const maxScore = questions.reduce((sum, q) => sum+ q.points, 0);
  const updates = [];
 
  // Map responses for easy lookup
@@ -332,7 +332,7 @@ export async function completeTestAttempt(attemptId: string, totalTimeSpent?: nu
  const pointsEarned = isCorrect ? question.points : 0;
 
  if (isCorrect) {
- totalScore += pointsEarned;
+ totalScore+= pointsEarned;
  }
 
  // Prepare update for the response

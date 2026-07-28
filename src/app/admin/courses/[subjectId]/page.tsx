@@ -56,7 +56,7 @@ export default function AdminSubjectDetailPage({ params }: { params: Promise<{ s
  setLessonForm({ id: lesson.id, title: lesson.title, description: lesson.description || "", order_num: lesson.order_num });
  setIsEditingLesson(true);
  } else {
- setLessonForm({ id: "", title: "", description: "", order_num: lessons.length + 1 });
+ setLessonForm({ id: "", title: "", description: "", order_num: lessons.length+ 1 });
  setIsEditingLesson(false);
  }
  setIsLessonModalOpen(true);
@@ -179,7 +179,7 @@ export default function AdminSubjectDetailPage({ params }: { params: Promise<{ s
  return (
  <div className="space-y-6">
  <div className="flex items-center gap-4">
- <button onClick={() => router.back()} className="p-2 hover:bg-gray-100 dark:hover:bg-slate-800 rounded-full transition-colors">
+ <button onClick={() => router.back()} className="p-2 active:bg-gray-100 dark:active:bg-slate-800 rounded-full transition-colors">
  <ArrowLeft size={24} />
  </button>
  <div>
@@ -193,7 +193,7 @@ export default function AdminSubjectDetailPage({ params }: { params: Promise<{ s
  <div className="flex justify-end">
  <button
  onClick={() => openLessonModal()}
- className="flex items-center gap-2 bg-brand-blue hover:bg-blue-600 text-white px-4 py-2 rounded-xl font-medium transition-colors shadow-sm"
+ className="flex items-center gap-2 bg-brand-blue active:bg-blue-600 text-white px-4 py-2 rounded-xl font-medium transition-colors shadow-sm"
  >
  <Plus size={20} />
  Yangi dars qo'shish
@@ -210,7 +210,7 @@ export default function AdminSubjectDetailPage({ params }: { params: Promise<{ s
  <div key={lesson.id} className="bg-white dark:bg-slate-900 rounded-2xl border border-gray-200 dark:border-slate-800 overflow-hidden shadow-sm">
  <div className="p-4 sm:p-5 bg-gray-50 dark:bg-slate-800/50 border-b border-gray-200 dark:border-slate-800 flex items-center justify-between">
  <div className="flex items-center gap-3">
- <div className="cursor-move text-gray-400 hover:text-gray-600">
+ <div className="cursor-move text-gray-400 active:text-gray-600">
  <GripVertical size={20} />
  </div>
  <div>
@@ -221,13 +221,13 @@ export default function AdminSubjectDetailPage({ params }: { params: Promise<{ s
  </div>
  </div>
  <div className="flex gap-2">
- <button onClick={() => openMaterialModal(lesson.id)} className="flex items-center gap-1 px-3 py-1.5 text-sm font-medium text-brand-blue bg-blue-50 dark:bg-blue-900/20 hover:bg-blue-100 dark:hover:bg-blue-900/40 rounded-lg transition-colors">
+ <button onClick={() => openMaterialModal(lesson.id)} className="flex items-center gap-1 px-3 py-1.5 text-sm font-medium text-brand-blue bg-blue-50 dark:bg-blue-900/20 active:bg-blue-100 dark:active:bg-blue-900/40 rounded-lg transition-colors">
  <Plus size={16} /> Material
  </button>
- <button onClick={() => openLessonModal(lesson)} className="p-1.5 text-gray-500 hover:bg-gray-200 dark:hover:bg-slate-700 rounded-lg transition-colors">
+ <button onClick={() => openLessonModal(lesson)} className="p-1.5 text-gray-500 active:bg-gray-200 dark:active:bg-slate-700 rounded-lg transition-colors">
  <Edit2 size={16} />
  </button>
- <button onClick={() => handleDeleteLesson(lesson.id)} className="p-1.5 text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors">
+ <button onClick={() => handleDeleteLesson(lesson.id)} className="p-1.5 text-red-500 active:bg-red-50 dark:active:bg-red-900/20 rounded-lg transition-colors">
  <Trash2 size={16} />
  </button>
  </div>
@@ -246,10 +246,10 @@ export default function AdminSubjectDetailPage({ params }: { params: Promise<{ s
  <span className="text-[10px] uppercase font-medium text-gray-400 bg-gray-200 dark:bg-slate-700 px-2 py-0.5 rounded-full">{mat.type}</span>
  </div>
  <div className="flex gap-1">
- <button onClick={() => openMaterialModal(lesson.id, mat)} className="p-1.5 text-gray-400 hover:text-blue-500 transition-colors">
+ <button onClick={() => openMaterialModal(lesson.id, mat)} className="p-1.5 text-gray-400 active:text-blue-500 transition-colors">
  <Edit2 size={14} />
  </button>
- <button onClick={() => handleDeleteMaterial(mat.id)} className="p-1.5 text-gray-400 hover:text-red-500 transition-colors">
+ <button onClick={() => handleDeleteMaterial(mat.id)} className="p-1.5 text-gray-400 active:text-red-500 transition-colors">
  <Trash2 size={14} />
  </button>
  </div>
@@ -271,7 +271,7 @@ export default function AdminSubjectDetailPage({ params }: { params: Promise<{ s
  <h3 className="font-medium text-lg text-slate-800 dark:text-slate-100">
  {isEditingLesson ? "Darsni tahrirlash" : "Yangi dars"}
  </h3>
- <button onClick={() => setIsLessonModalOpen(false)} className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200">✕</button>
+ <button onClick={() => setIsLessonModalOpen(false)} className="text-gray-400 active:text-gray-600 dark:active:text-gray-200">✕</button>
  </div>
  <form onSubmit={handleLessonSubmit} className="p-6 space-y-4">
  <div>
@@ -287,7 +287,7 @@ export default function AdminSubjectDetailPage({ params }: { params: Promise<{ s
  <input required type="number" value={lessonForm.order_num} onChange={e => setLessonForm({...lessonForm, order_num: parseInt(e.target.value)})} className="w-full px-4 py-2 border rounded-xl dark:bg-slate-800 dark:border-slate-700" />
  </div>
  <div className="pt-4 flex justify-end gap-3">
- <button type="button" onClick={() => setIsLessonModalOpen(false)} className="px-5 py-2 hover:bg-gray-100 dark:hover:bg-slate-800 rounded-xl">Bekor qilish</button>
+ <button type="button" onClick={() => setIsLessonModalOpen(false)} className="px-5 py-2 active:bg-gray-100 dark:active:bg-slate-800 rounded-xl">Bekor qilish</button>
  <button type="submit" disabled={isSubmitting} className="px-5 py-2 bg-brand-blue text-white rounded-xl disabled:opacity-70">Saqlash</button>
  </div>
  </form>
@@ -303,7 +303,7 @@ export default function AdminSubjectDetailPage({ params }: { params: Promise<{ s
  <h3 className="font-medium text-lg text-slate-800 dark:text-slate-100">
  {isEditingMaterial ? "Materialni tahrirlash" : "Yangi material"}
  </h3>
- <button onClick={() => setIsMaterialModalOpen(false)} className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200">✕</button>
+ <button onClick={() => setIsMaterialModalOpen(false)} className="text-gray-400 active:text-gray-600 dark:active:text-gray-200">✕</button>
  </div>
  <form onSubmit={handleMaterialSubmit} className="p-6 space-y-4">
  <div>
@@ -335,7 +335,7 @@ export default function AdminSubjectDetailPage({ params }: { params: Promise<{ s
  )}
  
  <div className="pt-4 flex justify-end gap-3">
- <button type="button" onClick={() => setIsMaterialModalOpen(false)} className="px-5 py-2 hover:bg-gray-100 dark:hover:bg-slate-800 rounded-xl">Bekor qilish</button>
+ <button type="button" onClick={() => setIsMaterialModalOpen(false)} className="px-5 py-2 active:bg-gray-100 dark:active:bg-slate-800 rounded-xl">Bekor qilish</button>
  <button type="submit" disabled={isSubmitting} className="px-5 py-2 bg-brand-blue text-white rounded-xl disabled:opacity-70">Saqlash</button>
  </div>
  </form>

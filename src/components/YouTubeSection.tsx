@@ -72,10 +72,10 @@ const YouTubeSection = () => {
  initial={{ opacity: 0, x: 20 }}
  whileInView={{ opacity: 1, x: 0 }}
  viewport={{ once: true }}
- className="inline-flex items-center gap-2 font-medium uppercase tracking-wider text-red-600 dark:text-red-500 hover:text-red-700 dark:hover:text-red-400 transition-colors group"
+ className="inline-flex items-center gap-2 font-medium uppercase tracking-wider text-red-600 dark:text-red-500 hover:text-red-700 active:text-red-700 dark:hover:text-red-400 active:text-red-400 transition-colors group"
  >
  {t('home.youtube.view_channel')}
- <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform duration-300 ease-out" />
+ <ArrowRight className="w-5 h-5 group-hover:translate-x-1 active:scale-95 transition-transform duration-300 ease-out" />
  </motion.a>
  </div>
 
@@ -98,26 +98,26 @@ const YouTubeSection = () => {
             <div className="absolute -top-2 left-3 right-3 bottom-0 bg-slate-300/60 dark:bg-slate-700/60 rounded-[2rem] transition-all duration-300 group-hover:-top-3 opacity-60 z-0" />
 
             {/* Main Card (Integrates both thumbnail and text) */}
-            <div className="relative w-full rounded-[2rem] overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-300 z-10 bg-white/70 dark:bg-slate-900/70 backdrop-blur-xl border border-white/60 dark:border-slate-800/50 group-hover:border-red-500/30 dark:group-hover:border-red-500/30">
+            <div className="relative w-full rounded-[2rem] overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-300 z-10 bg-white/70 dark:bg-slate-900/70 backdrop-blur-xl border border-white/60 dark:border-slate-800/50 group-hover:border-red-500/30 group-active:border-red-500/30 active:border-red-500/30 dark:group-hover:border-red-500/30 group-active:border-red-500/30 active:border-red-500/30">
               {/* Thumbnail area */}
               <div className="relative w-full aspect-[16/10] sm:aspect-video overflow-hidden bg-slate-100 dark:bg-slate-800">
                 <Image
                   src={playlist.image}
                   alt="Playlist Thumbnail"
                   fill
-                  className="object-cover transition-transform duration-700 group-hover:scale-105"
+                  className="object-cover transition-transform duration-700 group-hover:scale-105 group-active:scale-95"
                 />
                 
                 {/* Right Side Overlay (YouTube Style) */}
-                <div className="absolute top-0 right-0 bottom-0 w-[35%] sm:w-[30%] bg-black/60 backdrop-blur-md flex flex-col items-center justify-center text-white transition-all duration-300 group-hover:bg-black/70 border-l border-white/10">
+                <div className="absolute top-0 right-0 bottom-0 w-[35%] sm:w-[30%] bg-black/60 backdrop-blur-md flex flex-col items-center justify-center text-white transition-all duration-300 group-hover:bg-black/70 group-active:bg-black/70 active:bg-black/70 border-l border-white/10">
                   <ListVideo className="w-8 h-8 sm:w-10 sm:h-10 mb-2 opacity-90" />
                   <span className="font-bold text-lg sm:text-xl">{playlist.count}</span>
                   <span className="text-[10px] sm:text-xs font-medium uppercase tracking-widest opacity-80 mt-1">Videolar</span>
                 </div>
 
                 {/* Hover Play All Overlay */}
-                <div className="absolute inset-0 bg-black/30 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300 backdrop-blur-[2px]">
-                  <div className="flex items-center gap-2 bg-red-600 text-white px-6 py-3 rounded-full font-bold tracking-wider transform translate-y-4 group-hover:translate-y-0 transition-all duration-300 shadow-lg shadow-red-600/30">
+                <div className="absolute inset-0 bg-black/30 flex items-center justify-center opacity-0 group-hover:opacity-100 group-active:opacity-100 active:opacity-100 transition-all duration-300 backdrop-blur-[2px]">
+                  <div className="flex items-center gap-2 bg-red-600 text-white px-6 py-3 rounded-full font-bold tracking-wider transform translate-y-4 group-hover:translate-y-0 active:scale-95 transition-all duration-300 shadow-lg shadow-red-600/30">
                     <Play className="w-5 h-5" fill="currentColor" />
                     PLAY ALL
                   </div>
@@ -126,7 +126,7 @@ const YouTubeSection = () => {
 
               {/* Integrated Text Information */}
               <div className="p-6">
-                <h3 className="text-xl font-bold text-slate-800 dark:text-slate-100 leading-tight transition-colors duration-300 group-hover:text-red-600 dark:group-hover:text-red-500 font-fredoka line-clamp-2">
+                <h3 className="text-xl font-bold text-slate-800 dark:text-slate-100 leading-tight transition-colors duration-300 group-hover:text-red-600 group-active:text-red-600 active:text-red-600 dark:group-hover:text-red-500 group-active:text-red-500 active:text-red-500 font-fredoka line-clamp-2">
                   {t(playlist.titleKey)}
                 </h3>
                 <p className="text-xs font-medium text-slate-500 dark:text-slate-400 mt-3 flex items-center gap-2">

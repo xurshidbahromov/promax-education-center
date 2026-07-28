@@ -24,9 +24,9 @@ export default function AnimatedCounter({ value, prefix = "", suffix = "", durat
 
  const displayValue = useTransform(springValue, (current) => {
  if (isDecimal) {
- return prefix + current.toFixed(1) + suffix;
+ return prefix+ current.toFixed(1)+ suffix;
  }
- return prefix + Math.floor(current) + suffix;
+ return prefix+ Math.floor(current)+ suffix;
  });
 
  useEffect(() => {

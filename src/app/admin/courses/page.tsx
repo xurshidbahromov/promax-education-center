@@ -166,7 +166,7 @@ export default function AdminCoursesPage() {
  </div>
  <button
  onClick={() => openModal()}
- className="flex items-center gap-2 bg-brand-blue hover:bg-blue-600 text-white px-4 py-2 rounded-xl font-medium transition-colors shadow-lg shadow-brand-blue/20"
+ className="flex items-center gap-2 bg-brand-blue active:bg-blue-600 text-white px-4 py-2 rounded-xl font-medium transition-colors shadow-lg shadow-brand-blue/20"
  >
  <Plus size={20} />
  Yangi fan qo'shish
@@ -180,7 +180,7 @@ export default function AdminCoursesPage() {
  </div>
  ) : (
  subjects.map((subject) => (
- <div key={subject.id} className="bg-white dark:bg-slate-900 rounded-2xl border border-gray-200 dark:border-slate-800 overflow-hidden shadow-sm hover:shadow-md transition-shadow flex flex-col">
+ <div key={subject.id} className="bg-white dark:bg-slate-900 rounded-2xl border border-gray-200 dark:border-slate-800 overflow-hidden shadow-sm transition-shadow flex flex-col">
  <div className="h-32 bg-gray-100 dark:bg-slate-800 relative">
  {subject.cover_image ? (
  <Image src={subject.cover_image} alt={subject.title} fill className="object-cover" />
@@ -198,14 +198,14 @@ export default function AdminCoursesPage() {
  
  <div className="mt-4 pt-4 border-t border-gray-100 dark:border-slate-800 flex items-center justify-between">
  <div className="flex gap-2">
- <button onClick={() => openModal(subject)} className="p-2 text-blue-500 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-lg transition-colors" title="Tahrirlash">
+ <button onClick={() => openModal(subject)} className="p-2 text-blue-500 active:bg-blue-50 dark:active:bg-blue-900/20 rounded-lg transition-colors" title="Tahrirlash">
  <Edit2 size={18} />
  </button>
- <button onClick={() => handleDelete(subject.id)} className="p-2 text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors" title="O'chirish">
+ <button onClick={() => handleDelete(subject.id)} className="p-2 text-red-500 active:bg-red-50 dark:active:bg-red-900/20 rounded-lg transition-colors" title="O'chirish">
  <Trash2 size={18} />
  </button>
  </div>
- <Link href={`/admin/courses/${subject.id}`} className="flex items-center gap-1 text-sm font-semibold text-brand-blue hover:text-blue-600 px-3 py-1.5 bg-blue-50 dark:bg-blue-900/20 rounded-lg transition-colors">
+ <Link href={`/admin/courses/${subject.id}`} className="flex items-center gap-1 text-sm font-semibold text-brand-blue active:text-blue-600 px-3 py-1.5 bg-blue-50 dark:bg-blue-900/20 rounded-lg transition-colors">
  Darslar
  <ChevronRight size={16} />
  </Link>
@@ -224,7 +224,7 @@ export default function AdminCoursesPage() {
  <h3 className="font-medium text-lg text-slate-800 dark:text-slate-100">
  {isEditing ? "Fanni tahrirlash" : "Yangi fan qo'shish"}
  </h3>
- <button onClick={closeModal} className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200">
+ <button onClick={closeModal} className="text-gray-400 active:text-gray-600 dark:active:text-gray-200">
  ✕
  </button>
  </div>
@@ -257,10 +257,10 @@ export default function AdminCoursesPage() {
  <img
  src={imagePreview}
  alt="Muqova rasmi preview"
- className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+ className="w-full h-full object-cover transition-transform duration-300 group-active:scale-95"
  />
- <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-all duration-200 flex items-center justify-center gap-3">
- <label className="cursor-pointer bg-white text-slate-800 hover:bg-gray-100 px-4 py-2 rounded-xl text-sm font-semibold shadow-md transition-colors flex items-center gap-1.5">
+ <div className="absolute inset-0 bg-black/50 opacity-0 group-active:opacity-100 transition-all duration-200 flex items-center justify-center gap-3">
+ <label className="cursor-pointer bg-white text-slate-800 active:bg-gray-100 px-4 py-2 rounded-xl text-sm font-semibold shadow-md transition-colors flex items-center gap-1.5">
  <Upload size={16} />
  O'zgartirish
  <input
@@ -273,7 +273,7 @@ export default function AdminCoursesPage() {
  <button
  type="button"
  onClick={handleRemoveImage}
- className="bg-red-600 hover:bg-red-700 text-white p-2 rounded-xl shadow-md transition-colors"
+ className="bg-red-600 active:bg-red-700 text-white p-2 rounded-xl shadow-md transition-colors"
  title="Rasmni o'chirish"
  >
  <X size={18} />
@@ -281,10 +281,10 @@ export default function AdminCoursesPage() {
  </div>
  </div>
  ) : (
- <label className="flex flex-col items-center justify-center h-44 w-full border-2 border-dashed border-gray-300 dark:border-slate-800 rounded-2xl cursor-pointer hover:bg-gray-50 dark:hover:bg-slate-800/40 hover:border-brand-blue/50 dark:hover:border-brand-blue/50 transition-all group">
+ <label className="flex flex-col items-center justify-center h-44 w-full border-2 border-dashed border-gray-300 dark:border-slate-800 rounded-2xl cursor-pointer active:bg-gray-50 dark:active:bg-slate-800/40 active:border-brand-blue/50 dark:active:border-brand-blue/50 transition-all group">
  <div className="flex flex-col items-center justify-center px-4 text-center">
- <div className="p-3 bg-blue-50 dark:bg-blue-900/10 rounded-xl group-hover:bg-brand-blue group-hover:text-white transition-all text-brand-blue mb-3">
- <Upload className="h-6 w-6 transition-transform group-hover:-translate-y-0.5" />
+ <div className="p-3 bg-blue-50 dark:bg-blue-900/10 rounded-xl group-active:bg-brand-blue group-active:text-white transition-all text-brand-blue mb-3">
+ <Upload className="h-6 w-6 transition-transform group-active:scale-95" />
  </div>
  <p className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
  Rasmni yuklash
@@ -306,14 +306,14 @@ export default function AdminCoursesPage() {
  <button
  type="button"
  onClick={closeModal}
- className="px-5 py-2.5 text-gray-600 dark:text-gray-300 font-medium hover:bg-gray-100 dark:hover:bg-slate-800 rounded-xl transition-colors"
+ className="px-5 py-2.5 text-gray-600 dark:text-gray-300 font-medium active:bg-gray-100 dark:active:bg-slate-800 rounded-xl transition-colors"
  >
  Bekor qilish
  </button>
  <button
  type="submit"
  disabled={isSubmitting}
- className="px-5 py-2.5 bg-brand-blue hover:bg-blue-600 text-white font-medium rounded-xl transition-colors shadow-lg shadow-brand-blue/20 disabled:opacity-70"
+ className="px-5 py-2.5 bg-brand-blue active:bg-blue-600 text-white font-medium rounded-xl transition-colors shadow-lg shadow-brand-blue/20 disabled:opacity-70"
  >
  {isSubmitting ? "Saqlanmoqda..." : "Saqlash"}
  </button>

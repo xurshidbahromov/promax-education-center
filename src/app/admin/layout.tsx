@@ -126,7 +126,7 @@ export default function AdminLayout({
  <p className="text-gray-600 dark:text-gray-400 mb-6">You don't have permission to access this area.</p>
  <Link
  href="/dashboard"
- className="inline-flex items-center gap-2 h-10 px-6 bg-brand-blue text-white rounded-xl text-sm font-medium hover:bg-blue-600 transition-colors"
+ className="inline-flex items-center gap-2 h-10 px-6 bg-brand-blue text-white rounded-xl text-sm font-medium active:bg-blue-600 transition-colors"
  >
  Return to Dashboard
  </Link>
@@ -178,7 +178,7 @@ export default function AdminLayout({
  </div>
  <button
  onClick={() => setSidebarOpen(false)}
- className="lg:hidden ml-auto text-slate-400 hover:text-white"
+ className="lg:hidden ml-auto text-slate-400 active:text-white"
  >
  <X size={24} />
  </button>
@@ -197,11 +197,11 @@ export default function AdminLayout({
  flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 group
  ${isActive
  ? "bg-red-600/10 text-red-500 border border-red-600/20"
- : "text-slate-400 hover:bg-slate-800 hover:text-white"
+ : "text-slate-400 active:bg-slate-800 active:text-white"
  }
  `}
  >
- <item.icon size={20} className={isActive ? "" : "group-hover:scale-110 transition-transform"} />
+ <item.icon size={20} className={isActive ? "" : "group-active:scale-95 transition-transform"} />
  <span className="font-medium">{item.label}</span>
  </Link>
  );
@@ -220,7 +220,7 @@ export default function AdminLayout({
  </div>
  <button
  onClick={handleLogout}
- className="text-slate-400 hover:text-red-500 transition-colors"
+ className="text-slate-400 active:text-red-500 transition-colors"
  >
  <LogOut size={18} />
  </button>
@@ -235,7 +235,7 @@ export default function AdminLayout({
  <header className="sticky top-0 z-40 h-16 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border-b border-gray-200 dark:border-slate-800 flex items-center justify-between px-4 lg:px-8">
  <button
  onClick={() => setSidebarOpen(true)}
- className="lg:hidden p-2 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-slate-800 rounded-lg"
+ className="lg:hidden p-2 text-gray-600 dark:text-gray-300 active:bg-gray-100 dark:active:bg-slate-800 rounded-lg"
  >
  <Menu size={24} />
  </button>
@@ -245,7 +245,7 @@ export default function AdminLayout({
  {currentDate}
  </span>
  <div className="h-6 w-px bg-gray-200 dark:bg-slate-800 hidden md:block" />
- <button className="p-2 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-slate-800 rounded-full relative">
+ <button className="p-2 text-gray-600 dark:text-gray-300 active:bg-gray-100 dark:active:bg-slate-800 rounded-full relative">
  <Bell size={20} />
  <span className="absolute top-2 right-2 w-2 h-2 bg-red-500 rounded-full border-2 border-white dark:border-slate-900"></span>
  </button>

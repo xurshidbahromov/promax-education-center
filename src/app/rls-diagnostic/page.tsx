@@ -121,7 +121,7 @@ export default function RLSDiagnosticPage() {
  setLoading(true);
  runDiagnostics();
  }}
- className="px-6 py-3 bg-brand-blue text-white rounded-lg hover:bg-blue-600"
+ className="px-6 py-3 bg-brand-blue text-white rounded-lg active:bg-blue-600"
  >
  Run Again
  </button>

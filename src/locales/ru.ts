@@ -247,7 +247,7 @@ export const ru = {
  "courses.cert.sat.teacher_name": "Сарвар ака",
  "courses.cert.sat.teacher_bio": "Результат SAT 1500+.",
  "courses.cert.sat.program.main.title": "SAT Intensive",
- "courses.cert.sat.program.main.features": "3 урока в неделю (по 2 часа) + воскресный обзор|2 пробных урока (Регистрация с 1-го урока, если понравится)|Внутренние экзамены каждые две недели|Ежемесячный MOCK EXAM по пройденным темам|Длительность курса: 8 месяцев (6 месяцев интенсив + 2 месяца практика SAT*GMAT)|100% гарантия качества (Минимум 690+ по математике)",
+ "courses.cert.sat.program.main.features": "3 урока в неделю (по 2 часа)+ воскресный обзор|2 пробных урока (Регистрация с 1-го урока, если понравится)|Внутренние экзамены каждые две недели|Ежемесячный MOCK EXAM по пройденным темам|Длительность курса: 8 месяцев (6 месяцев интенсив+ 2 месяца практика SAT*GMAT)|100% гарантия качества (Минимум 690+ по математике)",
 
  "courses.prep.inha.long_desc": "Целевая подготовка к вступительным экзаменам Университета Инха (Math & Physics).",
  "courses.prep.inha.materials": "Inha past papers, книги по Calculus.",
@@ -275,7 +275,7 @@ export const ru = {
  "auth.error_invalid_credentials": "Неверный email или пароль.",
  "auth.error_email_not_confirmed": "Email не подтвержден. Пожалуйста, подтвердите email.",
  "auth.error_fill_all_fields": "Пожалуйста, заполните все обязательные поля.",
- "auth.error_invalid_phone": "Неверный формат телефона. Пример: +998 90 123 45 67",
+ "auth.error_invalid_phone": "Неверный формат телефона. Пример:+998 90 123 45 67",
  "auth.error_password_too_short": "Пароль должен содержать минимум 6 символов.",
  "auth.welcome": "Добро пожаловать",
  "auth.welcome_subtitle_login": "Войдите в учебную платформу и продолжите уроки.",
@@ -287,6 +287,7 @@ export const ru = {
 
  // Dashboard Keys
  "sidebar.dashboard": "Кабинет",
+ "sidebar.lessons": "Уроки",
  "sidebar.onlinetests": "Онлайн Тесты",
  "sidebar.results": "Пробный тест",
  "sidebar.games": "Игры",

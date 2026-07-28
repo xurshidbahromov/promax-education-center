@@ -69,15 +69,15 @@ const Hero = () => {
  >
  <Link
  href="/register"
- className="group bg-brand-orange text-white px-8 py-4 rounded-full font-semibold text-lg hover:bg-brand-orange/90 transition-colors active:scale-[0.98] flex items-center justify-center gap-3 uppercase tracking-wider"
+ className="group bg-brand-orange text-white px-8 py-4 rounded-full font-semibold text-lg hover:bg-brand-orange/90 active:bg-brand-orange/90 transition-colors active:scale-[0.98] flex items-center justify-center gap-3 uppercase tracking-wider"
  >
  {t('hero.cta.primary')}
- <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform duration-300 ease-out" />
+ <ArrowRight className="w-5 h-5 group-hover:translate-x-1 active:scale-95 transition-transform duration-300 ease-out" />
  </Link>
  
  <Link
  href="/courses"
- className="group bg-black/5 dark:bg-white/10 backdrop-blur-md border border-black/10 dark:border-white/20 text-slate-800 dark:text-slate-100 px-8 py-4 rounded-full font-medium text-lg hover:bg-black/10 dark:hover:bg-white/20 transition-colors active:scale-[0.98] flex items-center justify-center gap-3 uppercase tracking-wider"
+ className="group bg-black/5 dark:bg-white/10 backdrop-blur-md border border-black/10 dark:border-white/20 text-slate-800 dark:text-slate-100 px-8 py-4 rounded-full font-medium text-lg hover:bg-black/10 active:bg-black/10 dark:hover:bg-white/20 active:bg-white/20 transition-colors active:scale-[0.98] flex items-center justify-center gap-3 uppercase tracking-wider"
  >
  <PlayCircle className="w-5 h-5 transition-transform" />
  {t('hero.cta.tests')}
@@ -92,22 +92,22 @@ const Hero = () => {
  transition={{ duration: 1, delay: 0.6 }}
  >
  <div className="flex items-center gap-3 group">
- <div className="w-8 h-8 rounded-full bg-black/5 dark:bg-white/10 flex items-center justify-center border border-black/10 dark:border-white/20 group-hover:border-brand-orange group-hover:text-brand-orange transition-colors">
+ <div className="w-8 h-8 rounded-full bg-black/5 dark:bg-white/10 flex items-center justify-center border border-black/10 dark:border-white/20 group-hover:border-brand-orange group-active:border-brand-orange active:border-brand-orange group-hover:text-brand-orange group-active:text-brand-orange active:text-brand-orange transition-colors">
  <CheckCircle2 className="w-4 h-4" />
  </div>
- <span className="group-hover:text-slate-800 dark:group-hover:text-slate-100 transition-colors">{t('hero.trust.cert')}</span>
+ <span className="group-hover:text-slate-800 group-active:text-slate-800 active:text-slate-800 dark:group-hover:text-slate-100 group-active:text-slate-100 active:text-slate-100 transition-colors">{t('hero.trust.cert')}</span>
  </div>
  <div className="flex items-center gap-3 group">
- <div className="w-8 h-8 rounded-full bg-black/5 dark:bg-white/10 flex items-center justify-center border border-black/10 dark:border-white/20 group-hover:border-brand-orange group-hover:text-brand-orange transition-colors">
+ <div className="w-8 h-8 rounded-full bg-black/5 dark:bg-white/10 flex items-center justify-center border border-black/10 dark:border-white/20 group-hover:border-brand-orange group-active:border-brand-orange active:border-brand-orange group-hover:text-brand-orange group-active:text-brand-orange active:text-brand-orange transition-colors">
  <CheckCircle2 className="w-4 h-4" />
  </div>
- <span className="group-hover:text-slate-800 dark:group-hover:text-slate-100 transition-colors">{t('hero.trust.exam')}</span>
+ <span className="group-hover:text-slate-800 group-active:text-slate-800 active:text-slate-800 dark:group-hover:text-slate-100 group-active:text-slate-100 active:text-slate-100 transition-colors">{t('hero.trust.exam')}</span>
  </div>
  <div className="flex items-center gap-3 group">
- <div className="w-8 h-8 rounded-full bg-black/5 dark:bg-white/10 flex items-center justify-center border border-black/10 dark:border-white/20 group-hover:border-brand-orange group-hover:text-brand-orange transition-colors">
+ <div className="w-8 h-8 rounded-full bg-black/5 dark:bg-white/10 flex items-center justify-center border border-black/10 dark:border-white/20 group-hover:border-brand-orange group-active:border-brand-orange active:border-brand-orange group-hover:text-brand-orange group-active:text-brand-orange active:text-brand-orange transition-colors">
  <CheckCircle2 className="w-4 h-4" />
  </div>
- <span className="group-hover:text-slate-800 dark:group-hover:text-slate-100 transition-colors">{t('hero.trust.mock')}</span>
+ <span className="group-hover:text-slate-800 group-active:text-slate-800 active:text-slate-800 dark:group-hover:text-slate-100 group-active:text-slate-100 active:text-slate-100 transition-colors">{t('hero.trust.mock')}</span>
  </div>
  </motion.div>
  </div>
@@ -123,30 +123,30 @@ const Hero = () => {
  {/* Column 1 */}
  <div className="absolute left-[2%] lg:left-[5%] top-0 bottom-0 w-[30%] lg:w-[180px] xl:w-[240px] pointer-events-auto">
  <motion.div initial={{ opacity: 0, y: 50 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7, delay: 0.2 }} className="absolute top-[12%] bottom-[51.5%] w-full rounded-full overflow-hidden shadow-2xl">
- <Image src="/hero_images/hero1.jpeg" alt="Student" fill priority sizes="(max-width: 768px) 30vw, 240px" className="object-cover object-top hover:scale-[1.02] transition-transform duration-500" />
+ <Image src="/hero_images/hero1.jpeg" alt="Student" fill priority sizes="(max-width: 768px) 30vw, 240px" className="object-cover object-top hover:scale-[1.02] active:scale-95 transition-transform duration-500" />
  </motion.div>
  <motion.div initial={{ opacity: 0, y: 50 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7, delay: 0.3 }} className="absolute top-[51.5%] bottom-0 w-full rounded-t-full overflow-hidden shadow-2xl">
- <Image src="/hero_images/hero2.jpeg" alt="Students with books" fill priority sizes="(max-width: 768px) 30vw, 240px" className="object-cover hover:scale-[1.02] transition-transform duration-500" />
+ <Image src="/hero_images/hero2.jpeg" alt="Students with books" fill priority sizes="(max-width: 768px) 30vw, 240px" className="object-cover hover:scale-[1.02] active:scale-95 transition-transform duration-500" />
  </motion.div>
  </div>
 
  {/* Column 2 */}
  <div className="absolute left-[35%] lg:left-[38%] top-0 bottom-0 w-[30%] lg:w-[180px] xl:w-[240px] pointer-events-auto">
  <motion.div initial={{ opacity: 0, y: 50 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7, delay: 0.4 }} className="absolute top-[6%] bottom-[51.5%] w-full rounded-full overflow-hidden shadow-2xl">
- <Image src="/hero_images/hero3.jpeg" alt="Student" fill priority sizes="(max-width: 768px) 30vw, 240px" className="object-cover object-top hover:scale-[1.02] transition-transform duration-500" />
+ <Image src="/hero_images/hero3.jpeg" alt="Student" fill priority sizes="(max-width: 768px) 30vw, 240px" className="object-cover object-top hover:scale-[1.02] active:scale-95 transition-transform duration-500" />
  </motion.div>
  <motion.div initial={{ opacity: 0, y: 50 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7, delay: 0.5 }} className="absolute top-[51.5%] bottom-[6%] w-full rounded-full overflow-hidden shadow-2xl">
- <Image src="/hero_images/hero4.jpeg" alt="Student studying" fill priority sizes="(max-width: 768px) 30vw, 240px" className="object-cover object-top hover:scale-[1.02] transition-transform duration-500" />
+ <Image src="/hero_images/hero4.jpeg" alt="Student studying" fill priority sizes="(max-width: 768px) 30vw, 240px" className="object-cover object-top hover:scale-[1.02] active:scale-95 transition-transform duration-500" />
  </motion.div>
  </div>
 
  {/* Column 3 */}
  <div className="absolute left-[68%] lg:left-[71%] top-0 bottom-0 w-[30%] lg:w-[180px] xl:w-[240px] pointer-events-auto">
  <motion.div initial={{ opacity: 0, y: -50 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7, delay: 0.6 }} className="absolute top-0 bottom-[51.5%] w-full rounded-b-full overflow-hidden shadow-2xl">
- <Image src="/hero_images/hero5.jpeg" alt="Student" fill priority sizes="(max-width: 768px) 30vw, 240px" className="object-cover object-top scale-[1.2] translate-y-[10%] hover:scale-[1.22] transition-transform duration-500" />
+ <Image src="/hero_images/hero5.jpeg" alt="Student" fill priority sizes="(max-width: 768px) 30vw, 240px" className="object-cover object-top scale-[1.2] translate-y-[10%] hover:scale-[1.22] active:scale-95 transition-transform duration-500" />
  </motion.div>
  <motion.div initial={{ opacity: 0, y: 50 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7, delay: 0.7 }} className="absolute top-[51.5%] bottom-0 w-full rounded-t-full overflow-hidden shadow-2xl">
- <Image src="/hero_images/hero6.jpeg" alt="Students learning" fill priority sizes="(max-width: 768px) 30vw, 240px" className="object-cover object-top hover:scale-[1.02] transition-transform duration-500" />
+ <Image src="/hero_images/hero6.jpeg" alt="Students learning" fill priority sizes="(max-width: 768px) 30vw, 240px" className="object-cover object-top hover:scale-[1.02] active:scale-95 transition-transform duration-500" />
  </motion.div>
  </div>
  </div>

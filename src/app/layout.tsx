@@ -78,24 +78,24 @@ export default function RootLayout({
  >
  <QueryProvider>
  <LanguageProvider>
-              <Toaster 
-                position="top-center"
-                toastOptions={{
-                  duration: 4000,
-                  style: {
-                    background: 'transparent',
-                    boxShadow: 'none',
-                    padding: 0,
-                  },
-                  className: "!max-w-[90vw] sm:!max-w-md !bg-white/60 dark:!bg-slate-900/60 !backdrop-blur-2xl !border !border-white/50 dark:!border-slate-700/50 !shadow-2xl !text-slate-800 dark:!text-slate-100 !font-medium !font-fredoka !text-base sm:!text-lg !rounded-2xl sm:!rounded-[1.5rem] !px-4 sm:!px-6 !py-3 sm:!py-4",
-                  success: {
-                    iconTheme: { primary: '#10b981', secondary: '#ffffff' }
-                  },
-                  error: {
-                    iconTheme: { primary: '#ef4444', secondary: '#ffffff' }
-                  }
-                }}
-              />
+ <Toaster 
+ position="top-center"
+ toastOptions={{
+ duration: 4000,
+ style: {
+ background: 'transparent',
+ boxShadow: 'none',
+ padding: 0,
+ },
+ className: "!max-w-[90vw] sm:!max-w-md !bg-white/60 dark:!bg-slate-900/60 !backdrop-blur-2xl !border !border-white/50 dark:!border-slate-700/50 !shadow-2xl !text-slate-800 dark:!text-slate-100 !font-medium !font-fredoka !text-base sm:!text-lg !rounded-2xl sm:!rounded-[1.5rem] !px-4 sm:!px-6 !py-3 sm:!py-4",
+ success: {
+ iconTheme: { primary: '#10b981', secondary: '#ffffff' }
+ },
+ error: {
+ iconTheme: { primary: '#ef4444', secondary: '#ffffff' }
+ }
+ }}
+ />
  {children}
  </LanguageProvider>
  </QueryProvider>

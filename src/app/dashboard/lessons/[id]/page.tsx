@@ -46,7 +46,7 @@ export default function LessonDetailPage() {
  return (
  <div className="text-center py-20">
  <h2 className="text-2xl font-medium text-slate-800 dark:text-slate-100">Dars topilmadi</h2>
- <button onClick={() => router.back()} className="mt-4 text-brand-blue hover:underline">
+ <button onClick={() => router.back()} className="mt-4 text-brand-blue active:underline">
  Orqaga qaytish
  </button>
  </div>
@@ -75,24 +75,24 @@ export default function LessonDetailPage() {
  );
  case 'pdf':
  return (
- <a href={material.url} target="_blank" rel="noopener noreferrer" className="flex items-center justify-between p-4 bg-white/60 dark:bg-slate-800/60 rounded-xl border border-gray-200 dark:border-slate-700 hover:border-brand-blue/50 group transition-colors">
+ <a href={material.url} target="_blank" rel="noopener noreferrer" className="flex items-center justify-between p-4 bg-white/60 dark:bg-slate-800/60 rounded-xl border border-gray-200 dark:border-slate-700 active:border-brand-blue/50 group transition-colors">
  <div className="flex items-center gap-3">
  <div className="w-10 h-10 rounded-lg bg-red-100 dark:bg-red-900/30 text-red-500 flex items-center justify-center">
  <FileDown size={20} />
  </div>
- <span className="font-semibold text-slate-800 dark:text-slate-100 group-hover:text-brand-blue transition-colors">{material.title}</span>
+ <span className="font-semibold text-slate-800 dark:text-slate-100 group-active:text-brand-blue transition-colors">{material.title}</span>
  </div>
  <span className="text-sm font-medium text-brand-blue px-3 py-1 bg-brand-blue/10 rounded-full">Ochish</span>
  </a>
  );
  case 'link':
  return (
- <a href={material.url} target="_blank" rel="noopener noreferrer" className="flex items-center justify-between p-4 bg-white/60 dark:bg-slate-800/60 rounded-xl border border-gray-200 dark:border-slate-700 hover:border-brand-blue/50 group transition-colors">
+ <a href={material.url} target="_blank" rel="noopener noreferrer" className="flex items-center justify-between p-4 bg-white/60 dark:bg-slate-800/60 rounded-xl border border-gray-200 dark:border-slate-700 active:border-brand-blue/50 group transition-colors">
  <div className="flex items-center gap-3">
  <div className="w-10 h-10 rounded-lg bg-blue-100 dark:bg-blue-900/30 text-blue-500 flex items-center justify-center">
  <LinkIcon size={20} />
  </div>
- <span className="font-semibold text-slate-800 dark:text-slate-100 group-hover:text-brand-blue transition-colors">{material.title}</span>
+ <span className="font-semibold text-slate-800 dark:text-slate-100 group-active:text-brand-blue transition-colors">{material.title}</span>
  </div>
  <span className="text-sm font-medium text-brand-blue px-3 py-1 bg-brand-blue/10 rounded-full">O'tish</span>
  </a>
@@ -113,7 +113,7 @@ export default function LessonDetailPage() {
  {/* Header / Back button */}
  <button 
  onClick={() => router.back()}
- className="flex items-center gap-2 text-slate-600 dark:text-slate-400 hover:text-brand-blue dark:hover:text-brand-blue transition-colors font-medium"
+ className="flex items-center gap-2 text-slate-600 dark:text-slate-400 active:text-brand-blue dark:active:text-brand-blue transition-colors font-medium"
  >
  <ArrowLeft size={20} />
  Fanga qaytish

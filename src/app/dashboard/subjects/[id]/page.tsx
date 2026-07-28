@@ -14,18 +14,18 @@ export default function SubjectDetailPage() {
  const router = useRouter();
  const subjectId = params.id as string;
 
-  const fetcher = async (id: string) => {
-    if (!id) return null;
-    const [subj, less] = await Promise.all([
-      getSubjectById(id),
-      getLessonsBySubjectId(id)
-    ]);
-    return { subject: subj, lessons: less };
-  };
+ const fetcher = async (id: string) => {
+ if (!id) return null;
+ const [subj, less] = await Promise.all([
+ getSubjectById(id),
+ getLessonsBySubjectId(id)
+ ]);
+ return { subject: subj, lessons: less };
+ };
 
-  const { data, isLoading: loading } = useSWR(subjectId ? `subject-${subjectId}` : null, () => fetcher(subjectId));
-  const subject = data?.subject || null;
-  const lessons = data?.lessons || [];
+ const { data, isLoading: loading } = useSWR(subjectId ? `subject-${subjectId}` : null, () => fetcher(subjectId));
+ const subject = data?.subject || null;
+ const lessons = data?.lessons || [];
 
  if (loading) {
  return (
@@ -45,7 +45,7 @@ export default function SubjectDetailPage() {
  return (
  <div className="text-center py-20">
  <h2 className="text-2xl font-medium text-slate-800 dark:text-slate-100">Fan topilmadi</h2>
- <button onClick={() => router.back()} className="mt-4 text-brand-blue hover:underline">
+ <button onClick={() => router.back()} className="mt-4 text-brand-blue active:underline">
  Orqaga qaytish
  </button>
  </div>
@@ -53,41 +53,41 @@ export default function SubjectDetailPage() {
  }
 
  return (
-        <div className="space-y-6 sm:space-y-8 pb-10">
-            {/* Header / Back button */}
-            <button 
-                onClick={() => router.back()}
-                className="flex items-center gap-2 text-slate-600 dark:text-slate-400 hover:text-brand-blue dark:hover:text-brand-blue transition-colors font-medium"
-            >
-                <ArrowLeft size={20} />
-                Fanlar ro'yxatiga qaytish
-            </button>
+ <div className="space-y-6 sm:space-y-8 pb-10">
+ {/* Header / Back button */}
+ <button 
+ onClick={() => router.back()}
+ className="flex items-center gap-2 text-slate-600 dark:text-slate-400 active:text-brand-blue dark:active:text-brand-blue transition-colors font-medium"
+ >
+ <ArrowLeft size={20} />
+ Fanlar ro'yxatiga qaytish
+ </button>
 
-            {/* Subject Banner */}
-            <div className="bg-white/40 dark:bg-slate-900/40 backdrop-blur-xl border border-white/60 dark:border-slate-800/60 rounded-[2rem] md:rounded-[3rem] overflow-hidden shadow-lg flex flex-col relative">
-                
-                {/* Full-width Cover Image */}
-                <div className="w-full h-48 md:h-64 relative bg-gradient-to-br from-brand-blue to-blue-900 flex items-center justify-center text-white shrink-0">
-                    {subject.cover_image ? (
-                        <>
-                            <Image src={subject.cover_image} alt={subject.title} fill className="object-cover" />
-                            <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent" />
-                        </>
-                    ) : (
-                        <BookOpen size={64} className="opacity-80" />
-                    )}
-                </div>
-                
-                {/* Content Area */}
-                <div className="p-6 sm:p-8 md:p-10 flex-1 bg-white/40 dark:bg-slate-900/40">
-                    <h1 className="text-3xl sm:text-4xl lg:text-5xl font-semibold text-slate-800 dark:text-slate-100 font-fredoka uppercase tracking-tighter mb-3">
-                        {subject.title}
-                    </h1>
-                    <p className="text-lg text-slate-600 dark:text-slate-300 font-medium leading-relaxed max-w-4xl">
-                        {subject.description || "Fanning batafsil tavsifi kiritilmagan."}
-                    </p>
-                </div>
-            </div>
+ {/* Subject Banner */}
+ <div className="bg-white/40 dark:bg-slate-900/40 backdrop-blur-xl border border-white/60 dark:border-slate-800/60 rounded-[2rem] md:rounded-[3rem] overflow-hidden shadow-lg flex flex-col relative">
+ 
+ {/* Full-width Cover Image */}
+ <div className="w-full h-48 md:h-64 relative bg-gradient-to-br from-brand-blue to-blue-900 flex items-center justify-center text-white shrink-0">
+ {subject.cover_image ? (
+ <>
+ <Image src={subject.cover_image} alt={subject.title} fill className="object-cover" />
+ <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent" />
+ </>
+ ) : (
+ <BookOpen size={64} className="opacity-80" />
+ )}
+ </div>
+ 
+ {/* Content Area */}
+ <div className="p-6 sm:p-8 md:p-10 flex-1 bg-white/40 dark:bg-slate-900/40">
+ <h1 className="text-3xl sm:text-4xl lg:text-5xl font-semibold text-slate-800 dark:text-slate-100 font-fredoka uppercase tracking-tighter mb-3">
+ {subject.title}
+ </h1>
+ <p className="text-lg text-slate-600 dark:text-slate-300 font-medium leading-relaxed max-w-4xl">
+ {subject.description || "Fanning batafsil tavsifi kiritilmagan."}
+ </p>
+ </div>
+ </div>
 
  {/* Lessons List */}
  <div>
@@ -109,13 +109,13 @@ export default function SubjectDetailPage() {
  animate={{ opacity: 1, x: 0 }}
  whileTap={{ scale: 0.96 }}
  transition={{ delay: index * 0.05 }}
- className="bg-white/60 dark:bg-slate-800/60 backdrop-blur-md rounded-2xl border border-white/80 dark:border-slate-700/80 p-4 sm:p-5 shadow-sm hover:shadow-md hover:scale-[1.01] transition-all duration-300 flex items-center gap-3 sm:gap-5 group"
+ className="bg-white/60 dark:bg-slate-800/60 backdrop-blur-md rounded-2xl border border-white/80 dark:border-slate-700/80 p-4 sm:p-5 shadow-sm active:scale-95 transition-all duration-300 flex items-center gap-3 sm:gap-5 group"
  >
- <div className="w-10 h-10 sm:w-12 sm:h-12 shrink-0 rounded-full bg-brand-blue/10 dark:bg-brand-blue/20 flex items-center justify-center text-brand-blue font-medium font-fredoka text-base sm:text-lg group-hover:bg-brand-blue group-hover:text-white transition-colors">
- {index + 1}
+ <div className="w-10 h-10 sm:w-12 sm:h-12 shrink-0 rounded-full bg-brand-blue/10 dark:bg-brand-blue/20 flex items-center justify-center text-brand-blue font-medium font-fredoka text-base sm:text-lg group-active:bg-brand-blue group-active:text-white transition-colors">
+ {index+ 1}
  </div>
  <div className="flex-1">
- <h3 className="text-base sm:text-lg font-medium text-slate-800 dark:text-slate-100 group-hover:text-brand-blue transition-colors line-clamp-2 sm:line-clamp-1">
+ <h3 className="text-base sm:text-lg font-medium text-slate-800 dark:text-slate-100 group-active:text-brand-blue transition-colors line-clamp-2 sm:line-clamp-1">
  {lesson.title}
  </h3>
  {lesson.description && (
@@ -124,7 +124,7 @@ export default function SubjectDetailPage() {
  </p>
  )}
  </div>
- <div className="hidden sm:flex text-slate-400 group-hover:text-brand-blue transition-colors">
+ <div className="hidden sm:flex text-slate-400 group-active:text-brand-blue transition-colors">
  <PlayCircle size={24} />
  </div>
  </motion.div>

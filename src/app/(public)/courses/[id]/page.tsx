@@ -42,7 +42,7 @@ export default function CourseDetailPage() {
  <div className="absolute top-24 md:top-32 left-4 sm:left-6 lg:left-8 z-10 max-w-7xl mx-auto w-full">
  <Link
  href="/courses"
- className="inline-flex items-center text-white/90 hover:text-white transition-colors bg-white/10 hover:bg-white/20 px-5 py-2.5 rounded-full backdrop-blur-md text-sm font-medium border border-white/20 shadow-lg"
+ className="inline-flex items-center text-white/90 hover:text-white active:text-white transition-colors bg-white/10 hover:bg-white/20 active:bg-white/20 px-5 py-2.5 rounded-full backdrop-blur-md text-sm font-medium border border-white/20 shadow-lg"
  >
  <ArrowLeft className="w-5 h-5 mr-2" />
  {t('nav.courses')}

@@ -9,12 +9,12 @@ import { memo } from "react";
 const ActivityItem = memo(({ item }: { item: any }) => {
  const { t } = useLanguage();
  return (
- <div className="flex gap-4 items-start p-3.5 rounded-2xl bg-white/40 dark:bg-slate-800/40 hover:bg-white/70 dark:hover:bg-slate-800/70 border border-white/40 dark:border-slate-700/40 hover:border-white/80 dark:hover:border-slate-600/60 transition-all duration-300 group hover:shadow-lg hover:-translate-y-1">
- <div className="mt-1 bg-green-100 dark:bg-green-900/30 p-1.5 rounded-full text-green-600 dark:text-green-400 shadow-sm group-hover:scale-110 transition-transform">
+ <div className="flex gap-4 items-start p-3.5 rounded-2xl bg-white/40 dark:bg-slate-800/40 active:bg-white/70 dark:active:bg-slate-800/70 border border-white/40 dark:border-slate-700/40 active:border-white/80 dark:active:border-slate-600/60 transition-all duration-300 group active:scale-95">
+ <div className="mt-1 bg-green-100 dark:bg-green-900/30 p-1.5 rounded-full text-green-600 dark:text-green-400 shadow-sm group-active:scale-95 transition-transform">
  <CheckCircle2 size={16} />
  </div>
  <div>
- <h4 className="text-sm font-medium text-slate-800 dark:text-slate-100 line-clamp-1 group-hover:text-brand-orange transition-colors">{item.title}</h4>
+ <h4 className="text-sm font-medium text-slate-800 dark:text-slate-100 line-clamp-1 group-active:text-brand-orange transition-colors">{item.title}</h4>
  <p className="text-xs font-semibold text-gray-600 dark:text-gray-300 mt-1">
  {t('dashboard.activity.scored')}: <span className="font-medium text-brand-blue bg-brand-blue/10 dark:bg-brand-blue/20 px-1.5 py-0.5 rounded-md ml-1">{item.score}/{item.maxScore}</span>
  </p>
@@ -38,7 +38,7 @@ export default function ActivityFeed({ userId }: { userId?: string }) {
 
  return (
  <div className="bg-white/40 dark:bg-slate-900/40 backdrop-blur-xl p-4 sm:p-6 rounded-3xl border border-white/60 dark:border-slate-800/60 shadow-lg relative overflow-hidden h-full flex flex-col group">
- <div className="absolute -bottom-10 -right-10 w-40 h-40 bg-brand-orange/10 rounded-full blur-[60px] -z-10 pointer-events-none transition-transform duration-700 group-hover:scale-125"></div>
+ <div className="absolute -bottom-10 -right-10 w-40 h-40 bg-brand-orange/10 rounded-full blur-[60px] -z-10 pointer-events-none transition-transform duration-700 group-active:scale-95"></div>
  
  <h3 className="text-xl font-medium text-slate-800 dark:text-slate-100 mb-5 flex items-center gap-2 font-fredoka tracking-wide relative z-10">
  <Clock className="text-brand-orange " size={24} />

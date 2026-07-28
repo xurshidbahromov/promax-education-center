@@ -21,7 +21,7 @@ export default function NotFound() {
  <div className="flex flex-col sm:flex-row gap-4">
  <Link
  href="/"
- className="flex items-center justify-center gap-2 px-6 py-3 bg-brand-blue text-white rounded-xl font-medium hover:bg-blue-600 transition-colors shadow-sm"
+ className="flex items-center justify-center gap-2 px-6 py-3 bg-brand-blue text-white rounded-xl font-medium active:bg-blue-600 transition-colors shadow-sm"
  >
  <Home size={18} />
  Bosh sahifaga qaytish
@@ -29,7 +29,7 @@ export default function NotFound() {
 
  <button
  onClick={() => window.history.back()}
- className="flex items-center justify-center gap-2 px-6 py-3 bg-white dark:bg-slate-800 text-gray-700 dark:text-gray-300 border border-gray-300 dark:border-slate-700 rounded-xl font-medium hover:bg-gray-50 dark:hover:bg-slate-700 transition-colors shadow-sm"
+ className="flex items-center justify-center gap-2 px-6 py-3 bg-white dark:bg-slate-800 text-gray-700 dark:text-gray-300 border border-gray-300 dark:border-slate-700 rounded-xl font-medium active:bg-gray-50 dark:active:bg-slate-700 transition-colors shadow-sm"
  >
  <ArrowLeft size={18} />
  Orqaga chekinish

@@ -54,7 +54,7 @@ export default function TestResultsPage() {
  <div className="text-center py-12">
  <AlertCircle className="mx-auto text-red-500 mb-4" size={64} />
  <h2 className="text-2xl font-medium text-slate-800 dark:text-slate-100 mb-2">{t('tests.result.not_found')}</h2>
- <Link href="/dashboard/tests" className="text-brand-blue hover:underline">
+ <Link href="/dashboard/tests" className="text-brand-blue active:underline">
  {t('tests.result.back')}
  </Link>
  </div>
@@ -80,7 +80,7 @@ export default function TestResultsPage() {
  {/* Back Button */}
  <Link
  href="/dashboard/tests"
- className="flex items-center gap-2 text-gray-600 dark:text-gray-400 hover:text-brand-blue mb-6"
+ className="flex items-center gap-2 text-gray-600 dark:text-gray-400 active:text-brand-blue mb-6"
  >
  <ArrowLeft size={20} />
  {t('tests.result.back')}
@@ -129,7 +129,7 @@ export default function TestResultsPage() {
  <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
  <Link
  href={`/dashboard/tests/${testId}`}
- className="flex items-center justify-center gap-2 px-6 py-4 bg-gradient-to-r from-brand-blue to-cyan-500 text-white rounded-xl font-semibold hover:shadow-xl transition-all"
+ className="flex items-center justify-center gap-2 px-6 py-4 bg-gradient-to-r from-brand-blue to-cyan-500 text-white rounded-xl font-semibold transition-all"
  >
  <RotateCcw size={20} />
  {t('tests.result.retry')}
@@ -137,7 +137,7 @@ export default function TestResultsPage() {
 
  <button
  onClick={() => setShowReview(!showReview)}
- className="flex items-center justify-center gap-2 px-6 py-4 bg-white dark:bg-slate-900 border-2 border-gray-200 dark:border-slate-800 text-gray-700 dark:text-gray-300 rounded-xl font-semibold hover:border-brand-blue transition-all"
+ className="flex items-center justify-center gap-2 px-6 py-4 bg-white dark:bg-slate-900 border-2 border-gray-200 dark:border-slate-800 text-gray-700 dark:text-gray-300 rounded-xl font-semibold active:border-brand-blue transition-all"
  >
  <CheckCircle size={20} />
  {showReview ? t('tests.result.hide_answers') : t('tests.result.show_answers')}
@@ -145,7 +145,7 @@ export default function TestResultsPage() {
 
  <Link
  href="/dashboard/tests"
- className="flex items-center justify-center gap-2 px-6 py-4 bg-gray-100 dark:bg-slate-800 text-gray-700 dark:text-gray-300 rounded-xl font-semibold hover:bg-gray-200 dark:hover:bg-slate-700 transition-all"
+ className="flex items-center justify-center gap-2 px-6 py-4 bg-gray-100 dark:bg-slate-800 text-gray-700 dark:text-gray-300 rounded-xl font-semibold active:bg-gray-200 dark:active:bg-slate-700 transition-all"
  >
  {t('tests.result.list')}
  </Link>
@@ -209,7 +209,7 @@ export default function TestResultsPage() {
  {/* Question Header */}
  <div className="flex items-start gap-3 mb-4">
  <span className="px-3 py-1 bg-gray-100 dark:bg-slate-800 text-gray-700 dark:text-gray-300 rounded-lg font-medium">
- {index + 1}
+ {index+ 1}
  </span>
  {isCorrect ? (
  <div className="flex items-center gap-2 px-3 py-1 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 rounded-lg text-sm font-semibold">

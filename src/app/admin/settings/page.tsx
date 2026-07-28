@@ -139,7 +139,7 @@ export default function AdminSettingsPage() {
  <button
  onClick={handleSave}
  disabled={saving}
- className="h-10 px-6 flex items-center gap-2 bg-brand-blue hover:bg-brand-blue/90 text-white rounded-xl text-sm font-medium transition-colors shadow-sm disabled:opacity-50"
+ className="h-10 px-6 flex items-center gap-2 bg-brand-blue active:bg-brand-blue/90 text-white rounded-xl text-sm font-medium transition-colors shadow-sm disabled:opacity-50"
  >
  {saving ? (
  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
@@ -160,7 +160,7 @@ export default function AdminSettingsPage() {
  flex items-center gap-2 px-4 py-3 rounded-t-xl text-sm font-medium transition-colors whitespace-nowrap
  ${activeTab === tab.id
  ? "bg-white dark:bg-slate-900 text-brand-blue border-b-2 border-brand-blue"
- : "text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 hover:bg-gray-50 dark:hover:bg-slate-800"
+ : "text-gray-500 dark:text-gray-400 active:text-gray-700 dark:active:text-gray-200 active:bg-gray-50 dark:active:bg-slate-800"
  }
  `}
  >

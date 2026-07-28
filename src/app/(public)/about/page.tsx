@@ -91,13 +91,13 @@ export default function AboutPage() {
  src={`https://img.youtube.com/vi/${videoId}/maxresdefault.jpg`}
  alt="Promax Education Video"
  fill
- className="object-cover group-hover:scale-105 transition-transform duration-700"
+ className="object-cover group-hover:scale-105 group-active:scale-95 transition-transform duration-700"
  unoptimized
  />
- <div className="absolute inset-0 bg-black/30 group-hover:bg-black/20 transition-colors duration-500" />
+ <div className="absolute inset-0 bg-black/30 group-hover:bg-black/20 group-active:bg-black/20 active:bg-black/20 transition-colors duration-500" />
  
  <div className="absolute inset-0 flex items-center justify-center">
- <div className="w-20 h-20 md:w-24 md:h-24 rounded-full bg-white/20 backdrop-blur-md flex items-center justify-center border border-white/40 hover:bg-red-600 hover:border-red-600 transition-colors duration-300 shadow-md">
+ <div className="w-20 h-20 md:w-24 md:h-24 rounded-full bg-white/20 backdrop-blur-md flex items-center justify-center border border-white/40 hover:bg-red-600 active:bg-red-600 hover:border-red-600 active:border-red-600 transition-colors duration-300 shadow-md">
  <Play className="w-8 h-8 md:w-10 md:h-10 text-white fill-white translate-x-1" />
  </div>
  </div>
@@ -160,7 +160,7 @@ export default function AboutPage() {
  whileInView={{ opacity: 1, y: 0 }}
  viewport={{ once: true }}
  transition={{ delay: index * 0.1 }}
- className={`bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl rounded-[2rem] p-8 border ${feature.border} shadow-sm transition-all duration-300 hover:-translate-y-1 group`}
+ className={`bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl rounded-[2rem] p-8 border ${feature.border} shadow-sm transition-all duration-300 hover:-translate-y-1 active:scale-95 group`}
  >
  <div className={`w-16 h-16 rounded-2xl ${feature.bg} ${feature.color} flex items-center justify-center mb-8 transition-transform duration-300`}>
  <feature.icon size={32} strokeWidth={2} />
@@ -215,7 +215,7 @@ export default function AboutPage() {
 
  {/* Location */}
  <div className="flex items-start gap-6 px-2 group">
- <div className="w-12 h-12 rounded-2xl bg-gray-100 dark:bg-slate-800 flex items-center justify-center text-gray-600 dark:text-gray-300 flex-shrink-0 group-hover:bg-brand-orange/10 group-hover:text-brand-orange transition-colors">
+ <div className="w-12 h-12 rounded-2xl bg-gray-100 dark:bg-slate-800 flex items-center justify-center text-gray-600 dark:text-gray-300 flex-shrink-0 group-hover:bg-brand-orange/10 group-active:bg-brand-orange/10 active:bg-brand-orange/10 group-hover:text-brand-orange group-active:text-brand-orange active:text-brand-orange transition-colors">
  <MapPin size={24} />
  </div>
  <div>
@@ -229,7 +229,7 @@ export default function AboutPage() {
 
  {/* Working Hours */}
  <div className="flex items-start gap-6 px-2 group">
- <div className="w-12 h-12 rounded-2xl bg-gray-100 dark:bg-slate-800 flex items-center justify-center text-gray-600 dark:text-gray-300 flex-shrink-0 group-hover:bg-brand-blue/10 group-hover:text-brand-blue transition-colors">
+ <div className="w-12 h-12 rounded-2xl bg-gray-100 dark:bg-slate-800 flex items-center justify-center text-gray-600 dark:text-gray-300 flex-shrink-0 group-hover:bg-brand-blue/10 group-active:bg-brand-blue/10 active:bg-brand-blue/10 group-hover:text-brand-blue group-active:text-brand-blue active:text-brand-blue transition-colors">
  <Clock size={24} />
  </div>
  <div>

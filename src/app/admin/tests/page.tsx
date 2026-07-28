@@ -142,7 +142,7 @@ export default function AdminTestsPage() {
 
  <Link
  href="/admin/tests/create"
- className="h-10 px-4 bg-brand-blue text-white rounded-xl text-sm font-medium flex items-center gap-2 hover:bg-blue-600 transition-colors shadow-sm"
+ className="h-10 px-4 bg-brand-blue text-white rounded-xl text-sm font-medium flex items-center gap-2 active:bg-blue-600 transition-colors shadow-sm"
  >
  <Plus size={18} />
  Yangi Test
@@ -172,7 +172,7 @@ export default function AdminTestsPage() {
  onClick={() => setFilterPublished(filter as any)}
  className={`h-10 px-4 rounded-xl text-sm font-medium transition-all ${filterPublished === filter
  ? "bg-brand-blue text-white shadow-sm"
- : "bg-gray-100 dark:bg-slate-800 text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-slate-700"
+ : "bg-gray-100 dark:bg-slate-800 text-gray-600 dark:text-gray-400 active:bg-gray-200 dark:active:bg-slate-700"
  }`}
  >
  {filter === "all" ? "Hammasi" : filter === "published" ? "Chop etilgan" : "Qoralama"}
@@ -200,7 +200,7 @@ export default function AdminTestsPage() {
  </p>
  <Link
  href="/admin/tests/create"
- className="inline-flex items-center gap-2 h-10 px-6 bg-brand-blue text-white rounded-xl text-sm font-medium hover:bg-blue-600 transition-colors shadow-sm"
+ className="inline-flex items-center gap-2 h-10 px-6 bg-brand-blue text-white rounded-xl text-sm font-medium active:bg-blue-600 transition-colors shadow-sm"
  >
  <Plus size={18} />
  Yangi Test Yaratish
@@ -222,7 +222,7 @@ export default function AdminTestsPage() {
  </thead>
  <tbody className="divide-y divide-gray-200 dark:divide-slate-700">
  {filteredTests.map((test) => (
- <tr key={test.id} className="hover:bg-gray-50 dark:hover:bg-slate-800/50 transition-colors">
+ <tr key={test.id} className="active:bg-gray-50 dark:active:bg-slate-800/50 transition-colors">
  <td className="px-6 py-4">
  <div className="font-medium text-slate-800 dark:text-slate-100">{test.title}</div>
  </td>
@@ -257,14 +257,14 @@ export default function AdminTestsPage() {
  <div className="flex items-center justify-end gap-2">
  <Link
  href={`/admin/tests/${test.id}/analytics`}
- className="h-8 w-8 flex items-center justify-center text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-lg transition-colors"
+ className="h-8 w-8 flex items-center justify-center text-blue-600 active:bg-blue-50 dark:active:bg-blue-900/20 rounded-lg transition-colors"
  title="Analytics"
  >
  <BarChart3 size={18} />
  </Link>
  <Link
  href={`/admin/tests/${test.id}`}
- className="h-8 w-8 flex items-center justify-center text-gray-600 hover:bg-gray-100 dark:hover:bg-slate-700 rounded-lg transition-colors"
+ className="h-8 w-8 flex items-center justify-center text-gray-600 active:bg-gray-100 dark:active:bg-slate-700 rounded-lg transition-colors"
  title="Ko'rish"
  >
  <Eye size={18} />
@@ -272,8 +272,8 @@ export default function AdminTestsPage() {
  <button
  onClick={() => handleTogglePublish(test.id)}
  className={`h-8 w-8 flex items-center justify-center rounded-lg transition-colors ${test.is_published
- ? "text-yellow-600 hover:bg-yellow-50 dark:hover:bg-yellow-900/20"
- : "text-green-600 hover:bg-green-50 dark:hover:bg-green-900/20"
+ ? "text-yellow-600 active:bg-yellow-50 dark:active:bg-yellow-900/20"
+ : "text-green-600 active:bg-green-50 dark:active:bg-green-900/20"
  }`}
  title={test.is_published ? "Noshir qilish" : "Nashr qilish"}
  >
@@ -285,21 +285,21 @@ export default function AdminTestsPage() {
  </button>
  <Link
  href={`/admin/tests/${test.id}/edit`}
- className="h-8 w-8 flex items-center justify-center text-green-600 hover:bg-green-50 dark:hover:bg-green-900/20 rounded-lg transition-colors"
+ className="h-8 w-8 flex items-center justify-center text-green-600 active:bg-green-50 dark:active:bg-green-900/20 rounded-lg transition-colors"
  title="Tahrirlash"
  >
  <Edit size={18} />
  </Link>
  <button
  onClick={() => handleDuplicate(test.id)}
- className="h-8 w-8 flex items-center justify-center text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-lg transition-colors"
+ className="h-8 w-8 flex items-center justify-center text-blue-600 active:bg-blue-50 dark:active:bg-blue-900/20 rounded-lg transition-colors"
  title="Nusxalash"
  >
  <Copy size={18} />
  </button>
  <button
  onClick={() => handleDelete(test.id)}
- className="h-8 w-8 flex items-center justify-center text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"
+ className="h-8 w-8 flex items-center justify-center text-red-600 active:bg-red-50 dark:active:bg-red-900/20 rounded-lg transition-colors"
  title="O'chirish"
  >
  <Trash2 size={18} />
@@ -359,7 +359,7 @@ export default function AdminTestsPage() {
  <span className="text-gray-500 dark:text-gray-400 text-sm">Jami Savollar</span>
  </div>
  <div className="text-3xl font-medium text-slate-800 dark:text-slate-100">
- {tests.reduce((sum, t) => sum + t.total_questions, 0)}
+ {tests.reduce((sum, t) => sum+ t.total_questions, 0)}
  </div>
  </div>
  </div>

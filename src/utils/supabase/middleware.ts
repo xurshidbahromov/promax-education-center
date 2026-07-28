@@ -35,25 +35,25 @@ export async function updateSession(request: NextRequest) {
  data: { user },
  } = await supabase.auth.getUser()
 
-  const isProtectedRoute = request.nextUrl.pathname.startsWith('/dashboard') || request.nextUrl.pathname.startsWith('/admin')
+ const isProtectedRoute = request.nextUrl.pathname.startsWith('/dashboard') || request.nextUrl.pathname.startsWith('/admin')
 
-  if (!user && isProtectedRoute) {
-    // no user, potentially respond by redirecting the user to the login page
-    const url = request.nextUrl.clone()
-    url.pathname = '/login'
-    return NextResponse.redirect(url)
-  }
+ if (!user && isProtectedRoute) {
+ // no user, potentially respond by redirecting the user to the login page
+ const url = request.nextUrl.clone()
+ url.pathname = '/login'
+ return NextResponse.redirect(url)
+ }
 
-  // If user is logged in and tries to access login/register/root, redirect to dashboard
-  if (user && (
-    request.nextUrl.pathname === '/' ||
-    request.nextUrl.pathname.startsWith('/login') ||
-    request.nextUrl.pathname.startsWith('/register')
-  )) {
-    const url = request.nextUrl.clone()
-    url.pathname = '/dashboard'
-    return NextResponse.redirect(url)
-  }
+ // If user is logged in and tries to access login/register/root, redirect to dashboard
+ if (user && (
+ request.nextUrl.pathname === '/' ||
+ request.nextUrl.pathname.startsWith('/login') ||
+ request.nextUrl.pathname.startsWith('/register')
+ )) {
+ const url = request.nextUrl.clone()
+ url.pathname = '/dashboard'
+ return NextResponse.redirect(url)
+ }
 
  return response
 }

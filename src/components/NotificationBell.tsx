@@ -144,7 +144,7 @@ export default function NotificationBell() {
  <div className="relative" ref={dropdownRef}>
  <button
  onClick={() => setIsOpen(!isOpen)}
- className="p-2 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-slate-800 rounded-full relative transition-colors"
+ className="p-2 text-gray-600 dark:text-gray-300 active:bg-gray-100 dark:active:bg-slate-800 rounded-full relative transition-colors"
  aria-label="Notifications"
  >
  <Bell size={20} />
@@ -160,7 +160,7 @@ export default function NotificationBell() {
  {unreadCount > 0 && (
  <button
  onClick={handleMarkAllRead}
- className="text-xs text-brand-blue hover:text-blue-600 font-medium flex items-center gap-1"
+ className="text-xs text-brand-blue active:text-blue-600 font-medium flex items-center gap-1"
  >
  <Check size={14} />
  Barchasini o'qish
@@ -192,7 +192,7 @@ export default function NotificationBell() {
  {notifications.map((notification) => (
  <div
  key={notification.id}
- className={`p-4 hover:bg-gray-50 dark:hover:bg-slate-800/50 transition-colors ${!notification.is_read ? 'bg-blue-50/50 dark:bg-blue-900/10' : ''}`}
+ className={`p-4 active:bg-gray-50 dark:active:bg-slate-800/50 transition-colors ${!notification.is_read ? 'bg-blue-50/50 dark:bg-blue-900/10' : ''}`}
  >
  <div className="flex gap-3">
  <div className="mt-0.5 shrink-0">
@@ -206,7 +206,7 @@ export default function NotificationBell() {
  {!notification.is_read && (
  <button
  onClick={() => handleMarkAsRead(notification.id)}
- className="text-gray-400 hover:text-brand-blue"
+ className="text-gray-400 active:text-brand-blue"
  title="O'qildi deb belgilash"
  >
  <span className="w-2 h-2 bg-blue-500 rounded-full block"></span>

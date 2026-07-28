@@ -69,7 +69,7 @@ export default function ResultsPage() {
  subject_1: answers.subject_1 * 3.1,
  subject_2: answers.subject_2 * 2.1
  };
- const total = Object.values(s).reduce((a, b) => a + b, 0);
+ const total = Object.values(s).reduce((a, b) => a+ b, 0);
  return { ...s, total };
  }, [answers]);
 
@@ -128,7 +128,7 @@ export default function ResultsPage() {
  <div>
  <Link
  href="/admin/results"
- className="inline-flex items-center gap-2 text-gray-500 hover:text-brand-blue mb-4 transition-colors"
+ className="inline-flex items-center gap-2 text-gray-500 active:text-brand-blue mb-4 transition-colors"
  >
  <ArrowLeft size={20} />
  Natijalarga qaytish
@@ -293,7 +293,7 @@ export default function ResultsPage() {
  type="button"
  onClick={handleSave}
  disabled={saving}
- className="w-full h-12 bg-brand-blue text-white rounded-xl font-medium hover:bg-blue-600 transition-colors shadow-lg shadow-blue-500/30 flex items-center justify-center gap-2 active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed"
+ className="w-full h-12 bg-brand-blue text-white rounded-xl font-medium active:bg-blue-600 transition-colors shadow-lg shadow-blue-500/30 flex items-center justify-center gap-2 active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed"
  >
  {saving ? (
  <Loader2 className="animate-spin" size={20} />
@@ -327,7 +327,7 @@ export default function ResultsPage() {
  </div>
 
  <div className="mt-8 space-y-3 relative z-10">
- <SummaryRow label="Majburiy Fanlar" value={(scores.comp_math + scores.comp_history + scores.comp_lang).toFixed(1)} />
+ <SummaryRow label="Majburiy Fanlar" value={(scores.comp_math+ scores.comp_history+ scores.comp_lang).toFixed(1)} />
  <SummaryRow label={`1-Fan (${currentDirection.subject_1})`} value={scores.subject_1.toFixed(1)} />
  <SummaryRow label={`2-Fan (${currentDirection.subject_2})`} value={scores.subject_2.toFixed(1)} />
  </div>

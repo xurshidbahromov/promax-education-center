@@ -269,7 +269,7 @@ function EditTestContent({ id }: { id: string }) {
  <div className="mb-8">
  <button
  onClick={() => router.push("/admin/tests")}
- className="flex items-center gap-2 text-gray-600 dark:text-gray-400 hover:text-brand-blue mb-4"
+ className="flex items-center gap-2 text-gray-600 dark:text-gray-400 active:text-brand-blue mb-4"
  >
  <ArrowLeft size={20} />
  Orqaga
@@ -388,7 +388,7 @@ function EditTestContent({ id }: { id: string }) {
  <div className="flex justify-end pt-4">
  <button
  onClick={() => setCurrentStep("questions")}
- className="px-6 py-3 bg-brand-blue text-white rounded-xl font-medium hover:bg-blue-600 transition-colors"
+ className="px-6 py-3 bg-brand-blue text-white rounded-xl font-medium active:bg-blue-600 transition-colors"
  >
  Keyingi: Savollar
  </button>
@@ -405,7 +405,7 @@ function EditTestContent({ id }: { id: string }) {
  <h2 className="text-xl font-medium">Savollar Ro'yxati ({questions.length})</h2>
  <button
  onClick={addQuestion}
- className="flex items-center gap-2 px-4 py-2 bg-green-500 text-white rounded-xl font-medium hover:bg-green-600 transition-colors"
+ className="flex items-center gap-2 px-4 py-2 bg-green-500 text-white rounded-xl font-medium active:bg-green-600 transition-colors"
  >
  <Plus size={18} />
  Yangi Savol
@@ -421,7 +421,7 @@ function EditTestContent({ id }: { id: string }) {
  {questions.map((q, i) => (
  <div key={q.id} className="p-4 border border-gray-200 dark:border-slate-700 rounded-xl flex items-start gap-4">
  <div className="bg-gray-100 dark:bg-slate-800 w-8 h-8 flex items-center justify-center rounded-lg font-medium text-gray-500 shrink-0">
- {i + 1}
+ {i+ 1}
  </div>
  <div className="flex-1">
  <p className="font-medium line-clamp-2">{q.question_text || "(Savol matni yo'q)"}</p>
@@ -432,13 +432,13 @@ function EditTestContent({ id }: { id: string }) {
  <div className="flex items-center gap-2">
  <button
  onClick={() => setEditingQuestion(q)}
- className="p-2 text-blue-500 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-lg"
+ className="p-2 text-blue-500 active:bg-blue-50 dark:active:bg-blue-900/20 rounded-lg"
  >
  Tahrirlash
  </button>
  <button
  onClick={() => deleteQuestion(q.id)}
- className="p-2 text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg"
+ className="p-2 text-red-500 active:bg-red-50 dark:active:bg-red-900/20 rounded-lg"
  >
  <Trash2 size={18} />
  </button>
@@ -451,14 +451,14 @@ function EditTestContent({ id }: { id: string }) {
  <div className="flex justify-between pt-8 border-t dark:border-slate-800 mt-8">
  <button
  onClick={() => setCurrentStep("basic")}
- className="text-gray-500 hover:text-slate-800 dark:hover:text-white"
+ className="text-gray-500 active:text-slate-800 dark:active:text-white"
  >
  Ortga
  </button>
  <button
  onClick={handleSubmit}
  disabled={saving}
- className="flex items-center gap-2 px-8 py-3 bg-brand-blue text-white rounded-xl font-medium hover:bg-blue-600 transition-colors shadow-lg shadow-blue-500/30"
+ className="flex items-center gap-2 px-8 py-3 bg-brand-blue text-white rounded-xl font-medium active:bg-blue-600 transition-colors shadow-lg shadow-blue-500/30"
  >
  {saving ? "Saqlanmoqda..." : (
  <>
@@ -544,14 +544,14 @@ function EditTestContent({ id }: { id: string }) {
  <div className="flex gap-4 pt-4">
  <button
  onClick={() => setEditingQuestion(null)}
- className="flex-1 py-3 text-gray-500 hover:bg-gray-100 dark:hover:bg-slate-800 rounded-xl font-medium"
+ className="flex-1 py-3 text-gray-500 active:bg-gray-100 dark:active:bg-slate-800 rounded-xl font-medium"
  >
  Bekor qilish
  </button>
  <button
  onClick={saveQuestion}
  disabled={!editingQuestion.question_text || !editingQuestion.correct_answer}
- className="flex-1 py-3 bg-brand-blue text-white rounded-xl font-medium hover:bg-blue-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+ className="flex-1 py-3 bg-brand-blue text-white rounded-xl font-medium active:bg-blue-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
  >
  Saqlash
  </button>

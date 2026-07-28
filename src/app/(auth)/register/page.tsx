@@ -264,8 +264,8 @@ export default function RegisterPage() {
 
  <div className="relative z-10 max-w-lg space-y-12">
  <Link href="/" className="inline-block group">
- <div className="flex items-center gap-2 text-blue-200 hover:text-white transition-colors mb-8">
- <ArrowLeft size={20} className="group-hover:-translate-x-1 transition-transform" />
+ <div className="flex items-center gap-2 text-blue-200 hover:text-white active:text-white transition-colors mb-8">
+ <ArrowLeft size={20} className="group-hover:-translate-x-1 active:scale-95 transition-transform" />
  <span>{t('auth.back_to_home')}</span>
  </div>
  </Link>
@@ -307,8 +307,8 @@ export default function RegisterPage() {
           <div className="absolute top-[-10%] right-[-10%] w-[60%] h-[60%] rounded-full bg-blue-300/60 blur-[130px] opacity-60" />
           <div className="absolute bottom-[-10%] left-[-10%] w-[60%] h-[60%] rounded-full bg-purple-300/60 blur-[130px] opacity-60" />
         </div>
- <Link href="/" className="absolute top-8 left-8 lg:hidden group flex items-center gap-2 text-gray-500 hover:text-brand-blue transition-colors z-20">
- <ArrowLeft size={20} className="group-hover:-translate-x-1 transition-transform" />
+ <Link href="/" className="absolute top-8 left-8 lg:hidden group flex items-center gap-2 text-gray-500 hover:text-brand-blue active:text-brand-blue transition-colors z-20">
+ <ArrowLeft size={20} className="group-hover:-translate-x-1 active:scale-95 transition-transform" />
  <span>{t('auth.back_to_home')}</span>
  </Link>
 
@@ -398,7 +398,7 @@ export default function RegisterPage() {
  <button
  type="button"
  onClick={() => setShowPassword(!showPassword)}
- className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors"
+ className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 active:text-gray-600 dark:hover:text-gray-300 active:text-gray-300 transition-colors"
  >
  {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
  </button>
@@ -412,14 +412,14 @@ export default function RegisterPage() {
  <button
  type="submit"
  disabled={loading}
- className="w-full py-4 bg-brand-blue hover:bg-blue-700 text-white font-medium rounded-full text-lg shadow-lg hover:shadow-xl active:scale-95 transition-all flex items-center justify-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed group"
+ className="w-full py-4 bg-brand-blue hover:bg-blue-700 active:bg-blue-700 text-white font-medium rounded-full text-lg shadow-lg hover:shadow-xl active:scale-95 transition-all flex items-center justify-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed group"
  >
  {loading ? (
  <Loader2 className="animate-spin" size={20} />
  ) : (
  <>
  {t('auth.register.button')}
- <ArrowRight size={20} className="group-hover:translate-x-1 transition-transform duration-300 ease-out" />
+ <ArrowRight size={20} className="group-hover:translate-x-1 active:scale-95 transition-transform duration-300 ease-out" />
  </>
  )}
  </button>
@@ -463,7 +463,7 @@ export default function RegisterPage() {
         <button
           type="button"
           onClick={handleBack}
-          className="p-2 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 text-gray-500 transition-colors"
+          className="p-2 rounded-full hover:bg-slate-100 active:bg-slate-100 dark:hover:bg-slate-800 active:bg-slate-800 text-gray-500 transition-colors"
         >
           <ArrowLeft size={20} />
         </button>
@@ -520,7 +520,7 @@ export default function RegisterPage() {
             <button
               type="button"
               onClick={() => setShowLinkPassword(!showLinkPassword)}
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 p-1"
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 active:text-gray-600 dark:hover:text-gray-300 active:text-gray-300 p-1"
             >
               {showLinkPassword ? <EyeOff size={18} /> : <Eye size={18} />}
             </button>
@@ -531,7 +531,7 @@ export default function RegisterPage() {
       <button
         type="submit"
         disabled={loading || !linkPhone}
-        className="w-full py-3.5 bg-brand-blue hover:bg-brand-blue/90 text-white rounded-xl font-medium transition-all shadow-lg shadow-brand-blue/20 hover:shadow-brand-blue/40 disabled:opacity-70 disabled:cursor-not-allowed flex items-center justify-center gap-2 mt-4"
+        className="w-full py-3.5 bg-brand-blue hover:bg-brand-blue/90 active:bg-brand-blue/90 text-white rounded-xl font-medium transition-all shadow-lg shadow-brand-blue/20 hover:shadow-brand-blue/40 disabled:opacity-70 disabled:cursor-not-allowed flex items-center justify-center gap-2 mt-4"
       >
         {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : <><Send size={18} /> Ulash va Kirish</>}
       </button>

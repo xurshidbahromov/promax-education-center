@@ -263,8 +263,8 @@ export default function LoginPage() {
 
  <div className="relative z-10 max-w-lg space-y-12">
  <Link href="/" className="inline-block group">
- <div className="flex items-center gap-2 text-blue-200 hover:text-white transition-colors mb-8">
- <ArrowLeft size={20} className="group-hover:-translate-x-1 transition-transform" />
+ <div className="flex items-center gap-2 text-blue-200 hover:text-white active:text-white transition-colors mb-8">
+ <ArrowLeft size={20} className="group-hover:-translate-x-1 active:scale-95 transition-transform" />
  <span>{t('auth.back_to_home')}</span>
  </div>
  </Link>
@@ -300,8 +300,8 @@ export default function LoginPage() {
         </div>
 
  {step === 'role' && (
-   <Link href="/" className="absolute top-8 left-8 lg:hidden group flex items-center gap-2 text-gray-500 hover:text-brand-blue transition-colors z-20">
-   <ArrowLeft size={20} className="group-hover:-translate-x-1 transition-transform" />
+   <Link href="/" className="absolute top-8 left-8 lg:hidden group flex items-center gap-2 text-gray-500 hover:text-brand-blue active:text-brand-blue transition-colors z-20">
+   <ArrowLeft size={20} className="group-hover:-translate-x-1 active:scale-95 transition-transform" />
    <span>{t('auth.back_to_home')}</span>
    </Link>
  )}
@@ -338,10 +338,10 @@ export default function LoginPage() {
  <motion.button
  onClick={() => handleRoleSelect('student')}
  whileTap={{ scale: 0.95 }}
- className="relative overflow-hidden flex flex-col items-center justify-center p-6 sm:p-7 rounded-3xl border border-slate-100 dark:border-slate-800/60 bg-white/70 dark:bg-slate-900/70 backdrop-blur-xl hover:border-brand-blue/30 dark:hover:border-brand-blue/20 transition-all duration-300 group shadow-[0_8px_30px_rgb(0,0,0,0.02)]"
+ className="relative overflow-hidden flex flex-col items-center justify-center p-6 sm:p-7 rounded-3xl border border-slate-100 dark:border-slate-800/60 bg-white/70 dark:bg-slate-900/70 backdrop-blur-xl hover:border-brand-blue/30 active:border-brand-blue/30 dark:hover:border-brand-blue/20 active:border-brand-blue/20 transition-all duration-300 group shadow-[0_8px_30px_rgb(0,0,0,0.02)]"
  >
  {/* Dynamic Glowing Blobs */}
- <div className="absolute inset-0 z-0 pointer-events-none opacity-40 group-hover:opacity-100 transition-opacity duration-700">
+ <div className="absolute inset-0 z-0 pointer-events-none opacity-40 group-hover:opacity-100 group-active:opacity-100 active:opacity-100 transition-opacity duration-700">
  <motion.div 
  animate={{ y: [0, -15, 0], scale: [1, 1.1, 1] }}
  transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
@@ -358,17 +358,17 @@ export default function LoginPage() {
  <motion.div 
  animate={{ y: [0, -6, 0], rotate: [-12, -8, -12] }}
  transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
- className="absolute -right-4 -bottom-4 z-0 text-brand-blue/5 dark:text-brand-blue/10 group-hover:text-brand-blue/10 dark:group-hover:text-brand-blue/20 transition-colors duration-500"
+ className="absolute -right-4 -bottom-4 z-0 text-brand-blue/5 dark:text-brand-blue/10 group-hover:text-brand-blue/10 group-active:text-brand-blue/10 active:text-brand-blue/10 dark:group-hover:text-brand-blue/20 group-active:text-brand-blue/20 active:text-brand-blue/20 transition-colors duration-500"
  >
  <GraduationCap className="w-32 h-32" />
  </motion.div>
 
  <div className="relative z-10 flex flex-col items-center gap-3">
- <div className="w-14 h-14 rounded-2xl bg-brand-blue/10 group-hover:bg-brand-blue flex items-center justify-center transition-all duration-300 group-hover:shadow-lg group-hover:shadow-brand-blue/20 group-hover:scale-110">
- <GraduationCap className="text-brand-blue group-hover:text-white transition-colors duration-300" size={26} />
+ <div className="w-14 h-14 rounded-2xl bg-brand-blue/10 group-hover:bg-brand-blue group-active:bg-brand-blue active:bg-brand-blue flex items-center justify-center transition-all duration-300 group-hover:shadow-lg group-hover:shadow-brand-blue/20 group-hover:scale-110 group-active:scale-95">
+ <GraduationCap className="text-brand-blue group-hover:text-white group-active:text-white active:text-white transition-colors duration-300" size={26} />
  </div>
  <div className="text-center">
- <div className="font-fredoka text-lg font-medium text-slate-800 dark:text-slate-100 group-hover:text-brand-blue transition-colors duration-300">
+ <div className="font-fredoka text-lg font-medium text-slate-800 dark:text-slate-100 group-hover:text-brand-blue group-active:text-brand-blue active:text-brand-blue transition-colors duration-300">
  O'quvchi
  </div>
  <div className="text-xs text-gray-400 dark:text-gray-500 font-medium mt-0.5">
@@ -381,10 +381,10 @@ export default function LoginPage() {
  <motion.button
  onClick={() => handleRoleSelect('staff')}
  whileTap={{ scale: 0.95 }}
- className="relative overflow-hidden flex flex-col items-center justify-center p-6 sm:p-7 rounded-3xl border border-slate-100 dark:border-slate-800/60 bg-white/70 dark:bg-slate-900/70 backdrop-blur-xl hover:border-brand-orange/30 dark:hover:border-brand-orange/20 transition-all duration-300 group shadow-[0_8px_30px_rgb(0,0,0,0.02)]"
+ className="relative overflow-hidden flex flex-col items-center justify-center p-6 sm:p-7 rounded-3xl border border-slate-100 dark:border-slate-800/60 bg-white/70 dark:bg-slate-900/70 backdrop-blur-xl hover:border-brand-orange/30 active:border-brand-orange/30 dark:hover:border-brand-orange/20 active:border-brand-orange/20 transition-all duration-300 group shadow-[0_8px_30px_rgb(0,0,0,0.02)]"
  >
  {/* Dynamic Glowing Blobs */}
- <div className="absolute inset-0 z-0 pointer-events-none opacity-40 group-hover:opacity-100 transition-opacity duration-700">
+ <div className="absolute inset-0 z-0 pointer-events-none opacity-40 group-hover:opacity-100 group-active:opacity-100 active:opacity-100 transition-opacity duration-700">
  <motion.div 
  animate={{ y: [0, -15, 0], scale: [1, 1.1, 1] }}
  transition={{ duration: 4.5, repeat: Infinity, ease: "easeInOut" }}
@@ -401,17 +401,17 @@ export default function LoginPage() {
  <motion.div 
  animate={{ y: [0, -6, 0], rotate: [-12, -8, -12] }}
  transition={{ duration: 6, repeat: Infinity, ease: "easeInOut", delay: 0.5 }}
- className="absolute -right-4 -bottom-4 z-0 text-brand-orange/5 dark:text-brand-orange/10 group-hover:text-brand-orange/10 dark:group-hover:text-brand-orange/20 transition-colors duration-500"
+ className="absolute -right-4 -bottom-4 z-0 text-brand-orange/5 dark:text-brand-orange/10 group-hover:text-brand-orange/10 group-active:text-brand-orange/10 active:text-brand-orange/10 dark:group-hover:text-brand-orange/20 group-active:text-brand-orange/20 active:text-brand-orange/20 transition-colors duration-500"
  >
  <Users className="w-32 h-32" />
  </motion.div>
 
  <div className="relative z-10 flex flex-col items-center gap-3">
- <div className="w-14 h-14 rounded-2xl bg-brand-orange/10 group-hover:bg-brand-orange flex items-center justify-center transition-all duration-300 group-hover:shadow-lg group-hover:shadow-brand-orange/20 group-hover:scale-110">
- <Users className="text-brand-orange group-hover:text-white transition-colors duration-300" size={26} />
+ <div className="w-14 h-14 rounded-2xl bg-brand-orange/10 group-hover:bg-brand-orange group-active:bg-brand-orange active:bg-brand-orange flex items-center justify-center transition-all duration-300 group-hover:shadow-lg group-hover:shadow-brand-orange/20 group-hover:scale-110 group-active:scale-95">
+ <Users className="text-brand-orange group-hover:text-white group-active:text-white active:text-white transition-colors duration-300" size={26} />
  </div>
  <div className="text-center">
- <div className="font-fredoka text-lg font-medium text-slate-800 dark:text-slate-100 group-hover:text-brand-orange transition-colors duration-300">
+ <div className="font-fredoka text-lg font-medium text-slate-800 dark:text-slate-100 group-hover:text-brand-orange group-active:text-brand-orange active:text-brand-orange transition-colors duration-300">
  O'qituvchi
  </div>
  <div className="text-xs text-gray-400 dark:text-gray-500 font-medium mt-0.5">
@@ -447,7 +447,7 @@ export default function LoginPage() {
  <button
  type="button"
  onClick={handleBack}
- className="flex items-center gap-2 text-gray-600 dark:text-gray-400 hover:text-brand-blue transition-colors"
+ className="flex items-center gap-2 text-gray-600 dark:text-gray-400 hover:text-brand-blue active:text-brand-blue transition-colors"
  >
  <ArrowLeft size={20} />
  <span>Ortga</span>
@@ -517,7 +517,7 @@ export default function LoginPage() {
  <button
  type="button"
  onClick={() => setShowPassword(!showPassword)}
- className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors"
+ className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 active:text-gray-600 dark:hover:text-gray-300 active:text-gray-300 transition-colors"
  >
  {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
  </button>
@@ -530,7 +530,7 @@ export default function LoginPage() {
  type="submit"
  disabled={loading}
  className={`w-full py-4 text-white font-medium rounded-full text-lg shadow-lg hover:shadow-xl transition-all flex items-center justify-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed group relative overflow-hidden ${
- loginAs === 'student' ? 'bg-brand-blue shadow-brand-blue/30 hover:bg-blue-700' : 'bg-brand-orange shadow-brand-orange/30 hover:bg-orange-600'
+ loginAs === 'student' ? 'bg-brand-blue shadow-brand-blue/30 hover:bg-blue-700 active:bg-blue-700' : 'bg-brand-orange shadow-brand-orange/30 hover:bg-orange-600 active:bg-orange-600'
  }`}
  >
  <div className="absolute inset-0 bg-white/20 scale-x-0 group-hover:scale-x-100 origin-left transition-transform duration-500 ease-out" />
@@ -540,7 +540,7 @@ export default function LoginPage() {
  ) : (
  <>
  {t('auth.login.button')}
- <ArrowRight size={20} className="group-hover:translate-x-1 transition-transform duration-300 ease-out" />
+ <ArrowRight size={20} className="group-hover:translate-x-1 active:scale-95 transition-transform duration-300 ease-out" />
  </>
  )}
  </span>
@@ -585,7 +585,7 @@ export default function LoginPage() {
         <button
           type="button"
           onClick={handleBack}
-          className="p-2 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 text-gray-500 transition-colors"
+          className="p-2 rounded-full hover:bg-slate-100 active:bg-slate-100 dark:hover:bg-slate-800 active:bg-slate-800 text-gray-500 transition-colors"
         >
           <ArrowLeft size={20} />
         </button>
@@ -642,7 +642,7 @@ export default function LoginPage() {
             <button
               type="button"
               onClick={() => setShowLinkPassword(!showLinkPassword)}
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 p-1"
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 active:text-gray-600 dark:hover:text-gray-300 active:text-gray-300 p-1"
             >
               {showLinkPassword ? <EyeOff size={18} /> : <Eye size={18} />}
             </button>
@@ -653,7 +653,7 @@ export default function LoginPage() {
       <button
         type="submit"
         disabled={loading || !linkPhone}
-        className="w-full py-3.5 bg-brand-blue hover:bg-brand-blue/90 text-white rounded-xl font-medium transition-all shadow-lg shadow-brand-blue/20 hover:shadow-brand-blue/40 disabled:opacity-70 disabled:cursor-not-allowed flex items-center justify-center gap-2 mt-4"
+        className="w-full py-3.5 bg-brand-blue hover:bg-brand-blue/90 active:bg-brand-blue/90 text-white rounded-xl font-medium transition-all shadow-lg shadow-brand-blue/20 hover:shadow-brand-blue/40 disabled:opacity-70 disabled:cursor-not-allowed flex items-center justify-center gap-2 mt-4"
       >
         {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : <><Send size={18} /> Ulash va Kirish</>}
       </button>
@@ -675,7 +675,7 @@ export default function LoginPage() {
  </p>
  <button
  onClick={() => setShowForgotPassword(false)}
- className="w-full bg-gray-100 hover:bg-gray-200 dark:bg-slate-700 dark:hover:bg-slate-600 text-slate-800 dark:text-slate-100 font-medium py-2.5 rounded-xl transition-colors"
+ className="w-full bg-gray-100 hover:bg-gray-200 active:bg-gray-200 dark:bg-slate-700 dark:hover:bg-slate-600 active:bg-slate-600 text-slate-800 dark:text-slate-100 font-medium py-2.5 rounded-xl transition-colors"
  >
  {t("auth.forgot_password.close")}
  </button>

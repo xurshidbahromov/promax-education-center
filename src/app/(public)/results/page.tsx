@@ -31,15 +31,15 @@ const VideoCard = ({ video, index }: { video: { id: string, title: string }, ind
  src={`https://img.youtube.com/vi/${video.id}/hqdefault.jpg`}
  alt={video.title}
  fill
- className="object-cover group-hover:scale-105 transition-transform duration-700"
+ className="object-cover group-hover:scale-105 group-active:scale-95 transition-transform duration-700"
  unoptimized
  />
  {/* Dark overlay to make the play button pop */}
- <div className="absolute inset-0 bg-black/20 group-hover:bg-black/10 transition-colors duration-500" />
+ <div className="absolute inset-0 bg-black/20 group-hover:bg-black/10 group-active:bg-black/10 active:bg-black/10 transition-colors duration-500" />
  
  {/* Custom Premium Play Button */}
  <div className="absolute inset-0 flex items-center justify-center">
- <div className="w-16 h-16 rounded-full bg-white/20 backdrop-blur-md flex items-center justify-center border border-white/40 group-hover:scale-110 group-hover:bg-red-600 group-hover:border-red-600 transition-all duration-300 shadow-xl">
+ <div className="w-16 h-16 rounded-full bg-white/20 backdrop-blur-md flex items-center justify-center border border-white/40 group-hover:scale-110 group-active:scale-95 group-hover:bg-red-600 group-active:bg-red-600 active:bg-red-600 group-hover:border-red-600 group-active:border-red-600 active:border-red-600 transition-all duration-300 shadow-xl">
  <Play className="w-6 h-6 text-white fill-white translate-x-0.5" />
  </div>
  </div>

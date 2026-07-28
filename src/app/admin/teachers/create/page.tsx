@@ -86,7 +86,7 @@ export default function CreateTeacherPage() {
  <div>
  <Link
  href="/admin/teachers"
- className="inline-flex items-center gap-2 text-gray-500 hover:text-brand-blue mb-4 transition-colors"
+ className="inline-flex items-center gap-2 text-gray-500 active:text-brand-blue mb-4 transition-colors"
  >
  <ArrowLeft size={20} />
  Ortga qaytish
@@ -145,13 +145,13 @@ export default function CreateTeacherPage() {
  <button
  key={student.id}
  onClick={() => setSelectedStudent(student)}
- className="w-full p-3 flex items-center gap-3 hover:bg-gray-50 dark:hover:bg-slate-800 rounded-xl transition-colors text-left group"
+ className="w-full p-3 flex items-center gap-3 active:bg-gray-50 dark:active:bg-slate-800 rounded-xl transition-colors text-left group"
  >
  <div className="w-10 h-10 rounded-full bg-brand-blue/10 flex items-center justify-center text-brand-blue font-medium">
  {(student.full_name || "U").charAt(0)}
  </div>
  <div>
- <p className="font-medium text-slate-800 dark:text-slate-100 group-hover:text-brand-blue transition-colors">
+ <p className="font-medium text-slate-800 dark:text-slate-100 group-active:text-brand-blue transition-colors">
  {student.full_name}
  </p>
  <p className="text-xs text-gray-500">Student</p>
@@ -181,7 +181,7 @@ export default function CreateTeacherPage() {
  setSelectedStudent(null);
  setSearchTerm("");
  }}
- className="text-sm text-red-500 hover:text-red-600 font-medium"
+ className="text-sm text-red-500 active:text-red-600 font-medium"
  >
  Bekor qilish
  </button>
@@ -207,7 +207,7 @@ export default function CreateTeacherPage() {
  <button
  onClick={handlePromote}
  disabled={loading || !selectedStudent}
- className="w-full py-4 bg-brand-blue text-white rounded-xl font-medium text-lg hover:bg-blue-600 transition-colors shadow-lg shadow-blue-500/30 flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+ className="w-full py-4 bg-brand-blue text-white rounded-xl font-medium text-lg active:bg-blue-600 transition-colors shadow-lg shadow-blue-500/30 flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
  >
  {loading ? (
  <span className="w-6 h-6 border-2 border-white/30 border-t-white rounded-full animate-spin" />
