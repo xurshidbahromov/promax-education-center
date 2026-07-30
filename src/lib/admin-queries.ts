@@ -26,7 +26,7 @@ export async function getTeachers(searchTerm: string = ""): Promise<Teacher[]> {
  .order('created_at', { ascending: false });
 
  if (searchTerm) {
- query = query.or(`full_name.ilike.%${searchTerm}%,email.ilike.%${searchTerm}%`);
+ query = query.or(`full_name.ilike.%${searchTerm}%,phone.ilike.%${searchTerm}%`);
  }
 
  const { data, error } = await query;
@@ -114,20 +114,32 @@ export async function demoteTeacher(id: string): Promise<{ success: boolean; err
 }
 
 // Promote user to teacher (by ID)
-export async function promoteToTeacher(userId: string): Promise<{ success: boolean; error?: string }> {
- const supabase = createClient();
+export async function promoteToTeacher(userId: string, subjects: string[] = []): Promise<{ success: boolean; error?: string }> {
+  const supabase = createClient();
 
- // Update role directly
- const { error: updateError } = await supabase
- .from('profiles')
- .update({ role: 'teacher' })
- .eq('id', userId);
+  // First get current profile to preserve other settings
+  const { data: profile } = await supabase.from('profiles').select('settings').eq('id', userId).single();
+  const currentSettings = profile?.settings || {};
+  
+  const newSettings = {
+    ...currentSettings,
+    subjects: subjects
+  };
 
- if (updateError) {
- return { success: false, error: updateError.message };
- }
+  // Update role and settings
+  const { error: updateError } = await supabase
+    .from('profiles')
+    .update({ 
+      role: 'teacher',
+      settings: newSettings
+    })
+    .eq('id', userId);
 
- return { success: true };
+  if (updateError) {
+    return { success: false, error: updateError.message };
+  }
+
+  return { success: true };
 }
 
 export async function getStudents(searchTerm: string = ""): Promise<Student[]> {
@@ -468,4 +480,139 @@ export async function broadcastNotification(
  console.error('Error broadcasting notification:', error);
  return { success: false, error: error.message };
  }
+}
+
+// ============================================================
+// GURUHLAR (Groups) CRUD
+// ============================================================
+
+export interface Group {
+  id: string;
+  name: string;
+  subject_id: string;
+  description: string | null;
+  max_students: number;
+  schedule: string | null;
+  teacher_id: string | null;
+  status: 'active' | 'archived';
+  created_at: string;
+  updated_at: string;
+  subject?: { title: string };
+  teacher?: { full_name: string | null; email: string | null };
+  student_count?: number;
+}
+
+export interface GroupStudent {
+  id: string;
+  group_id: string;
+  student_id: string;
+  joined_at: string;
+  student?: { id: string; full_name: string | null; email: string | null; phone: string | null; avatar_url: string | null };
+}
+
+export async function getGroups(subjectId?: string): Promise<Group[]> {
+  const supabase = createClient();
+  let query = supabase
+    .from("groups")
+    .select("*, subject:subjects(title), teacher:profiles!groups_teacher_id_fkey(full_name, phone)")
+    .order("created_at", { ascending: false });
+  if (subjectId) query = query.eq("subject_id", subjectId);
+  const { data, error } = await query;
+  if (error) throw error;
+  const groups = data || [];
+  if (groups.length === 0) return [];
+  const { data: counts } = await supabase
+    .from("group_students").select("group_id").in("group_id", groups.map((g: any) => g.id));
+  const countMap: Record<string, number> = {};
+  (counts || []).forEach((row: any) => { countMap[row.group_id] = (countMap[row.group_id] || 0) + 1; });
+  return groups.map((g: any) => ({ ...g, student_count: countMap[g.id] || 0 }));
+}
+
+export async function getGroup(id: string): Promise<Group | null> {
+  const supabase = createClient();
+  const { data, error } = await supabase
+    .from("groups")
+    .select("*, subject:subjects(title), teacher:profiles!groups_teacher_id_fkey(full_name, email)")
+    .eq("id", id).single();
+  if (error) return null;
+  return data;
+}
+
+export async function createGroup(groupData: {
+  name: string; subject_id: string; description?: string;
+  max_students?: number; schedule?: string; teacher_id?: string;
+}): Promise<{ success: boolean; error?: string; id?: string }> {
+  const supabase = createClient();
+  const { data, error } = await supabase.from("groups").insert(groupData).select("id").single();
+  if (error) return { success: false, error: error.message };
+  return { success: true, id: data.id };
+}
+
+export async function updateGroup(
+  id: string,
+  updates: Partial<{ name: string; description: string; max_students: number; schedule: string; teacher_id: string; status: "active" | "archived" }>
+): Promise<{ success: boolean; error?: string }> {
+  const supabase = createClient();
+  const { error } = await supabase.from("groups").update(updates).eq("id", id);
+  if (error) return { success: false, error: error.message };
+  return { success: true };
+}
+
+export async function deleteGroup(id: string): Promise<{ success: boolean; error?: string }> {
+  const supabase = createClient();
+  const { error } = await supabase.from("groups").delete().eq("id", id);
+  if (error) return { success: false, error: error.message };
+  return { success: true };
+}
+
+export async function getGroupStudents(groupId: string): Promise<GroupStudent[]> {
+  const supabase = createClient();
+  const { data, error } = await supabase
+    .from("group_students")
+    .select("*, student:profiles!group_students_student_id_fkey(id, full_name, phone, avatar_url)")
+    .eq("group_id", groupId).order("joined_at", { ascending: false });
+  if (error) throw error;
+  return data || [];
+}
+
+export async function addStudentToGroup(
+  groupId: string, studentId: string
+): Promise<{ success: boolean; error?: string }> {
+  const supabase = createClient();
+  const { error } = await supabase.from("group_students").insert({ group_id: groupId, student_id: studentId });
+  if (error) {
+    if (error.code === "23505") return { success: false, error: "O'quvchi bu guruhda allaqachon mavjud" };
+    return { success: false, error: error.message };
+  }
+  return { success: true };
+}
+
+export async function removeStudentFromGroup(
+  groupId: string, studentId: string
+): Promise<{ success: boolean; error?: string }> {
+  const supabase = createClient();
+  const { error } = await supabase
+    .from("group_students").delete().eq("group_id", groupId).eq("student_id", studentId);
+  if (error) return { success: false, error: error.message };
+  return { success: true };
+}
+
+export async function getStudentGroups(studentId: string): Promise<Group[]> {
+  const supabase = createClient();
+  const { data, error } = await supabase
+    .from("group_students").select("group:groups(*, subject:subjects(title))").eq("student_id", studentId);
+  if (error) throw error;
+  return (data || []).map((d: any) => d.group).filter(Boolean);
+}
+
+export async function getStudentsNotInGroup(groupId: string, searchTerm: string = ""): Promise<Student[]> {
+  const supabase = createClient();
+  const { data: existing } = await supabase.from("group_students").select("student_id").eq("group_id", groupId);
+  const existingIds = (existing || []).map((e: any) => e.student_id);
+  let query = supabase.from("profiles").select("*").eq("role", "student").order("full_name");
+  if (existingIds.length > 0) query = query.not("id", "in", "(" + existingIds.join(",") + ")");
+  if (searchTerm) query = query.or("full_name.ilike.%" + searchTerm + "%,phone.ilike.%" + searchTerm + "%");
+  const { data, error } = await query.limit(50);
+  if (error) throw error;
+  return (data || []) as Student[];
 }

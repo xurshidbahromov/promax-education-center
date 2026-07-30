@@ -206,7 +206,7 @@ export default function AdminCoursesPage() {
  </button>
  </div>
  <Link href={`/admin/courses/${subject.id}`} className="flex items-center gap-1 text-sm font-semibold text-brand-blue active:text-blue-600 px-3 py-1.5 bg-blue-50 dark:bg-blue-900/20 rounded-lg transition-colors">
- Darslar
+ Guruhlar
  <ChevronRight size={16} />
  </Link>
  </div>

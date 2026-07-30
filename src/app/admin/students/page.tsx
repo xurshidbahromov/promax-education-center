@@ -1,357 +1,219 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
 import {
- Search,
- Plus,
- MoreVertical,
- Filter,
- Download,
- User,
- Mail,
- Phone,
- Edit,
- Trash2,
- FileText,
- DollarSign
+  Search, Users, Edit2, Trash2, Phone, X, GraduationCap
 } from "lucide-react";
-import { deleteStudent, Student } from "@/lib/admin-queries";
-import { type StudentPaymentSummary } from "@/lib/payments";
-import PaymentBadge from "@/components/PaymentBadge";
-import { exportStudentsList } from "@/lib/excel-export";
+import { deleteStudent, promoteToTeacher } from "@/lib/admin-queries";
+import { getSubjects, Subject } from "@/lib/supabase-queries";
 import { useQueryClient } from "@tanstack/react-query";
-import { useStudents, useStudentPaymentSummaries } from "@/hooks/useAdminData";
+import { useStudents } from "@/hooks/useAdminData";
 
 export default function AdminStudentsPage() {
- const router = useRouter();
- const queryClient = useQueryClient();
- const [searchTerm, setSearchTerm] = useState("");
- const [debouncedSearchTerm, setDebouncedSearchTerm] = useState("");
- const [paymentFilter, setPaymentFilter] = useState<'all' | 'all_paid' | 'partial' | 'overdue' | 'no_courses'>('all');
- const [isExporting, setIsExporting] = useState(false);
+  const router = useRouter();
+  const queryClient = useQueryClient();
+  
+  const [searchTerm, setSearchTerm] = useState("");
+  const [debouncedSearchTerm, setDebouncedSearchTerm] = useState("");
 
- // Debounce search term
- useEffect(() => {
- const timer = setTimeout(() => {
- setDebouncedSearchTerm(searchTerm);
- }, 500);
- return () => clearTimeout(timer);
- }, [searchTerm]);
+  // Promote Modal states
+  const [promoteModal, setPromoteModal] = useState<{ open: boolean; studentId: string; studentName: string } | null>(null);
+  const [subjects, setSubjects] = useState<Subject[]>([]);
+  const [selectedSubjects, setSelectedSubjects] = useState<string[]>([]);
+  const [isPromoting, setIsPromoting] = useState(false);
 
- // React Query hooks
- const { data: studentsData, isLoading: studentsLoading } = useStudents(debouncedSearchTerm);
- const students = studentsData || [];
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearchTerm(searchTerm);
+    }, 500);
+    return () => clearTimeout(timer);
+  }, [searchTerm]);
 
- // Fetch payment summaries for loaded students
- const { data: paymentSummariesData, isLoading: approachesLoading } = useStudentPaymentSummaries(students);
- const paymentSummaries = paymentSummariesData || new Map();
+  // Fetch subjects once for the modal
+  useEffect(() => {
+    getSubjects().then(setSubjects).catch(console.error);
+  }, []);
 
- const loading = studentsLoading || approachesLoading;
+  const { data: students, isLoading: loading } = useStudents(debouncedSearchTerm);
+  const studentsList = students || [];
 
- const handleDelete = async (id: string) => {
- if (!confirm("Haqiqatan ham bu o'quvchini o'chirmoqchimisiz?")) return;
+  const handleDelete = async (id: string) => {
+    if (!confirm("Haqiqatan ham bu o'quvchini o'chirmoqchimisiz?")) return;
+    try {
+      const result = await deleteStudent(id);
+      if (result.success) {
+        queryClient.invalidateQueries({ queryKey: ['students'] });
+        toast.success("O'quvchi muvaffaqiyatli o'chirildi");
+      } else {
+        toast.error("Xatolik: "+ result.error);
+      }
+    } catch (error) {
+      console.error("Delete error:", error);
+    }
+  };
 
- try {
- const result = await deleteStudent(id);
- if (result.success) {
- // Refresh list by invalidating cache
- queryClient.invalidateQueries({ queryKey: ['students'] });
- queryClient.invalidateQueries({ queryKey: ['paymentSummaries'] });
- toast.success("Student muvaffaqiyatli o'chirildi");
- } else {
- toast.error("Xatolik: "+ result.error);
- }
- } catch (error) {
- console.error("Delete error:", error);
- }
- };
+  const openPromoteModal = (id: string, name: string) => {
+    setSelectedSubjects([]);
+    setPromoteModal({ open: true, studentId: id, studentName: name || "Ism yo'q" });
+  };
 
- const handleExportStudents = async () => {
- const filteredStudents = students.filter(student => {
- const matchesSearch = (student.full_name || "").toLowerCase().includes(searchTerm.toLowerCase()) ||
- (student.phone || "").includes(searchTerm);
+  const closePromoteModal = () => {
+    setPromoteModal(null);
+    setSelectedSubjects([]);
+  };
 
- if (paymentFilter === 'all') return matchesSearch;
- const summary = paymentSummaries.get(student.id);
- return matchesSearch && summary?.status === paymentFilter;
- });
+  const toggleSubject = (subjectTitle: string) => {
+    if (selectedSubjects.includes(subjectTitle)) {
+      setSelectedSubjects(prev => prev.filter(s => s !== subjectTitle));
+    } else {
+      setSelectedSubjects(prev => [...prev, subjectTitle]);
+    }
+  };
 
- if (filteredStudents.length === 0) {
- toast("Export qilish uchun talabalar yo'q", { icon: "⚠️" });
- return;
- }
+  const handlePromoteConfirm = async () => {
+    if (!promoteModal) return;
+    if (selectedSubjects.length === 0) {
+      toast.error("Kamida bitta fanni tanlang!");
+      return;
+    }
 
- try {
- setIsExporting(true);
- toast("Excel fayl tayyorlanmoqda...");
- await exportStudentsList(filteredStudents, paymentSummaries);
- toast.success(`${filteredStudents.length} ta talaba Excel formatida yuklandi`);
- } catch (error) {
- console.error('Export error:', error);
- toast.error("Export qilishda xatolik yuz berdi");
- } finally {
- setIsExporting(false);
- }
- };
+    setIsPromoting(true);
+    try {
+      const result = await promoteToTeacher(promoteModal.studentId, selectedSubjects);
+      if (result.success) {
+        queryClient.invalidateQueries({ queryKey: ['students'] });
+        queryClient.invalidateQueries({ queryKey: ['teachers'] });
+        toast.success(`${promoteModal.studentName} o'qituvchi etib belgilandi!`);
+        closePromoteModal();
+      } else {
+        toast.error("Xatolik: "+ result.error);
+      }
+    } catch (error) {
+      console.error("Promote error:", error);
+    } finally {
+      setIsPromoting(false);
+    }
+  };
 
- return (
- <div className="space-y-8">
- {/* Header */}
- <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
- <div>
- <h1 className="text-3xl font-medium text-slate-800 dark:text-slate-100 flex items-center gap-3">
- <User className="text-brand-blue" size={32} />
- Student Management
- </h1>
- <p className="text-gray-500 dark:text-gray-400 mt-1">
- Manage all registered students.
- </p>
- </div>
+  return (
+    <div className="space-y-6">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div>
+          <h1 className="text-2xl font-semibold text-slate-800 dark:text-slate-100 flex items-center gap-2">
+            <Users size={22} className="text-brand-blue" />
+            O'quvchilar
+          </h1>
+          <p className="text-sm text-slate-500 mt-1">Platformadagi barcha o'quvchilarni boshqarish</p>
+        </div>
+      </div>
 
- <div className="flex items-center gap-3">
- <button onClick={handleExportStudents} disabled={isExporting} className="h-10 px-4 flex items-center gap-2 bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-800 rounded-xl text-sm font-medium text-gray-600 dark:text-gray-300 active:bg-gray-50 dark:active:bg-slate-800 transition-colors disabled:opacity-50">
- <Download size={18} className={isExporting ? "animate-bounce" : ""} />
- <span className="hidden sm:inline">{isExporting ? "Yuklanmoqda..." : "Export"}</span>
- </button>
- {/* Add Student functionality can be added later - currently registration is self-service */}
- <button disabled className="h-10 px-4 flex items-center gap-2 bg-brand-blue/50 text-white rounded-xl text-sm font-medium cursor-not-allowed transition-colors shadow-sm">
- <Plus size={18} />
- Add Student
- </button>
- </div>
- </div>
+      <div className="flex items-center gap-4 bg-white dark:bg-slate-900 p-3 rounded-2xl border border-gray-100 dark:border-slate-800 shadow-sm">
+        <div className="flex-1 relative">
+          <Search size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+          <input
+            type="text"
+            placeholder="Ism yoki telefon orqali qidirish..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="w-full pl-10 pr-4 py-2 bg-slate-50 dark:bg-slate-800/50 border-none rounded-xl text-sm focus:ring-2 focus:ring-brand-blue/30 transition-all outline-none"
+          />
+        </div>
+      </div>
 
- {/* Search & Filter */}
- <div className="flex flex-col sm:flex-row items-center gap-4 bg-white dark:bg-slate-900 p-4 rounded-2xl border border-gray-200 dark:border-slate-800 shadow-sm">
- <div className="w-full sm:flex-1 relative">
- <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
- <input
- type="text"
- placeholder="Search students by name..."
- value={searchTerm}
- onChange={(e) => setSearchTerm(e.target.value)}
- className="w-full pl-10 pr-4 py-2 rounded-xl bg-gray-50 dark:bg-slate-800 border-none focus:ring-2 focus:ring-brand-blue transition-all"
- />
- </div>
- <div className="flex items-center gap-2 w-full sm:w-auto">
- <select
- value={paymentFilter}
- onChange={(e) => setPaymentFilter(e.target.value as any)}
- className="h-10 px-4 flex-1 sm:flex-none flex items-center gap-2 bg-gray-50 dark:bg-slate-800 rounded-xl text-sm font-medium text-gray-600 dark:text-gray-300 border-none focus:ring-2 focus:ring-brand-blue transition-all"
- >
- <option value="all">Barchasi</option>
- <option value="all_paid">✅ To'langan</option>
- <option value="partial">⚠️ Qisman</option>
- <option value="overdue">❌ Muddati o'tgan</option>
- <option value="no_courses">📚 Kurs yo'q</option>
- </select>
- </div>
- </div>
+      {loading ? (
+        <div className="flex items-center justify-center py-20 text-slate-500">
+          <div className="animate-spin w-8 h-8 border-2 border-brand-blue border-t-transparent rounded-full mr-3" />
+          Yuklanmoqda...
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          {studentsList.length === 0 ? (
+            <div className="col-span-full py-12 text-center text-slate-500 bg-white dark:bg-slate-900 rounded-2xl border border-dashed border-gray-200 dark:border-slate-800">
+              O'quvchilar topilmadi
+            </div>
+          ) : (
+            studentsList.map((student) => (
+              <div key={student.id} className="group relative bg-white dark:bg-slate-900 rounded-2xl border border-gray-100 dark:border-slate-800 p-5 flex flex-col gap-3 shadow-sm hover:shadow-md transition-shadow duration-200">
+                <div className="flex items-start justify-between gap-2">
+                  <div className="flex items-center gap-3 min-w-0">
+                    <div className="w-10 h-10 rounded-full bg-brand-blue/10 flex items-center justify-center text-brand-blue font-semibold shrink-0">
+                      {(student.full_name || "?")[0].toUpperCase()}
+                    </div>
+                    <div className="min-w-0">
+                      <h3 className="font-semibold text-slate-800 dark:text-slate-100 truncate">{student.full_name || "Ism yo'q"}</h3>
+                      <p className="text-xs text-slate-500 truncate flex items-center gap-1 mt-0.5">
+                        <Phone size={12} className="text-slate-400" /> {student.phone || "Telefon yo'q"}
+                      </p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-0.5 flex-shrink-0">
+                    <button onClick={() => openPromoteModal(student.id, student.full_name)} className="p-1.5 text-slate-400 hover:text-emerald-500 hover:bg-emerald-50 dark:hover:bg-emerald-900/20 rounded-lg transition-colors active:scale-90" title="O'qituvchi qilish">
+                      <GraduationCap size={15} />
+                    </button>
+                    <button className="p-1.5 text-slate-400 hover:text-brand-blue hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-lg transition-colors active:scale-90" title="Tahrirlash">
+                      <Edit2 size={15} />
+                    </button>
+                    <button onClick={() => handleDelete(student.id)} className="p-1.5 text-slate-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors active:scale-90" title="O'chirish">
+                      <Trash2 size={15} />
+                    </button>
+                  </div>
+                </div>
+              </div>
+            ))
+          )}
+        </div>
+      )}
 
- {/* Mobile Card View */}
- <div className="block md:hidden space-y-4">
- {loading ? (
- <div className="flex items-center justify-center py-12">
- <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-brand-blue"></div>
- </div>
- ) : (() => {
- const filteredStudents = students.filter(student => {
- if (paymentFilter === 'all') return true;
- const summary = paymentSummaries.get(student.id);
- return summary?.status === paymentFilter;
- });
+      {promoteModal?.open && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
+          <div className="bg-white dark:bg-slate-900 rounded-3xl shadow-2xl w-full max-w-md overflow-hidden">
+            <div className="px-6 py-4 border-b border-gray-100 dark:border-slate-800 flex items-center justify-between">
+              <h3 className="font-semibold text-lg text-slate-800 dark:text-slate-100 flex items-center gap-2">
+                <GraduationCap size={20} className="text-emerald-500" />
+                O'qituvchi tayinlash
+              </h3>
+              <button onClick={closePromoteModal} className="p-1.5 text-slate-400 hover:text-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-colors">
+                <X size={20} />
+              </button>
+            </div>
+            
+            <div className="p-6">
+              <p className="text-sm text-slate-600 dark:text-slate-300 mb-5">
+                <span className="font-semibold text-slate-800 dark:text-slate-100">{promoteModal.studentName}</span> ni o'qituvchi qilib belgilash uchun, u qaysi fanlardan dars berishini tanlang:
+              </p>
 
- if (filteredStudents.length === 0) {
- return (
- <div className="text-center py-12 text-gray-500">
- No students found.
- </div>
- );
- }
+              <div className="space-y-2 max-h-60 overflow-y-auto pr-2">
+                {subjects.length === 0 ? (
+                  <p className="text-sm text-slate-400 text-center py-4">Fanlar topilmadi.</p>
+                ) : (
+                  subjects.map(subject => (
+                    <label key={subject.id} className="flex items-center gap-3 p-3 rounded-xl border border-gray-100 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800/50 cursor-pointer transition-colors">
+                      <input 
+                        type="checkbox" 
+                        checked={selectedSubjects.includes(subject.title)}
+                        onChange={() => toggleSubject(subject.title)}
+                        className="w-4 h-4 text-brand-blue rounded border-gray-300 focus:ring-brand-blue"
+                      />
+                      <span className="text-sm font-medium text-slate-700 dark:text-slate-200">{subject.title}</span>
+                    </label>
+                  ))
+                )}
+              </div>
+            </div>
 
- return filteredStudents.map((student) => {
- const summary = paymentSummaries.get(student.id);
- return (
- <div key={student.id} className="bg-white dark:bg-slate-900 rounded-xl border border-gray-200 dark:border-slate-800 p-4 shadow-sm">
- {/* Student Header */}
- <div className="flex items-start gap-3 mb-4">
- <div className="w-12 h-12 rounded-full bg-brand-blue/10 flex items-center justify-center text-brand-blue font-medium text-lg uppercase shrink-0">
- {(student.full_name || "U").charAt(0)}
- </div>
- <div className="flex-1 min-w-0">
- <h3 className="font-semibold text-slate-800 dark:text-slate-100 truncate">
- {student.full_name || "Unknown User"}
- </h3>
- <p className="text-xs text-gray-500 mt-0.5">
- Role: {student.role}
- </p>
- </div>
- {summary && (
- <PaymentBadge
- status={summary.status}
- totalCourses={summary.totalCourses}
- overdueAmount={summary.totalOverdue}
- />
- )}
- </div>
-
- {/* Contact Info */}
- <div className="space-y-2 mb-4 pb-4 border-b border-gray-100 dark:border-slate-800">
- <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
- <Phone size={14} className="shrink-0" />
- <span className="truncate">{student.phone || "No phone"}</span>
- </div>
- <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
- <Mail size={14} className="shrink-0" />
- <span className="text-gray-400 italic">Hidden</span>
- </div>
- <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
- <User size={14} className="shrink-0" />
- <span>Joined {new Date(student.joined_at || "").toLocaleDateString()}</span>
- </div>
- </div>
-
- {/* Actions */}
- <div className="flex gap-2">
- <Link
- href={`/admin/students/${student.id}`}
- className="flex-1 h-10 flex items-center justify-center gap-2 text-green-600 bg-green-50 dark:bg-green-900/20 rounded-lg font-medium text-sm transition-colors active:bg-green-100 dark:active:bg-green-900/30"
- >
- <FileText size={16} />
- Results
- </Link>
- <Link
- href={`/admin/students/${student.id}/edit`}
- className="flex-1 h-10 flex items-center justify-center gap-2 text-blue-600 bg-blue-50 dark:bg-blue-900/20 rounded-lg font-medium text-sm transition-colors active:bg-blue-100 dark:active:bg-blue-900/30"
- >
- <Edit size={16} />
- Edit
- </Link>
- <button
- onClick={() => handleDelete(student.id)}
- className="h-10 px-4 flex items-center justify-center text-red-600 bg-red-50 dark:bg-red-900/20 rounded-lg transition-colors active:bg-red-100 dark:active:bg-red-900/30"
- title="Delete"
- >
- <Trash2 size={16} />
- </button>
- </div>
- </div>
- );
- });
- })()}
- </div>
-
- {/* Tablet+ Table View */}
- <div className="hidden md:block bg-white dark:bg-slate-900 rounded-2xl border border-gray-200 dark:border-slate-800 shadow-sm overflow-hidden">
- <div className="overflow-x-auto">
- <table className="w-full text-left">
- <thead className="bg-gray-50 dark:bg-slate-800/50">
- <tr>
- <th className="px-6 py-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Name</th>
- <th className="px-6 py-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Contact</th>
- <th className="px-6 py-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Payment Status</th>
- <th className="px-6 py-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Joined</th>
- <th className="px-6 py-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Actions</th>
- </tr>
- </thead>
- <tbody className="divide-y divide-gray-200 dark:divide-slate-800">
- {loading ? (
- <tr>
- <td colSpan={5} className="px-6 py-8 text-center text-gray-500">
- Loading students...
- </td>
- </tr>
- ) : (() => {
- const filteredStudents = students.filter(student => {
- if (paymentFilter === 'all') return true;
- const summary = paymentSummaries.get(student.id);
- return summary?.status === paymentFilter;
- });
-
- if (filteredStudents.length === 0) {
- return (
- <tr>
- <td colSpan={5} className="px-6 py-8 text-center text-gray-500">
- No students found.
- </td>
- </tr>
- );
- }
-
- return filteredStudents.map((student) => (
- <tr key={student.id} className="active:bg-gray-50 dark:active:bg-slate-800/50 transition-colors group">
- <td className="px-6 py-4">
- <div className="flex items-center gap-3">
- <div className="w-10 h-10 rounded-full bg-brand-blue/10 flex items-center justify-center text-brand-blue font-medium uppercase">
- {(student.full_name || "U").charAt(0)}
- </div>
- <div>
- <p className="font-medium text-slate-800 dark:text-slate-100">{student.full_name || "Unknown User"}</p>
- <p className="text-xs text-gray-500">
- Role: {student.role}
- </p>
- </div>
- </div>
- </td>
- <td className="px-6 py-4">
- <div className="space-y-1">
- <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
- <Phone size={14} /> {student.phone || "No phone"}
- </div>
- <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
- <Mail size={14} /> <span className="text-gray-400 italic">Hidden</span>
- </div>
- </div>
- </td>
- <td className="px-6 py-4">
- {(() => {
- const summary = paymentSummaries.get(student.id);
- if (!summary) return <span className="text-xs text-gray-400">Loading...</span>;
- return <PaymentBadge
- status={summary.status}
- totalCourses={summary.totalCourses}
- overdueAmount={summary.totalOverdue}
- />;
- })()}
- </td>
- <td className="px-6 py-4 text-gray-600 dark:text-gray-300 text-sm">
- {new Date(student.joined_at || "").toLocaleDateString()}
- </td>
- <td className="px-6 py-4">
- <div className="flex items-center gap-2">
- <Link
- href={`/admin/students/${student.id}`}
- title="Natijalarni ko'rish"
- className="h-8 w-8 flex items-center justify-center text-gray-400 active:text-green-600 active:bg-green-50 dark:active:bg-green-900/20 rounded-lg transition-colors"
- >
- <FileText size={16} />
- </Link>
- <Link
- href={`/admin/students/${student.id}/edit`}
- title="Tahrirlash"
- className="h-8 w-8 flex items-center justify-center text-gray-400 active:text-brand-blue active:bg-blue-50 dark:active:bg-blue-900/20 rounded-lg transition-colors"
- >
- <Edit size={16} />
- </Link>
- <button
- onClick={() => handleDelete(student.id)}
- title="O'chirib yuborish"
- className="h-8 w-8 flex items-center justify-center text-gray-400 active:text-red-600 active:bg-red-50 dark:active:bg-red-900/20 rounded-lg transition-colors"
- >
- <Trash2 size={16} />
- </button>
- </div>
- </td>
- </tr>
- ));
- })()}
- </tbody>
- </table>
- </div>
- </div>
- </div>
- );
+            <div className="flex justify-end gap-3 px-6 py-4 border-t border-gray-100 dark:border-slate-800 bg-gray-50/50 dark:bg-slate-900/50">
+              <button onClick={closePromoteModal} className="px-5 py-2.5 text-sm font-medium text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl transition-colors">
+                Bekor
+              </button>
+              <button onClick={handlePromoteConfirm} disabled={isPromoting || selectedSubjects.length === 0} className="px-5 py-2.5 text-sm font-medium text-white bg-emerald-500 hover:bg-emerald-600 rounded-xl transition-colors shadow-lg shadow-emerald-500/20 disabled:opacity-50">
+                {isPromoting ? "Saqlanmoqda..." : "Saqlash va Tayinlash"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
 }
