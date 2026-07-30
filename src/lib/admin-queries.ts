@@ -616,3 +616,70 @@ export async function getStudentsNotInGroup(groupId: string, searchTerm: string 
   if (error) throw error;
   return (data || []) as Student[];
 }
+
+// --- VIDEO LESSONS ---
+
+export async function createVideoLesson(subjectId: string, title: string, description: string, videoUrl: string, orderNum: number = 1): Promise<{ success: boolean; error?: string }> {
+  const supabase = createClient();
+  
+  // 1. Create Lesson
+  const { data: lesson, error: lessonError } = await supabase.from('lessons').insert({
+    subject_id: subjectId,
+    title,
+    description,
+    order_num: orderNum
+  }).select().single();
+
+  if (lessonError) return { success: false, error: lessonError.message };
+
+  // 2. Create Material (Video)
+  const { error: materialError } = await supabase.from('materials').insert({
+    lesson_id: lesson.id,
+    title: "Asosiy Video",
+    type: 'video',
+    url: videoUrl
+  });
+
+  if (materialError) return { success: false, error: materialError.message };
+  return { success: true };
+}
+
+export async function updateVideoLesson(lessonId: string, title: string, description: string, videoUrl: string): Promise<{ success: boolean; error?: string }> {
+  const supabase = createClient();
+  
+  // 1. Update Lesson
+  const { error: lessonError } = await supabase.from('lessons').update({
+    title,
+    description
+  }).eq('id', lessonId);
+
+  if (lessonError) return { success: false, error: lessonError.message };
+
+  // 2. Update existing video material, or create one if it doesn't exist
+  const { data: existingMaterials } = await supabase.from('materials').select('id').eq('lesson_id', lessonId).eq('type', 'video');
+  
+  if (existingMaterials && existingMaterials.length > 0) {
+    const { error: materialError } = await supabase.from('materials').update({ url: videoUrl }).eq('id', existingMaterials[0].id);
+    if (materialError) return { success: false, error: materialError.message };
+  } else {
+    const { error: materialError } = await supabase.from('materials').insert({
+      lesson_id: lessonId,
+      title: "Asosiy Video",
+      type: 'video',
+      url: videoUrl
+    });
+    if (materialError) return { success: false, error: materialError.message };
+  }
+
+  return { success: true };
+}
+
+export async function deleteVideoLesson(lessonId: string): Promise<{ success: boolean; error?: string }> {
+  const supabase = createClient();
+  // Materials will be deleted by CASCADE if foreign key is set up, but let's be safe and delete materials first
+  await supabase.from('materials').delete().eq('lesson_id', lessonId);
+  const { error } = await supabase.from('lessons').delete().eq('id', lessonId);
+  if (error) return { success: false, error: error.message };
+  return { success: true };
+}
+

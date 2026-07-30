@@ -1,4 +1,6 @@
-"use client";
+import os
+
+code = """\"use client\";
 
 import { useEffect, useState, use } from "react";
 import Link from "next/link";
@@ -127,7 +129,7 @@ export default function SubjectGroupsPage({ params }: PageProps) {
     if (!selectedGroup) return;
     setAddingStudent(true);
     const res = await addStudentToGroup(selectedGroup.id, studentId);
-    if (!res.success) { toast.error(res.error || "Xatolik"); setAddingStudent(false); return; }
+    if (!res.success) { toast.error(res.error); setAddingStudent(false); return; }
     const [members, available] = await Promise.all([getGroupStudents(selectedGroup.id), getStudentsNotInGroup(selectedGroup.id, addSearch)]);
     setGroupStudents(members); setAvailableStudents(available); setAddingStudent(false); await load();
   };
@@ -168,7 +170,7 @@ export default function SubjectGroupsPage({ params }: PageProps) {
   const handleDeleteVideo = async (lesson: Lesson) => {
     if (!confirm(lesson.title + " videosini o'chirmoqchimisiz?")) return;
     const res = await deleteVideoLesson(lesson.id);
-    if (!res.success) toast.error(res.error || "Xatolik");
+    if (!res.success) toast.error(res.error);
     else { toast.success("O'chirildi"); await load(); }
   };
 
@@ -539,3 +541,9 @@ function GroupCard({ group, onEdit, onDelete, onToggleStatus, onStudents }: {
     </div>
   );
 }
+"""
+
+with open("src/app/admin/courses/[subjectId]/page.tsx", "w") as f:
+    f.write(code)
+
+print("Page replaced successfully.")
