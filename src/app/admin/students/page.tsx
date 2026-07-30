@@ -149,7 +149,7 @@ export default function AdminStudentsPage() {
                     </div>
                   </div>
                   <div className="flex items-center gap-0.5 flex-shrink-0">
-                    <button onClick={() => openPromoteModal(student.id, student.full_name)} className="p-1.5 text-slate-400 hover:text-emerald-500 hover:bg-emerald-50 dark:hover:bg-emerald-900/20 rounded-lg transition-colors active:scale-90" title="O'qituvchi qilish">
+                    <button onClick={() => openPromoteModal(student.id, student.full_name || "Ism yo'q")} className="p-1.5 text-slate-400 hover:text-emerald-500 hover:bg-emerald-50 dark:hover:bg-emerald-900/20 rounded-lg transition-colors active:scale-90" title="O'qituvchi qilish">
                       <GraduationCap size={15} />
                     </button>
                     <button className="p-1.5 text-slate-400 hover:text-brand-blue hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-lg transition-colors active:scale-90" title="Tahrirlash">

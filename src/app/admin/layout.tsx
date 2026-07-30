@@ -23,6 +23,7 @@ import {
 } from "lucide-react";
 import Image from "next/image";
 import { createClient } from "@/utils/supabase/client";
+import RealtimeSyncEnabler from "@/components/RealtimeSyncEnabler";
 
 export default function AdminLayout({
  children,
@@ -255,6 +256,7 @@ export default function AdminLayout({
  {/* Page Content */}
  <main className="flex-1 p-4 lg:p-8 overflow-y-auto">
  <div className="max-w-7xl mx-auto">
+ <RealtimeSyncEnabler />
  {children}
  </div>
  </main>

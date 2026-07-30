@@ -1,4 +1,6 @@
-import { useQuery, useQueryClient } from '@tanstack/react-query';
+import os
+
+code = """import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useEffect } from 'react';
 import { createClient } from '@/utils/supabase/client';
 import { getAdminStats, getRecentActivity, getTeachers, getStudents, getAllResults, Student, getGroups, getGroupStudents, getStudentsNotInGroup } from '@/lib/admin-queries';
@@ -156,3 +158,8 @@ export const useSupabaseRealtimeSync = () => {
     };
   }, [queryClient]);
 };
+"""
+
+with open("src/hooks/useAdminData.ts", "w") as f:
+    f.write(code)
+print("useAdminData.ts replaced.")

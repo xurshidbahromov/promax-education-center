@@ -1,4 +1,6 @@
-"use client";
+import os
+
+code = """"use client";
 
 import { useState, useEffect } from "react";
 import { createClient } from "@/utils/supabase/client";
@@ -322,3 +324,8 @@ export default function AdminCoursesPage() {
    </div>
  );
 }
+"""
+
+with open("src/app/admin/courses/page.tsx", "w") as f:
+    f.write(code)
+print("Admin courses page refactored!")

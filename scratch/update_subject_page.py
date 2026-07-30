@@ -1,4 +1,6 @@
-"use client";
+import os
+
+code = """"use client";
 
 import { useState, use } from "react";
 import Link from "next/link";
@@ -516,3 +518,8 @@ function GroupCard({ group, onEdit, onDelete, onToggleStatus, onStudents }: {
     </div>
   );
 }
+"""
+
+with open("src/app/admin/courses/[subjectId]/page.tsx", "w") as f:
+    f.write(code)
+print("Subject details page refactored!")
