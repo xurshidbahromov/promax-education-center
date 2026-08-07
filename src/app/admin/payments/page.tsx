@@ -3,7 +3,7 @@
 import { useState, useMemo } from "react";
 import {
   Banknote, Calendar, Filter, Search, User, CreditCard,
-  MoreVertical, CheckCircle2, XCircle, AlertCircle, ChevronDown, Plus, Wallet, X
+  CheckCircle2, XCircle, AlertCircle, Plus, Wallet, X
 } from "lucide-react";
 import { useSubjects, useGroups } from "@/hooks/useAdminData";
 import { useExpectedPayments, processPayment, deletePayment, ExpectedPayment } from "@/hooks/usePayments";
@@ -43,7 +43,7 @@ export default function AdminPaymentsPage() {
 
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // Computed totals for the summary cards
+  // Computed totals for summary cards
   const summary = useMemo(() => {
     let expected = 0;
     let collected = 0;
@@ -127,66 +127,63 @@ export default function AdminPaymentsPage() {
   return (
     <div className="w-full max-w-[1400px] mx-auto space-y-6">
       {/* Header & Title */}
-      <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
+      <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 pb-2 border-b border-slate-200/50 dark:border-slate-800/50">
         <div>
-          <h1 className="text-3xl sm:text-4xl font-black text-slate-800 dark:text-slate-100 font-sans-pro tracking-tight">
+          <h1 className="text-3xl font-black text-slate-800 dark:text-slate-100 tracking-tight font-sans-pro">
             Moliya va To'lovlar
           </h1>
-          <p className="text-slate-500 dark:text-slate-400 mt-2 font-medium">
-            O'quvchilarning oylik to'lovlarini kuzating va boshqaring.
+          <p className="text-xs sm:text-sm font-medium text-slate-400 dark:text-slate-500 mt-1">
+            O'quvchilarning oylik to'lovlarini kuzating va boshqaring ({payments.length} ta yozuv)
           </p>
         </div>
       </div>
 
       {/* Summary Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
         {[
-          { label: "Kutilayotgan summa", value: formatMoney(summary.expected), icon: Wallet, color: "text-blue-500", bg: "bg-blue-50 dark:bg-blue-900/20" },
-          { label: "Yig'ilgan summa", value: formatMoney(summary.collected), icon: Banknote, color: "text-emerald-500", bg: "bg-emerald-50 dark:bg-emerald-900/20" },
-          { label: "To'lov qilganlar", value: `${summary.paidCount} ta o'quvchi`, icon: CheckCircle2, color: "text-emerald-500", bg: "bg-emerald-50 dark:bg-emerald-900/20" },
-          { label: "Qarzdorlar", value: `${summary.pendingCount} ta o'quvchi`, icon: AlertCircle, color: "text-red-500", bg: "bg-red-50 dark:bg-red-900/20" }
+          { label: "Kutilayotgan summa", value: formatMoney(summary.expected), icon: Wallet, color: "text-blue-500" },
+          { label: "Yig'ilgan summa", value: formatMoney(summary.collected), icon: Banknote, color: "text-emerald-500" },
+          { label: "To'lov qilganlar", value: `${summary.paidCount} ta o'quvchi`, icon: CheckCircle2, color: "text-emerald-500" },
+          { label: "Qarzdorlar", value: `${summary.pendingCount} ta o'quvchi`, icon: AlertCircle, color: "text-red-500" }
         ].map((s, i) => (
-          <div key={i} className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl border border-gray-200/50 dark:border-slate-800/50 p-4 sm:p-5 rounded-2xl sm:rounded-3xl shadow-sm flex items-center gap-3.5 min-w-0">
-            <div className={`w-12 h-12 rounded-2xl flex items-center justify-center shrink-0 ${s.bg}`}>
-              <s.icon size={24} className={s.color} />
+          <div key={i} className="bg-white/70 dark:bg-slate-900/70 backdrop-blur-xl border border-slate-200/60 dark:border-slate-800/60 p-5 sm:p-6 rounded-3xl flex items-center justify-between min-w-0">
+            <div className="min-w-0 flex-1 pr-2">
+              <p className="text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider truncate mb-1">{s.label}</p>
+              <p className="text-2xl font-black text-slate-800 dark:text-slate-100 tracking-tight truncate">{s.value}</p>
             </div>
-            <div className="min-w-0 flex-1">
-              <p className="text-[11px] font-bold text-slate-400 dark:text-slate-400 uppercase tracking-wider truncate leading-none mb-1.5">{s.label}</p>
-              <p className="text-lg sm:text-xl font-black text-slate-800 dark:text-slate-100 tracking-tight leading-tight truncate">{s.value}</p>
-            </div>
+            
+            {/* Box-free Icon */}
+            <s.icon size={26} className={`${s.color} shrink-0 opacity-90`} />
           </div>
         ))}
       </div>
 
-      {/* Filters Area */}
-      <div className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl border border-gray-200/50 dark:border-slate-800/50 p-5 rounded-[2rem] shadow-sm flex flex-col xl:flex-row gap-4 items-center">
-        <div className="flex-1 w-full relative">
-          <div className="w-12 h-12 absolute left-1 top-1 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-400">
-            <Search size={20} />
-          </div>
+      {/* Filters Area (Harmonized with all other admin pages) */}
+      <div className="bg-white/70 dark:bg-slate-900/70 backdrop-blur-xl border border-slate-200/60 dark:border-slate-800/60 p-2.5 rounded-2xl flex flex-col xl:flex-row items-center gap-3">
+        <div className="flex-1 relative w-full">
+          <Search size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
           <input
             type="text"
-            placeholder="O'quvchi ISH yoki tel raqami bilan qidirish..."
-            className="w-full h-14 pl-16 pr-4 bg-transparent border border-gray-200/50 dark:border-slate-700/50 rounded-full focus:ring-2 focus:ring-brand-blue/20 outline-none text-slate-700 dark:text-slate-200"
+            placeholder="O'quvchi ismi yoki tel raqami bo'yicha qidirish..."
+            className="w-full pl-11 pr-4 py-2 bg-transparent border-none text-xs sm:text-sm font-medium text-slate-800 dark:text-slate-100 placeholder:text-slate-400 outline-none"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
           />
         </div>
 
-        <div className="flex w-full xl:w-auto overflow-x-auto no-scrollbar gap-3 pb-2 xl:pb-0">
+        <div className="flex flex-wrap sm:flex-nowrap w-full xl:w-auto items-center gap-2">
           {/* Month Filter */}
-          <div className="min-w-[160px] relative">
+          <div className="relative min-w-[140px]">
             <input
               type="month"
-              className="w-full appearance-none h-14 pl-12 pr-4 bg-gray-50/50 dark:bg-slate-800/50 border border-gray-200/50 dark:border-slate-700/50 rounded-full outline-none focus:ring-2 focus:ring-brand-blue/20 text-slate-700 dark:text-slate-200 font-medium"
+              className="w-full px-4 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-bold text-slate-700 dark:text-slate-200 outline-none"
               value={currentMonth}
               onChange={(e) => setCurrentMonth(e.target.value)}
             />
-            <Calendar size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
           </div>
 
           <select
-            className="min-w-[150px] appearance-none h-14 px-5 bg-gray-50/50 dark:bg-slate-800/50 border border-gray-200/50 dark:border-slate-700/50 rounded-full outline-none focus:ring-2 focus:ring-brand-blue/20 text-slate-700 dark:text-slate-200 font-medium cursor-pointer"
+            className="px-4 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-bold text-slate-700 dark:text-slate-200 outline-none"
             value={filterSubject}
             onChange={(e) => setFilterSubject(e.target.value)}
           >
@@ -197,7 +194,7 @@ export default function AdminPaymentsPage() {
           </select>
 
           <select
-            className="min-w-[150px] appearance-none h-14 px-5 bg-gray-50/50 dark:bg-slate-800/50 border border-gray-200/50 dark:border-slate-700/50 rounded-full outline-none focus:ring-2 focus:ring-brand-blue/20 text-slate-700 dark:text-slate-200 font-medium cursor-pointer"
+            className="px-4 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-bold text-slate-700 dark:text-slate-200 outline-none"
             value={filterGroup}
             onChange={(e) => setFilterGroup(e.target.value)}
           >
@@ -208,7 +205,7 @@ export default function AdminPaymentsPage() {
           </select>
 
           <select
-            className="min-w-[150px] appearance-none h-14 px-5 bg-gray-50/50 dark:bg-slate-800/50 border border-gray-200/50 dark:border-slate-700/50 rounded-full outline-none focus:ring-2 focus:ring-brand-blue/20 text-slate-700 dark:text-slate-200 font-medium cursor-pointer"
+            className="px-4 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-bold text-slate-700 dark:text-slate-200 outline-none"
             value={filterStatus}
             onChange={(e) => setFilterStatus(e.target.value)}
           >
@@ -221,34 +218,31 @@ export default function AdminPaymentsPage() {
       </div>
 
       {/* Main List */}
-      <div className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl border border-gray-200/50 dark:border-slate-800/50 rounded-[2rem] shadow-sm overflow-hidden min-h-[400px]">
+      <div className="bg-white/70 dark:bg-slate-900/70 backdrop-blur-xl border border-slate-200/60 dark:border-slate-800/60 rounded-3xl overflow-hidden min-h-[400px]">
         {isLoading ? (
-          <div className="p-8 flex flex-col gap-4 animate-pulse">
+          <div className="p-8 space-y-4 animate-pulse">
             {[1,2,3,4,5].map(i => (
-              <div key={i} className="h-20 bg-slate-100 dark:bg-slate-800 rounded-2xl w-full" />
+              <div key={i} className="h-14 bg-slate-100 dark:bg-slate-800/60 rounded-2xl" />
             ))}
           </div>
         ) : filteredPayments.length === 0 ? (
-          <div className="flex flex-col items-center justify-center p-24 text-center">
-            <div className="w-20 h-20 bg-slate-100 dark:bg-slate-800 rounded-full flex items-center justify-center mb-6">
-              <Filter size={32} className="text-slate-400" />
-            </div>
-            <h3 className="text-xl font-bold text-slate-800 dark:text-slate-200 mb-2">Ma'lumot topilmadi</h3>
-            <p className="text-slate-500 dark:text-slate-400">Bu filtrlarga mos keluvchi to'lovlar yo'q.</p>
+          <div className="py-20 text-center text-slate-400">
+            <Filter size={32} className="mx-auto mb-2 opacity-40" />
+            <p className="text-sm font-semibold">Mos keluvchi to'lovlar topilmadi</p>
           </div>
         ) : (
           <div className="w-full overflow-x-auto">
             <table className="w-full text-left whitespace-nowrap border-collapse">
               <thead>
-                <tr className="border-b border-gray-200/50 dark:border-slate-800/50 bg-slate-50/50 dark:bg-slate-800/20">
-                  <th className="px-6 py-5 text-xs font-bold text-slate-500 uppercase tracking-wider">O'quvchi</th>
-                  <th className="px-6 py-5 text-xs font-bold text-slate-500 uppercase tracking-wider">Guruh & Fan</th>
-                  <th className="px-6 py-5 text-xs font-bold text-slate-500 uppercase tracking-wider">To'lov holati</th>
-                  <th className="px-6 py-5 text-xs font-bold text-slate-500 uppercase tracking-wider">Guruh summasi</th>
-                  <th className="px-6 py-5 text-xs font-bold text-slate-500 uppercase tracking-wider text-right">Amallar</th>
+                <tr className="border-b border-slate-200/50 dark:border-slate-800/50 bg-slate-50/50 dark:bg-slate-800/20">
+                  <th className="px-6 py-4 text-xs font-bold text-slate-400 uppercase tracking-wider">O'quvchi</th>
+                  <th className="px-6 py-4 text-xs font-bold text-slate-400 uppercase tracking-wider">Guruh & Fan</th>
+                  <th className="px-6 py-4 text-xs font-bold text-slate-400 uppercase tracking-wider">To'lov holati</th>
+                  <th className="px-6 py-4 text-xs font-bold text-slate-400 uppercase tracking-wider">Guruh summasi</th>
+                  <th className="px-6 py-4 text-xs font-bold text-slate-400 uppercase tracking-wider text-right">Amallar</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-gray-100 dark:divide-slate-800">
+              <tbody className="divide-y divide-slate-100 dark:divide-slate-800/50">
                 {filteredPayments.map((item) => {
                   const isPaid = item.payment?.status === 'completed';
                   const isPartial = item.payment?.status === 'partial';
@@ -257,44 +251,44 @@ export default function AdminPaymentsPage() {
                     <tr key={`${item.studentId}-${item.groupId}`} className="hover:bg-slate-50/50 dark:hover:bg-slate-800/30 transition-colors">
                       <td className="px-6 py-4">
                         <div className="flex items-center gap-3">
-                          <div className="w-10 h-10 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center">
-                            <User size={18} className="text-slate-400" />
+                          <div className="w-9 h-9 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center font-bold text-xs text-slate-700 dark:text-slate-200">
+                            {item.studentName ? item.studentName.charAt(0).toUpperCase() : 'U'}
                           </div>
                           <div>
-                            <p className="font-bold text-slate-800 dark:text-slate-100">{item.studentName || 'Ismsiz'}</p>
-                            <p className="text-xs text-slate-500 font-medium mt-0.5">{item.studentPhone || 'Raqam yo\'q'}</p>
+                            <p className="font-bold text-xs sm:text-sm text-slate-800 dark:text-slate-100">{item.studentName || 'Ismsiz'}</p>
+                            <p className="text-xs text-slate-400 font-medium mt-0.5">{item.studentPhone || 'Raqam yo\'q'}</p>
                           </div>
                         </div>
                       </td>
                       <td className="px-6 py-4">
-                        <p className="font-bold text-slate-800 dark:text-slate-100">{item.groupName}</p>
-                        <p className="text-xs text-slate-500 font-medium mt-0.5">{item.subjectTitle}</p>
+                        <p className="font-bold text-xs sm:text-sm text-slate-800 dark:text-slate-100">{item.groupName}</p>
+                        <p className="text-xs text-slate-400 font-medium mt-0.5">{item.subjectTitle}</p>
                       </td>
                       <td className="px-6 py-4">
                         {isPaid ? (
-                          <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-50 dark:bg-emerald-900/20 text-emerald-600 border border-emerald-100 dark:border-emerald-800/30">
-                            <CheckCircle2 size={14} />
-                            <span className="text-xs font-bold uppercase tracking-wider">To'lagan</span>
+                          <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-emerald-50 dark:bg-emerald-950/30 text-emerald-600 dark:text-emerald-400 text-xs font-bold">
+                            <CheckCircle2 size={13} />
+                            <span>To'lagan</span>
                           </div>
                         ) : isPartial ? (
-                          <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-amber-50 dark:bg-amber-900/20 text-amber-600 border border-amber-100 dark:border-amber-800/30">
-                            <AlertCircle size={14} />
-                            <span className="text-xs font-bold uppercase tracking-wider">Qisman to'lagan</span>
+                          <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-amber-50 dark:bg-amber-950/30 text-amber-600 dark:text-amber-400 text-xs font-bold">
+                            <AlertCircle size={13} />
+                            <span>Qisman to'lagan</span>
                           </div>
                         ) : (
-                          <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-red-50 dark:bg-red-900/20 text-red-500 border border-red-100 dark:border-red-800/30">
-                            <XCircle size={14} />
-                            <span className="text-xs font-bold uppercase tracking-wider">To'lamagan</span>
+                          <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-red-50 dark:bg-red-950/30 text-red-500 text-xs font-bold">
+                            <XCircle size={13} />
+                            <span>To'lamagan</span>
                           </div>
                         )}
                         {item.payment && (
-                          <div className="text-[11px] text-slate-400 font-medium mt-1.5">
+                          <div className="text-xs text-slate-400 font-medium mt-1">
                             {formatMoney(item.payment.amount)} to'landi • {item.payment.payment_method}
                           </div>
                         )}
                       </td>
                       <td className="px-6 py-4">
-                        <p className="font-bold text-slate-800 dark:text-slate-100">
+                        <p className="font-bold text-xs sm:text-sm text-slate-800 dark:text-slate-100">
                           {formatMoney(item.groupPrice)}
                         </p>
                       </td>
@@ -302,14 +296,14 @@ export default function AdminPaymentsPage() {
                         <div className="flex items-center justify-end gap-2">
                           <button
                             onClick={() => openPaymentModal(item)}
-                            className="px-4 py-2 bg-brand-blue/10 text-brand-blue hover:bg-brand-blue hover:text-white rounded-xl text-sm font-bold transition-all active:scale-95"
+                            className="px-3.5 py-1.5 bg-brand-blue hover:bg-blue-600 text-white rounded-xl text-xs font-bold transition-all"
                           >
                             {item.payment ? "Tahrirlash" : "To'lov qabul qilish"}
                           </button>
                           {item.payment && (
                             <button
                               onClick={() => handleClearPayment(item)}
-                              className="w-9 h-9 flex items-center justify-center bg-red-50 dark:bg-red-900/20 text-red-500 hover:bg-red-500 hover:text-white rounded-xl transition-all active:scale-95"
+                              className="p-1.5 text-slate-400 hover:text-red-500 transition-colors"
                               title="To'lovni bekor qilish"
                             >
                               <X size={16} />
@@ -328,82 +322,81 @@ export default function AdminPaymentsPage() {
 
       {/* Payment Modal */}
       {paymentModal.isOpen && paymentModal.data && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-          <div className="absolute inset-0 bg-slate-900/50 backdrop-blur-sm" onClick={closePaymentModal} />
-          
-          <div className="relative bg-white dark:bg-slate-900 w-full max-w-md rounded-[2.5rem] shadow-2xl overflow-hidden animate-in zoom-in-95 duration-200">
-            <div className="p-8">
-              <div className="flex justify-between items-center mb-6">
-                <h3 className="text-2xl font-black text-slate-800 dark:text-slate-100 font-sans-pro tracking-tight">
-                  To'lov qabul qilish
-                </h3>
-                <button onClick={closePaymentModal} className="w-10 h-10 bg-slate-100 dark:bg-slate-800 rounded-full flex items-center justify-center text-slate-500 hover:text-slate-800 dark:hover:text-white transition-colors">
-                  <X size={20} />
-                </button>
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-sm">
+          <div className="bg-white dark:bg-slate-900 rounded-3xl shadow-xl w-full max-w-md overflow-hidden border border-slate-200/80 dark:border-slate-800 p-6 space-y-4">
+            <div className="flex justify-between items-center border-b border-slate-100 dark:border-slate-800 pb-3">
+              <h3 className="font-bold text-base text-slate-800 dark:text-slate-100">
+                To'lov qabul qilish
+              </h3>
+              <button onClick={closePaymentModal} className="text-slate-400 hover:text-slate-700 dark:hover:text-slate-200">
+                <X size={18} />
+              </button>
+            </div>
+
+            <div className="bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-800 rounded-2xl p-4 space-y-1">
+              <p className="text-xs font-bold text-brand-blue uppercase tracking-wider">{paymentModal.data.studentName}</p>
+              <p className="text-slate-600 dark:text-slate-400 font-medium text-xs">
+                {paymentModal.data.groupName} • {currentMonth} oyi uchun
+              </p>
+              <div className="mt-2 pt-2 border-t border-slate-200/50 dark:border-slate-700/50 flex justify-between items-center text-xs">
+                <span className="text-slate-500 font-medium">Kutilayotgan summa:</span>
+                <span className="text-brand-blue font-bold">{formatMoney(paymentModal.data.groupPrice)}</span>
               </div>
+            </div>
 
-              <div className="bg-brand-blue/5 border border-brand-blue/10 rounded-2xl p-4 mb-6">
-                <p className="text-sm font-bold text-brand-blue mb-1 uppercase tracking-wider">{paymentModal.data.studentName}</p>
-                <p className="text-slate-600 dark:text-slate-400 font-medium text-sm">
-                  {paymentModal.data.groupName} • {currentMonth} oyi uchun
-                </p>
-                <div className="mt-3 pt-3 border-t border-brand-blue/10 flex justify-between items-center">
-                  <span className="text-slate-500 text-sm font-medium">Kutilayotgan summa:</span>
-                  <span className="text-brand-blue font-black">{formatMoney(paymentModal.data.groupPrice)}</span>
-                </div>
-              </div>
-
-              <div className="space-y-5">
-                <div>
-                  <label className="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2 uppercase tracking-wider">To'langan summa</label>
-                  <div className="relative">
-                    <input
-                      type="number"
-                      min="0"
-                      className="w-full h-14 pl-5 pr-14 bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-2xl focus:ring-2 focus:ring-brand-blue/30 focus:border-transparent outline-none transition-all text-xl font-bold text-slate-800 dark:text-slate-100 font-fredoka"
-                      value={paymentForm.amount || ''}
-                      onChange={e => setPaymentForm({ ...paymentForm, amount: parseInt(e.target.value) || 0 })}
-                    />
-                    <div className="absolute right-5 top-1/2 -translate-y-1/2 text-slate-400 font-bold">
-                      UZS
-                    </div>
-                  </div>
-                </div>
-
-                <div>
-                  <label className="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2 uppercase tracking-wider">To'lov usuli</label>
-                  <div className="grid grid-cols-3 gap-3">
-                    {[
-                      { id: 'cash', label: 'Naqd pul', icon: Banknote },
-                      { id: 'card', label: 'Karta', icon: CreditCard },
-                      { id: 'transfer', label: 'Otkazma', icon: Wallet }
-                    ].map(method => (
-                      <button
-                        key={method.id}
-                        onClick={() => setPaymentForm({ ...paymentForm, method: method.id as 'cash'|'card'|'transfer' })}
-                        className={`flex flex-col items-center justify-center gap-2 p-3 rounded-2xl border-2 transition-all ${
-                          paymentForm.method === method.id
-                            ? 'border-brand-blue bg-brand-blue/5 text-brand-blue'
-                            : 'border-gray-100 dark:border-slate-800 bg-white dark:bg-slate-900 text-slate-500 hover:border-gray-200'
-                        }`}
-                      >
-                        <method.icon size={20} className={paymentForm.method === method.id ? 'text-brand-blue' : 'text-slate-400'} />
-                        <span className="text-xs font-bold">{method.label}</span>
-                      </button>
-                    ))}
+            <div className="space-y-4">
+              <div>
+                <label className="block text-xs font-bold text-slate-600 dark:text-slate-300 mb-1 uppercase tracking-wider">To'langan summa</label>
+                <div className="relative">
+                  <input
+                    type="number"
+                    min="0"
+                    className="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm font-bold text-slate-800 dark:text-slate-100 outline-none"
+                    value={paymentForm.amount || ''}
+                    onChange={e => setPaymentForm({ ...paymentForm, amount: parseInt(e.target.value) || 0 })}
+                  />
+                  <div className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 text-xs font-bold">
+                    UZS
                   </div>
                 </div>
               </div>
 
-              <div className="mt-8">
-                <button
-                  onClick={handleSavePayment}
-                  disabled={isSubmitting || paymentForm.amount <= 0}
-                  className="w-full h-14 bg-brand-blue hover:bg-blue-600 active:scale-[0.98] text-white rounded-2xl font-bold transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-brand-blue/20 flex items-center justify-center gap-2"
-                >
-                  {isSubmitting ? "Saqlanmoqda..." : "Tasdiqlash va Saqlash"}
-                </button>
+              <div>
+                <label className="block text-xs font-bold text-slate-600 dark:text-slate-300 mb-1.5 uppercase tracking-wider">To'lov usuli</label>
+                <div className="grid grid-cols-3 gap-2.5">
+                  {[
+                    { id: 'cash', label: 'Naqd pul', icon: Banknote },
+                    { id: 'card', label: 'Karta', icon: CreditCard },
+                    { id: 'transfer', label: "O'tkazma", icon: Wallet }
+                  ].map(method => (
+                    <button
+                      key={method.id}
+                      onClick={() => setPaymentForm({ ...paymentForm, method: method.id as 'cash'|'card'|'transfer' })}
+                      className={`flex flex-col items-center justify-center gap-1.5 p-3 rounded-2xl border transition-all ${
+                        paymentForm.method === method.id
+                          ? 'border-brand-blue bg-brand-blue/10 text-brand-blue font-bold'
+                          : 'border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-800/40 text-slate-500 hover:bg-slate-100'
+                      }`}
+                    >
+                      <method.icon size={18} className={paymentForm.method === method.id ? 'text-brand-blue' : 'text-slate-400'} />
+                      <span className="text-xs font-bold">{method.label}</span>
+                    </button>
+                  ))}
+                </div>
               </div>
+            </div>
+
+            <div className="flex items-center justify-end gap-3 pt-3 border-t border-slate-100 dark:border-slate-800">
+              <button onClick={closePaymentModal} className="px-4 py-2 text-xs font-bold text-slate-500">
+                Bekor qilish
+              </button>
+              <button
+                onClick={handleSavePayment}
+                disabled={isSubmitting || paymentForm.amount <= 0}
+                className="px-4 py-2.5 text-xs font-bold text-white bg-brand-blue hover:bg-blue-600 rounded-xl disabled:opacity-50"
+              >
+                {isSubmitting ? "Saqlanmoqda..." : "Tasdiqlash va Saqlash"}
+              </button>
             </div>
           </div>
         </div>

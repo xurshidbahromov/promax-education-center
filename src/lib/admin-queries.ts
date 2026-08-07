@@ -701,10 +701,69 @@ export async function updateVideoLesson(lessonId: string, title: string, descrip
 
 export async function deleteVideoLesson(lessonId: string): Promise<{ success: boolean; error?: string }> {
   const supabase = createClient();
-  // Materials will be deleted by CASCADE if foreign key is set up, but let's be safe and delete materials first
   await supabase.from('materials').delete().eq('lesson_id', lessonId);
   const { error } = await supabase.from('lessons').delete().eq('id', lessonId);
   if (error) return { success: false, error: error.message };
   return { success: true };
 }
+
+// Subject CRUD & Aliases
+export async function createSubject(title: string, description?: string): Promise<{ success: boolean; error?: string }> {
+  const supabase = createClient();
+  const { error } = await supabase.from('subjects').insert({ title, description: description || null });
+  if (error) return { success: false, error: error.message };
+  return { success: true };
+}
+
+export async function updateSubject(id: string, title: string, description?: string): Promise<{ success: boolean; error?: string }> {
+  const supabase = createClient();
+  const { error } = await supabase.from('subjects').update({ title, description: description || null }).eq('id', id);
+  if (error) return { success: false, error: error.message };
+  return { success: true };
+}
+
+export async function deleteSubject(id: string): Promise<{ success: boolean; error?: string }> {
+  const supabase = createClient();
+  const { error } = await supabase.from('subjects').delete().eq('id', id);
+  if (error) return { success: false, error: error.message };
+  return { success: true };
+}
+
+export async function getSubjectById(id: string) {
+  const supabase = createClient();
+  const { data } = await supabase.from('subjects').select('*').eq('id', id).single();
+  return data;
+}
+
+export async function getSubjectGroups(subjectId: string): Promise<Group[]> {
+  return getGroups(subjectId);
+}
+
+export interface VideoLesson {
+  id: string;
+  subject_id: string;
+  title: string;
+  description: string | null;
+  video_url: string;
+  duration?: string;
+  created_at: string;
+}
+
+export async function getSubjectLessons(subjectId: string): Promise<VideoLesson[]> {
+  const supabase = createClient();
+  const { data } = await supabase.from('lessons').select('*').eq('subject_id', subjectId);
+  return (data || []).map((l: any) => ({
+    id: l.id,
+    subject_id: l.subject_id,
+    title: l.title,
+    description: l.description || null,
+    video_url: l.video_url || '',
+    duration: '15 min',
+    created_at: l.created_at
+  }));
+}
+
+export const assignStudentToGroup = addStudentToGroup;
+export const demoteToStudent = demoteTeacher;
+
 

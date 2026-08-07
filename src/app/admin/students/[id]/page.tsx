@@ -81,7 +81,7 @@ export default function StudentDetailPage({ params }: PageProps) {
 
         if (profile) setStudent(profile);
 
-        // 2. Fetch Enrolled Groups via group_students
+        // 2. Fetch Enrolled Groups
         const { data: groupStudentsData } = await supabase
           .from('group_students')
           .select(`
@@ -165,10 +165,6 @@ export default function StudentDetailPage({ params }: PageProps) {
       <div className="w-full max-w-[1200px] mx-auto p-6 space-y-6 animate-pulse">
         <div className="h-10 bg-slate-100 dark:bg-slate-800 rounded-2xl w-48" />
         <div className="h-40 bg-slate-100 dark:bg-slate-800 rounded-3xl w-full" />
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div className="h-64 bg-slate-100 dark:bg-slate-800 rounded-3xl" />
-          <div className="h-64 bg-slate-100 dark:bg-slate-800 rounded-3xl" />
-        </div>
       </div>
     );
   }
@@ -180,7 +176,7 @@ export default function StudentDetailPage({ params }: PageProps) {
         <p className="text-base font-semibold">O'quvchi ma'lumotlari topilmadi</p>
         <button
           onClick={() => router.push('/admin/students')}
-          className="mt-4 px-4 py-2 text-xs font-bold text-brand-blue hover:underline"
+          className="mt-3 px-4 py-2.5 text-xs sm:text-sm font-bold text-brand-blue hover:underline"
         >
           O'quvchilar ro'yxatiga qaytish
         </button>
@@ -205,33 +201,33 @@ export default function StudentDetailPage({ params }: PageProps) {
           <ArrowLeft size={20} />
         </button>
         <div>
-          <h1 className="text-2xl font-black text-slate-800 dark:text-slate-100 tracking-tight font-sans-pro">
+          <h1 className="text-2xl sm:text-3xl font-black text-slate-800 dark:text-slate-100 tracking-tight font-sans-pro">
             {student.full_name || "Ismsiz O'quvchi"}
           </h1>
-          <p className="text-xs text-slate-400 font-medium">O'quvchi statusi va ma'lumotlari</p>
+          <p className="text-xs sm:text-sm font-medium text-slate-400 dark:text-slate-500 mt-0.5">O'quvchi statusi va ma'lumotlari</p>
         </div>
       </div>
 
-      {/* Profile Overview (Box-free Minimalist Glassy Card) */}
-      <div className="bg-white/70 dark:bg-slate-900/70 backdrop-blur-xl border border-slate-200/60 dark:border-slate-800/60 p-6 rounded-3xl flex flex-col md:flex-row md:items-center justify-between gap-6">
+      {/* Profile Overview Card */}
+      <div className="bg-white/70 dark:bg-slate-900/70 backdrop-blur-xl border border-slate-200/60 dark:border-slate-800/60 p-5 sm:p-6 rounded-3xl flex flex-col md:flex-row md:items-center justify-between gap-5">
         <div className="flex items-center gap-4">
-          <div className="w-16 h-16 rounded-2xl bg-slate-100 dark:bg-slate-800 flex items-center justify-center font-black text-2xl text-slate-700 dark:text-slate-200 shrink-0">
+          <div className="w-14 h-14 rounded-2xl bg-slate-100 dark:bg-slate-800 flex items-center justify-center font-black text-xl text-slate-700 dark:text-slate-200 shrink-0">
             {initial}
           </div>
           <div>
             <div className="flex items-center gap-2">
               <h2 className="text-xl font-extrabold text-slate-800 dark:text-slate-100">{student.full_name || "Ismsiz"}</h2>
-              <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-blue-50 dark:bg-blue-900/30 text-blue-600">
+              <span className="px-2.5 py-0.5 rounded-full text-xs font-bold uppercase tracking-wider bg-blue-50 dark:bg-blue-900/30 text-blue-600">
                 O'quvchi
               </span>
             </div>
-            <div className="flex flex-wrap items-center gap-4 text-xs font-medium text-slate-400 mt-1.5">
+            <div className="flex flex-wrap items-center gap-3 text-xs sm:text-sm font-medium text-slate-500 mt-1">
               <span className="flex items-center gap-1.5">
-                <Phone size={13} className="text-slate-400" />
+                <Phone size={14} className="text-slate-400" />
                 {student.phone || "Telefon ko'rsatilmadi"}
               </span>
               <span className="flex items-center gap-1.5">
-                <Calendar size={13} className="text-slate-400" />
+                <Calendar size={14} className="text-slate-400" />
                 Ro'yxatdan o'tgan: {formattedJoinedDate}
               </span>
             </div>
@@ -241,7 +237,7 @@ export default function StudentDetailPage({ params }: PageProps) {
         <div className="flex items-center gap-3">
           <Link
             href="/admin/payments"
-            className="px-4 py-2.5 bg-slate-100 dark:bg-slate-800 hover:bg-brand-blue hover:text-white text-slate-700 dark:text-slate-200 rounded-xl text-xs font-bold transition-all"
+            className="px-4 py-2.5 bg-slate-100 dark:bg-slate-800 hover:bg-brand-blue hover:text-white text-slate-800 dark:text-slate-200 rounded-xl text-xs sm:text-sm font-bold transition-all"
           >
             To'lov sahifasiga o'tish
           </Link>
@@ -251,7 +247,7 @@ export default function StudentDetailPage({ params }: PageProps) {
       {/* Grid: Groups & Payments Status */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {/* Enrolled Groups Status */}
-        <div className="bg-white/70 dark:bg-slate-900/70 backdrop-blur-xl border border-slate-200/60 dark:border-slate-800/60 p-6 rounded-3xl space-y-4">
+        <div className="bg-white/70 dark:bg-slate-900/70 backdrop-blur-xl border border-slate-200/60 dark:border-slate-800/60 p-5 sm:p-6 rounded-3xl space-y-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
               <Layers size={18} className="text-slate-400" />
@@ -261,20 +257,20 @@ export default function StudentDetailPage({ params }: PageProps) {
           </div>
 
           {groups.length === 0 ? (
-            <div className="py-10 text-center text-slate-400">
+            <div className="py-8 text-center text-slate-400">
               <p className="text-xs font-medium">Hozircha birorta guruhga biriktirilmagan</p>
             </div>
           ) : (
             <div className="space-y-3">
               {groups.map(g => (
-                <div key={g.id} className="p-4 rounded-2xl bg-slate-50/50 dark:bg-slate-800/30 border border-slate-100 dark:border-slate-800/40 space-y-2">
+                <div key={g.id} className="p-4 rounded-2xl bg-slate-50/50 dark:bg-slate-800/30 border border-slate-100 dark:border-slate-800/40 space-y-1.5">
                   <div className="flex items-center justify-between">
-                    <span className="font-bold text-sm text-slate-800 dark:text-slate-100">{g.name}</span>
+                    <span className="font-extrabold text-sm text-slate-800 dark:text-slate-100">{g.name}</span>
                     <span className="text-xs font-semibold text-slate-500">{g.subject_title}</span>
                   </div>
-                  <div className="flex items-center justify-between text-xs text-slate-400 font-medium">
+                  <div className="flex items-center justify-between text-xs text-slate-500 font-medium">
                     <span>O'qituvchi: {g.teacher_name}</span>
-                    <span>{g.schedule || "Dars vaqti kiritilmagan"}</span>
+                    <span>{g.schedule || "Vaqt kiritilmagan"}</span>
                   </div>
                 </div>
               ))}
@@ -283,7 +279,7 @@ export default function StudentDetailPage({ params }: PageProps) {
         </div>
 
         {/* Payments History & Status */}
-        <div className="bg-white/70 dark:bg-slate-900/70 backdrop-blur-xl border border-slate-200/60 dark:border-slate-800/60 p-6 rounded-3xl space-y-4">
+        <div className="bg-white/70 dark:bg-slate-900/70 backdrop-blur-xl border border-slate-200/60 dark:border-slate-800/60 p-5 sm:p-6 rounded-3xl space-y-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
               <Banknote size={18} className="text-slate-400" />
@@ -293,11 +289,11 @@ export default function StudentDetailPage({ params }: PageProps) {
           </div>
 
           {payments.length === 0 ? (
-            <div className="py-10 text-center text-slate-400">
+            <div className="py-8 text-center text-slate-400">
               <p className="text-xs font-medium">Hozircha to'lov yozuvlari yo'q</p>
             </div>
           ) : (
-            <div className="space-y-3 max-h-72 overflow-y-auto pr-1">
+            <div className="space-y-3 max-h-80 overflow-y-auto pr-1">
               {payments.map(p => {
                 const isPaid = p.status === 'completed';
                 const isPartial = p.status === 'partial';
@@ -306,22 +302,22 @@ export default function StudentDetailPage({ params }: PageProps) {
                   <div key={p.id} className="p-3.5 rounded-2xl bg-slate-50/50 dark:bg-slate-800/30 border border-slate-100 dark:border-slate-800/40 flex items-center justify-between">
                     <div>
                       <div className="flex items-center gap-2">
-                        <span className="font-bold text-xs text-slate-800 dark:text-slate-100">{p.month_year} oyi</span>
-                        <span className="text-[11px] font-medium text-slate-400">• {p.group_name}</span>
+                        <span className="font-extrabold text-xs sm:text-sm text-slate-800 dark:text-slate-100">{p.month_year} oyi</span>
+                        <span className="text-xs font-medium text-slate-400">• {p.group_name}</span>
                       </div>
-                      <p className="text-[11px] text-slate-400 mt-0.5">{p.payment_method} orqali to'langan</p>
+                      <p className="text-xs text-slate-400 mt-0.5">{p.payment_method} orqali to'langan</p>
                     </div>
 
                     <div className="text-right">
-                      <p className="font-extrabold text-xs text-slate-800 dark:text-slate-100">
+                      <p className="font-black text-sm text-slate-800 dark:text-slate-100">
                         {p.amount.toLocaleString('uz-UZ')} so'm
                       </p>
                       {isPaid ? (
-                        <span className="text-[10px] font-bold uppercase text-emerald-600">To'langan</span>
+                        <span className="text-xs font-bold uppercase text-emerald-600">To'langan</span>
                       ) : isPartial ? (
-                        <span className="text-[10px] font-bold uppercase text-amber-600">Qisman</span>
+                        <span className="text-xs font-bold uppercase text-amber-600">Qisman</span>
                       ) : (
-                        <span className="text-[10px] font-bold uppercase text-red-500">To'lamagan</span>
+                        <span className="text-xs font-bold uppercase text-red-500">To'lamagan</span>
                       )}
                     </div>
                   </div>
@@ -333,7 +329,7 @@ export default function StudentDetailPage({ params }: PageProps) {
       </div>
 
       {/* Exam Results & Score Performance */}
-      <div className="bg-white/70 dark:bg-slate-900/70 backdrop-blur-xl border border-slate-200/60 dark:border-slate-800/60 p-6 rounded-3xl space-y-4">
+      <div className="bg-white/70 dark:bg-slate-900/70 backdrop-blur-xl border border-slate-200/60 dark:border-slate-800/60 p-5 sm:p-6 rounded-3xl space-y-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <FileText size={18} className="text-slate-400" />
@@ -343,25 +339,25 @@ export default function StudentDetailPage({ params }: PageProps) {
         </div>
 
         {examResults.length === 0 ? (
-          <div className="py-10 text-center text-slate-400">
+          <div className="py-8 text-center text-slate-400">
             <p className="text-xs font-medium">Hozircha topshirilgan test natijalari yo'q</p>
           </div>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3.5">
             {examResults.map(res => (
               <div key={res.id} className="p-4 rounded-2xl bg-slate-50/50 dark:bg-slate-800/30 border border-slate-100 dark:border-slate-800/40 flex items-center justify-between">
                 <div>
-                  <p className="font-bold text-xs text-slate-800 dark:text-slate-100">{res.exam_title}</p>
-                  <p className="text-[10px] text-slate-400 mt-1">
+                  <p className="font-extrabold text-xs sm:text-sm text-slate-800 dark:text-slate-100">{res.exam_title}</p>
+                  <p className="text-xs text-slate-400 mt-0.5">
                     {new Date(res.created_at).toLocaleDateString('uz-UZ', { month: 'short', day: 'numeric', year: 'numeric' })}
                   </p>
                 </div>
 
                 <div className="text-right">
-                  <span className="text-sm font-black text-emerald-600 dark:text-emerald-400">
+                  <span className="text-base font-black text-emerald-600 dark:text-emerald-400">
                     {res.total_score.toFixed(1)}
                   </span>
-                  <span className="text-[10px] text-slate-400 block font-semibold">ball</span>
+                  <span className="text-xs text-slate-400 block font-semibold">ball</span>
                 </div>
               </div>
             ))}
