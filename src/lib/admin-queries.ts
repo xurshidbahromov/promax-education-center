@@ -708,16 +708,16 @@ export async function deleteVideoLesson(lessonId: string): Promise<{ success: bo
 }
 
 // Subject CRUD & Aliases
-export async function createSubject(title: string, description?: string): Promise<{ success: boolean; error?: string }> {
+export async function createSubject(title: string, description?: string, cover_image?: string): Promise<{ success: boolean; error?: string }> {
   const supabase = createClient();
-  const { error } = await supabase.from('subjects').insert({ title, description: description || null });
+  const { error } = await supabase.from('subjects').insert({ title, description: description || null, cover_image: cover_image || null });
   if (error) return { success: false, error: error.message };
   return { success: true };
 }
 
-export async function updateSubject(id: string, title: string, description?: string): Promise<{ success: boolean; error?: string }> {
+export async function updateSubject(id: string, title: string, description?: string, cover_image?: string): Promise<{ success: boolean; error?: string }> {
   const supabase = createClient();
-  const { error } = await supabase.from('subjects').update({ title, description: description || null }).eq('id', id);
+  const { error } = await supabase.from('subjects').update({ title, description: description || null, cover_image: cover_image || null }).eq('id', id);
   if (error) return { success: false, error: error.message };
   return { success: true };
 }

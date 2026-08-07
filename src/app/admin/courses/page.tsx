@@ -2,9 +2,10 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import Image from "next/image";
 import toast from "react-hot-toast";
 import {
-  BookOpen, Plus, Edit2, Trash2, Layers, Video, Search, ChevronRight, X
+  BookOpen, Plus, Edit2, Trash2, Layers, Video, Search, ChevronRight, X, Image as ImageIcon
 } from "lucide-react";
 import { createSubject, updateSubject, deleteSubject } from "@/lib/admin-queries";
 import { useQueryClient } from "@tanstack/react-query";
@@ -14,9 +15,19 @@ interface SubjectItem {
   id: string;
   title: string;
   description: string | null;
+  cover_image?: string | null;
   groups_count?: number;
   lessons_count?: number;
 }
+
+const PRESET_IMAGES = [
+  { name: "Matematika", url: "https://images.unsplash.com/photo-1635070041078-e363dbe005cb?q=80&w=600&auto=format&fit=crop" },
+  { name: "Fizika", url: "https://images.unsplash.com/photo-1636466497217-26a8cbeaf0aa?q=80&w=600&auto=format&fit=crop" },
+  { name: "Ingliz tili", url: "https://images.unsplash.com/photo-1546410531-bb4caa6b424d?q=80&w=600&auto=format&fit=crop" },
+  { name: "Dasturlash", url: "https://images.unsplash.com/photo-1555066931-4365d14bab8c?q=80&w=600&auto=format&fit=crop" },
+  { name: "Kimyo", url: "https://images.unsplash.com/photo-1532187863486-abf9dbad1b69?q=80&w=600&auto=format&fit=crop" },
+  { name: "Biologiya", url: "https://images.unsplash.com/photo-1530026405186-ed1f139313f8?q=80&w=600&auto=format&fit=crop" },
+];
 
 export default function AdminCoursesPage() {
   const router = useRouter();
@@ -28,6 +39,7 @@ export default function AdminCoursesPage() {
   const [editingSubject, setEditingSubject] = useState<SubjectItem | null>(null);
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
+  const [coverImage, setCoverImage] = useState("");
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
@@ -38,10 +50,11 @@ export default function AdminCoursesPage() {
   }, [searchTerm]);
 
   const { data: dbSubjects, isLoading: loading } = useSubjects();
-  const subjectsList: SubjectItem[] = (dbSubjects || []).map(s => ({
+  const subjectsList: SubjectItem[] = (dbSubjects || []).map((s: any) => ({
     id: s.id,
     title: s.title,
     description: s.description || null,
+    cover_image: s.cover_image || null,
   }));
 
   const filteredSubjects = subjectsList.filter(s =>
@@ -53,6 +66,7 @@ export default function AdminCoursesPage() {
     setEditingSubject(null);
     setTitle("");
     setDescription("");
+    setCoverImage("");
     setModalOpen(true);
   };
 
@@ -61,6 +75,7 @@ export default function AdminCoursesPage() {
     setEditingSubject(subject);
     setTitle(subject.title);
     setDescription(subject.description || "");
+    setCoverImage(subject.cover_image || "");
     setModalOpen(true);
   };
 
@@ -73,7 +88,7 @@ export default function AdminCoursesPage() {
     setSaving(true);
     try {
       if (editingSubject) {
-        const res = await updateSubject(editingSubject.id, title, description);
+        const res = await updateSubject(editingSubject.id, title, description, coverImage);
         if (res.success) {
           toast.success("Fan yangilandi!");
           queryClient.invalidateQueries({ queryKey: ['subjects'] });
@@ -82,7 +97,7 @@ export default function AdminCoursesPage() {
           toast.error("Xatolik: " + res.error);
         }
       } else {
-        const res = await createSubject(title, description);
+        const res = await createSubject(title, description, coverImage);
         if (res.success) {
           toast.success("Yangi fan qo'shildi!");
           queryClient.invalidateQueries({ queryKey: ['subjects'] });
@@ -155,7 +170,7 @@ export default function AdminCoursesPage() {
       {loading ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 animate-pulse">
           {[1, 2, 3, 4, 5, 6].map(i => (
-            <div key={i} className="h-40 bg-slate-100 dark:bg-slate-800/50 rounded-3xl" />
+            <div key={i} className="h-48 bg-slate-100 dark:bg-slate-800/50 rounded-3xl" />
           ))}
         </div>
       ) : filteredSubjects.length === 0 ? (
@@ -169,25 +184,37 @@ export default function AdminCoursesPage() {
             <div
               key={sub.id}
               onClick={() => router.push(`/admin/courses/${sub.id}`)}
-              className="group bg-white/70 dark:bg-slate-900/70 backdrop-blur-xl border border-slate-200/60 dark:border-slate-800/60 rounded-3xl p-5 sm:p-6 flex flex-col justify-between gap-4 transition-colors hover:border-slate-300 dark:hover:border-slate-700 cursor-pointer"
+              className="group bg-white/70 dark:bg-slate-900/70 backdrop-blur-xl border border-slate-200/60 dark:border-slate-800/60 rounded-3xl overflow-hidden flex flex-col justify-between transition-colors hover:border-slate-300 dark:hover:border-slate-700 cursor-pointer"
             >
-              <div className="space-y-2.5">
-                <div className="flex items-start justify-between gap-3">
-                  <div className="flex items-center gap-3">
-                    <BookOpen size={22} className="text-brand-blue shrink-0" />
-                    <h3 className="font-extrabold text-slate-800 dark:text-slate-100 text-base tracking-tight group-hover:text-brand-blue transition-colors">
-                      {sub.title}
-                    </h3>
-                  </div>
+              <div>
+                {/* Subject Cover Banner */}
+                <div className="relative w-full h-36 bg-slate-100 dark:bg-slate-800 overflow-hidden">
+                  {sub.cover_image ? (
+                    <img
+                      src={sub.cover_image}
+                      alt={sub.title}
+                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                    />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-blue-500/10 to-indigo-500/10 text-brand-blue">
+                      <BookOpen size={36} className="opacity-40" />
+                    </div>
+                  )}
+                  <div className="absolute inset-0 bg-gradient-to-t from-slate-900/60 via-transparent to-transparent" />
+                  <span className="absolute bottom-3 left-4 font-extrabold text-white text-lg drop-shadow-md">
+                    {sub.title}
+                  </span>
                 </div>
 
-                <p className="text-xs text-slate-500 font-medium line-clamp-2">
-                  {sub.description || "Tavsif kiritilmagan"}
-                </p>
+                <div className="p-5 space-y-2">
+                  <p className="text-xs text-slate-500 font-medium line-clamp-2">
+                    {sub.description || "Tavsif kiritilmagan"}
+                  </p>
+                </div>
               </div>
 
               {/* Box-free Footer Actions */}
-              <div className="pt-3 border-t border-slate-100 dark:border-slate-800/50 flex items-center justify-between">
+              <div className="p-5 pt-0 flex items-center justify-between">
                 <span className="inline-flex items-center gap-1 text-xs font-bold text-slate-600 dark:text-slate-300 group-hover:text-brand-blue transition-colors">
                   <span>Guruhlar & Darslar</span>
                   <ChevronRight size={16} />
@@ -218,7 +245,7 @@ export default function AdminCoursesPage() {
       {/* Add / Edit Modal */}
       {modalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-sm">
-          <div className="bg-white dark:bg-slate-900 rounded-3xl shadow-xl w-full max-w-md overflow-hidden border border-slate-200/80 dark:border-slate-800 p-6 space-y-4">
+          <div className="bg-white dark:bg-slate-900 rounded-3xl shadow-xl w-full max-w-md overflow-hidden border border-slate-200/80 dark:border-slate-800 p-6 space-y-4 max-h-[90vh] overflow-y-auto">
             <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-3">
               <h3 className="font-bold text-base text-slate-800 dark:text-slate-100">
                 {editingSubject ? "Fanni Tahrirlash" : "Yangi Fan Qo'shish"}
@@ -228,7 +255,7 @@ export default function AdminCoursesPage() {
               </button>
             </div>
 
-            <div className="space-y-3">
+            <div className="space-y-3.5">
               <div>
                 <label className="block text-xs font-bold text-slate-600 dark:text-slate-300 uppercase tracking-wider mb-1">
                   Fan Nomi *
@@ -238,7 +265,7 @@ export default function AdminCoursesPage() {
                   value={title}
                   onChange={(e) => setTitle(e.target.value)}
                   placeholder="Masalan: Matematika"
-                  className="w-full px-4 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-medium outline-none focus:ring-2 focus:ring-brand-blue/30"
+                  className="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs sm:text-sm font-medium outline-none focus:ring-2 focus:ring-brand-blue/30"
                 />
               </div>
 
@@ -250,8 +277,55 @@ export default function AdminCoursesPage() {
                   value={description}
                   onChange={(e) => setDescription(e.target.value)}
                   placeholder="Fan haqida qisqacha ma'lumot..."
-                  className="w-full px-4 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-medium outline-none focus:ring-2 focus:ring-brand-blue/30 resize-none h-20"
+                  className="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs sm:text-sm font-medium outline-none focus:ring-2 focus:ring-brand-blue/30 resize-none h-20"
                 />
+              </div>
+
+              {/* Cover Image Selection */}
+              <div>
+                <label className="block text-xs font-bold text-slate-600 dark:text-slate-300 uppercase tracking-wider mb-1.5">
+                  Fan Muqova Rasmi (Cover Image URL)
+                </label>
+                
+                {/* Preset Options */}
+                <div className="grid grid-cols-3 gap-2 mb-2">
+                  {PRESET_IMAGES.map((preset, idx) => (
+                    <button
+                      key={idx}
+                      type="button"
+                      onClick={() => setCoverImage(preset.url)}
+                      className={`relative h-14 rounded-xl overflow-hidden border-2 transition-all text-left ${
+                        coverImage === preset.url
+                          ? 'border-brand-blue ring-2 ring-brand-blue/20'
+                          : 'border-slate-200 dark:border-slate-700 hover:border-slate-300'
+                      }`}
+                    >
+                      <img src={preset.url} alt={preset.name} className="w-full h-full object-cover" />
+                      <div className="absolute inset-0 bg-slate-900/40 flex items-center justify-center">
+                        <span className="text-[10px] font-bold text-white text-center px-1 truncate">
+                          {preset.name}
+                        </span>
+                      </div>
+                    </button>
+                  ))}
+                </div>
+
+                <div className="relative">
+                  <input
+                    type="text"
+                    value={coverImage}
+                    onChange={(e) => setCoverImage(e.target.value)}
+                    placeholder="https://images.unsplash.com/..."
+                    className="w-full pl-9 pr-4 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-medium outline-none"
+                  />
+                  <ImageIcon size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+                </div>
+
+                {coverImage && (
+                  <div className="mt-2 relative w-full h-24 rounded-xl overflow-hidden border border-slate-200 dark:border-slate-700">
+                    <img src={coverImage} alt="Preview" className="w-full h-full object-cover" />
+                  </div>
+                )}
               </div>
             </div>
 
@@ -265,7 +339,7 @@ export default function AdminCoursesPage() {
               <button
                 onClick={handleSave}
                 disabled={saving}
-                className="px-4 py-2 text-xs font-bold text-white bg-brand-blue hover:bg-blue-600 rounded-xl disabled:opacity-50"
+                className="px-4 py-2.5 text-xs font-bold text-white bg-brand-blue hover:bg-blue-600 rounded-xl disabled:opacity-50"
               >
                 {saving ? "Saqlanmoqda..." : "Saqlash"}
               </button>
