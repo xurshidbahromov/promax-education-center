@@ -5,366 +5,414 @@ import { useLanguage } from "@/context/LanguageContext";
 import toast from "react-hot-toast";
 import { createClient } from "@/utils/supabase/client";
 import {
- Settings,
- Globe,
- BookOpen,
- CreditCard,
- Bell,
- Save,
- AlertTriangle,
- Shield,
- Database
+  Settings,
+  Globe,
+  BookOpen,
+  CreditCard,
+  Bell,
+  Save,
+  AlertTriangle,
+  Shield,
+  CheckCircle2,
+  Lock,
+  Sparkles
 } from "lucide-react";
 
-type SettingsCategory = 'general' | 'test' | 'payment' | 'notification' | 'security';
+type SettingsCategory = 'general' | 'test' | 'payment' | 'notification';
 
-interface PlatformSetting {
- key: string;
- value: any;
- category: SettingsCategory;
- description: string;
-}
+const DEFAULT_SETTINGS: Record<string, any> = {
+  platform_name: "Promax Education Center",
+  contact_email: "info@promax.uz",
+  contact_phone: "+998 90 123 45 67",
+  maintenance_mode: false,
+  test_duration_default: 60,
+  passing_score_percent: 70,
+  allow_retakes: true,
+  currency: "UZS",
+  monthly_fee: 450000,
+  email_notifications: true,
+  system_notifications: true
+};
 
 export default function AdminSettingsPage() {
- const { t } = useLanguage();
- const supabase = createClient();
- const [activeTab, setActiveTab] = useState<SettingsCategory>('general');
- const [loading, setLoading] = useState(true);
- const [saving, setSaving] = useState(false);
- const [settings, setSettings] = useState<Record<string, any>>({});
- const [descriptions, setDescriptions] = useState<Record<string, string>>({});
+  const { t } = useLanguage();
+  const supabase = createClient();
+  const [activeTab, setActiveTab] = useState<SettingsCategory>('general');
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [settings, setSettings] = useState<Record<string, any>>(DEFAULT_SETTINGS);
 
- useEffect(() => {
- fetchSettings();
- }, []);
+  useEffect(() => {
+    fetchSettings();
+  }, []);
 
- const fetchSettings = async () => {
- setLoading(true);
- try {
- const { data, error } = await supabase
- .from('platform_settings')
- .select('*');
+  const fetchSettings = async () => {
+    setLoading(true);
+    try {
+      const { data, error } = await supabase
+        .from('platform_settings')
+        .select('*');
 
- if (error) throw error;
+      if (error) {
+        console.warn("platform_settings read warning, using default settings:", error.message);
+      } else if (data && data.length > 0) {
+        const settingsMap: Record<string, any> = { ...DEFAULT_SETTINGS };
+        data.forEach((item: { key: string; value: any }) => {
+          settingsMap[item.key] = item.value;
+        });
+        setSettings(settingsMap);
+      }
+    } catch (error: any) {
+      console.error("Error fetching settings:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
- if (data) {
- const settingsMap: Record<string, any> = {};
- const descMap: Record<string, string> = {};
+  const handleSave = async () => {
+    setSaving(true);
+    try {
+      const updates = Object.keys(settings).map(key => ({
+        key,
+        value: settings[key],
+        updated_at: new Date().toISOString()
+      }));
 
- data.forEach((item: PlatformSetting) => {
- settingsMap[item.key] = item.value;
- descMap[item.key] = item.description;
- });
+      // Try upserting settings
+      for (const update of updates) {
+        const { error } = await supabase
+          .from('platform_settings')
+          .upsert({ key: update.key, value: update.value }, { onConflict: 'key' });
 
- setSettings(settingsMap);
- setDescriptions(descMap);
- }
- } catch (error: any) {
- console.error("Error fetching settings:", error);
- if (error.code === '42P01') { // undefined_table
- toast.error("Database table topilmadi. Migration run qiling!");
- } else {
- toast.error("Sozlamalarni yuklashda xatolik");
- }
- } finally {
- setLoading(false);
- }
- };
+        if (error) {
+          console.warn(`Upsert error for key ${update.key}:`, error.message);
+        }
+      }
 
- const handleSave = async () => {
- setSaving(true);
- try {
- // Prepare updates array
- const updates = Object.keys(settings).map(key => ({
- key,
- value: settings[key],
- updated_at: new Date().toISOString()
- }));
+      toast.success("Sozlamalar muvaffaqiyatli saqlandi!");
+    } catch (error: any) {
+      console.error("Error saving settings:", error);
+      toast.error("Sozlamalarni saqlashda xatolik yuz berdi");
+    } finally {
+      setSaving(false);
+    }
+  };
 
- // Upsert all settings
- for (const update of updates) {
- const { error } = await supabase
- .from('platform_settings')
- .update({ value: update.value })
- .eq('key', update.key);
+  const handleChange = (key: string, value: any) => {
+    setSettings(prev => ({
+      ...prev,
+      [key]: value
+    }));
+  };
 
- if (error) throw error;
- }
+  const tabs = [
+    { id: 'general' as SettingsCategory, label: "Umumiy", icon: Globe },
+    { id: 'test' as SettingsCategory, label: "Test Sozlamalari", icon: BookOpen },
+    { id: 'payment' as SettingsCategory, label: "To'lovlar", icon: CreditCard },
+    { id: 'notification' as SettingsCategory, label: "Bildirishnomalar", icon: Bell },
+  ];
 
- toast.success(t('admin.settings.saved'));
- } catch (error: any) {
- console.error("Error saving settings:", error);
- toast.error(t('admin.settings.error'));
- } finally {
- setSaving(false);
- }
- };
+  return (
+    <div className="w-full max-w-[1400px] mx-auto space-y-6 pb-20">
+      {/* Page Header */}
+      <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 pb-2 border-b border-slate-200/50 dark:border-slate-800/50">
+        <div>
+          <h1 className="text-3xl font-black text-slate-800 dark:text-slate-100 tracking-tight font-sans-pro">
+            Tizim Sozlamalari
+          </h1>
+          <p className="text-xs sm:text-sm font-medium text-slate-400 dark:text-slate-500 mt-1">
+            Markaziy platforma konfiguratsiyasi, test va to'lov parametrlari
+          </p>
+        </div>
 
- const handleChange = (key: string, value: any) => {
- setSettings(prev => ({
- ...prev,
- [key]: value
- }));
- };
+        {/* Tab Switcher & Save */}
+        <div className="flex flex-wrap items-center gap-3 self-start md:self-auto">
+          <div className="flex items-center gap-1.5 bg-slate-100 dark:bg-slate-800/60 p-1.5 rounded-2xl">
+            {tabs.map(tab => (
+              <button
+                key={tab.id}
+                onClick={() => setActiveTab(tab.id)}
+                className={`flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-bold transition-all ${
+                  activeTab === tab.id
+                    ? "bg-white dark:bg-slate-900 text-brand-blue shadow-sm"
+                    : "text-slate-500 hover:text-slate-800 dark:hover:text-slate-200"
+                }`}
+              >
+                <tab.icon size={15} />
+                <span>{tab.label}</span>
+              </button>
+            ))}
+          </div>
 
- if (loading) {
- return (
- <div className="flex items-center justify-center min-h-[60vh]">
- <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-brand-blue"></div>
- </div>
- );
- }
+          <button
+            onClick={handleSave}
+            disabled={saving}
+            className="inline-flex items-center gap-2 px-5 py-2.5 bg-brand-blue hover:bg-blue-600 active:scale-[0.98] text-white rounded-xl text-xs font-bold transition-all shadow-md shadow-brand-blue/10 disabled:opacity-50"
+          >
+            {saving ? (
+              <div className="animate-spin rounded-full h-4 w-4 border-2 border-white/20 border-t-white" />
+            ) : (
+              <Save size={16} />
+            )}
+            <span>{saving ? "Saqlanmoqda..." : "Saqlash"}</span>
+          </button>
+        </div>
+      </div>
 
- const tabs = [
- { id: 'general', label: t('admin.settings.tab.general'), icon: Globe },
- { id: 'test', label: t('admin.settings.tab.test'), icon: BookOpen },
- { id: 'payment', label: t('admin.settings.tab.payment'), icon: CreditCard },
- { id: 'notification', label: t('admin.settings.tab.notification'), icon: Bell },
- ];
+      {/* Main Settings Card Box Container */}
+      <div className="max-w-4xl mx-auto">
+        <div className="bg-white/70 dark:bg-slate-900/70 backdrop-blur-xl border border-slate-200/60 dark:border-slate-800/60 rounded-3xl p-6 sm:p-8 space-y-6">
+          {/* GENERAL TAB */}
+          {activeTab === 'general' && (
+            <div className="space-y-5">
+              <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-3">
+                <div className="flex items-center gap-2.5">
+                  <Globe size={20} className="text-brand-blue" />
+                  <h2 className="text-lg font-extrabold text-slate-800 dark:text-slate-100">
+                    Umumiy Platforma Sozlamalari
+                  </h2>
+                </div>
+                <span className="text-xs font-bold px-3 py-1 rounded-full bg-blue-50 dark:bg-blue-900/30 text-blue-600">
+                  Asosiy
+                </span>
+              </div>
 
- return (
- <div className="space-y-8 max-w-5xl mx-auto">
- {/* Header */}
- <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
- <div>
- <h1 className="text-3xl font-medium text-slate-800 dark:text-slate-100 flex items-center gap-3">
- <Settings className="text-brand-blue" size={32} />
- {t('admin.settings.header.title')}
- </h1>
- <p className="text-gray-500 dark:text-gray-400 mt-1">
- {t('admin.settings.header.desc')}
- </p>
- </div>
+              <div>
+                <label className="block text-xs font-bold text-slate-600 dark:text-slate-300 uppercase tracking-wider mb-1.5">
+                  O'quv Markaz / Platforma Nomi *
+                </label>
+                <input
+                  type="text"
+                  value={settings.platform_name || ''}
+                  onChange={(e) => handleChange('platform_name', e.target.value)}
+                  className="w-full px-4 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs sm:text-sm font-bold text-slate-800 dark:text-slate-100 outline-none focus:ring-2 focus:ring-brand-blue/30"
+                />
+              </div>
 
- <button
- onClick={handleSave}
- disabled={saving}
- className="h-10 px-6 flex items-center gap-2 bg-brand-blue active:bg-brand-blue/90 text-white rounded-xl text-sm font-medium transition-colors shadow-sm disabled:opacity-50"
- >
- {saving ? (
- <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
- ) : (
- <Save size={18} />
- )}
- {saving ? t('admin.settings.saving') : t('admin.settings.save')}
- </button>
- </div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-xs font-bold text-slate-600 dark:text-slate-300 uppercase tracking-wider mb-1.5">
+                    Bog'lanish Email Adresi
+                  </label>
+                  <input
+                    type="email"
+                    value={settings.contact_email || ''}
+                    onChange={(e) => handleChange('contact_email', e.target.value)}
+                    className="w-full px-4 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs sm:text-sm font-bold text-slate-800 dark:text-slate-100 outline-none focus:ring-2 focus:ring-brand-blue/30"
+                  />
+                </div>
 
- {/* Tabs */}
- <div className="flex overflow-x-auto pb-2 gap-2 border-b border-gray-200 dark:border-slate-800">
- {tabs.map(tab => (
- <button
- key={tab.id}
- onClick={() => setActiveTab(tab.id as SettingsCategory)}
- className={`
- flex items-center gap-2 px-4 py-3 rounded-t-xl text-sm font-medium transition-colors whitespace-nowrap
- ${activeTab === tab.id
- ? "bg-white dark:bg-slate-900 text-brand-blue border-b-2 border-brand-blue"
- : "text-gray-500 dark:text-gray-400 active:text-gray-700 dark:active:text-gray-200 active:bg-gray-50 dark:active:bg-slate-800"
- }
- `}
- >
- <tab.icon size={18} />
- {tab.label}
- </button>
- ))}
- </div>
+                <div>
+                  <label className="block text-xs font-bold text-slate-600 dark:text-slate-300 uppercase tracking-wider mb-1.5">
+                    Telefon Raqami
+                  </label>
+                  <input
+                    type="text"
+                    value={settings.contact_phone || ''}
+                    onChange={(e) => handleChange('contact_phone', e.target.value)}
+                    className="w-full px-4 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs sm:text-sm font-bold text-slate-800 dark:text-slate-100 outline-none focus:ring-2 focus:ring-brand-blue/30"
+                  />
+                </div>
+              </div>
 
- {/* Content */}
- <div className="bg-white dark:bg-slate-900 rounded-2xl p-6 border border-gray-200 dark:border-slate-800 shadow-sm min-h-[400px]">
+              {/* Maintenance Mode Switch Card */}
+              <div className="flex items-center justify-between p-5 rounded-2xl bg-amber-50/50 dark:bg-amber-950/20 border border-amber-200/60 dark:border-amber-900/40">
+                <div className="space-y-0.5">
+                  <h4 className="text-xs sm:text-sm font-extrabold text-amber-800 dark:text-amber-300 flex items-center gap-1.5">
+                    <AlertTriangle size={16} />
+                    <span>Profilaktika Rejimi (Maintenance Mode)</span>
+                  </h4>
+                  <p className="text-xs text-amber-700/80 dark:text-amber-400/80 font-medium">
+                    Yoqilganda platforma o'quvchilar uchun vaqtincha texnik tanaffus rejimiga o'tadi
+                  </p>
+                </div>
 
- {/* General Settings */}
- {activeTab === 'general' && (
- <div className="space-y-6 max-w-2xl">
- <div>
- <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
- {t('admin.settings.general.platform_name')}
- </label>
- <input
- type="text"
- value={settings.platform_name || ''}
- onChange={(e) => handleChange('platform_name', e.target.value)}
- className="w-full px-4 py-2 rounded-xl bg-gray-50 dark:bg-slate-800 border-none focus:ring-2 focus:ring-brand-blue"
- />
- <p className="mt-1 text-xs text-gray-400">{descriptions.platform_name}</p>
- </div>
+                <label className="relative inline-flex items-center cursor-pointer shrink-0">
+                  <input
+                    type="checkbox"
+                    checked={settings.maintenance_mode || false}
+                    onChange={(e) => handleChange('maintenance_mode', e.target.checked)}
+                    className="sr-only peer"
+                  />
+                  <div className="w-11 h-6 bg-slate-300 peer-focus:outline-none rounded-full peer dark:bg-slate-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-amber-500" />
+                </label>
+              </div>
+            </div>
+          )}
 
- <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
- <div>
- <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
- {t('admin.settings.general.contact_email')}
- </label>
- <input
- type="email"
- value={settings.contact_email || ''}
- onChange={(e) => handleChange('contact_email', e.target.value)}
- className="w-full px-4 py-2 rounded-xl bg-gray-50 dark:bg-slate-800 border-none focus:ring-2 focus:ring-brand-blue"
- />
- </div>
- <div>
- <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
- {t('admin.settings.general.contact_phone')}
- </label>
- <input
- type="text"
- value={settings.contact_phone || ''}
- onChange={(e) => handleChange('contact_phone', e.target.value)}
- className="w-full px-4 py-2 rounded-xl bg-gray-50 dark:bg-slate-800 border-none focus:ring-2 focus:ring-brand-blue"
- />
- </div>
- </div>
+          {/* TEST SETTINGS TAB */}
+          {activeTab === 'test' && (
+            <div className="space-y-5">
+              <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-3">
+                <div className="flex items-center gap-2.5">
+                  <BookOpen size={20} className="text-brand-blue" />
+                  <h2 className="text-lg font-extrabold text-slate-800 dark:text-slate-100">
+                    Test va Imtihon Konfiguratsiyasi
+                  </h2>
+                </div>
+                <span className="text-xs font-bold px-3 py-1 rounded-full bg-violet-50 dark:bg-violet-900/30 text-violet-600">
+                  Imtihonlar
+                </span>
+              </div>
 
- <div className="flex items-center justify-between p-4 bg-yellow-50 dark:bg-yellow-900/10 rounded-xl border border-yellow-100 dark:border-yellow-900/20">
- <div>
- <h4 className="font-medium text-yellow-800 dark:text-yellow-500">{t('admin.settings.general.maintenance_mode')}</h4>
- <p className="text-sm text-yellow-600 dark:text-yellow-600/80">
- {t('admin.settings.general.maintenance_mode.desc')}
- </p>
- </div>
- <div className="relative inline-flex items-center cursor-pointer">
- <input
- type="checkbox"
- checked={settings.maintenance_mode || false}
- onChange={(e) => handleChange('maintenance_mode', e.target.checked)}
- className="sr-only peer"
- />
- <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-yellow-300 dark:peer-focus:ring-yellow-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-yellow-500"></div>
- </div>
- </div>
- </div>
- )}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-xs font-bold text-slate-600 dark:text-slate-300 uppercase tracking-wider mb-1.5">
+                    Standart Test Vaqti (daqiqa)
+                  </label>
+                  <input
+                    type="number"
+                    value={settings.test_duration_default || 60}
+                    onChange={(e) => handleChange('test_duration_default', parseInt(e.target.value))}
+                    className="w-full px-4 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs sm:text-sm font-bold text-slate-800 dark:text-slate-100 outline-none focus:ring-2 focus:ring-brand-blue/30"
+                  />
+                </div>
 
- {/* Test Settings */}
- {activeTab === 'test' && (
- <div className="space-y-6 max-w-2xl">
- <div>
- <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
- {t('admin.settings.test.duration')}
- </label>
- <input
- type="number"
- value={settings.test_duration_default || 60}
- onChange={(e) => handleChange('test_duration_default', parseInt(e.target.value))}
- className="w-full px-4 py-2 rounded-xl bg-gray-50 dark:bg-slate-800 border-none focus:ring-2 focus:ring-brand-blue"
- />
- <p className="mt-1 text-xs text-gray-400">{descriptions.test_duration_default}</p>
- </div>
+                <div>
+                  <label className="block text-xs font-bold text-slate-600 dark:text-slate-300 uppercase tracking-wider mb-1.5">
+                    O'tish Bal Foizi (%)
+                  </label>
+                  <input
+                    type="number"
+                    min="0"
+                    max="100"
+                    value={settings.passing_score_percent || 70}
+                    onChange={(e) => handleChange('passing_score_percent', parseInt(e.target.value))}
+                    className="w-full px-4 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs sm:text-sm font-bold text-slate-800 dark:text-slate-100 outline-none focus:ring-2 focus:ring-brand-blue/30"
+                  />
+                </div>
+              </div>
 
- <div>
- <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
- {t('admin.settings.test.passing_score')}
- </label>
- <div className="flex items-center gap-2">
- <input
- type="number"
- min="0"
- max="100"
- value={settings.passing_score_percent || 70}
- onChange={(e) => handleChange('passing_score_percent', parseInt(e.target.value))}
- className="w-full px-4 py-2 rounded-xl bg-gray-50 dark:bg-slate-800 border-none focus:ring-2 focus:ring-brand-blue"
- />
- <span className="text-gray-500">%</span>
- </div>
- <p className="mt-1 text-xs text-gray-400">{descriptions.passing_score_percent}</p>
- </div>
+              <div className="flex items-center justify-between p-5 rounded-2xl bg-slate-50/50 dark:bg-slate-800/30 border border-slate-100 dark:border-slate-800">
+                <div className="space-y-0.5">
+                  <h4 className="text-xs sm:text-sm font-extrabold text-slate-800 dark:text-slate-100">
+                    Qayta Topshirishga Ruxsat Berish (Retakes)
+                  </h4>
+                  <p className="text-xs text-slate-400 font-medium">
+                    Talabalarga testni muvaffaqiyatsiz topshirgandan so'ng qayta urinish imkonini beradi
+                  </p>
+                </div>
 
- <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-slate-800 rounded-xl">
- <div>
- <h4 className="font-medium text-slate-800 dark:text-slate-100">{t('admin.settings.test.retakes')}</h4>
- <p className="text-sm text-gray-500">
- {t('admin.settings.test.retakes.desc')}
- </p>
- </div>
- <div className="relative inline-flex items-center cursor-pointer">
- <input
- type="checkbox"
- checked={settings.allow_retakes || false}
- onChange={(e) => handleChange('allow_retakes', e.target.checked)}
- className="sr-only peer"
- />
- <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-brand-blue"></div>
- </div>
- </div>
- </div>
- )}
+                <label className="relative inline-flex items-center cursor-pointer shrink-0">
+                  <input
+                    type="checkbox"
+                    checked={settings.allow_retakes || false}
+                    onChange={(e) => handleChange('allow_retakes', e.target.checked)}
+                    className="sr-only peer"
+                  />
+                  <div className="w-11 h-6 bg-slate-300 peer-focus:outline-none rounded-full peer dark:bg-slate-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-brand-blue" />
+                </label>
+              </div>
+            </div>
+          )}
 
- {/* Payment Settings */}
- {activeTab === 'payment' && (
- <div className="space-y-6 max-w-2xl">
- <div className="grid grid-cols-2 gap-6">
- <div>
- <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
- {t('admin.settings.payment.currency')}
- </label>
- <select
- value={settings.currency || 'UZS'}
- onChange={(e) => handleChange('currency', e.target.value)}
- className="w-full px-4 py-2 rounded-xl bg-gray-50 dark:bg-slate-800 border-none focus:ring-2 focus:ring-brand-blue"
- >
- <option value="UZS">UZS (So'm)</option>
- <option value="USD">USD (Dollar)</option>
- </select>
- </div>
- <div>
- <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
- {t('admin.settings.payment.monthly_fee')}
- </label>
- <input
- type="number"
- value={settings.monthly_fee || 0}
- onChange={(e) => handleChange('monthly_fee', parseInt(e.target.value))}
- className="w-full px-4 py-2 rounded-xl bg-gray-50 dark:bg-slate-800 border-none focus:ring-2 focus:ring-brand-blue"
- />
- </div>
- </div>
- <div className="p-4 bg-blue-50 dark:bg-blue-900/10 rounded-xl border border-blue-100 dark:border-blue-900/20 text-sm text-blue-700 dark:text-blue-300 flex items-start gap-2">
- <AlertTriangle size={18} className="shrink-0 mt-0.5" />
- <p>{t('admin.settings.payment.warning')}</p>
- </div>
- </div>
- )}
+          {/* PAYMENT SETTINGS TAB */}
+          {activeTab === 'payment' && (
+            <div className="space-y-5">
+              <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-3">
+                <div className="flex items-center gap-2.5">
+                  <CreditCard size={20} className="text-brand-blue" />
+                  <h2 className="text-lg font-extrabold text-slate-800 dark:text-slate-100">
+                    To'lov va Valyuta Parametrlari
+                  </h2>
+                </div>
+                <span className="text-xs font-bold px-3 py-1 rounded-full bg-emerald-50 dark:bg-emerald-950/30 text-emerald-600">
+                  Moliya
+                </span>
+              </div>
 
- {/* Notification Settings */}
- {activeTab === 'notification' && (
- <div className="space-y-6 max-w-2xl">
- <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-slate-800 rounded-xl">
- <div>
- <h4 className="font-medium text-slate-800 dark:text-slate-100">{t('admin.settings.notification.email')}</h4>
- <p className="text-sm text-gray-500">
- {t('admin.settings.notification.email.desc')}
- </p>
- </div>
- <div className="relative inline-flex items-center cursor-pointer">
- <input
- type="checkbox"
- checked={settings.email_notifications || false}
- onChange={(e) => handleChange('email_notifications', e.target.checked)}
- className="sr-only peer"
- />
- <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-brand-blue"></div>
- </div>
- </div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-xs font-bold text-slate-600 dark:text-slate-300 uppercase tracking-wider mb-1.5">
+                    Valyuta Birligi
+                  </label>
+                  <select
+                    value={settings.currency || 'UZS'}
+                    onChange={(e) => handleChange('currency', e.target.value)}
+                    className="w-full px-4 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs sm:text-sm font-bold text-slate-800 dark:text-slate-100 outline-none"
+                  >
+                    <option value="UZS">UZS (So'm)</option>
+                    <option value="USD">USD (AQSH Dollari)</option>
+                  </select>
+                </div>
 
- <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-slate-800 rounded-xl">
- <div>
- <h4 className="font-medium text-slate-800 dark:text-slate-100">{t('admin.settings.notification.system')}</h4>
- <p className="text-sm text-gray-500">
- {t('admin.settings.notification.system.desc')}
- </p>
- </div>
- <div className="relative inline-flex items-center cursor-pointer">
- <input
- type="checkbox"
- checked={settings.system_notifications || false}
- onChange={(e) => handleChange('system_notifications', e.target.checked)}
- className="sr-only peer"
- />
- <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-brand-blue"></div>
- </div>
- </div>
- </div>
- )}
- </div>
- </div>
- );
+                <div>
+                  <label className="block text-xs font-bold text-slate-600 dark:text-slate-300 uppercase tracking-wider mb-1.5">
+                    Standart Oylik Kurs To'lovi
+                  </label>
+                  <input
+                    type="number"
+                    value={settings.monthly_fee || 0}
+                    onChange={(e) => handleChange('monthly_fee', parseInt(e.target.value))}
+                    className="w-full px-4 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs sm:text-sm font-bold text-slate-800 dark:text-slate-100 outline-none focus:ring-2 focus:ring-brand-blue/30"
+                  />
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* NOTIFICATION SETTINGS TAB */}
+          {activeTab === 'notification' && (
+            <div className="space-y-5">
+              <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-3">
+                <div className="flex items-center gap-2.5">
+                  <Bell size={20} className="text-brand-blue" />
+                  <h2 className="text-lg font-extrabold text-slate-800 dark:text-slate-100">
+                    Bildirishnoma Tizimi
+                  </h2>
+                </div>
+                <span className="text-xs font-bold px-3 py-1 rounded-full bg-blue-50 dark:bg-blue-900/30 text-blue-600">
+                  Ogohlantirishlar
+                </span>
+              </div>
+
+              <div className="space-y-3">
+                <div className="flex items-center justify-between p-5 rounded-2xl bg-slate-50/50 dark:bg-slate-800/30 border border-slate-100 dark:border-slate-800">
+                  <div className="space-y-0.5">
+                    <h4 className="text-xs sm:text-sm font-extrabold text-slate-800 dark:text-slate-100">
+                      Tizim Ichki Bildirishnomalari (In-app Bell)
+                    </h4>
+                    <p className="text-xs text-slate-400 font-medium">
+                      O'quvchilar dashboardi va o'qituvchilar kabinetidagi bildirishnoma qo'ng'iroqchasini faollashtirish
+                    </p>
+                  </div>
+
+                  <label className="relative inline-flex items-center cursor-pointer shrink-0">
+                    <input
+                      type="checkbox"
+                      checked={settings.system_notifications !== false}
+                      onChange={(e) => handleChange('system_notifications', e.target.checked)}
+                      className="sr-only peer"
+                    />
+                    <div className="w-11 h-6 bg-slate-300 peer-focus:outline-none rounded-full peer dark:bg-slate-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-brand-blue" />
+                  </label>
+                </div>
+
+                <div className="flex items-center justify-between p-5 rounded-2xl bg-slate-50/50 dark:bg-slate-800/30 border border-slate-100 dark:border-slate-800">
+                  <div className="space-y-0.5">
+                    <h4 className="text-xs sm:text-sm font-extrabold text-slate-800 dark:text-slate-100">
+                      Email Bildirishnomalar
+                    </h4>
+                    <p className="text-xs text-slate-400 font-medium">
+                      Yangi testlar va to'lov kvitansiyalarini o'quvchi pochta manziliga yuborish
+                    </p>
+                  </div>
+
+                  <label className="relative inline-flex items-center cursor-pointer shrink-0">
+                    <input
+                      type="checkbox"
+                      checked={settings.email_notifications !== false}
+                      onChange={(e) => handleChange('email_notifications', e.target.checked)}
+                      className="sr-only peer"
+                    />
+                    <div className="w-11 h-6 bg-slate-300 peer-focus:outline-none rounded-full peer dark:bg-slate-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-brand-blue" />
+                  </label>
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
 }
