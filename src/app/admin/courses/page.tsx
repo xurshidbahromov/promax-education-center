@@ -184,7 +184,7 @@ export default function AdminCoursesPage() {
             <div
               key={sub.id}
               onClick={() => router.push(`/admin/courses/${sub.id}`)}
-              className="group bg-white/70 dark:bg-slate-900/70 backdrop-blur-xl border border-slate-200/60 dark:border-slate-800/60 rounded-3xl overflow-hidden flex flex-col justify-between transition-colors hover:border-slate-300 dark:hover:border-slate-700 cursor-pointer"
+              className="bg-white/70 dark:bg-slate-900/70 backdrop-blur-xl border border-slate-200/60 dark:border-slate-800/60 rounded-3xl overflow-hidden flex flex-col justify-between transition-colors hover:border-slate-300 dark:hover:border-slate-700 cursor-pointer"
             >
               <div>
                 {/* Subject Cover Banner */}
@@ -193,7 +193,7 @@ export default function AdminCoursesPage() {
                     <img
                       src={sub.cover_image}
                       alt={sub.title}
-                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                      className="w-full h-full object-cover"
                     />
                   ) : (
                     <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-blue-500/10 to-indigo-500/10 text-brand-blue">
@@ -215,7 +215,7 @@ export default function AdminCoursesPage() {
 
               {/* Box-free Footer Actions */}
               <div className="p-5 pt-0 flex items-center justify-between">
-                <span className="inline-flex items-center gap-1 text-xs font-bold text-slate-600 dark:text-slate-300 group-hover:text-brand-blue transition-colors">
+                <span className="inline-flex items-center gap-1 text-xs font-bold text-slate-600 dark:text-slate-300">
                   <span>Guruhlar & Darslar</span>
                   <ChevronRight size={16} />
                 </span>
