@@ -1,13 +1,14 @@
-"use client";
+content = """"use client";
 
 import { useState, useMemo } from "react";
 import {
   Banknote, Calendar, Filter, Search, User, CreditCard,
-  MoreVertical, CheckCircle2, XCircle, AlertCircle, ChevronDown, Plus, Wallet, X
+  MoreVertical, CheckCircle2, XCircle, AlertCircle, ChevronDown, Plus, Wallet
 } from "lucide-react";
 import { useSubjects, useGroups } from "@/hooks/useAdminData";
 import { useExpectedPayments, processPayment, deletePayment, ExpectedPayment } from "@/hooks/usePayments";
 import toast from "react-hot-toast";
+import { createClient } from "@/utils/supabase/client";
 
 export default function AdminPaymentsPage() {
   const [currentMonth, setCurrentMonth] = useState(() => {
@@ -139,20 +140,20 @@ export default function AdminPaymentsPage() {
       </div>
 
       {/* Summary Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         {[
           { label: "Kutilayotgan summa", value: formatMoney(summary.expected), icon: Wallet, color: "text-blue-500", bg: "bg-blue-50 dark:bg-blue-900/20" },
           { label: "Yig'ilgan summa", value: formatMoney(summary.collected), icon: Banknote, color: "text-emerald-500", bg: "bg-emerald-50 dark:bg-emerald-900/20" },
           { label: "To'lov qilganlar", value: `${summary.paidCount} ta o'quvchi`, icon: CheckCircle2, color: "text-emerald-500", bg: "bg-emerald-50 dark:bg-emerald-900/20" },
           { label: "Qarzdorlar", value: `${summary.pendingCount} ta o'quvchi`, icon: AlertCircle, color: "text-red-500", bg: "bg-red-50 dark:bg-red-900/20" }
         ].map((s, i) => (
-          <div key={i} className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl border border-gray-200/50 dark:border-slate-800/50 p-4 sm:p-5 rounded-2xl sm:rounded-3xl shadow-sm flex items-center gap-3.5 min-w-0">
-            <div className={`w-12 h-12 rounded-2xl flex items-center justify-center shrink-0 ${s.bg}`}>
-              <s.icon size={24} className={s.color} />
+          <div key={i} className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl border border-gray-200/50 dark:border-slate-800/50 p-6 rounded-3xl shadow-sm flex items-center gap-4">
+            <div className={`w-14 h-14 rounded-2xl flex items-center justify-center ${s.bg}`}>
+              <s.icon size={28} className={s.color} />
             </div>
-            <div className="min-w-0 flex-1">
-              <p className="text-[11px] font-bold text-slate-400 dark:text-slate-400 uppercase tracking-wider truncate leading-none mb-1.5">{s.label}</p>
-              <p className="text-lg sm:text-xl font-black text-slate-800 dark:text-slate-100 tracking-tight leading-tight truncate">{s.value}</p>
+            <div>
+              <p className="text-sm font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1">{s.label}</p>
+              <p className="text-2xl font-black text-slate-800 dark:text-slate-100">{s.value}</p>
             </div>
           </div>
         ))}
@@ -249,9 +250,10 @@ export default function AdminPaymentsPage() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-100 dark:divide-slate-800">
-                {filteredPayments.map((item) => {
+                {filteredPayments.map((item, idx) => {
                   const isPaid = item.payment?.status === 'completed';
                   const isPartial = item.payment?.status === 'partial';
+                  const isUnpaid = !item.payment;
                   
                   return (
                     <tr key={`${item.studentId}-${item.groupId}`} className="hover:bg-slate-50/50 dark:hover:bg-slate-800/30 transition-colors">
@@ -411,3 +413,8 @@ export default function AdminPaymentsPage() {
     </div>
   );
 }
+""""
+
+with open("src/app/admin/payments/page.tsx", "w") as f:
+    f.write(content)
+print("Payments page created successfully")

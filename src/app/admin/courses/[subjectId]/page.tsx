@@ -25,7 +25,7 @@ type ModalMode = "create" | "edit" | "students" | "create_video" | "edit_video" 
 
 const emptyForm = {
   id: "", name: "", description: "",
-  max_students: 20, schedule: "", teacher_id: "", status: "active" as "active" | "archived",
+  max_students: 20, schedule: "", teacher_id: "", status: "active" as "active" | "archived", price: 0
 };
 
 const emptyVideoForm = {
@@ -65,7 +65,7 @@ export default function SubjectGroupsPage({ params }: PageProps) {
   // --- Group Functions ---
   const openCreate = () => { setForm({ ...emptyForm }); setSelectedGroup(null); setModal("create"); };
   const openEdit = (g: Group) => {
-    setForm({ id: g.id, name: g.name, description: g.description || "", max_students: g.max_students, schedule: g.schedule || "", teacher_id: g.teacher_id || "", status: g.status });
+    setForm({ id: g.id, name: g.name, description: g.description || "", max_students: g.max_students, schedule: g.schedule || "", teacher_id: g.teacher_id || "", status: g.status, price: g.price || 0 });
     setSelectedGroup(g); setModal("edit");
   };
   const openStudents = (g: Group) => {
@@ -78,11 +78,11 @@ export default function SubjectGroupsPage({ params }: PageProps) {
     setSaving(true);
     try {
       if (modal === "create") {
-        const res = await createGroup({ name: form.name, subject_id: subjectId, description: form.description || undefined, max_students: form.max_students, schedule: form.schedule || undefined, teacher_id: form.teacher_id || undefined });
+        const res = await createGroup({ name: form.name, subject_id: subjectId, description: form.description || undefined, max_students: form.max_students, schedule: form.schedule || undefined, teacher_id: form.teacher_id || undefined, price: form.price });
         if (!res.success) throw new Error(res.error);
         toast.success("Guruh yaratildi");
       } else if (modal === "edit" && form.id) {
-        const res = await updateGroup(form.id, { name: form.name, description: form.description, max_students: form.max_students, schedule: form.schedule, teacher_id: form.teacher_id || undefined, status: form.status });
+        const res = await updateGroup(form.id, { name: form.name, description: form.description, max_students: form.max_students, schedule: form.schedule, teacher_id: form.teacher_id || undefined, status: form.status, price: form.price });
         if (!res.success) throw new Error(res.error);
         toast.success("Guruh saqlandi");
       }
@@ -315,6 +315,10 @@ export default function SubjectGroupsPage({ params }: PageProps) {
                   <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">Dars vaqti</label>
                   <input type="text" value={form.schedule} onChange={e => setForm({ ...form, schedule: e.target.value })} className="w-full px-4 py-2.5 bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-brand-blue/30 focus:border-transparent outline-none transition-all text-slate-800 dark:text-slate-100" placeholder="Dush, Chor 14:00" />
                 </div>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">Oylik to'lov summasi (so'm)</label>
+                <input type="number" min="0" value={form.price} onChange={e => setForm({ ...form, price: parseInt(e.target.value) || 0 })} className="w-full px-4 py-2.5 bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-brand-blue/30 focus:border-transparent outline-none transition-all text-slate-800 dark:text-slate-100" placeholder="Masalan: 300000" />
               </div>
               <div>
                 <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">Oqituvchi (ixtiyoriy)</label>

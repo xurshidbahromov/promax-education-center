@@ -495,6 +495,7 @@ export interface Group {
   schedule: string | null;
   teacher_id: string | null;
   status: 'active' | 'archived';
+  price: number;
   created_at: string;
   updated_at: string;
   subject?: { title: string };
@@ -541,6 +542,7 @@ export async function getGroup(id: string): Promise<Group | null> {
 export async function createGroup(groupData: {
   name: string; subject_id: string; description?: string;
   max_students?: number; schedule?: string; teacher_id?: string;
+  price?: number;
 }): Promise<{ success: boolean; error?: string; id?: string }> {
   const supabase = createClient();
   const { data, error } = await supabase.from("groups").insert(groupData).select("id").single();
@@ -550,7 +552,7 @@ export async function createGroup(groupData: {
 
 export async function updateGroup(
   id: string,
-  updates: Partial<{ name: string; description: string; max_students: number; schedule: string; teacher_id: string; status: "active" | "archived" }>
+  updates: Partial<{ name: string; description: string; max_students: number; schedule: string; teacher_id: string; status: "active" | "archived", price: number }>
 ): Promise<{ success: boolean; error?: string }> {
   const supabase = createClient();
   const { error } = await supabase.from("groups").update(updates).eq("id", id);
