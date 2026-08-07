@@ -1,4 +1,4 @@
-"use client";
+content = """"use client";
 
 import useSWR from "swr";
 import { useParams, useRouter } from "next/navigation";
@@ -23,11 +23,18 @@ export default function ResultDetailPage() {
 
   if (loading) {
     return (
-      <div className="max-w-4xl mx-auto space-y-6 animate-pulse">
-        <div className="h-10 w-32 bg-slate-200 dark:bg-slate-800 rounded-xl" />
-        <div className="h-52 w-full bg-slate-200 dark:bg-slate-800 rounded-[2rem]" />
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
-          {[1,2,3].map(i => <div key={i} className="h-44 bg-slate-200 dark:bg-slate-800 rounded-[1.5rem]" />)}
+      <div className="relative min-h-screen pb-24">
+        {/* Ambient bg */}
+        <div className="fixed inset-0 z-0 overflow-hidden pointer-events-none">
+          <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] rounded-full bg-blue-300/20 dark:bg-blue-500/10 blur-[130px]" />
+          <div className="absolute bottom-[-15%] right-[-10%] w-[45%] h-[45%] rounded-full bg-violet-300/20 dark:bg-purple-500/10 blur-[130px]" />
+        </div>
+        <div className="relative z-10 max-w-4xl mx-auto pt-4 animate-pulse space-y-6">
+          <div className="h-10 w-32 bg-slate-200 dark:bg-slate-800 rounded-xl" />
+          <div className="h-52 w-full bg-slate-200 dark:bg-slate-800 rounded-[2rem]" />
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+            {[1,2,3].map(i => <div key={i} className="h-44 bg-slate-200 dark:bg-slate-800 rounded-[1.5rem]" />)}
+          </div>
         </div>
       </div>
     );
@@ -35,8 +42,12 @@ export default function ResultDetailPage() {
 
   if (!result) {
     return (
-      <div className="flex items-center justify-center py-24">
-        <div className="text-center">
+      <div className="relative min-h-screen flex items-center justify-center">
+        <div className="fixed inset-0 z-0 overflow-hidden pointer-events-none">
+          <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] rounded-full bg-blue-300/20 dark:bg-blue-500/10 blur-[130px]" />
+          <div className="absolute bottom-[-15%] right-[-10%] w-[45%] h-[45%] rounded-full bg-violet-300/20 dark:bg-purple-500/10 blur-[130px]" />
+        </div>
+        <div className="relative z-10 text-center py-12">
           <div className="w-24 h-24 rounded-full bg-red-50 dark:bg-red-900/20 flex items-center justify-center mx-auto mb-6">
             <AlertCircle className="w-12 h-12 text-red-500" />
           </div>
@@ -71,7 +82,14 @@ export default function ResultDetailPage() {
   const StatusIcon = isExcellent ? Star : isPassed ? CheckCircle2 : XCircle;
 
   return (
-    <div className="max-w-4xl mx-auto space-y-6">
+    <div className="relative min-h-screen text-slate-800 dark:text-white pb-24">
+      {/* Ambient bg */}
+      <div className="fixed inset-0 z-0 overflow-hidden pointer-events-none">
+        <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] rounded-full bg-blue-300/20 dark:bg-blue-500/10 blur-[130px]" />
+        <div className="absolute bottom-[-15%] right-[-10%] w-[45%] h-[45%] rounded-full bg-violet-300/20 dark:bg-purple-500/10 blur-[130px]" />
+      </div>
+
+      <div className="relative z-10 max-w-4xl mx-auto pt-4 space-y-6">
         {/* Back Button */}
         <button
           onClick={() => router.push('/dashboard/results')}
@@ -344,6 +362,12 @@ export default function ResultDetailPage() {
           </p>
         </div>
 
+      </div>
     </div>
   );
 }
+"""
+
+with open("src/app/dashboard/results/[id]/page.tsx", "w") as f:
+    f.write(content)
+print("Results detail page written!")

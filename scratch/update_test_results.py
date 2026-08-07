@@ -1,4 +1,4 @@
-"use client";
+content = """"use client";
 
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
@@ -304,3 +304,8 @@ export default function TestResultsPage() {
     </div>
   );
 }
+"""
+
+with open("src/app/dashboard/tests/[id]/results/[attemptId]/page.tsx", "w") as f:
+    f.write(content)
+print("Updated successfully")

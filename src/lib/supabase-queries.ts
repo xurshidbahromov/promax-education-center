@@ -49,31 +49,53 @@ export interface DashboardStats {
 export async function getStudentResults(studentId: string): Promise<ExamResult[]> {
  const supabase = createClient();
 
- const { data, error } = await supabase
+ // Step 1: Get result rows without joins
+ const { data: results, error } = await supabase
  .from('results')
- .select(`
- *,
- exam:exams (
- title,
- date,
- type,
- max_score
- ),
- direction:directions (
- title,
- code
- )
- `)
+ .select('*')
  .eq('student_id', studentId)
  .order('created_at', { ascending: false });
 
  if (error) {
- console.error('Error fetching results:', error.message, error.details, error.hint, error);
+ console.error('Error fetching results:', error.message, JSON.stringify(error));
  return [];
  }
 
- return data || [];
+ if (!results || results.length === 0) return [];
+
+ // Step 2: Get unique exam_ids and fetch exam data in one query
+ const examIds = [...new Set(results.map(r => r.exam_id).filter(Boolean))];
+ let examsMap: Record<string, ExamResult['exam']> = {};
+ if (examIds.length > 0) {
+   const { data: exams } = await supabase
+     .from('exams')
+     .select('id, title, date, type, max_score')
+     .in('id', examIds);
+   if (exams) {
+     exams.forEach(e => { examsMap[e.id] = e; });
+   }
+ }
+
+ // Step 3: Get unique direction_ids and fetch direction data
+ const dirIds = [...new Set(results.map(r => r.direction_id).filter(Boolean))];
+ let directionsMap: Record<string, ExamResult['direction']> = {};
+ if (dirIds.length > 0) {
+   const { data: directions } = await supabase
+     .from('directions')
+     .select('id, title, code')
+     .in('id', dirIds);
+   if (directions) {
+     directions.forEach(d => { directionsMap[d.id] = d; });
+   }
+ }
+
+ return results.map(r => ({
+   ...r,
+   exam: r.exam_id ? examsMap[r.exam_id] : undefined,
+   direction: r.direction_id ? directionsMap[r.direction_id] : undefined,
+ }));
 }
+
 
 /**
  * Get a specific exam result by its ID
@@ -81,31 +103,51 @@ export async function getStudentResults(studentId: string): Promise<ExamResult[]
 export async function getExamResultById(resultId: string): Promise<ExamResult | null> {
  const supabase = createClient();
 
- const { data, error } = await supabase
+ // Step 1: Get the result row itself (no joins — avoids FK resolution errors)
+ // Use .maybeSingle() — returns null (not error) when 0 rows found
+ const { data: result, error } = await supabase
  .from('results')
- .select(`
- *,
- exam:exams (
- title,
- date,
- type,
- max_score
- ),
- direction:directions (
- title,
- code
- )
- `)
+ .select('*')
  .eq('id', resultId)
- .single();
+ .maybeSingle();
 
  if (error) {
- console.error('Error fetching exam result:', error);
+ console.error('Error fetching exam result:', error.message, JSON.stringify(error));
  return null;
+
  }
 
- return data;
+ if (!result) return null;
+
+ // Step 2: Try to get exam data separately (graceful fallback if table/FK missing)
+ let examData: ExamResult['exam'] | undefined;
+ if (result.exam_id) {
+   const { data: exam } = await supabase
+     .from('exams')
+     .select('title, date, type, max_score')
+     .eq('id', result.exam_id)
+     .single();
+   if (exam) examData = exam;
+ }
+
+ // Step 3: Try to get direction data separately (graceful fallback)
+ let directionData: ExamResult['direction'] | undefined;
+ if (result.direction_id) {
+   const { data: direction } = await supabase
+     .from('directions')
+     .select('title, code')
+     .eq('id', result.direction_id)
+     .single();
+   if (direction) directionData = direction;
+ }
+
+ return {
+   ...result,
+   exam: examData,
+   direction: directionData,
+ };
 }
+
 
 /**
  * Get available exams (for tests page)

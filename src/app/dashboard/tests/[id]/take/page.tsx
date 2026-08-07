@@ -194,7 +194,7 @@ export default function TakeTestPage() {
  await saveAnswers();
  const success = await completeTestAttempt(attemptId, test?.duration_minutes ? test.duration_minutes * 60 : 0);
  if (success) {
- router.push(`/dashboard/results/${attemptId}`);
+ router.push(`/dashboard/tests/${testId}/results/${attemptId}`);
  }
  } catch (error) {
  console.error("Error auto-submitting:", error);
@@ -224,7 +224,7 @@ export default function TakeTestPage() {
  if (success) {
  toast.success("Test muvaffaqiyatli yakunlandi!");
  // Redirect to results page
- router.push(`/dashboard/results/${attemptId}`);
+ router.push(`/dashboard/tests/${testId}/results/${attemptId}`);
  } else {
  toast.error("Testni yakunlashda xatolik yuz berdi");
  setSubmitting(false);

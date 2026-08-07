@@ -730,3 +730,156 @@ export async function duplicateTest(testId: string): Promise<string | null> {
  return null;
  }
 }
+
+/**
+ * Get a single test with all its questions (for admin detail view)
+ */
+export async function getTestWithQuestions(testId: string): Promise<(Test & { questions: Question[] }) | null> {
+  const supabase = createClient();
+  
+  const { data: test, error: testError } = await supabase
+    .from('tests')
+    .select('*')
+    .eq('id', testId)
+    .single();
+  
+  if (testError || !test) return null;
+  
+  const { data: questions, error: questionsError } = await supabase
+    .from('questions')
+    .select('*')
+    .eq('test_id', testId)
+    .order('order_index');
+  
+  if (questionsError) return null;
+  
+  return { ...test, questions: questions || [] };
+}
+
+/**
+ * Get all tests (for admin list with React Query)
+ */
+export async function getAllTests(): Promise<Test[]> {
+  const supabase = createClient();
+  const { data, error } = await supabase
+    .from('tests')
+    .select('*')
+    .order('created_at', { ascending: false });
+  if (error) throw error;
+  return data || [];
+}
+
+export interface TestResult {
+  id: string;
+  student_id: string;
+  started_at: string;
+  completed_at: string | null;
+  score: number;
+  max_score: number;
+  percentage: number | null;
+  status: AttemptStatus;
+  student: {
+    full_name: string | null;
+    phone: string | null;
+  } | null;
+}
+
+/**
+ * Get results for a specific test (who attempted it and their scores)
+ */
+export async function getTestResults(testId: string): Promise<TestResult[]> {
+  const supabase = createClient();
+  
+  const { data, error } = await supabase
+    .from('test_attempts')
+    .select(`
+      id,
+      student_id,
+      started_at,
+      completed_at,
+      score,
+      max_score,
+      percentage,
+      status,
+      student:profiles!test_attempts_student_id_fkey(full_name, phone)
+    `)
+    .eq('test_id', testId)
+    .order('completed_at', { ascending: false });
+  
+  if (error) {
+    console.error('Error fetching test results:', error);
+    return [];
+  }
+  
+  return (data || []) as unknown as TestResult[];
+}
+
+export interface GroupTest {
+  id: string;
+  group_id: string;
+  test_id: string;
+  assigned_at: string;
+  due_date: string | null;
+  group: { name: string } | null;
+}
+
+/**
+ * Assign a test to a group
+ */
+export async function assignTestToGroup(
+  testId: string,
+  groupId: string,
+  dueDate?: string
+): Promise<{ success: boolean; error?: string }> {
+  const supabase = createClient();
+  
+  // Check if already assigned
+  const { data: existing } = await supabase
+    .from('group_tests')
+    .select('id')
+    .eq('test_id', testId)
+    .eq('group_id', groupId)
+    .single();
+  
+  if (existing) {
+    return { success: false, error: 'Bu test allaqachon ushbu guruhga biriktirilgan' };
+  }
+  
+  const { error } = await supabase
+    .from('group_tests')
+    .insert({ test_id: testId, group_id: groupId, due_date: dueDate || null });
+  
+  if (error) return { success: false, error: error.message };
+  return { success: true };
+}
+
+/**
+ * Remove test assignment from a group
+ */
+export async function removeTestFromGroup(testId: string, groupId: string): Promise<{ success: boolean; error?: string }> {
+  const supabase = createClient();
+  const { error } = await supabase
+    .from('group_tests')
+    .delete()
+    .eq('test_id', testId)
+    .eq('group_id', groupId);
+  if (error) return { success: false, error: error.message };
+  return { success: true };
+}
+
+/**
+ * Get all groups that a test is assigned to
+ */
+export async function getTestGroups(testId: string): Promise<GroupTest[]> {
+  const supabase = createClient();
+  const { data, error } = await supabase
+    .from('group_tests')
+    .select(`
+      id, group_id, test_id, assigned_at, due_date,
+      group:groups(name)
+    `)
+    .eq('test_id', testId);
+  
+  if (error) return [];
+  return (data || []) as unknown as GroupTest[];
+}

@@ -15,6 +15,7 @@ import {
  AlertCircle
 } from "lucide-react";
 import { createTest, type Subject, type TestType } from "@/lib/tests";
+import { useSubjects } from "@/hooks/useAdminData";
 
 interface Question {
  id: string;
@@ -46,13 +47,22 @@ export default function CreateTestPage() {
  const [questions, setQuestions] = useState<Question[]>([]);
  const [editingQuestion, setEditingQuestion] = useState<Question | null>(null);
 
- const subjects: { value: Subject; label: string }[] = [
+ // Load real subjects from DB
+ const { data: dbSubjects = [] } = useSubjects();
+
+ const fallbackSubjects: { value: Subject; label: string }[] = [
  { value: "math", label: "Matematika" },
  { value: "english", label: "Ingliz tili" },
  { value: "physics", label: "Fizika" },
  { value: "chemistry", label: "Kimyo" },
  { value: "biology", label: "Biologiya" },
+ { value: "general", label: "Umumiy" },
  ];
+
+ // Merge DB subjects with the hardcoded fallback list (hardcoded act as fallback)
+ const subjectOptions = dbSubjects.length > 0
+ ? dbSubjects.map(s => ({ value: s.title.toLowerCase().replace(/\s+/g, '_'), label: s.title }))
+ : fallbackSubjects;
 
  const testTypes: { value: TestType; label: string }[] = [
  { value: "subject", label: "Fan Testi" },
@@ -216,7 +226,7 @@ export default function CreateTestPage() {
  onChange={(e) => setSubject(e.target.value as Subject)}
  className="w-full px-4 py-3 rounded-xl border border-gray-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-100 focus:ring-2 focus:ring-brand-blue"
  >
- {subjects.map((s) => (
+ {subjectOptions.map((s) => (
  <option key={s.value} value={s.value}>
  {s.label}
  </option>

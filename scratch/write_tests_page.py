@@ -1,4 +1,4 @@
-"use client";
+content = """"use client";
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
@@ -318,3 +318,8 @@ function TestCard({
     </div>
   );
 }
+"""
+
+with open("src/app/admin/tests/page.tsx", "w") as f:
+    f.write(content)
+print("Tests page written!")

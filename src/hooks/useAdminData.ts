@@ -4,6 +4,8 @@ import { createClient } from '@/utils/supabase/client';
 import { getAdminStats, getRecentActivity, getTeachers, getStudents, getAllResults, Student, getGroups, getGroupStudents, getStudentsNotInGroup } from '@/lib/admin-queries';
 import { getPaymentSummariesForStudents } from '@/lib/payments';
 import { getSubjects, getSubjectById, getLessonsBySubjectId, getMaterialsByLessonId } from '@/lib/supabase-queries';
+import { getAllTests, getTestWithQuestions, getTestResults, getTestGroups } from '@/lib/tests';
+
 
 export const useAdminStats = () => {
  return useQuery({
@@ -115,6 +117,40 @@ export const useAvailableStudents = (groupId: string, search: string = "") => {
  });
 };
 
+// --- TEST HOOKS ---
+
+export const useTests = () => {
+  return useQuery({
+    queryKey: ['tests'],
+    queryFn: () => getAllTests(),
+  });
+};
+
+export const useTestDetail = (testId: string) => {
+  return useQuery({
+    queryKey: ['testDetail', testId],
+    queryFn: () => getTestWithQuestions(testId),
+    enabled: !!testId,
+  });
+};
+
+export const useTestResults = (testId: string) => {
+  return useQuery({
+    queryKey: ['testResults', testId],
+    queryFn: () => getTestResults(testId),
+    enabled: !!testId,
+  });
+};
+
+export const useTestGroups = (testId: string) => {
+  return useQuery({
+    queryKey: ['testGroups', testId],
+    queryFn: () => getTestGroups(testId),
+    enabled: !!testId,
+  });
+};
+
+
 /**
  * A hook to automatically invalidate relevant queries when Supabase data changes.
  * This provides true Realtime updates across multiple active sessions.
@@ -140,12 +176,19 @@ export const useSupabaseRealtimeSync = () => {
           if (table === 'group_students') {
             queryClient.invalidateQueries({ queryKey: ['groupStudents'] });
             queryClient.invalidateQueries({ queryKey: ['availableStudents'] });
-            queryClient.invalidateQueries({ queryKey: ['groups'] }); // to update student count
+            queryClient.invalidateQueries({ queryKey: ['groups'] });
           }
           if (table === 'profiles') {
             queryClient.invalidateQueries({ queryKey: ['teachers'] });
             queryClient.invalidateQueries({ queryKey: ['students'] });
             queryClient.invalidateQueries({ queryKey: ['availableStudents'] });
+          }
+          if (table === 'tests') queryClient.invalidateQueries({ queryKey: ['tests'] });
+          if (table === 'questions') queryClient.invalidateQueries({ queryKey: ['testDetail'] });
+          if (table === 'test_attempts') queryClient.invalidateQueries({ queryKey: ['testResults'] });
+          if (table === 'group_tests') {
+            queryClient.invalidateQueries({ queryKey: ['testGroups'] });
+            queryClient.invalidateQueries({ queryKey: ['tests'] });
           }
         }
       )
