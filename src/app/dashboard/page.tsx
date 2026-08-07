@@ -1,27 +1,27 @@
 "use client";
 
 import { useLanguage } from "@/context/LanguageContext";
-import { useCurrentUser, useUserProfile, useDashboardStats, useUpcomingTests } from "@/hooks/useDashboardData";
+import { useCurrentUser, useUserProfile, useDashboardStats, useUpcomingTests, useAnnouncements } from "@/hooks/useDashboardData";
 import { motion } from "framer-motion";
 import Link from "next/link";
 import Image from "next/image";
 import { 
- LibraryBig,
- BookOpenText,
- FlaskConical, 
- Globe, 
- Calculator, 
- Atom, 
- Leaf, 
- FileCheck, 
- Trophy, 
- ChevronRight, 
- Megaphone,
- Clock,
- Zap,
- TrendingUp
+  LibraryBig,
+  BookOpenText,
+  FlaskConical, 
+  Globe, 
+  Calculator, 
+  Atom, 
+  Leaf, 
+  FileCheck, 
+  Trophy, 
+  ChevronRight, 
+  Megaphone,
+  Clock,
+  Zap,
+  TrendingUp
 } from "lucide-react";
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import useSWR from "swr";
 import { getSubjects, type Subject } from "@/lib/supabase-queries";
 import { DashboardHomeSkeleton } from "@/components/ui/Skeleton";
@@ -128,19 +128,36 @@ const featuredAnnouncements: FeaturedAnnouncement[] = [
 
 // Main dashboard page component
 export default function DashboardPage() {
- const { t } = useLanguage();
- const { data: user } = useCurrentUser();
- const { data: profile } = useUserProfile(user?.id);
- const { data: stats } = useDashboardStats(user?.id);
- const { data: upcomingTests } = useUpcomingTests();
+  const { t } = useLanguage();
+  const { data: user } = useCurrentUser();
+  const { data: profile } = useUserProfile(user?.id);
+  const { data: stats } = useDashboardStats(user?.id);
+  const { data: upcomingTests } = useUpcomingTests();
+  const { data: dbAnnouncements = [] } = useAnnouncements();
 
- const { data: subjects = [], isLoading: subjectsLoading } = useSWR('subjects', getSubjects);
+  const { data: subjects = [], isLoading: subjectsLoading } = useSWR('subjects', getSubjects);
 
- const isLoading = !user || subjectsLoading;
+  const activeBannerAnnouncements = useMemo(() => {
+    const customBanners = (dbAnnouncements || []).filter((a: any) => a.is_featured || a.image_url);
+    if (customBanners.length > 0) {
+      return customBanners.map((a: any) => ({
+        id: a.id,
+        title: a.title,
+        message: a.message,
+        image: a.image_url || "https://images.unsplash.com/photo-1434030216411-0b793f4b4173?w=600&auto=format&fit=crop&q=80",
+        badge: a.type?.toUpperCase() || "E'LON",
+        date: a.expires_at ? new Date(a.expires_at).toLocaleDateString('uz-UZ') : "Uzoq muddatli",
+        badgeBg: a.type === 'error' ? "bg-red-500/80 text-white" : a.type === 'warning' ? "bg-amber-500/80 text-white" : a.type === 'success' ? "bg-emerald-500/80 text-white" : "bg-blue-500/80 text-white"
+      }));
+    }
+    return featuredAnnouncements;
+  }, [dbAnnouncements]);
 
- const firstName = profile?.full_name?.split(" ")[0] || user?.email?.split("@")[0] || "Student";
- const hour = new Date().getHours();
- const greeting = hour < 12 ? "Xayrli tong" : hour < 18 ? "Xayrli kun" : "Xayrli kech";
+  const isLoading = !user || subjectsLoading;
+
+  const firstName = profile?.full_name?.split(" ")[0] || user?.email?.split("@")[0] || "Student";
+  const hour = new Date().getHours();
+  const greeting = hour < 12 ? "Xayrli tong" : hour < 18 ? "Xayrli kun" : "Xayrli kech";
 
  return (
  <div className="relative min-h-screen text-slate-800 dark:text-white font-sans pb-24">
@@ -364,7 +381,7 @@ export default function DashboardPage() {
  </div>
 
  <div className="flex gap-4 overflow-x-auto pb-4 snap-x snap-mandatory no-scrollbar w-full scroll-smooth">
- {featuredAnnouncements.map((item, i) => (
+ {activeBannerAnnouncements.map((item, i) => (
  <motion.div
  key={item.id}
  initial={{ opacity: 0, scale: 0.95 }}
