@@ -91,16 +91,12 @@ export default function SubjectGroupsPage({ params }: PageProps) {
   };
 
   const handleDelete = async (g: Group) => {
-    if (!confirm(g.name + " guruhini ochirmoqchimisiz?")) return;
+    if (!confirm(g.name + " guruhini o'chirmoqchimisiz?")) return;
     await deleteGroup(g.id);
   };
 
   const handleToggleStatus = async (g: Group) => {
     await updateGroup(g.id, { status: g.status === "active" ? "archived" : "active" });
-  };
-
-  const searchAvailable = (q: string) => {
-    setAddSearch(q);
   };
 
   const handleAddStudent = async (studentId: string) => {
@@ -112,7 +108,7 @@ export default function SubjectGroupsPage({ params }: PageProps) {
   };
 
   const handleRemoveStudent = async (studentId: string) => {
-    if (!selectedGroup || !confirm("Bu oquvchini guruhdan chiqarishni xohlaysizmi?")) return;
+    if (!selectedGroup || !confirm("Bu o'quvchini guruhdan chiqarishni xohlaysizmi?")) return;
     await removeStudentFromGroup(selectedGroup.id, studentId);
   };
 
@@ -150,373 +146,414 @@ export default function SubjectGroupsPage({ params }: PageProps) {
     else toast.success("O'chirildi");
   };
 
-  if (isLoading) return (
-    <div className="flex items-center justify-center py-32 text-slate-500">
-      <div className="animate-spin w-8 h-8 border-2 border-brand-blue border-t-transparent rounded-full mr-3" />
-      Yuklanmoqda...
-    </div>
-  );
+  const formatMoney = (amount: number) => {
+    return amount.toLocaleString('uz-UZ') + " so'm";
+  };
 
-  const activeGroups = groups.filter(g => g.status === "active");
-  const archivedGroups = groups.filter(g => g.status === "archived");
-  const totalStudents = groups.reduce((s, g) => s + (g.student_count || 0), 0);
+  if (isLoading) {
+    return (
+      <div className="w-full max-w-[1400px] mx-auto p-6 space-y-6 animate-pulse">
+        <div className="h-10 bg-slate-100 dark:bg-slate-800 rounded-2xl w-48" />
+        <div className="h-40 bg-slate-100 dark:bg-slate-800 rounded-3xl w-full" />
+      </div>
+    );
+  }
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center gap-4">
-        <Link href="/admin/courses" className="p-2 rounded-xl text-slate-500 hover:text-slate-800 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors active:scale-95">
-          <ArrowLeft size={20} />
-        </Link>
-        <div className="flex-1">
-          <div className="flex items-center gap-1.5 text-sm mb-1">
-            <Link href="/admin/courses" className="text-slate-400 hover:text-brand-blue transition-colors">Fanlar</Link>
-            <span className="text-slate-300 dark:text-slate-600">›</span>
-            <span className="text-slate-700 dark:text-slate-200 font-semibold">{subject?.title}</span>
+    <div className="w-full max-w-[1400px] mx-auto space-y-6">
+      {/* Header & Back */}
+      <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 pb-2 border-b border-slate-200/50 dark:border-slate-800/50">
+        <div className="flex items-center gap-3">
+          <Link
+            href="/admin/courses"
+            className="p-2 text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 transition-colors"
+            title="Orqaga"
+          >
+            <ArrowLeft size={20} />
+          </Link>
+          <div>
+            <h1 className="text-3xl font-black text-slate-800 dark:text-slate-100 tracking-tight font-sans-pro">
+              {subject?.title || "Fan Tafsilotlari"}
+            </h1>
+            <p className="text-sm font-medium text-slate-400 dark:text-slate-500 mt-1">
+              Guruhlar va video darslarni boshqarish
+            </p>
           </div>
-          <h1 className="text-2xl font-semibold text-slate-800 dark:text-slate-100 flex items-center gap-2">
-            Boshqaruv Paneli
-          </h1>
         </div>
-        {activeTab === "groups" ? (
-          <button onClick={openCreate} className="flex items-center gap-2 bg-brand-blue hover:bg-blue-600 text-white px-4 py-2.5 rounded-xl font-medium transition-colors shadow-lg shadow-brand-blue/20 active:scale-95">
-            <Plus size={18} />Yangi guruh
-          </button>
-        ) : (
-          <button onClick={openCreateVideo} className="flex items-center gap-2 bg-emerald-500 hover:bg-emerald-600 text-white px-4 py-2.5 rounded-xl font-medium transition-colors shadow-lg shadow-emerald-500/20 active:scale-95">
-            <Video size={18} />Yangi video dars
-          </button>
-        )}
-      </div>
 
-      {/* TABS */}
-      <div className="flex items-center gap-2 border-b border-gray-200 dark:border-slate-800 pb-px">
-        <button 
-          onClick={() => setActiveTab("groups")}
-          className={`flex items-center gap-2 px-4 py-3 font-medium text-sm border-b-2 transition-colors ${activeTab === "groups" ? "border-brand-blue text-brand-blue" : "border-transparent text-slate-500 hover:text-slate-700 dark:hover:text-slate-300 hover:border-slate-300 dark:hover:border-slate-700"}`}
-        >
-          <Layers size={18} />
-          Guruhlar ({groups.length})
-        </button>
-        <button 
-          onClick={() => setActiveTab("videos")}
-          className={`flex items-center gap-2 px-4 py-3 font-medium text-sm border-b-2 transition-colors ${activeTab === "videos" ? "border-emerald-500 text-emerald-500 dark:text-emerald-400" : "border-transparent text-slate-500 hover:text-slate-700 dark:hover:text-slate-300 hover:border-slate-300 dark:hover:border-slate-700"}`}
-        >
-          <PlayCircle size={18} />
-          Video Darslar ({lessons.length})
-        </button>
-      </div>
-
-      {/* CONTENT: GROUPS */}
-      {activeTab === "groups" && (
-        <>
-          <div className="grid grid-cols-3 gap-4">
-            {[
-              { label: "Jami guruhlar", value: groups.length, color: "text-slate-800 dark:text-slate-100" },
-              { label: "Faol guruhlar", value: activeGroups.length, color: "text-emerald-600" },
-              { label: "Jami oquvchilar", value: totalStudents, color: "text-brand-blue" },
-            ].map((s, i) => (
-              <div key={i} className="bg-white dark:bg-slate-900 p-4 rounded-2xl border border-gray-100 dark:border-slate-800 shadow-sm flex flex-col justify-center">
-                <p className="text-xs text-slate-500 font-medium uppercase tracking-wider mb-1">{s.label}</p>
-                <p className={`text-2xl font-bold ${s.color}`}>{s.value}</p>
-              </div>
-            ))}
+        {/* Tab Switcher & Primary Action */}
+        <div className="flex items-center gap-3 self-start md:self-auto">
+          <div className="bg-slate-100 dark:bg-slate-800/60 p-1 rounded-2xl flex items-center gap-1">
+            <button
+              onClick={() => setActiveTab("groups")}
+              className={`px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-2 ${
+                activeTab === "groups"
+                  ? "bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-100 shadow-sm"
+                  : "text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-white"
+              }`}
+            >
+              <Layers size={15} />
+              <span>Guruhlar ({groups.length})</span>
+            </button>
+            <button
+              onClick={() => setActiveTab("videos")}
+              className={`px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-2 ${
+                activeTab === "videos"
+                  ? "bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-100 shadow-sm"
+                  : "text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-white"
+              }`}
+            >
+              <Video size={15} />
+              <span>Video Darslar ({lessons.length})</span>
+            </button>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-            {activeGroups.map(g => (
-              <GroupCard key={g.id} group={g} onEdit={openEdit} onDelete={handleDelete} onToggleStatus={handleToggleStatus} onStudents={openStudents} />
-            ))}
-          </div>
-
-          {archivedGroups.length > 0 && (
-            <div className="pt-8">
-              <h2 className="text-lg font-semibold text-slate-800 dark:text-slate-100 mb-4 flex items-center gap-2">
-                <Archive size={20} className="text-slate-400" />
-                Arxivlangan guruhlar
-              </h2>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 opacity-70 hover:opacity-100 transition-opacity">
-                {archivedGroups.map(g => (
-                  <GroupCard key={g.id} group={g} onEdit={openEdit} onDelete={handleDelete} onToggleStatus={handleToggleStatus} onStudents={openStudents} />
-                ))}
-              </div>
-            </div>
+          {activeTab === "groups" ? (
+            <button
+              onClick={openCreate}
+              className="inline-flex items-center gap-2 px-4 py-2.5 bg-brand-blue hover:bg-blue-600 active:scale-[0.98] text-white rounded-xl text-xs font-bold transition-all shadow-md shadow-brand-blue/10"
+            >
+              <Plus size={16} />
+              <span>Guruh Yaratish</span>
+            </button>
+          ) : (
+            <button
+              onClick={openCreateVideo}
+              className="inline-flex items-center gap-2 px-4 py-2.5 bg-brand-blue hover:bg-blue-600 active:scale-[0.98] text-white rounded-xl text-xs font-bold transition-all shadow-md shadow-brand-blue/10"
+            >
+              <Plus size={16} />
+              <span>Video Qo'shish</span>
+            </button>
           )}
-        </>
-      )}
+        </div>
+      </div>
 
-      {/* CONTENT: VIDEO LESSONS */}
-      {activeTab === "videos" && (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-          {lessons.length === 0 ? (
-            <div className="col-span-full py-16 text-center text-slate-500 bg-white dark:bg-slate-900 rounded-2xl border border-dashed border-gray-200 dark:border-slate-800">
-              Bu fanga tegishli video darslar halicha yo'q.
+      {/* Content Tab: Groups */}
+      {activeTab === "groups" && (
+        <div className="space-y-4">
+          {groups.length === 0 ? (
+            <div className="py-16 text-center text-slate-400 bg-white/70 dark:bg-slate-900/70 backdrop-blur-xl rounded-3xl border border-dashed border-slate-200 dark:border-slate-800">
+              <Layers size={32} className="mx-auto mb-2 opacity-40" />
+              <p className="text-sm font-semibold">Bu fanda hali guruhlar yaratilmagan</p>
             </div>
           ) : (
-            lessons.map(lesson => {
-              const mainVideo = materials[lesson.id]?.find(m => m.type === 'video');
-              return (
-                <div key={lesson.id} className="group bg-white dark:bg-slate-900 rounded-2xl border border-gray-100 dark:border-slate-800 shadow-sm overflow-hidden hover:shadow-md transition-shadow">
-                  <div className="aspect-video bg-slate-100 dark:bg-slate-800 relative flex items-center justify-center">
-                    <PlayCircle size={48} className="text-slate-300 dark:text-slate-600" />
-                  </div>
-                  <div className="p-4">
-                    <div className="flex items-start justify-between gap-2 mb-2">
-                      <h3 className="font-semibold text-slate-800 dark:text-slate-100 line-clamp-2">{lesson.title}</h3>
-                      <div className="flex items-center gap-0.5 flex-shrink-0">
-                        <button onClick={() => openEditVideo(lesson)} className="p-1.5 text-slate-400 hover:text-emerald-500 hover:bg-emerald-50 dark:hover:bg-emerald-900/20 rounded-lg transition-colors active:scale-90" title="Tahrirlash">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+              {groups.map((g) => {
+                const isArchived = g.status === "archived";
+
+                return (
+                  <div
+                    key={g.id}
+                    className={`bg-white/70 dark:bg-slate-900/70 backdrop-blur-xl border border-slate-200/60 dark:border-slate-800/60 rounded-3xl p-5 flex flex-col justify-between gap-4 transition-colors hover:border-slate-300 dark:hover:border-slate-700 ${
+                      isArchived ? "opacity-60" : ""
+                    }`}
+                  >
+                    <div className="space-y-3">
+                      <div className="flex items-start justify-between gap-2">
+                        <div>
+                          <h3 className="font-extrabold text-base text-slate-800 dark:text-slate-100">{g.name}</h3>
+                          <p className="text-xs text-slate-400 font-medium mt-0.5">
+                            O'qituvchi: {g.teacher?.full_name || "Biriktirilmagan"}
+                          </p>
+                        </div>
+
+                        <span className="px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300">
+                          {g.student_count || 0}/{g.max_students} sig'im
+                        </span>
+                      </div>
+
+                      <div className="space-y-1.5 text-xs text-slate-500 dark:text-slate-400 font-medium">
+                        <div className="flex items-center gap-1.5">
+                          <Clock size={13} className="text-slate-400 shrink-0" />
+                          <span>{g.schedule || "Dars vaqti kiritilmagan"}</span>
+                        </div>
+                        <div className="flex items-center gap-1.5 font-bold text-slate-800 dark:text-slate-200">
+                          <span>Oylik to'lov: {formatMoney(g.price || 0)}</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Box-free Action Bar */}
+                    <div className="pt-3 border-t border-slate-100 dark:border-slate-800/50 flex items-center justify-between">
+                      <button
+                        onClick={() => openStudents(g)}
+                        className="inline-flex items-center gap-1.5 text-xs font-bold text-brand-blue hover:underline"
+                      >
+                        <Users size={14} />
+                        <span>O'quvchilar ({g.student_count || 0})</span>
+                      </button>
+
+                      <div className="flex items-center gap-1.5">
+                        <button
+                          onClick={() => openEdit(g)}
+                          className="p-1.5 text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 transition-colors"
+                          title="Tahrirlash"
+                        >
                           <Edit2 size={15} />
                         </button>
-                        <button onClick={() => handleDeleteVideo(lesson)} className="p-1.5 text-slate-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors active:scale-90" title="O'chirish">
+                        <button
+                          onClick={() => handleToggleStatus(g)}
+                          className="p-1.5 text-slate-400 hover:text-amber-500 transition-colors"
+                          title={isArchived ? "Aktivlashtirish" : "Arxivlash"}
+                        >
+                          {isArchived ? <ArchiveRestore size={15} /> : <Archive size={15} />}
+                        </button>
+                        <button
+                          onClick={() => handleDelete(g)}
+                          className="p-1.5 text-slate-400 hover:text-red-500 transition-colors"
+                          title="O'chirish"
+                        >
                           <Trash2 size={15} />
                         </button>
                       </div>
                     </div>
-                    {lesson.description && (
-                      <p className="text-sm text-slate-500 line-clamp-2 mb-3">{lesson.description}</p>
-                    )}
-                    {mainVideo && (
-                      <a href={mainVideo.url} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1.5 text-xs font-medium text-brand-blue hover:text-blue-600 bg-blue-50 hover:bg-blue-100 dark:bg-blue-900/20 dark:hover:bg-blue-900/40 px-2.5 py-1.5 rounded-lg transition-colors">
-                        <Video size={14} /> Videoni korish
-                      </a>
-                    )}
                   </div>
-                </div>
-              );
-            })
+                );
+              })}
+            </div>
           )}
         </div>
       )}
 
-      {/* --- MODALS --- */}
-      
-      {/* Group Create/Edit Modal */}
-      {(modal === "create" || modal === "edit") && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
-          <div className="bg-white dark:bg-slate-900 rounded-3xl shadow-2xl w-full max-w-md overflow-hidden">
-            <div className="px-6 py-4 border-b border-gray-100 dark:border-slate-800 flex items-center justify-between">
-              <h3 className="font-semibold text-lg text-slate-800 dark:text-slate-100">{modal === "create" ? "Yangi guruh" : "Guruhni tahrirlash"}</h3>
-              <button onClick={closeModal} className="p-1.5 text-slate-400 hover:text-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-colors"><X size={20} /></button>
+      {/* Content Tab: Video Lessons */}
+      {activeTab === "videos" && (
+        <div className="space-y-4">
+          {lessons.length === 0 ? (
+            <div className="py-16 text-center text-slate-400 bg-white/70 dark:bg-slate-900/70 backdrop-blur-xl rounded-3xl border border-dashed border-slate-200 dark:border-slate-800">
+              <Video size={32} className="mx-auto mb-2 opacity-40" />
+              <p className="text-sm font-semibold">Bu fanda hali video darslar yo'q</p>
             </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+              {lessons.map((lesson) => {
+                const mainVideo = materials[lesson.id]?.find(m => m.type === 'video');
+
+                return (
+                  <div
+                    key={lesson.id}
+                    className="bg-white/70 dark:bg-slate-900/70 backdrop-blur-xl border border-slate-200/60 dark:border-slate-800/60 rounded-3xl p-5 flex flex-col justify-between gap-4 transition-colors hover:border-slate-300 dark:hover:border-slate-700"
+                  >
+                    <div className="space-y-2">
+                      <div className="flex items-center gap-2">
+                        <PlayCircle size={18} className="text-emerald-500 shrink-0" />
+                        <h3 className="font-bold text-sm text-slate-800 dark:text-slate-100 truncate">{lesson.title}</h3>
+                      </div>
+                      <p className="text-xs text-slate-400 dark:text-slate-400 line-clamp-2 font-medium">
+                        {lesson.description || "Izoh yo'q"}
+                      </p>
+                    </div>
+
+                    <div className="pt-3 border-t border-slate-100 dark:border-slate-800/50 flex items-center justify-between">
+                      {mainVideo?.url ? (
+                        <a
+                          href={mainVideo.url}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="text-xs font-bold text-emerald-600 hover:underline truncate"
+                        >
+                          Videoni Ko'rish
+                        </a>
+                      ) : (
+                        <span className="text-xs text-slate-400 font-medium">Havola yo'q</span>
+                      )}
+
+                      <div className="flex items-center gap-1.5">
+                        <button
+                          onClick={() => openEditVideo(lesson)}
+                          className="p-1.5 text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 transition-colors"
+                          title="Tahrirlash"
+                        >
+                          <Edit2 size={15} />
+                        </button>
+                        <button
+                          onClick={() => handleDeleteVideo(lesson)}
+                          className="p-1.5 text-slate-400 hover:text-red-500 transition-colors"
+                          title="O'chirish"
+                        >
+                          <Trash2 size={15} />
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Modal: Group Create/Edit */}
+      {(modal === "create" || modal === "edit") && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-sm">
+          <div className="bg-white dark:bg-slate-900 rounded-3xl shadow-xl w-full max-w-md overflow-hidden border border-slate-200/80 dark:border-slate-800">
+            <div className="px-6 py-5 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between">
+              <h3 className="font-bold text-base text-slate-800 dark:text-slate-100">
+                {modal === "create" ? "Yangi Guruh Yaratish" : "Guruhni Tahrirlash"}
+              </h3>
+              <button onClick={closeModal} className="p-1.5 text-slate-400 hover:text-slate-700 transition-colors">
+                <X size={18} />
+              </button>
+            </div>
+
             <div className="p-6 space-y-4">
               <div>
-                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">Guruh nomi <span className="text-red-500">*</span></label>
-                <input type="text" value={form.name} onChange={e => setForm({ ...form, name: e.target.value })} className="w-full px-4 py-2.5 bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-brand-blue/30 focus:border-transparent outline-none transition-all text-slate-800 dark:text-slate-100" placeholder="Masalan: M-101" />
+                <label className="block text-xs font-bold text-slate-600 dark:text-slate-300 uppercase tracking-wider mb-1.5">Guruh Nomi *</label>
+                <input type="text" value={form.name} onChange={e => setForm({ ...form, name: e.target.value })} className="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-brand-blue/30 outline-none text-xs font-bold text-slate-800 dark:text-slate-100" placeholder="Masalan: M-101" />
               </div>
+
               <div>
-                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">Izoh</label>
-                <textarea value={form.description} onChange={e => setForm({ ...form, description: e.target.value })} className="w-full px-4 py-2.5 bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-brand-blue/30 focus:border-transparent outline-none transition-all text-slate-800 dark:text-slate-100 resize-none h-20" placeholder="Qoshimcha malumotlar..." />
+                <label className="block text-xs font-bold text-slate-600 dark:text-slate-300 uppercase tracking-wider mb-1.5">Oylik To'lov Summasi (so'm)</label>
+                <input type="number" min="0" value={form.price} onChange={e => setForm({ ...form, price: parseInt(e.target.value) || 0 })} className="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-brand-blue/30 outline-none text-xs font-bold text-slate-800 dark:text-slate-100" placeholder="Masalan: 300000" />
               </div>
-              <div className="grid grid-cols-2 gap-4">
+
+              <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">Oquvchilar sigimi</label>
-                  <input type="number" min="1" max="100" value={form.max_students} onChange={e => setForm({ ...form, max_students: parseInt(e.target.value) || 20 })} className="w-full px-4 py-2.5 bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-brand-blue/30 focus:border-transparent outline-none transition-all text-slate-800 dark:text-slate-100" />
+                  <label className="block text-xs font-bold text-slate-600 dark:text-slate-300 uppercase tracking-wider mb-1.5">Sig'im (Max)</label>
+                  <input type="number" min="1" max="100" value={form.max_students} onChange={e => setForm({ ...form, max_students: parseInt(e.target.value) || 20 })} className="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-brand-blue/30 outline-none text-xs font-bold text-slate-800 dark:text-slate-100" />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">Dars vaqti</label>
-                  <input type="text" value={form.schedule} onChange={e => setForm({ ...form, schedule: e.target.value })} className="w-full px-4 py-2.5 bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-brand-blue/30 focus:border-transparent outline-none transition-all text-slate-800 dark:text-slate-100" placeholder="Dush, Chor 14:00" />
+                  <label className="block text-xs font-bold text-slate-600 dark:text-slate-300 uppercase tracking-wider mb-1.5">Dars Vaqti</label>
+                  <input type="text" value={form.schedule} onChange={e => setForm({ ...form, schedule: e.target.value })} className="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-brand-blue/30 outline-none text-xs font-bold text-slate-800 dark:text-slate-100" placeholder="Dush, Chor 14:00" />
                 </div>
               </div>
+
               <div>
-                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">Oylik to'lov summasi (so'm)</label>
-                <input type="number" min="0" value={form.price} onChange={e => setForm({ ...form, price: parseInt(e.target.value) || 0 })} className="w-full px-4 py-2.5 bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-brand-blue/30 focus:border-transparent outline-none transition-all text-slate-800 dark:text-slate-100" placeholder="Masalan: 300000" />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">Oqituvchi (ixtiyoriy)</label>
-                <select value={form.teacher_id} onChange={e => setForm({ ...form, teacher_id: e.target.value })} className="w-full px-4 py-2.5 bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-brand-blue/30 focus:border-transparent outline-none transition-all text-slate-800 dark:text-slate-100">
+                <label className="block text-xs font-bold text-slate-600 dark:text-slate-300 uppercase tracking-wider mb-1.5">O'qituvchi</label>
+                <select value={form.teacher_id} onChange={e => setForm({ ...form, teacher_id: e.target.value })} className="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-brand-blue/30 outline-none text-xs font-bold text-slate-800 dark:text-slate-100">
                   <option value="">— Tanlang —</option>
                   {teachers.map(t => <option key={t.id} value={t.id}>{t.full_name || t.phone}</option>)}
                 </select>
               </div>
-              {modal === "edit" && (
-                <div>
-                  <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">Status</label>
-                  <select value={form.status} onChange={e => setForm({ ...form, status: e.target.value as any })} className="w-full px-4 py-2.5 bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-brand-blue/30 focus:border-transparent outline-none transition-all text-slate-800 dark:text-slate-100">
-                    <option value="active">Faol</option>
-                    <option value="archived">Arxivlangan</option>
-                  </select>
-                </div>
-              )}
             </div>
-            <div className="flex justify-end gap-3 px-6 py-4 border-t border-gray-100 dark:border-slate-800">
-              <button onClick={closeModal} className="px-5 py-2.5 text-slate-600 dark:text-slate-300 font-medium hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl transition-colors active:scale-95">Bekor</button>
-              <button onClick={handleSave} disabled={saving} className="px-5 py-2.5 bg-brand-blue hover:bg-blue-600 text-white font-medium rounded-xl transition-colors shadow-lg shadow-brand-blue/20 disabled:opacity-60 active:scale-95">{saving ? "Saqlanmoqda..." : "Saqlash"}</button>
+
+            <div className="flex items-center justify-end gap-2 px-6 py-4 border-t border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/50">
+              <button onClick={closeModal} className="px-4 py-2 text-xs font-bold text-slate-500 hover:text-slate-800 dark:text-slate-400">Bekor qilish</button>
+              <button onClick={handleSave} disabled={saving} className="px-4 py-2 text-xs font-bold text-white bg-brand-blue hover:bg-blue-600 rounded-xl disabled:opacity-50">
+                {saving ? "Saqlanmoqda..." : "Saqlash"}
+              </button>
             </div>
           </div>
         </div>
       )}
 
-      {/* Video Create/Edit Modal */}
-      {(modal === "create_video" || modal === "edit_video") && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
-          <div className="bg-white dark:bg-slate-900 rounded-3xl shadow-2xl w-full max-w-md overflow-hidden">
-            <div className="px-6 py-4 border-b border-gray-100 dark:border-slate-800 flex items-center justify-between">
-              <h3 className="font-semibold text-lg text-slate-800 dark:text-slate-100 flex items-center gap-2">
-                <Video size={20} className="text-emerald-500" />
-                {modal === "create_video" ? "Yangi video dars" : "Video darsni tahrirlash"}
-              </h3>
-              <button onClick={closeModal} className="p-1.5 text-slate-400 hover:text-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-colors"><X size={20} /></button>
-            </div>
-            <div className="p-6 space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">Dars nomi <span className="text-red-500">*</span></label>
-                <input type="text" value={videoForm.title} onChange={e => setVideoForm({ ...videoForm, title: e.target.value })} className="w-full px-4 py-2.5 bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-emerald-500/30 focus:border-transparent outline-none transition-all text-slate-800 dark:text-slate-100" placeholder="Masalan: 1-dars. Kirish" />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">Video havola (URL) <span className="text-red-500">*</span></label>
-                <input type="url" value={videoForm.url} onChange={e => setVideoForm({ ...videoForm, url: e.target.value })} className="w-full px-4 py-2.5 bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-emerald-500/30 focus:border-transparent outline-none transition-all text-slate-800 dark:text-slate-100" placeholder="https://youtube.com/..." />
-                <p className="text-[11px] text-slate-500 mt-1.5">YouTube, Vimeo yoki boshqa serverdagi to'g'ridan-to'g'ri video linki.</p>
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">Izoh</label>
-                <textarea value={videoForm.description} onChange={e => setVideoForm({ ...videoForm, description: e.target.value })} className="w-full px-4 py-2.5 bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-emerald-500/30 focus:border-transparent outline-none transition-all text-slate-800 dark:text-slate-100 resize-none h-20" placeholder="Dars haqida qisqacha..." />
-              </div>
-            </div>
-            <div className="flex justify-end gap-3 px-6 py-4 border-t border-gray-100 dark:border-slate-800">
-              <button onClick={closeModal} className="px-5 py-2.5 text-slate-600 dark:text-slate-300 font-medium hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl transition-colors active:scale-95">Bekor</button>
-              <button onClick={handleSaveVideo} disabled={saving} className="px-5 py-2.5 bg-emerald-500 hover:bg-emerald-600 text-white font-medium rounded-xl transition-colors shadow-lg shadow-emerald-500/20 disabled:opacity-60 active:scale-95">{saving ? "Saqlanmoqda..." : "Saqlash"}</button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Students Modal */}
+      {/* Modal: Group Students Management */}
       {modal === "students" && selectedGroup && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
-          <div className="bg-white dark:bg-slate-900 rounded-3xl shadow-2xl w-full max-w-3xl overflow-hidden">
-            <div className="px-6 py-4 border-b border-gray-100 dark:border-slate-800 flex items-center justify-between">
-              <h3 className="font-semibold text-lg text-slate-800 dark:text-slate-100">{selectedGroup.name} — Oquvchilar</h3>
-              <button onClick={closeModal} className="p-1.5 text-slate-400 hover:text-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-colors"><X size={20} /></button>
-            </div>
-            <div className="p-6 grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-sm">
+          <div className="bg-white dark:bg-slate-900 rounded-3xl shadow-xl w-full max-w-lg overflow-hidden border border-slate-200/80 dark:border-slate-800">
+            <div className="px-6 py-5 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between">
               <div>
-                <h4 className="font-semibold text-slate-700 dark:text-slate-200 mb-3 flex items-center gap-2">
-                  <Users size={16} className="text-brand-blue" />
-                  Guruh oquvchilari ({groupStudents.length} / {selectedGroup.max_students})
-                </h4>
-                {studentsLoading ? (
-                  <div className="text-center py-8 text-slate-400 animate-pulse">Yuklanmoqda...</div>
-                ) : groupStudents.length === 0 ? (
-                  <div className="text-center py-8 text-slate-400 text-sm border border-dashed border-slate-200 dark:border-slate-700 rounded-2xl">Hali oquvchi yoq</div>
-                ) : (
-                  <div className="space-y-2 max-h-80 overflow-y-auto pr-1">
-                    {groupStudents.map(gs => (
-                      <div key={gs.id} className="flex items-center gap-3 p-3 bg-slate-50 dark:bg-slate-800/50 rounded-xl">
-                        <div className="w-9 h-9 rounded-full bg-brand-blue/10 flex items-center justify-center text-brand-blue font-semibold text-sm flex-shrink-0">{gs.student?.full_name?.[0]?.toUpperCase() || "?"}</div>
-                        <div className="flex-1 min-w-0">
-                          <p className="text-sm font-medium text-slate-800 dark:text-slate-100 truncate">{gs.student?.full_name || "Ism yoq"}</p>
-                          <p className="text-xs text-slate-500 truncate">{gs.student?.phone}</p>
-                        </div>
-                        <button onClick={() => handleRemoveStudent(gs.student_id)} className="p-1.5 text-red-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors active:scale-95"><X size={16} /></button>
+                <h3 className="font-bold text-base text-slate-800 dark:text-slate-100">{selectedGroup.name} — O'quvchilari</h3>
+                <p className="text-xs text-slate-400 font-medium">A'zolar soni: {groupStudents.length}/{selectedGroup.max_students}</p>
+              </div>
+              <button onClick={closeModal} className="p-1.5 text-slate-400 hover:text-slate-700 transition-colors">
+                <X size={18} />
+              </button>
+            </div>
+
+            <div className="p-6 space-y-5">
+              {/* Add Student Section */}
+              <div className="space-y-2">
+                <label className="block text-xs font-bold text-slate-600 dark:text-slate-300 uppercase tracking-wider">O'quvchi Qo'shish</label>
+                <div className="relative">
+                  <Search size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
+                  <input
+                    type="text"
+                    placeholder="Qidiruv..."
+                    value={addSearch}
+                    onChange={e => setAddSearch(e.target.value)}
+                    className="w-full pl-10 pr-4 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs outline-none text-slate-800 dark:text-slate-100"
+                  />
+                </div>
+
+                {addSearch && availableStudents.length > 0 && (
+                  <div className="max-h-36 overflow-y-auto border border-slate-200 dark:border-slate-700 rounded-xl divide-y divide-slate-100 dark:divide-slate-800">
+                    {availableStudents.map(s => (
+                      <div key={s.id} className="p-2.5 flex items-center justify-between hover:bg-slate-50 dark:hover:bg-slate-800/50">
+                        <span className="text-xs font-bold text-slate-800 dark:text-slate-100">{s.full_name || s.phone}</span>
+                        <button
+                          onClick={() => handleAddStudent(s.id)}
+                          disabled={addingStudent}
+                          className="px-3 py-1 bg-brand-blue text-white rounded-lg text-xs font-bold hover:bg-blue-600 disabled:opacity-50"
+                        >
+                          Qo'shish
+                        </button>
                       </div>
                     ))}
                   </div>
                 )}
               </div>
-              <div>
-                <h4 className="font-semibold text-slate-700 dark:text-slate-200 mb-3 flex items-center gap-2">
-                  <UserPlus size={16} className="text-emerald-600" />
-                  Oquvchi qoshish
-                </h4>
-                <div className="relative mb-3">
-                  <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
-                  <input type="text" value={addSearch} onChange={e => searchAvailable(e.target.value)} placeholder="Ism yoki telefon..." className="w-full pl-9 pr-4 py-2.5 bg-slate-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-xl text-sm outline-none focus:ring-2 focus:ring-brand-blue/30 transition-all" />
-                </div>
-                <div className="space-y-2 max-h-72 overflow-y-auto pr-1">
-                  {availableStudents.length === 0 ? (
-                    <p className="text-center text-slate-400 text-sm py-6 border border-dashed border-slate-200 dark:border-slate-700 rounded-2xl">{addSearch ? "Topilmadi" : "Qoshish uchun oquvchilar yoq"}</p>
-                  ) : availableStudents.map(s => (
-                    <div key={s.id} className="flex items-center gap-3 p-3 bg-slate-50 dark:bg-slate-800/50 rounded-xl">
-                      <div className="w-9 h-9 rounded-full bg-emerald-500/10 flex items-center justify-center text-emerald-600 font-semibold text-sm flex-shrink-0">{s.full_name?.[0]?.toUpperCase() || "?"}</div>
-                      <div className="flex-1 min-w-0">
-                        <p className="text-sm font-medium text-slate-800 dark:text-slate-100 truncate">{s.full_name || "Ism yoq"}</p>
-                        <p className="text-xs text-slate-500 truncate">{s.phone}</p>
+
+              {/* Group Students List */}
+              <div className="space-y-2">
+                <label className="block text-xs font-bold text-slate-600 dark:text-slate-300 uppercase tracking-wider">Mavjud O'quvchilar</label>
+                {studentsLoading ? (
+                  <p className="text-xs text-slate-400">Yuklanmoqda...</p>
+                ) : groupStudents.length === 0 ? (
+                  <p className="text-xs text-slate-400 py-4 text-center">Guruhda hali o'quvchi yo'q</p>
+                ) : (
+                  <div className="max-h-48 overflow-y-auto space-y-1.5 pr-1">
+                    {groupStudents.map(gs => (
+                      <div key={gs.id} className="p-2.5 rounded-xl bg-slate-50 dark:bg-slate-800/40 flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          <User size={14} className="text-slate-400" />
+                          <span className="text-xs font-bold text-slate-800 dark:text-slate-100">{gs.student?.full_name || gs.student?.phone}</span>
+                        </div>
+                        <button
+                          onClick={() => handleRemoveStudent(gs.student_id)}
+                          className="p-1 text-slate-400 hover:text-red-500 transition-colors"
+                          title="Guruhdan chiqarish"
+                        >
+                          <X size={14} />
+                        </button>
                       </div>
-                      <button onClick={() => handleAddStudent(s.id)} disabled={addingStudent} className="flex items-center gap-1 text-xs font-semibold text-emerald-600 bg-emerald-50 dark:bg-emerald-900/20 hover:bg-emerald-100 dark:hover:bg-emerald-900/40 px-3 py-1.5 rounded-lg transition-colors active:scale-95 disabled:opacity-50">
-                        <Plus size={14} />Qosh
-                      </button>
-                    </div>
-                  ))}
-                </div>
+                    ))}
+                  </div>
+                )}
               </div>
             </div>
-            <div className="flex justify-end px-6 py-4 border-t border-gray-100 dark:border-slate-800">
-              <button onClick={closeModal} className="px-5 py-2.5 text-slate-600 dark:text-slate-300 font-medium hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl transition-colors active:scale-95">Yopish</button>
+          </div>
+        </div>
+      )}
+
+      {/* Modal: Video Create/Edit */}
+      {(modal === "create_video" || modal === "edit_video") && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-sm">
+          <div className="bg-white dark:bg-slate-900 rounded-3xl shadow-xl w-full max-w-md overflow-hidden border border-slate-200/80 dark:border-slate-800">
+            <div className="px-6 py-5 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between">
+              <h3 className="font-bold text-base text-slate-800 dark:text-slate-100">
+                {modal === "create_video" ? "Yangi Video Qo'shish" : "Videoni Tahrirlash"}
+              </h3>
+              <button onClick={closeModal} className="p-1.5 text-slate-400 hover:text-slate-700 transition-colors">
+                <X size={18} />
+              </button>
+            </div>
+
+            <div className="p-6 space-y-4">
+              <div>
+                <label className="block text-xs font-bold text-slate-600 dark:text-slate-300 uppercase tracking-wider mb-1.5">Video Sarlavhasi *</label>
+                <input type="text" value={videoForm.title} onChange={e => setVideoForm({ ...videoForm, title: e.target.value })} className="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-brand-blue/30 outline-none text-xs font-bold text-slate-800 dark:text-slate-100" placeholder="Masalan: 1-Dars. Kirish" />
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold text-slate-600 dark:text-slate-300 uppercase tracking-wider mb-1.5">Video Havolasi (URL) *</label>
+                <input type="text" value={videoForm.url} onChange={e => setVideoForm({ ...videoForm, url: e.target.value })} className="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-brand-blue/30 outline-none text-xs font-bold text-slate-800 dark:text-slate-100" placeholder="YouTube yoki Video URL" />
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold text-slate-600 dark:text-slate-300 uppercase tracking-wider mb-1.5">Tavsif</label>
+                <textarea value={videoForm.description} onChange={e => setVideoForm({ ...videoForm, description: e.target.value })} className="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-brand-blue/30 outline-none text-xs font-medium text-slate-800 dark:text-slate-100 resize-none h-20" placeholder="Qisqacha dars mazmuni..." />
+              </div>
+            </div>
+
+            <div className="flex items-center justify-end gap-2 px-6 py-4 border-t border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/50">
+              <button onClick={closeModal} className="px-4 py-2 text-xs font-bold text-slate-500 hover:text-slate-800 dark:text-slate-400">Bekor qilish</button>
+              <button onClick={handleSaveVideo} disabled={saving} className="px-4 py-2 text-xs font-bold text-white bg-brand-blue hover:bg-blue-600 rounded-xl disabled:opacity-50">
+                {saving ? "Saqlanmoqda..." : "Saqlash"}
+              </button>
             </div>
           </div>
         </div>
       )}
-    </div>
-  );
-}
-
-function GroupCard({ group, onEdit, onDelete, onToggleStatus, onStudents }: {
-  group: Group; onEdit: (g: Group) => void; onDelete: (g: Group) => void;
-  onToggleStatus: (g: Group) => void; onStudents: (g: Group) => void;
-}) {
-  const pct = group.max_students > 0 ? Math.round(((group.student_count || 0) / group.max_students) * 100) : 0;
-  const isArchived = group.status === "archived";
-  const barColor = pct >= 90 ? "bg-red-500" : pct >= 70 ? "bg-amber-500" : "bg-emerald-500";
-
-  return (
-    <div className={"group relative bg-white dark:bg-slate-900 rounded-2xl border " + (isArchived ? "border-dashed border-slate-200 dark:border-slate-700/60" : "border-gray-100 dark:border-slate-800") + " p-5 flex flex-col gap-3 shadow-sm hover:shadow-md transition-shadow duration-200"}
-    >
-      <div className="flex items-start justify-between gap-2">
-        <div className="flex-1 min-w-0">
-          <div className="flex items-center gap-2 mb-0.5">
-            <h3 className="font-semibold text-slate-800 dark:text-slate-100 truncate">{group.name}</h3>
-            {isArchived && (
-              <span className="text-[10px] font-semibold text-slate-400 bg-slate-100 dark:bg-slate-800 px-2 py-0.5 rounded-full flex-shrink-0 uppercase tracking-wide">Arxiv</span>
-            )}
-          </div>
-          {group.description && (
-            <p className="text-xs text-slate-400 dark:text-slate-500 line-clamp-1">{group.description}</p>
-          )}
-        </div>
-        <div className="flex items-center gap-0.5 flex-shrink-0">
-          <button onClick={() => onEdit(group)} className="p-1.5 text-slate-400 hover:text-brand-blue hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-lg transition-colors active:scale-90" title="Tahrirlash"><Edit2 size={15} /></button>
-          <button onClick={() => onToggleStatus(group)} className="p-1.5 text-slate-400 hover:text-amber-500 hover:bg-amber-50 dark:hover:bg-amber-900/20 rounded-lg transition-colors active:scale-90" title={isArchived ? "Aktivlashtirish" : "Arxivlash"}>{isArchived ? <ArchiveRestore size={15} /> : <Archive size={15} />}</button>
-          <button onClick={() => onDelete(group)} className="p-1.5 text-slate-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors active:scale-90" title="O'chirish"><Trash2 size={15} /></button>
-        </div>
-      </div>
-
-      {(group.schedule || group.teacher?.full_name) && (
-        <div className="flex flex-col gap-1">
-          {group.schedule && (
-            <div className="flex items-center gap-2 text-xs text-slate-500">
-              <Clock size={12} className="text-slate-400 flex-shrink-0" />
-              <span>{group.schedule}</span>
-            </div>
-          )}
-          {group.teacher?.full_name && (
-            <div className="flex items-center gap-2 text-xs text-slate-500">
-              <User size={12} className="text-slate-400 flex-shrink-0" />
-              <span className="truncate">{group.teacher.full_name}</span>
-            </div>
-          )}
-        </div>
-      )}
-
-      <div className="mt-auto">
-        <div className="flex justify-between items-center mb-2">
-          <span className="text-xs text-slate-400">O'quvchilar</span>
-          <span className="text-xs font-bold text-slate-600 dark:text-slate-300 tabular-nums">
-            {group.student_count || 0}<span className="text-slate-300 dark:text-slate-600 font-normal"> / {group.max_students}</span>
-          </span>
-        </div>
-        <div className="h-1.5 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
-          <div
-            className={"h-full rounded-full transition-all duration-700 " + barColor}
-            style={{ width: Math.min(pct, 100) + "%" }}
-          />
-        </div>
-      </div>
-
-      <button
-        onClick={() => onStudents(group)}
-        className="w-full flex items-center justify-center gap-2 text-sm font-semibold text-brand-blue bg-blue-50 dark:bg-blue-900/20 hover:bg-blue-100 dark:hover:bg-blue-900/35 py-2.5 rounded-xl transition-colors active:scale-[0.98]"
-      >
-        <Users size={15} />O'quvchilarni boshqarish
-      </button>
     </div>
   );
 }
