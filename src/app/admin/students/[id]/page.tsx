@@ -191,7 +191,7 @@ export default function StudentDetailPage({ params }: PageProps) {
   const initial = (student.full_name || "?")[0].toUpperCase();
   const formattedJoinedDate = student.created_at
     ? new Date(student.created_at).toLocaleDateString('uz-UZ', { year: 'numeric', month: 'long', day: 'numeric' })
-    : 'Ma'lum emas';
+    : "Ma'lum emas";
 
   return (
     <div className="w-full max-w-[1200px] mx-auto space-y-6">
