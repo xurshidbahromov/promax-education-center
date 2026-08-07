@@ -370,35 +370,58 @@ export async function getStudentResults(studentId: string): Promise<any[]> {
 
 // Admin Dashboard Stats
 export async function getAdminStats() {
- const supabase = createClient();
+  const supabase = createClient();
 
- try {
- const { data, error } = await supabase.rpc('get_admin_dashboard_stats').single();
+  try {
+    const { count: totalStudents } = await supabase
+      .from('profiles')
+      .select('*', { count: 'exact', head: true })
+      .eq('role', 'student');
 
- if (error) throw error;
+    const { count: activeTeachers } = await supabase
+      .from('profiles')
+      .select('*', { count: 'exact', head: true })
+      .eq('role', 'teacher');
 
- const stats = data as {
- total_students: number;
- active_teachers: number;
- total_tests: number;
- monthly_revenue: string;
- };
+    const { count: totalGroups } = await supabase
+      .from('groups')
+      .select('*', { count: 'exact', head: true })
+      .eq('status', 'active');
 
- return {
- totalStudents: Number(stats.total_students) || 0,
- activeTeachers: Number(stats.active_teachers) || 0,
- totalTests: Number(stats.total_tests) || 0,
- monthlyRevenue: Number(stats.monthly_revenue).toLocaleString('uz-UZ')
- };
- } catch (error) {
- console.error('Error fetching admin stats:', error);
- return {
- totalStudents: 0,
- activeTeachers: 0,
- totalTests: 0,
- monthlyRevenue: '0'
- };
- }
+    const { count: totalTests } = await supabase
+      .from('exams')
+      .select('*', { count: 'exact', head: true });
+
+    // Calculate current month's revenue
+    const today = new Date();
+    const currentMonth = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}`;
+    
+    const { data: paymentsData } = await supabase
+      .from('payments')
+      .select('amount')
+      .eq('month_year', currentMonth);
+
+    const monthlyRevenueRaw = (paymentsData || []).reduce((acc, curr) => acc + (Number(curr.amount) || 0), 0);
+
+    return {
+      totalStudents: totalStudents || 0,
+      activeTeachers: activeTeachers || 0,
+      totalGroups: totalGroups || 0,
+      totalTests: totalTests || 0,
+      monthlyRevenue: monthlyRevenueRaw.toLocaleString('uz-UZ'),
+      rawMonthlyRevenue: monthlyRevenueRaw
+    };
+  } catch (error) {
+    console.error('Error fetching admin stats:', error);
+    return {
+      totalStudents: 0,
+      activeTeachers: 0,
+      totalGroups: 0,
+      totalTests: 0,
+      monthlyRevenue: '0',
+      rawMonthlyRevenue: 0
+    };
+  }
 }
 
 // Admin Dashboard Recent Activity
