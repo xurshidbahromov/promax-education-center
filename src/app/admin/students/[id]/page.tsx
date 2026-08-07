@@ -1,463 +1,373 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { useParams, useRouter } from "next/navigation";
-import toast from "react-hot-toast";
+import { useEffect, useState, use } from "react";
+import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { createClient } from "@/utils/supabase/client";
 import {
- getStudentCourses,
- getMonthlyPaymentStatus,
- enrollStudentInCourse,
- addPayment,
- type StudentCourse,
- type MonthlyPaymentStatus
-} from "@/lib/payments";
-import {
- ArrowLeft,
- BookOpen,
- CreditCard,
- CheckCircle,
- XCircle,
- Clock,
- AlertCircle,
- Plus,
- X,
- User,
- Mail,
- Phone
+  ArrowLeft,
+  User,
+  Phone,
+  Calendar,
+  Layers,
+  Banknote,
+  FileText,
+  CheckCircle2,
+  XCircle,
+  AlertCircle,
+  Clock,
+  ShieldCheck
 } from "lucide-react";
 
 interface StudentProfile {
- id: string;
- full_name: string;
- email: string;
- phone: string | null;
- role: string;
+  id: string;
+  full_name: string | null;
+  phone: string | null;
+  role: string;
+  created_at: string;
 }
 
-export default function StudentDetailPage() {
- const params = useParams();
- const router = useRouter();
- const studentId = params.id as string;
+interface EnrolledGroup {
+  id: string;
+  name: string;
+  schedule: string | null;
+  price: number | null;
+  subject_title: string;
+  teacher_name: string | null;
+}
 
- const [student, setStudent] = useState<StudentProfile | null>(null);
- const [courses, setCourses] = useState<StudentCourse[]>([]);
- const [paymentStatuses, setPaymentStatuses] = useState<MonthlyPaymentStatus[]>([]);
- const [loading, setLoading] = useState(true);
+interface PaymentRecord {
+  id: string;
+  amount: number;
+  month_year: string;
+  status: 'completed' | 'partial' | 'pending';
+  payment_method: string;
+  payment_date: string;
+  group_name: string;
+}
 
- // Modal states
- const [showEnrollModal, setShowEnrollModal] = useState(false);
- const [showPaymentModal, setShowPaymentModal] = useState(false);
- const [selectedCourse, setSelectedCourse] = useState<StudentCourse | null>(null);
+interface ExamResult {
+  id: string;
+  exam_title: string;
+  total_score: number;
+  created_at: string;
+}
 
- // Form states
- const [enrollForm, setEnrollForm] = useState({
- subject: "",
- monthly_fee: "",
- start_date: new Date().toISOString().split('T')[0]
- });
+interface PageProps {
+  params: Promise<{ id: string }>;
+}
 
- const [paymentForm, setPaymentForm] = useState({
- amount: "",
- payment_month: new Date().getMonth()+ 1,
- payment_year: new Date().getFullYear(),
- payment_method: "cash" as "cash" | "card" | "transfer" | "other",
- notes: ""
- });
+export default function StudentDetailPage({ params }: PageProps) {
+  const router = useRouter();
+  const { id: studentId } = use(params);
 
- useEffect(() => {
- loadStudentData();
- }, [studentId]);
+  const [student, setStudent] = useState<StudentProfile | null>(null);
+  const [groups, setGroups] = useState<EnrolledGroup[]>([]);
+  const [payments, setPayments] = useState<PaymentRecord[]>([]);
+  const [examResults, setExamResults] = useState<ExamResult[]>([]);
+  const [loading, setLoading] = useState(true);
 
- async function loadStudentData() {
- const supabase = createClient();
+  useEffect(() => {
+    async function loadData() {
+      const supabase = createClient();
 
- const { data: profile } = await supabase
- .from('profiles')
- .select('*')
- .eq('id', studentId)
- .single();
+      try {
+        // 1. Fetch Profile
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('*')
+          .eq('id', studentId)
+          .single();
 
- if (profile) setStudent(profile);
+        if (profile) setStudent(profile);
 
- const studentCourses = await getStudentCourses(studentId);
- setCourses(studentCourses);
+        // 2. Fetch Enrolled Groups via group_students
+        const { data: groupStudentsData } = await supabase
+          .from('group_students')
+          .select(`
+            group:groups(
+              id, name, schedule, price,
+              subject:subjects(title),
+              teacher:profiles!groups_teacher_id_fkey(full_name)
+            )
+          `)
+          .eq('student_id', studentId);
 
- const currentMonth = new Date().getMonth()+ 1;
- const currentYear = new Date().getFullYear();
- const statuses = await getMonthlyPaymentStatus(studentId, currentMonth, currentYear);
- setPaymentStatuses(statuses);
+        const mappedGroups: EnrolledGroup[] = (groupStudentsData || [])
+          .map((item: any) => {
+            const g = item.group;
+            if (!g) return null;
+            return {
+              id: g.id,
+              name: g.name,
+              schedule: g.schedule,
+              price: g.price,
+              subject_title: g.subject?.title || 'Fan kiritilmagan',
+              teacher_name: g.teacher?.full_name || "Biriktirilmagan"
+            };
+          })
+          .filter(Boolean) as EnrolledGroup[];
 
- setLoading(false);
- }
+        setGroups(mappedGroups);
 
- async function handleEnroll(e: React.FormEvent) {
- e.preventDefault();
+        // 3. Fetch Payments
+        const { data: paymentsData } = await supabase
+          .from('payments')
+          .select(`
+            id, amount, month_year, status, payment_method, payment_date,
+            group:groups(name)
+          `)
+          .eq('student_id', studentId)
+          .order('payment_date', { ascending: false });
 
- const result = await enrollStudentInCourse({
- student_id: studentId,
- subject: enrollForm.subject,
- monthly_fee: parseFloat(enrollForm.monthly_fee),
- start_date: enrollForm.start_date
- });
+        const mappedPayments: PaymentRecord[] = (paymentsData || []).map((p: any) => ({
+          id: p.id,
+          amount: p.amount,
+          month_year: p.month_year,
+          status: p.status,
+          payment_method: p.payment_method,
+          payment_date: p.payment_date,
+          group_name: p.group?.name || 'Guruh'
+        }));
 
- if (result.success) {
- toast.success("Student kursga yozildi!");
- await loadStudentData();
- setShowEnrollModal(false);
- setEnrollForm({ subject: "", monthly_fee: "", start_date: new Date().toISOString().split('T')[0] });
- } else {
- toast.error("Xatolik: "+ result.error);
- }
- }
+        setPayments(mappedPayments);
 
- async function handleAddPayment(e: React.FormEvent) {
- e.preventDefault();
- if (!selectedCourse) return;
+        // 4. Fetch Exam Results
+        const { data: resultsData } = await supabase
+          .from('results')
+          .select(`
+            id, total_score, created_at,
+            exam:exams(title)
+          `)
+          .eq('student_id', studentId)
+          .order('created_at', { ascending: false });
 
- const result = await addPayment({
- student_id: studentId,
- student_course_id: selectedCourse.id,
- amount: parseFloat(paymentForm.amount),
- payment_month: paymentForm.payment_month,
- payment_year: paymentForm.payment_year,
- payment_method: paymentForm.payment_method,
- notes: paymentForm.notes
- });
+        const mappedResults: ExamResult[] = (resultsData || []).map((r: any) => ({
+          id: r.id,
+          total_score: Number(r.total_score) || 0,
+          created_at: r.created_at,
+          exam_title: r.exam?.title || 'DTM Imtihon'
+        }));
 
- if (result.success) {
- toast.success("To'lov qo'shildi!");
- await loadStudentData();
- setShowPaymentModal(false);
- setPaymentForm({
- amount: "",
- payment_month: new Date().getMonth()+ 1,
- payment_year: new Date().getFullYear(),
- payment_method: "cash",
- notes: ""
- });
- } else {
- toast.error("Xatolik: "+ result.error);
- }
- }
+        setExamResults(mappedResults);
+      } catch (e) {
+        console.error("Error loading student detail:", e);
+      } finally {
+        setLoading(false);
+      }
+    }
 
- const formatSubject = (subject: string) => {
- const map: Record<string, string> = {
- 'matematika': 'Matematika',
- 'ingliz_tili': 'Ingliz tili',
- 'ona_tili': 'Ona tili',
- 'fizika': 'Fizika',
- 'kimyo': 'Kimyo',
- 'biologiya': 'Biologiya',
- 'tarix': 'Tarix',
- 'geografiya': 'Geografiya'
- };
- return map[subject] || subject;
- };
+    loadData();
+  }, [studentId]);
 
- const getPaymentStatus = (courseId: string) => {
- return paymentStatuses.find(s => s.student_course_id === courseId);
- };
+  if (loading) {
+    return (
+      <div className="w-full max-w-[1200px] mx-auto p-6 space-y-6 animate-pulse">
+        <div className="h-10 bg-slate-100 dark:bg-slate-800 rounded-2xl w-48" />
+        <div className="h-40 bg-slate-100 dark:bg-slate-800 rounded-3xl w-full" />
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="h-64 bg-slate-100 dark:bg-slate-800 rounded-3xl" />
+          <div className="h-64 bg-slate-100 dark:bg-slate-800 rounded-3xl" />
+        </div>
+      </div>
+    );
+  }
 
- const getStatusBadge = (status?: string) => {
- if (!status) return null;
- const badges = {
- paid: <span className="px-3 py-1 bg-green-100 text-green-700 rounded-full text-sm flex items-center gap-1"><CheckCircle size={14} /> To'liq</span>,
- partial: <span className="px-3 py-1 bg-yellow-100 text-yellow-700 rounded-full text-sm flex items-center gap-1"><Clock size={14} /> Qisman</span>,
- overdue: <span className="px-3 py-1 bg-red-100 text-red-700 rounded-full text-sm flex items-center gap-1"><AlertCircle size={14} /> Muddati o'tgan</span>,
- pending: <span className="px-3 py-1 bg-gray-100 text-gray-700 rounded-full text-sm flex items-center gap-1"><XCircle size={14} /> Kutilmoqda</span>
- };
- return badges[status as keyof typeof badges] || null;
- };
+  if (!student) {
+    return (
+      <div className="w-full max-w-[1200px] mx-auto py-16 text-center text-slate-400">
+        <User size={36} className="mx-auto mb-2 opacity-40" />
+        <p className="text-base font-semibold">O'quvchi ma'lumotlari topilmadi</p>
+        <button
+          onClick={() => router.push('/admin/students')}
+          className="mt-4 px-4 py-2 text-xs font-bold text-brand-blue hover:underline"
+        >
+          O'quvchilar ro'yxatiga qaytish
+        </button>
+      </div>
+    );
+  }
 
- if (loading) return <div className="p-8 animate-pulse"><div className="h-8 bg-gray-200 rounded w-1/4"></div></div>;
- if (!student) return <div className="p-8 text-center">Student topilmadi</div>;
+  const initial = (student.full_name || "?")[0].toUpperCase();
+  const formattedJoinedDate = student.created_at
+    ? new Date(student.created_at).toLocaleDateString('uz-UZ', { year: 'numeric', month: 'long', day: 'numeric' })
+    : 'Ma'lum emas';
 
- return (
- <div className="p-8 space-y-6">
- {/* Header */}
- <div className="flex items-center gap-4">
- <button onClick={() => router.back()} className="p-2 active:bg-gray-100 rounded-lg">
- <ArrowLeft size={20} />
- </button>
- <div>
- <h1 className="text-3xl font-medium">{student.full_name}</h1>
- <p className="text-gray-500">Student ma'lumotlari</p>
- </div>
- </div>
+  return (
+    <div className="w-full max-w-[1200px] mx-auto space-y-6">
+      {/* Header & Back */}
+      <div className="flex items-center gap-3">
+        <button
+          onClick={() => router.push('/admin/students')}
+          className="p-2 text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 transition-colors"
+          title="Orqaga"
+        >
+          <ArrowLeft size={20} />
+        </button>
+        <div>
+          <h1 className="text-2xl font-black text-slate-800 dark:text-slate-100 tracking-tight font-sans-pro">
+            {student.full_name || "Ismsiz O'quvchi"}
+          </h1>
+          <p className="text-xs text-slate-400 font-medium">O'quvchi statusi va ma'lumotlari</p>
+        </div>
+      </div>
 
- {/* Info Card */}
- <div className="bg-white rounded-xl border p-6">
- <h2 className="text-xl font-medium mb-4">Shaxsiy ma'lumotlar</h2>
- <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
- <div className="flex items-center gap-3">
- <div className="w-10 h-10 rounded-lg bg-blue-100 flex items-center justify-center">
- <User size={20} className="text-blue-600" />
- </div>
- <div>
- <p className="text-sm text-gray-500">Ism</p>
- <p className="font-semibold">{student.full_name}</p>
- </div>
- </div>
- <div className="flex items-center gap-3">
- <div className="w-10 h-10 rounded-lg bg-green-100 flex items-center justify-center">
- <Mail size={20} className="text-green-600" />
- </div>
- <div>
- <p className="text-sm text-gray-500">Email</p>
- <p className="font-semibold">{student.email}</p>
- </div>
- </div>
- <div className="flex items-center gap-3">
- <div className="w-10 h-10 rounded-lg bg-purple-100 flex items-center justify-center">
- <Phone size={20} className="text-purple-600" />
- </div>
- <div>
- <p className="text-sm text-gray-500">Telefon</p>
- <p className="font-semibold">{student.phone || "Kiritilmagan"}</p>
- </div>
- </div>
- </div>
- </div>
+      {/* Profile Overview (Box-free Minimalist Glassy Card) */}
+      <div className="bg-white/70 dark:bg-slate-900/70 backdrop-blur-xl border border-slate-200/60 dark:border-slate-800/60 p-6 rounded-3xl flex flex-col md:flex-row md:items-center justify-between gap-6">
+        <div className="flex items-center gap-4">
+          <div className="w-16 h-16 rounded-2xl bg-slate-100 dark:bg-slate-800 flex items-center justify-center font-black text-2xl text-slate-700 dark:text-slate-200 shrink-0">
+            {initial}
+          </div>
+          <div>
+            <div className="flex items-center gap-2">
+              <h2 className="text-xl font-extrabold text-slate-800 dark:text-slate-100">{student.full_name || "Ismsiz"}</h2>
+              <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-blue-50 dark:bg-blue-900/30 text-blue-600">
+                O'quvchi
+              </span>
+            </div>
+            <div className="flex flex-wrap items-center gap-4 text-xs font-medium text-slate-400 mt-1.5">
+              <span className="flex items-center gap-1.5">
+                <Phone size={13} className="text-slate-400" />
+                {student.phone || "Telefon ko'rsatilmadi"}
+              </span>
+              <span className="flex items-center gap-1.5">
+                <Calendar size={13} className="text-slate-400" />
+                Ro'yxatdan o'tgan: {formattedJoinedDate}
+              </span>
+            </div>
+          </div>
+        </div>
 
- {/* Courses */}
- <div className="bg-white rounded-xl border p-6">
- <div className="flex items-center justify-between mb-6">
- <h2 className="text-xl font-medium flex items-center gap-2">
- <BookOpen size={24} className="text-blue-600" />
- Yozilgan kurslar
- </h2>
- <button
- onClick={() => setShowEnrollModal(true)}
- className="px-4 py-2 bg-blue-600 text-white rounded-lg active:bg-blue-700 flex items-center gap-2"
- >
- <Plus size={18} />
- Kursga yozish
- </button>
- </div>
+        <div className="flex items-center gap-3">
+          <Link
+            href="/admin/payments"
+            className="px-4 py-2.5 bg-slate-100 dark:bg-slate-800 hover:bg-brand-blue hover:text-white text-slate-700 dark:text-slate-200 rounded-xl text-xs font-bold transition-all"
+          >
+            To'lov sahifasiga o'tish
+          </Link>
+        </div>
+      </div>
 
- {courses.length === 0 ? (
- <div className="text-center py-12">
- <BookOpen className="w-16 h-16 text-gray-400 mx-auto mb-4" />
- <p className="text-gray-600">Hali kurslar yo'q</p>
- </div>
- ) : (
- <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
- {courses.map((course) => {
- const status = getPaymentStatus(course.id);
- const percentage = status ? (status.paid_amount / status.required_amount) * 100 : 0;
+      {/* Grid: Groups & Payments Status */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        {/* Enrolled Groups Status */}
+        <div className="bg-white/70 dark:bg-slate-900/70 backdrop-blur-xl border border-slate-200/60 dark:border-slate-800/60 p-6 rounded-3xl space-y-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <Layers size={18} className="text-slate-400" />
+              <h3 className="text-base font-bold text-slate-800 dark:text-slate-100">Qatnashadigan Guruhlari</h3>
+            </div>
+            <span className="text-xs font-bold text-slate-400">{groups.length} ta guruh</span>
+          </div>
 
- return (
- <div key={course.id} className={`border-2 rounded-xl p-6 ${status?.status === 'overdue' ? 'border-red-300' : 'border-gray-200'}`}>
- <div className="flex items-start justify-between mb-4">
- <div>
- <h3 className="text-lg font-medium">{formatSubject(course.subject)}</h3>
- <p className="text-sm text-gray-500">{course.monthly_fee.toLocaleString()} so'm/oy</p>
- </div>
- {status && getStatusBadge(status.status)}
- </div>
+          {groups.length === 0 ? (
+            <div className="py-10 text-center text-slate-400">
+              <p className="text-xs font-medium">Hozircha birorta guruhga biriktirilmagan</p>
+            </div>
+          ) : (
+            <div className="space-y-3">
+              {groups.map(g => (
+                <div key={g.id} className="p-4 rounded-2xl bg-slate-50/50 dark:bg-slate-800/30 border border-slate-100 dark:border-slate-800/40 space-y-2">
+                  <div className="flex items-center justify-between">
+                    <span className="font-bold text-sm text-slate-800 dark:text-slate-100">{g.name}</span>
+                    <span className="text-xs font-semibold text-slate-500">{g.subject_title}</span>
+                  </div>
+                  <div className="flex items-center justify-between text-xs text-slate-400 font-medium">
+                    <span>O'qituvchi: {g.teacher_name}</span>
+                    <span>{g.schedule || "Dars vaqti kiritilmagan"}</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
 
- {status && (
- <>
- <div className="mb-3">
- <div className="flex justify-between text-sm mb-2">
- <span>Joriy oy</span>
- <span className="font-semibold">{percentage.toFixed(0)}%</span>
- </div>
- <div className="w-full bg-gray-200 rounded-full h-2.5">
- <div
- className={`h-2.5 rounded-full ${status.status === 'paid' ? 'bg-green-600' :
- status.status === 'partial' ? 'bg-yellow-500' :
- status.status === 'overdue' ? 'bg-red-600' : 'bg-gray-400'
- }`}
- style={{ width: `${Math.min(percentage, 100)}%` }}
- />
- </div>
- </div>
+        {/* Payments History & Status */}
+        <div className="bg-white/70 dark:bg-slate-900/70 backdrop-blur-xl border border-slate-200/60 dark:border-slate-800/60 p-6 rounded-3xl space-y-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <Banknote size={18} className="text-slate-400" />
+              <h3 className="text-base font-bold text-slate-800 dark:text-slate-100">To'lovlar Tarixi</h3>
+            </div>
+            <span className="text-xs font-bold text-slate-400">{payments.length} ta yozuv</span>
+          </div>
 
- <div className="mb-4">
- <p className="text-xs text-gray-500">To'langan / Kerak</p>
- <p className="text-sm font-semibold">
- {status.paid_amount.toLocaleString()} / {status.required_amount.toLocaleString()} so'm
- </p>
- </div>
- </>
- )}
+          {payments.length === 0 ? (
+            <div className="py-10 text-center text-slate-400">
+              <p className="text-xs font-medium">Hozircha to'lov yozuvlari yo'q</p>
+            </div>
+          ) : (
+            <div className="space-y-3 max-h-72 overflow-y-auto pr-1">
+              {payments.map(p => {
+                const isPaid = p.status === 'completed';
+                const isPartial = p.status === 'partial';
 
- <button
- onClick={() => {
- setSelectedCourse(course);
- setShowPaymentModal(true);
- }}
- className="w-full px-4 py-2 bg-green-600 text-white rounded-lg active:bg-green-700 flex items-center justify-center gap-2"
- >
- <CreditCard size={18} />
- To'lov qo'shish
- </button>
- </div>
- );
- })}
- </div>
- )}
- </div>
+                return (
+                  <div key={p.id} className="p-3.5 rounded-2xl bg-slate-50/50 dark:bg-slate-800/30 border border-slate-100 dark:border-slate-800/40 flex items-center justify-between">
+                    <div>
+                      <div className="flex items-center gap-2">
+                        <span className="font-bold text-xs text-slate-800 dark:text-slate-100">{p.month_year} oyi</span>
+                        <span className="text-[11px] font-medium text-slate-400">• {p.group_name}</span>
+                      </div>
+                      <p className="text-[11px] text-slate-400 mt-0.5">{p.payment_method} orqali to'langan</p>
+                    </div>
 
- {/* Enroll Modal */}
- {showEnrollModal && (
- <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
- <div className="bg-white rounded-xl p-6 w-full max-w-md">
- <div className="flex items-center justify-between mb-4">
- <h3 className="text-xl font-medium">Kursga yozish</h3>
- <button onClick={() => setShowEnrollModal(false)} className="p-2 active:bg-gray-100 rounded-lg">
- <X size={20} />
- </button>
- </div>
+                    <div className="text-right">
+                      <p className="font-extrabold text-xs text-slate-800 dark:text-slate-100">
+                        {p.amount.toLocaleString('uz-UZ')} so'm
+                      </p>
+                      {isPaid ? (
+                        <span className="text-[10px] font-bold uppercase text-emerald-600">To'langan</span>
+                      ) : isPartial ? (
+                        <span className="text-[10px] font-bold uppercase text-amber-600">Qisman</span>
+                      ) : (
+                        <span className="text-[10px] font-bold uppercase text-red-500">To'lamagan</span>
+                      )}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </div>
+      </div>
 
- <form onSubmit={handleEnroll} className="space-y-4">
- <div>
- <label className="block text-sm font-medium mb-2">Fan</label>
- <select
- value={enrollForm.subject}
- onChange={(e) => setEnrollForm({ ...enrollForm, subject: e.target.value })}
- className="w-full px-4 py-2 border rounded-lg"
- required
- >
- <option value="">Tanlang...</option>
- <option value="matematika">Matematika</option>
- <option value="ingliz_tili">Ingliz tili</option>
- <option value="ona_tili">Ona tili</option>
- <option value="fizika">Fizika</option>
- <option value="kimyo">Kimyo</option>
- <option value="biologiya">Biologiya</option>
- <option value="tarix">Tarix</option>
- </select>
- </div>
+      {/* Exam Results & Score Performance */}
+      <div className="bg-white/70 dark:bg-slate-900/70 backdrop-blur-xl border border-slate-200/60 dark:border-slate-800/60 p-6 rounded-3xl space-y-4">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <FileText size={18} className="text-slate-400" />
+            <h3 className="text-base font-bold text-slate-800 dark:text-slate-100">Imtihon & Test Natijalari</h3>
+          </div>
+          <span className="text-xs font-bold text-slate-400">{examResults.length} ta natija</span>
+        </div>
 
- <div>
- <label className="block text-sm font-medium mb-2">Oylik to'lov (so'm)</label>
- <input
- type="number"
- value={enrollForm.monthly_fee}
- onChange={(e) => setEnrollForm({ ...enrollForm, monthly_fee: e.target.value })}
- className="w-full px-4 py-2 border rounded-lg"
- placeholder="500000"
- required
- />
- </div>
+        {examResults.length === 0 ? (
+          <div className="py-10 text-center text-slate-400">
+            <p className="text-xs font-medium">Hozircha topshirilgan test natijalari yo'q</p>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
+            {examResults.map(res => (
+              <div key={res.id} className="p-4 rounded-2xl bg-slate-50/50 dark:bg-slate-800/30 border border-slate-100 dark:border-slate-800/40 flex items-center justify-between">
+                <div>
+                  <p className="font-bold text-xs text-slate-800 dark:text-slate-100">{res.exam_title}</p>
+                  <p className="text-[10px] text-slate-400 mt-1">
+                    {new Date(res.created_at).toLocaleDateString('uz-UZ', { month: 'short', day: 'numeric', year: 'numeric' })}
+                  </p>
+                </div>
 
- <div>
- <label className="block text-sm font-medium mb-2">Boshlanish</label>
- <input
- type="date"
- value={enrollForm.start_date}
- onChange={(e) => setEnrollForm({ ...enrollForm, start_date: e.target.value })}
- className="w-full px-4 py-2 border rounded-lg"
- required
- />
- </div>
-
- <div className="flex gap-3 pt-4">
- <button type="button" onClick={() => setShowEnrollModal(false)} className="flex-1 px-4 py-2 border rounded-lg">
- Bekor qilish
- </button>
- <button type="submit" className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg">
- Qo'shish
- </button>
- </div>
- </form>
- </div>
- </div>
- )}
-
- {/* Payment Modal */}
- {showPaymentModal && selectedCourse && (
- <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
- <div className="bg-white rounded-xl p-6 w-full max-w-md">
- <div className="flex items-center justify-between mb-4">
- <h3 className="text-xl font-medium">To'lov qo'shish</h3>
- <button onClick={() => { setShowPaymentModal(false); setSelectedCourse(null); }} className="p-2 active:bg-gray-100 rounded-lg">
- <X size={20} />
- </button>
- </div>
-
- <div className="mb-4 p-3 bg-blue-50 rounded-lg">
- <p className="text-sm font-medium">Fan: {formatSubject(selectedCourse.subject)}</p>
- </div>
-
- <form onSubmit={handleAddPayment} className="space-y-4">
- <div>
- <label className="block text-sm font-medium mb-2">Summa (so'm)</label>
- <input
- type="number"
- value={paymentForm.amount}
- onChange={(e) => setPaymentForm({ ...paymentForm, amount: e.target.value })}
- className="w-full px-4 py-2 border rounded-lg"
- placeholder={selectedCourse.monthly_fee.toString()}
- required
- />
- </div>
-
- <div className="grid grid-cols-2 gap-3">
- <div>
- <label className="block text-sm font-medium mb-2">Oy</label>
- <select
- value={paymentForm.payment_month}
- onChange={(e) => setPaymentForm({ ...paymentForm, payment_month: parseInt(e.target.value) })}
- className="w-full px-4 py-2 border rounded-lg"
- >
- {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].map(m => (
- <option key={m} value={m}>{m}-oy</option>
- ))}
- </select>
- </div>
- <div>
- <label className="block text-sm font-medium mb-2">Yil</label>
- <select
- value={paymentForm.payment_year}
- onChange={(e) => setPaymentForm({ ...paymentForm, payment_year: parseInt(e.target.value) })}
- className="w-full px-4 py-2 border rounded-lg"
- >
- <option value={2026}>2026</option>
- <option value={2027}>2027</option>
- </select>
- </div>
- </div>
-
- <div>
- <label className="block text-sm font-medium mb-2">To'lov usuli</label>
- <select
- value={paymentForm.payment_method}
- onChange={(e) => setPaymentForm({ ...paymentForm, payment_method: e.target.value as any })}
- className="w-full px-4 py-2 border rounded-lg"
- >
- <option value="cash">Naqd</option>
- <option value="card">Karta</option>
- <option value="transfer">O'tkazma</option>
- <option value="other">Boshqa</option>
- </select>
- </div>
-
- <div>
- <label className="block text-sm font-medium mb-2">Izoh</label>
- <textarea
- value={paymentForm.notes}
- onChange={(e) => setPaymentForm({ ...paymentForm, notes: e.target.value })}
- className="w-full px-4 py-2 border rounded-lg"
- rows={2}
- />
- </div>
-
- <div className="flex gap-3 pt-4">
- <button type="button" onClick={() => { setShowPaymentModal(false); setSelectedCourse(null); }} className="flex-1 px-4 py-2 border rounded-lg">
- Bekor qilish
- </button>
- <button type="submit" className="flex-1 px-4 py-2 bg-green-600 text-white rounded-lg">
- To'lov qo'shish
- </button>
- </div>
- </form>
- </div>
- </div>
- )}
- </div>
- );
+                <div className="text-right">
+                  <span className="text-sm font-black text-emerald-600 dark:text-emerald-400">
+                    {res.total_score.toFixed(1)}
+                  </span>
+                  <span className="text-[10px] text-slate-400 block font-semibold">ball</span>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+    </div>
+  );
 }
