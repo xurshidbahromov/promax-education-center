@@ -110,12 +110,13 @@ export async function POST(request: NextRequest) {
  });
 
  if (authData.user) {
- // Update profile with Telegram info
- await supabase.from('profiles').update({
- telegram_id: telegramId,
- telegram_username: tgUserRaw.username || null,
- avatar_url: tgUserRaw.photo_url || null
- }).eq('id', authData.user.id);
+    await supabase.from('profiles').update({
+      full_name: tgUserRaw.first_name + (tgUserRaw.last_name ? ` ${tgUserRaw.last_name}` : ''),
+      role: 'student',
+      telegram_id: telegramId,
+      telegram_username: tgUserRaw.username || null,
+      avatar_url: tgUserRaw.photo_url || null
+    }).eq('id', authData.user.id);
 
  // Sign them in
  await supabase.auth.signInWithPassword({ email: detEmail, password: detPassword });

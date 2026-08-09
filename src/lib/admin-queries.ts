@@ -143,31 +143,32 @@ export async function promoteToTeacher(userId: string, subjects: string[] = []):
 }
 
 export async function getStudents(searchTerm: string = ""): Promise<Student[]> {
- const supabase = createClient();
+  const supabase = createClient();
 
- let query = supabase
- .from('profiles')
- .select('*')
- .eq('role', 'student')
- .order('created_at', { ascending: false });
+  let query = supabase
+    .from('profiles')
+    .select('*')
+    .neq('role', 'teacher')
+    .neq('role', 'admin')
+    .order('created_at', { ascending: false });
 
- if (searchTerm) {
- query = query.ilike('full_name', `%${searchTerm}%`);
- }
+  if (searchTerm) {
+    query = query.or(`full_name.ilike.%${searchTerm}%,phone.ilike.%${searchTerm}%,parent_phone.ilike.%${searchTerm}%`);
+  }
 
- const { data, error } = await query;
+  const { data, error } = await query;
 
- if (error) {
- console.error('Error fetching students:', error);
- return [];
- }
+  if (error) {
+    console.error('Error fetching students:', error);
+    return [];
+  }
 
- return data.map(profile => ({
- ...profile,
- joined_at: profile.created_at,
- status: 'Active', // Placeholder until we have real status
- course: 'N/A' // Placeholder until we have courses
- }));
+  return (data || []).map(profile => ({
+    ...profile,
+    joined_at: profile.created_at,
+    status: 'Active',
+    course: 'N/A'
+  }));
 }
 
 // Get Single Student
@@ -380,7 +381,8 @@ export async function getAdminStats() {
     const { count: totalStudents } = await supabase
       .from('profiles')
       .select('*', { count: 'exact', head: true })
-      .eq('role', 'student');
+      .neq('role', 'teacher')
+      .neq('role', 'admin');
 
     const { count: activeTeachers } = await supabase
       .from('profiles')
@@ -651,9 +653,9 @@ export async function getStudentsNotInGroup(groupId: string, searchTerm: string 
   const supabase = createClient();
   const { data: existing } = await supabase.from("group_students").select("student_id").eq("group_id", groupId);
   const existingIds = (existing || []).map((e: any) => e.student_id);
-  let query = supabase.from("profiles").select("*").eq("role", "student").order("full_name");
+  let query = supabase.from("profiles").select("*").neq("role", "teacher").neq("role", "admin").order("full_name");
   if (existingIds.length > 0) query = query.not("id", "in", "(" + existingIds.join(",") + ")");
-  if (searchTerm) query = query.or("full_name.ilike.%" + searchTerm + "%,phone.ilike.%" + searchTerm + "%");
+  if (searchTerm) query = query.or("full_name.ilike.%" + searchTerm + "%,phone.ilike.%" + searchTerm + "%,parent_phone.ilike.%" + searchTerm + "%");
   const { data, error } = await query.limit(50);
   if (error) throw error;
   return (data || []) as Student[];
