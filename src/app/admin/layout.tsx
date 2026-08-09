@@ -22,6 +22,7 @@ import {
   ChevronRight
 } from "lucide-react";
 import Image from "next/image";
+import toast from "react-hot-toast";
 import { createClient } from "@/utils/supabase/client";
 import RealtimeSyncEnabler from "@/components/RealtimeSyncEnabler";
 
@@ -78,8 +79,8 @@ export default function AdminLayout({
         }
 
         setUserInfo({
-          name: profile.full_name || user.email?.split('@')[0] || "Administrator",
-          email: user.email || "admin@promax.uz",
+          name: profile.full_name || user.email?.split('@')[0] || "Foydalanuvchi",
+          email: user.email || "user@promax.uz",
           role: profile.role,
           avatarUrl: profile.avatar_url
         });
@@ -94,6 +95,29 @@ export default function AdminLayout({
 
     checkAccess();
   }, []);
+
+  // Route protection based on sub-path & role
+  useEffect(() => {
+    if (!userInfo || !authorized) return;
+
+    // Protection rules for Teacher role
+    if (userInfo.role === 'teacher') {
+      const restrictedForTeacher = ['/admin/payments', '/admin/teachers', '/admin/settings'];
+      if (restrictedForTeacher.some(path => pathname.startsWith(path))) {
+        toast.error("Ushbu bo'limga faqat Bosh Admin kirishi mumkin");
+        router.push('/admin');
+      }
+    }
+
+    // Protection rules for Staff role
+    if (userInfo.role === 'staff') {
+      const restrictedForStaff = ['/admin/teachers', '/admin/settings'];
+      if (restrictedForStaff.some(path => pathname.startsWith(path))) {
+        toast.error("Ushbu bo'limga faqat Bosh Admin kirishi mumkin");
+        router.push('/admin');
+      }
+    }
+  }, [pathname, userInfo, authorized]);
 
   // Format date on client
   useEffect(() => {
@@ -147,17 +171,23 @@ export default function AdminLayout({
     );
   }
 
-  const menuItems = [
-    { icon: LayoutDashboard, label: "Bosh Sahifa", href: "/admin" },
-    { icon: Users, label: "O'quvchilar", href: "/admin/students" },
-    { icon: GraduationCap, label: "O'qituvchilar", href: "/admin/teachers" },
-    { icon: Library, label: "Fanlar & Darslar", href: "/admin/courses" },
-    { icon: BookOpen, label: "Testlar", href: "/admin/tests" },
-    { icon: FileText, label: "Natijalar", href: "/admin/results" },
-    { icon: DollarSign, label: "To'lovlar", href: "/admin/payments" },
-    { icon: Bell, label: "E'lonlar", href: "/admin/announcements" },
-    { icon: Settings, label: "Sozlamalar", href: "/admin/settings" },
+  // Menu items with explicit role access permissions
+  const allMenuItems = [
+    { icon: LayoutDashboard, label: "Bosh Sahifa", href: "/admin", roles: ['admin', 'teacher', 'staff'] },
+    { icon: Users, label: "O'quvchilar", href: "/admin/students", roles: ['admin', 'teacher', 'staff'] },
+    { icon: GraduationCap, label: "O'qituvchilar", href: "/admin/teachers", roles: ['admin'] },
+    { icon: Library, label: "Fanlar & Darslar", href: "/admin/courses", roles: ['admin', 'teacher', 'staff'] },
+    { icon: BookOpen, label: "Testlar", href: "/admin/tests", roles: ['admin', 'teacher', 'staff'] },
+    { icon: FileText, label: "Natijalar", href: "/admin/results", roles: ['admin', 'teacher', 'staff'] },
+    { icon: DollarSign, label: "To'lovlar", href: "/admin/payments", roles: ['admin', 'staff'] },
+    { icon: Bell, label: "E'lonlar", href: "/admin/announcements", roles: ['admin', 'teacher', 'staff'] },
+    { icon: Settings, label: "Sozlamalar", href: "/admin/settings", roles: ['admin'] },
   ];
+
+  // Filter menu items dynamically based on current user's role
+  const visibleMenuItems = allMenuItems.filter(item =>
+    !userInfo?.role || item.roles.includes(userInfo.role)
+  );
 
   return (
     <div className="flex h-screen bg-slate-50 dark:bg-slate-950 font-sans text-slate-800 dark:text-slate-100 overflow-hidden">
@@ -169,7 +199,7 @@ export default function AdminLayout({
         />
       )}
 
-      {/* Professional Prominent Sidebar */}
+      {/* Professional Sidebar */}
       <aside
         className={`
           fixed lg:sticky top-0 h-screen z-50 w-72 bg-slate-900/95 backdrop-blur-2xl text-slate-200 border-r border-slate-800/80 transition-transform duration-300 ease-in-out shrink-0 flex flex-col justify-between shadow-2xl lg:shadow-none
@@ -177,7 +207,7 @@ export default function AdminLayout({
         `}
       >
         <div className="flex flex-col h-full">
-          {/* O'quv Markaz Logotipi Header */}
+          {/* Logo Header */}
           <div className="h-20 flex items-center justify-between px-6 border-b border-slate-800/70 bg-slate-900/50">
             <Link href="/admin" className="flex items-center gap-3 group">
               <div className="w-10 h-10 relative flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
@@ -195,7 +225,7 @@ export default function AdminLayout({
                     Promax
                   </span>
                   <span className="text-[10px] font-extrabold px-1.5 py-0.2 rounded-md bg-brand-blue/20 text-brand-blue border border-brand-blue/30 uppercase tracking-wider">
-                    Admin
+                    {userInfo?.role === 'teacher' ? 'Ustoz' : userInfo?.role === 'staff' ? 'Xodim' : 'Admin'}
                   </span>
                 </div>
                 <span className="text-[9px] text-slate-400 font-medium tracking-tight">
@@ -212,13 +242,16 @@ export default function AdminLayout({
             </button>
           </div>
 
-          {/* Prominent Navigation List */}
+          {/* Role-filtered Navigation */}
           <nav className="flex-1 px-4 py-5 space-y-1.5 overflow-y-auto custom-scrollbar">
-            <div className="px-3 pb-3 text-[11px] font-black text-slate-500 uppercase tracking-widest">
-              Boshqaruv Menyu
+            <div className="px-3 pb-3 text-[11px] font-black text-slate-500 uppercase tracking-widest flex items-center justify-between">
+              <span>Boshqaruv Menyu</span>
+              <span className="text-[9px] font-extrabold text-brand-blue uppercase bg-brand-blue/10 px-2 py-0.5 rounded-full">
+                {userInfo?.role === 'teacher' ? "O'qituvchilar uchun" : userInfo?.role === 'staff' ? "Xodimlar uchun" : "Bosh Admin"}
+              </span>
             </div>
 
-            {menuItems.map((item) => {
+            {visibleMenuItems.map((item) => {
               const isActive = pathname === item.href || (item.href !== "/admin" && pathname.startsWith(item.href));
               const Icon = item.icon;
 
@@ -281,7 +314,7 @@ export default function AdminLayout({
                     {userInfo?.name}
                   </span>
                   <span className="text-[10px] font-semibold text-brand-blue capitalize tracking-wide truncate">
-                    {userInfo?.role || "Admin"}
+                    {userInfo?.role === 'teacher' ? "O'qituvchi" : userInfo?.role === 'staff' ? "Xodim" : "Bosh Admin"}
                   </span>
                 </div>
               </div>
