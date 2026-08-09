@@ -95,34 +95,38 @@ export async function POST(request: NextRequest) {
  });
 
  } else {
- // 3. AUTO-REGISTER NEW USERS
- const { email: detEmail, password: detPassword } = generateDeterministicAuth(telegramId);
- 
- const { data: authData, error: authError } = await supabase.auth.signUp({
- email: detEmail,
- password: detPassword,
- options: {
- data: {
- full_name: tgUserRaw.first_name+ (tgUserRaw.last_name ? ` ${tgUserRaw.last_name}` : ''),
- role: 'student',
- }
- }
- });
+  // 3. AUTO-REGISTER NEW USERS — always as 'student', never as 'admin'
+  const { email: detEmail, password: detPassword } = generateDeterministicAuth(telegramId);
+  
+  const fullName = tgUserRaw.first_name + (tgUserRaw.last_name ? ` ${tgUserRaw.last_name}` : '');
 
- if (authData.user) {
-    await supabase.from('profiles').update({
-      full_name: tgUserRaw.first_name + (tgUserRaw.last_name ? ` ${tgUserRaw.last_name}` : ''),
-      role: 'student',
+  const { data: authData, error: authError } = await supabase.auth.signUp({
+    email: detEmail,
+    password: detPassword,
+    options: {
+      data: {
+        full_name: fullName,
+        role: 'student', // Always student for Telegram auto-registration
+      }
+    }
+  });
+
+  if (authData.user) {
+    // Force-update profile: override any trigger-set role to 'student'
+    await supabase.from('profiles').upsert({
+      id: authData.user.id,
+      full_name: fullName,
+      role: 'student',  // CRITICAL: Never allow admin via Telegram auto-reg
       telegram_id: telegramId,
       telegram_username: tgUserRaw.username || null,
-      avatar_url: tgUserRaw.photo_url || null
-    }).eq('id', authData.user.id);
+      avatar_url: tgUserRaw.photo_url || null,
+    }, { onConflict: 'id' });
 
- // Sign them in
- await supabase.auth.signInWithPassword({ email: detEmail, password: detPassword });
+  // Sign them in
+  await supabase.auth.signInWithPassword({ email: detEmail, password: detPassword });
 
- return NextResponse.json({ linked: true, autoCreated: true, method: 'auto-register' });
- }
+  return NextResponse.json({ linked: true, autoCreated: true, method: 'auto-register' });
+  }
 
  // Fallback if auto-register fails
  const tgUser = {
