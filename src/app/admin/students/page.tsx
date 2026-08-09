@@ -219,12 +219,13 @@ export default function AdminStudentsPage() {
                       </p>
                       <div className="mt-2.5">
                         {student.parent_phone ? (
-                          <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-blue-50/80 dark:bg-blue-950/40 text-brand-blue border border-blue-200/50 dark:border-blue-900/50 text-[11px] font-bold shadow-xs">
+                          <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-blue-50/80 dark:bg-blue-950/40 border border-blue-200/50 dark:border-blue-900/50 text-[11px] font-bold overflow-hidden">
                             <UserCheck size={13} className="text-brand-blue shrink-0" />
-                            <span className="text-slate-500 dark:text-slate-400 font-semibold">Ota-onasi:</span>
+                            <span className="text-slate-500 dark:text-slate-400 font-semibold shrink-0">Ota-onasi:</span>
                             <span className="text-slate-800 dark:text-slate-200 font-extrabold truncate">
-                              {student.parent_name || 'Ota-ona'} ({formatUzPhone(student.parent_phone)})
+                              {student.parent_name || 'Ota-ona'}
                             </span>
+                            <span className="text-slate-500 dark:text-slate-400 shrink-0 font-medium">{formatUzPhone(student.parent_phone)}</span>
                           </div>
                         ) : (
                           <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-400 text-[11px] font-medium">
