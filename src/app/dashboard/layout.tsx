@@ -61,12 +61,12 @@ export default function DashboardLayout({
  return;
  }
 
- // Only students can access dashboard
- if (profile.role !== 'student') {
- console.log('Non-student trying to access dashboard, redirecting to admin');
- router.push("/admin");
- return;
- }
+  // Students, teachers, and staff can all access the dashboard
+  // Only redirect to admin if they are ONLY admin (not student/teacher using dashboard)
+  if (profile.role === 'admin') {
+    router.push("/admin");
+    return;
+  }
 
  setLoading(false);
  } catch (err) {

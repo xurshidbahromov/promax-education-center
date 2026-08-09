@@ -119,11 +119,11 @@ export default function AdminStudentsPage() {
   };
 
   const toggleSubject = (subjectTitle: string) => {
-    if (selectedSubjects.includes(subjectTitle)) {
-      setSelectedSubjects(prev => prev.filter(s => s !== subjectTitle));
-    } else {
-      setSelectedSubjects(prev => [...prev, subjectTitle]);
-    }
+    setSelectedSubjects(prev =>
+      prev.includes(subjectTitle)
+        ? prev.filter(s => s !== subjectTitle)
+        : [...prev, subjectTitle]
+    );
   };
 
   const handlePromoteConfirm = async () => {
@@ -308,22 +308,18 @@ export default function AdminStudentsPage() {
                   subjects.map(subject => {
                     const isSelected = selectedSubjects.includes(subject.title);
                     return (
-                      <label
+                      <button
                         key={subject.id}
-                        className={`flex items-center gap-3 p-3 rounded-2xl border transition-colors cursor-pointer text-xs font-semibold ${
+                        type="button"
+                        onClick={() => toggleSubject(subject.title)}
+                        className={`w-full p-3 rounded-2xl border transition-all text-xs font-semibold text-left ${
                           isSelected
-                            ? 'border-emerald-500/50 bg-emerald-50/50 text-emerald-700 dark:bg-emerald-950/20 dark:text-emerald-300'
-                            : 'border-slate-100 dark:border-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800/40'
+                            ? 'border-emerald-500 bg-emerald-50 text-emerald-700 dark:bg-emerald-950/30 dark:text-emerald-300 dark:border-emerald-500/60 shadow-sm'
+                            : 'border-slate-100 dark:border-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800/40 hover:border-slate-200 dark:hover:border-slate-700'
                         }`}
                       >
-                        <input 
-                          type="checkbox" 
-                          checked={isSelected}
-                          onChange={() => toggleSubject(subject.title)}
-                          className="w-4 h-4 text-emerald-500 rounded border-slate-300 focus:ring-emerald-500"
-                        />
-                        <span>{subject.title}</span>
-                      </label>
+                        {subject.title}
+                      </button>
                     );
                   })
                 )}
