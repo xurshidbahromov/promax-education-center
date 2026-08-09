@@ -11,6 +11,7 @@ import {
 } from "lucide-react";
 import { toggleTestPublish, assignTestToGroup, removeTestFromGroup, type Question } from "@/lib/tests";
 import { useTestDetail, useTestResults, useTestGroups, useGroups, useSubjects } from "@/hooks/useAdminData";
+import MathRenderer from "@/components/MathRenderer";
 
 interface PageProps { params: Promise<{ id: string }> }
 
@@ -200,7 +201,15 @@ export default function TestDetailPage({ params }: PageProps) {
                   onClick={() => setExpandedQ(expandedQ === q.id ? null : q.id)}
                 >
                   <span className="flex-shrink-0 w-7 h-7 rounded-lg bg-brand-blue/10 text-brand-blue text-xs font-bold flex items-center justify-center mt-0.5">{idx + 1}</span>
-                  <p className="flex-1 text-sm font-medium text-slate-800 dark:text-slate-100 leading-relaxed">{q.question_text}</p>
+                  <div className="flex-1 text-sm font-medium text-slate-800 dark:text-slate-100 leading-relaxed">
+                    <MathRenderer content={q.question_text} />
+                    {q.image_url && (
+                      <div className="mt-2.5">
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img src={q.image_url} alt="Savol rasmi" className="max-h-56 w-auto rounded-xl border border-slate-200 dark:border-slate-800 object-contain shadow-sm" />
+                      </div>
+                    )}
+                  </div>
                   <div className="flex items-center gap-2 flex-shrink-0">
                     <span className="text-xs text-slate-400">{q.points} ball</span>
                     {expandedQ === q.id ? <ChevronUp size={16} className="text-slate-400" /> : <ChevronDown size={16} className="text-slate-400" />}
@@ -219,7 +228,7 @@ export default function TestDetailPage({ params }: PageProps) {
                             <span className={`w-5 h-5 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0 ${
                               key === q.correct_answer ? "bg-emerald-500 text-white" : "bg-slate-200 dark:bg-slate-700 text-slate-600 dark:text-slate-400"
                             }`}>{key === q.correct_answer ? <Check size={11} /> : key.toUpperCase()}</span>
-                            {value}
+                            <MathRenderer content={String(value || '')} inline />
                           </div>
                         ))}
                       </div>

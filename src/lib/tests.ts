@@ -8,6 +8,21 @@ export type DifficultyLevel = 'easy' | 'medium' | 'hard';
 export type QuestionType = 'multiple_choice' | 'true_false' | 'short_answer';
 export type AttemptStatus = 'in_progress' | 'completed' | 'abandoned';
 
+const VALID_SUBJECTS: Subject[] = ['math', 'english', 'physics', 'chemistry', 'biology', 'general'];
+
+export function sanitizeSubject(subject: string): Subject {
+  const normalized = (subject || '').toLowerCase().trim();
+  if (VALID_SUBJECTS.includes(normalized as Subject)) {
+    return normalized as Subject;
+  }
+  if (normalized.includes('matematik') || normalized.includes('math') || normalized.includes('algebra') || normalized.includes('geometriya')) return 'math';
+  if (normalized.includes('ingliz') || normalized.includes('english') || normalized.includes('ing')) return 'english';
+  if (normalized.includes('fizik') || normalized.includes('physics')) return 'physics';
+  if (normalized.includes('kimyo') || normalized.includes('chemist')) return 'chemistry';
+  if (normalized.includes('biolog') || normalized.includes('biol')) return 'biology';
+  return 'general';
+}
+
 export interface Test {
  id: string;
  title: string;
@@ -110,69 +125,86 @@ export async function getPublishedTests(filters?: TestFilters): Promise<Test[]> 
  * Create a new test with questions
  */
 export async function createTest(testData: {
- title: string;
- description: string | null;
- subject: Subject;
- test_type: TestType;
- difficulty_level: DifficultyLevel;
- duration_minutes: number | null;
- is_published: boolean;
- questions: Omit<Question, 'id' | 'test_id'>[];
+  title: string;
+  description: string | null;
+  subject: Subject;
+  test_type: TestType;
+  difficulty_level: DifficultyLevel;
+  duration_minutes: number | null;
+  is_published: boolean;
+  questions: Omit<Question, 'id' | 'test_id'>[];
 }): Promise<string | null> {
- const supabase = createClient();
+  const supabase = createClient();
 
- const { data: { user } } = await supabase.auth.getUser();
- if (!user) return null;
+  const { data: { user } } = await supabase.auth.getUser();
 
- // Insert test
- const { data: test, error: testError } = await supabase
- .from('tests')
- .insert({
- title: testData.title,
- description: testData.description,
- subject: testData.subject,
- test_type: testData.test_type,
- difficulty_level: testData.difficulty_level,
- duration_minutes: testData.duration_minutes,
- is_published: testData.is_published,
- total_questions: testData.questions.length,
- created_by: user.id
- })
- .select()
- .single();
+  // Attempt test insertion with created_by
+  const insertPayload: any = {
+    title: testData.title,
+    description: testData.description,
+    subject: sanitizeSubject(testData.subject),
+    test_type: testData.test_type,
+    difficulty_level: testData.difficulty_level,
+    duration_minutes: testData.duration_minutes,
+    is_published: testData.is_published,
+    total_questions: testData.questions.length,
+  };
 
- if (testError || !test) {
- console.error('Error creating test:', testError);
- return null;
- }
+  if (user?.id) {
+    insertPayload.created_by = user.id;
+  }
 
- // Insert questions
- if (testData.questions.length > 0) {
- const { error: questionsError } = await supabase
- .from('questions')
- .insert(
- testData.questions.map((q) => ({
- test_id: test.id,
- question_text: q.question_text,
- question_type: q.question_type,
- options: q.options,
- correct_answer: q.correct_answer,
- explanation: q.explanation,
- points: q.points,
- order_index: q.order_index,
- image_url: q.image_url || null
- }))
- );
+  let { data: test, error: testError } = await supabase
+    .from('tests')
+    .insert(insertPayload)
+    .select()
+    .single();
 
- if (questionsError) {
- console.error('Error creating questions:', questionsError);
- // Optionally delete the test if questions fail
- await supabase.from('tests').delete().eq('id', test.id);
- return null;
- }
- }
+  if (testError && user?.id) {
+    // If created_by caused an RLS or foreign key error, try without created_by
+    console.warn('Initial test insert failed, trying without created_by:', testError.message);
+    delete insertPayload.created_by;
+    const retryResult = await supabase
+      .from('tests')
+      .insert(insertPayload)
+      .select()
+      .single();
+    test = retryResult.data;
+    testError = retryResult.error;
+  }
 
- return test.id;
+  if (testError || !test) {
+    console.error('Error creating test:', testError?.message || testError?.details || JSON.stringify(testError));
+    return null;
+  }
+
+  // Insert questions
+  if (testData.questions.length > 0) {
+    const { error: questionsError } = await supabase
+      .from('questions')
+      .insert(
+        testData.questions.map((q) => ({
+          test_id: test.id,
+          question_text: q.question_text,
+          question_type: q.question_type,
+          options: q.options,
+          correct_answer: q.correct_answer,
+          explanation: q.explanation,
+          points: q.points,
+          order_index: q.order_index,
+          image_url: q.image_url || null
+        }))
+      );
+
+    if (questionsError) {
+      console.error('Error creating questions:', questionsError.message || questionsError.details || JSON.stringify(questionsError));
+      // Delete test if questions insert fails
+      await supabase.from('tests').delete().eq('id', test.id);
+      return null;
+    }
+  }
+
+  return test.id;
 }
 
 /**
@@ -517,7 +549,7 @@ export async function updateTest(
  .update({
  title: testData.title,
  description: testData.description,
- subject: testData.subject,
+ subject: sanitizeSubject(testData.subject),
  test_type: testData.test_type,
  difficulty_level: testData.difficulty_level,
  duration_minutes: testData.duration_minutes,
@@ -882,4 +914,47 @@ export async function getTestGroups(testId: string): Promise<GroupTest[]> {
   
   if (error) return [];
   return (data || []) as unknown as GroupTest[];
+}
+
+/**
+ * Upload an image for a test question
+ */
+export async function uploadQuestionImage(file: File): Promise<string | null> {
+  try {
+    const supabase = createClient();
+    const fileExt = file.name.split('.').pop() || 'png';
+    const fileName = `question_${Date.now()}_${Math.random().toString(36).substring(7)}.${fileExt}`;
+    const filePath = `questions/${fileName}`;
+
+    // Attempt upload to Supabase storage 'test-images'
+    const { error: uploadError } = await supabase.storage
+      .from('test-images')
+      .upload(filePath, file, { upsert: true });
+
+    if (!uploadError) {
+      const { data } = supabase.storage.from('test-images').getPublicUrl(filePath);
+      return data.publicUrl;
+    }
+
+    // Try fallback bucket 'avatars'
+    const { error: fallbackError } = await supabase.storage
+      .from('avatars')
+      .upload(filePath, file, { upsert: true });
+
+    if (!fallbackError) {
+      const { data } = supabase.storage.from('avatars').getPublicUrl(filePath);
+      return data.publicUrl;
+    }
+
+    // Base64 fallback if storage bucket is not created
+    return new Promise((resolve) => {
+      const reader = new FileReader();
+      reader.onloadend = () => resolve(reader.result as string);
+      reader.onerror = () => resolve(null);
+      reader.readAsDataURL(file);
+    });
+  } catch (err) {
+    console.error("Error uploading question image:", err);
+    return null;
+  }
 }

@@ -21,8 +21,10 @@ import {
  completeTestAttempt,
  getActiveAttempt,
  getAttemptResponses,
+ type Test,
  type Question
 } from "@/lib/tests";
+import MathRenderer from "@/components/MathRenderer";
 import { TakeTestSkeleton } from "@/components/ui/Skeleton";
 import { createClient } from "@/utils/supabase/client";
 import toast from "react-hot-toast";
@@ -357,11 +359,21 @@ export default function TakeTestPage() {
  </button>
  </div>
 
- {/* Question Text */}
- <div className="mb-8">
- <p className="text-[18px] sm:text-[20px] font-medium text-slate-800 dark:text-slate-100 leading-relaxed">
- {currentQuestion.question_text}
- </p>
+ {/* Question Text & Image */}
+ <div className="mb-8 space-y-4">
+ <div className="text-[18px] sm:text-[20px] font-medium text-slate-800 dark:text-slate-100 leading-relaxed">
+ <MathRenderer content={currentQuestion.question_text} />
+ </div>
+ {currentQuestion.image_url && (
+ <div className="rounded-2xl overflow-hidden border border-slate-200/80 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/30 p-2 max-h-72 flex items-center justify-center">
+ {/* eslint-disable-next-line @next/next/no-img-element */}
+ <img
+ src={currentQuestion.image_url}
+ alt="Savol rasmi"
+ className="max-h-64 w-auto rounded-xl object-contain shadow-sm"
+ />
+ </div>
+ )}
  </div>
 
  {/* Answer Options */}
@@ -397,7 +409,7 @@ export default function TakeTestPage() {
  {key}.
  </span>
  <span className={`font-medium ${isSelected ? "text-slate-900 dark:text-white" : "text-slate-600 dark:text-slate-300"}`}>
- {value as React.ReactNode}
+ <MathRenderer content={String(value || '')} inline />
  </span>
  </div>
  </label>
