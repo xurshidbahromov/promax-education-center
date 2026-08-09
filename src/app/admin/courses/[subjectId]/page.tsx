@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
 import {
   ArrowLeft, Plus, Edit2, Trash2, Users, Video, Clock, DollarSign,
-  GraduationCap, BookOpen, UserPlus, X, Play, CheckCircle2
+  GraduationCap, BookOpen, UserPlus, X, Play, CheckCircle2, Search, CheckSquare, Square
 } from "lucide-react";
 import {
   getSubjectById,
@@ -17,6 +17,7 @@ import {
   createVideoLesson,
   deleteVideoLesson,
   assignStudentToGroup,
+  assignMultipleStudentsToGroup,
   removeStudentFromGroup,
   type Group,
   type VideoLesson
@@ -55,7 +56,9 @@ export default function SubjectDetailPage({ params }: PageProps) {
 
   // Student Assignment Modal
   const [assignModalGroup, setAssignModalGroup] = useState<Group | null>(null);
-  const [selectedStudentId, setSelectedStudentId] = useState("");
+  const [selectedStudentIds, setSelectedStudentIds] = useState<string[]>([]);
+  const [studentSearchTerm, setStudentSearchTerm] = useState("");
+  const [assigning, setAssigning] = useState(false);
 
   const { data: teachers = [] } = useTeachers();
   const { data: students = [] } = useStudents();
@@ -176,17 +179,27 @@ export default function SubjectDetailPage({ params }: PageProps) {
     } else toast.error("Xatolik: " + res.error);
   };
 
-  // Assign Student
+  // Assign Multiple Students
   const handleAssignStudent = async () => {
-    if (!assignModalGroup || !selectedStudentId) return;
+    if (!assignModalGroup || selectedStudentIds.length === 0) return;
+    setAssigning(true);
 
-    const res = await assignStudentToGroup(assignModalGroup.id, selectedStudentId);
-    if (res.success) {
-      toast.success("O'quvchi guruhga biriktirildi!");
-      setSelectedStudentId("");
-      setAssignModalGroup(null);
-      reloadGroups();
-    } else toast.error("Xatolik: " + res.error);
+    try {
+      const res = await assignMultipleStudentsToGroup(assignModalGroup.id, selectedStudentIds);
+      if (res.success) {
+        toast.success(`${selectedStudentIds.length} ta o'quvchi guruhga biriktirildi!`);
+        setSelectedStudentIds([]);
+        setStudentSearchTerm("");
+        setAssignModalGroup(null);
+        reloadGroups();
+      } else {
+        toast.error("Xatolik: " + res.error);
+      }
+    } catch (e: any) {
+      toast.error("Xatolik yuz berdi");
+    } finally {
+      setAssigning(false);
+    }
   };
 
   if (loading) {
@@ -528,47 +541,167 @@ export default function SubjectDetailPage({ params }: PageProps) {
         </div>
       )}
 
-      {/* Assign Student Modal */}
-      {assignModalGroup && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-sm">
-          <div className="bg-white dark:bg-slate-900 rounded-3xl shadow-xl w-full max-w-md overflow-hidden border border-slate-200/80 dark:border-slate-800 p-6 space-y-4">
-            <h3 className="font-bold text-base text-slate-800 dark:text-slate-100">
-              {assignModalGroup.name} guruhiga o'quvchi qo'shish
-            </h3>
+      {/* Multi-Student Assignment Modal with Live Search */}
+      {assignModalGroup && (() => {
+        const matchingStudents = students.filter(s => {
+          const query = studentSearchTerm.toLowerCase();
+          return (s.full_name || "").toLowerCase().includes(query) || (s.phone || "").toLowerCase().includes(query);
+        });
 
-            <div>
-              <label className="block text-xs font-bold text-slate-600 dark:text-slate-300 uppercase tracking-wider mb-1.5">
-                O'quvchini tanlang
-              </label>
-              <select
-                value={selectedStudentId}
-                onChange={(e) => setSelectedStudentId(e.target.value)}
-                className="w-full px-4 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-bold text-slate-800 dark:text-slate-100 outline-none"
-              >
-                <option value="">— Tanlang —</option>
-                {students.map(s => (
-                  <option key={s.id} value={s.id}>
-                    {s.full_name || s.phone || "Ismsiz"}
-                  </option>
-                ))}
-              </select>
-            </div>
+        const allFilteredSelected = matchingStudents.length > 0 && matchingStudents.every(s => selectedStudentIds.includes(s.id));
 
-            <div className="flex items-center justify-end gap-3 pt-3 border-t border-slate-100 dark:border-slate-800">
-              <button onClick={() => setAssignModalGroup(null)} className="px-4 py-2 text-xs font-bold text-slate-500">
-                Bekor qilish
-              </button>
-              <button
-                onClick={handleAssignStudent}
-                disabled={!selectedStudentId}
-                className="px-4 py-2 text-xs font-bold text-white bg-emerald-500 hover:bg-emerald-600 rounded-xl disabled:opacity-50"
-              >
-                Qo'shish
-              </button>
+        const toggleStudent = (id: string) => {
+          if (selectedStudentIds.includes(id)) {
+            setSelectedStudentIds(selectedStudentIds.filter(sId => sId !== id));
+          } else {
+            setSelectedStudentIds([...selectedStudentIds, id]);
+          }
+        };
+
+        const toggleSelectAllFiltered = () => {
+          const filteredIds = matchingStudents.map(s => s.id);
+          if (allFilteredSelected) {
+            setSelectedStudentIds(selectedStudentIds.filter(id => !filteredIds.includes(id)));
+          } else {
+            const merged = Array.from(new Set([...selectedStudentIds, ...filteredIds]));
+            setSelectedStudentIds(merged);
+          }
+        };
+
+        return (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-sm">
+            <div className="bg-white dark:bg-slate-900 rounded-3xl shadow-xl w-full max-w-lg overflow-hidden border border-slate-200/80 dark:border-slate-800 p-6 space-y-4">
+              <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-3">
+                <div className="flex items-center gap-2.5">
+                  <UserPlus size={20} className="text-brand-blue" />
+                  <div>
+                    <h3 className="font-extrabold text-base text-slate-800 dark:text-slate-100">
+                      {assignModalGroup.name} guruhiga o'quvchi qo'shish
+                    </h3>
+                    <p className="text-xs text-slate-400 font-medium">Bir vaqtning o'zida bir nechta o'quvchini tanlashingiz mumkin</p>
+                  </div>
+                </div>
+                <button
+                  onClick={() => { setAssignModalGroup(null); setStudentSearchTerm(""); setSelectedStudentIds([]); }}
+                  className="p-1 text-slate-400 hover:text-slate-700 dark:hover:text-slate-200"
+                >
+                  <X size={18} />
+                </button>
+              </div>
+
+              {/* Live Search Input */}
+              <div className="relative">
+                <Search size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
+                <input
+                  type="text"
+                  value={studentSearchTerm}
+                  onChange={(e) => setStudentSearchTerm(e.target.value)}
+                  placeholder="O'quvchi ismi yoki telefon raqami bo'yicha qidirish..."
+                  className="w-full pl-10 pr-9 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-bold text-slate-800 dark:text-slate-100 outline-none focus:ring-2 focus:ring-brand-blue/30"
+                />
+                {studentSearchTerm && (
+                  <button
+                    onClick={() => setStudentSearchTerm("")}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
+                  >
+                    <X size={14} />
+                  </button>
+                )}
+              </div>
+
+              {/* Students List Container */}
+              <div className="space-y-2">
+                <div className="flex items-center justify-between text-[11px] font-bold text-slate-400 uppercase tracking-wider px-1">
+                  <div className="flex items-center gap-2">
+                    <span>Mavjud O'quvchilar ({matchingStudents.length})</span>
+                    {selectedStudentIds.length > 0 && (
+                      <span className="px-2 py-0.5 rounded-full bg-brand-blue/10 text-brand-blue font-bold text-[10px]">
+                        {selectedStudentIds.length} ta tanlandi
+                      </span>
+                    )}
+                  </div>
+
+                  {matchingStudents.length > 0 && (
+                    <button
+                      onClick={toggleSelectAllFiltered}
+                      className="text-brand-blue hover:underline text-[11px] font-bold flex items-center gap-1"
+                    >
+                      {allFilteredSelected ? <CheckSquare size={13} /> : <Square size={13} />}
+                      <span>{allFilteredSelected ? "Tanlovni bekor qilish" : "Barchasini tanlash"}</span>
+                    </button>
+                  )}
+                </div>
+
+                {matchingStudents.length === 0 ? (
+                  <div className="py-8 text-center text-slate-400 bg-slate-50/50 dark:bg-slate-800/30 rounded-2xl border border-dashed border-slate-200 dark:border-slate-800">
+                    <p className="text-xs font-semibold">Qidiruvga mos o'quvchi topilmadi</p>
+                  </div>
+                ) : (
+                  <div className="space-y-2 max-h-60 overflow-y-auto pr-1 custom-scrollbar">
+                    {matchingStudents.map((s) => {
+                      const isSelected = selectedStudentIds.includes(s.id);
+                      return (
+                        <div
+                          key={s.id}
+                          onClick={() => toggleStudent(s.id)}
+                          className={`flex items-center justify-between p-3.5 rounded-2xl border cursor-pointer transition-all duration-200 ${
+                            isSelected
+                              ? 'border-brand-blue bg-brand-blue/10 dark:bg-brand-blue/20 ring-2 ring-brand-blue/20 shadow-sm'
+                              : 'border-slate-200/60 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/30 hover:border-slate-300 dark:hover:border-slate-700'
+                          }`}
+                        >
+                          <div className="flex items-center gap-3">
+                            <div className={`w-9 h-9 rounded-xl font-bold text-xs flex items-center justify-center uppercase shrink-0 transition-colors ${
+                              isSelected
+                                ? 'bg-brand-blue text-white shadow-sm shadow-brand-blue/30'
+                                : 'bg-slate-200/70 dark:bg-slate-800 text-slate-600 dark:text-slate-300'
+                            }`}>
+                              {(s.full_name || s.phone || "U").charAt(0)}
+                            </div>
+                            <div>
+                              <p className={`text-xs font-extrabold transition-colors ${
+                                isSelected ? 'text-brand-blue dark:text-blue-400' : 'text-slate-800 dark:text-slate-100'
+                              }`}>
+                                {s.full_name || "Ismsiz o'quvchi"}
+                              </p>
+                              <p className="text-[11px] font-semibold text-slate-400">
+                                {s.phone || "Telefon kiritilmagan"}
+                              </p>
+                            </div>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
+
+              {/* Footer Actions */}
+              <div className="flex items-center justify-between pt-3 border-t border-slate-100 dark:border-slate-800">
+                <span className="text-xs text-slate-400 font-medium">
+                  {selectedStudentIds.length > 0 ? `${selectedStudentIds.length} ta o'quvchi tanlandi` : "Hali tanlanmadi"}
+                </span>
+
+                <div className="flex items-center gap-3">
+                  <button
+                    onClick={() => { setAssignModalGroup(null); setStudentSearchTerm(""); setSelectedStudentIds([]); }}
+                    className="px-4 py-2 text-xs font-bold text-slate-500 hover:text-slate-800"
+                  >
+                    Bekor qilish
+                  </button>
+                  <button
+                    onClick={handleAssignStudent}
+                    disabled={selectedStudentIds.length === 0 || assigning}
+                    className="px-5 py-2.5 text-xs font-bold text-white bg-emerald-500 hover:bg-emerald-600 rounded-xl disabled:opacity-50 shadow-md shadow-emerald-500/10 transition-all flex items-center gap-2"
+                  >
+                    {assigning ? "Biriktirilmoqda..." : selectedStudentIds.length > 0 ? `${selectedStudentIds.length} ta o'quvchini qo'shish` : "Tanlanmagan"}
+                  </button>
+                </div>
+              </div>
             </div>
           </div>
-        </div>
-      )}
+        );
+      })()}
     </div>
   );
 }

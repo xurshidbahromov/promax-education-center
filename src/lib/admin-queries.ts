@@ -612,6 +612,19 @@ export async function addStudentToGroup(
   return { success: true };
 }
 
+export async function addMultipleStudentsToGroup(
+  groupId: string, studentIds: string[]
+): Promise<{ success: boolean; count: number; error?: string }> {
+  if (!studentIds.length) return { success: true, count: 0 };
+  const supabase = createClient();
+  const rows = studentIds.map(id => ({ group_id: groupId, student_id: id }));
+  const { error } = await supabase
+    .from("group_students")
+    .upsert(rows, { onConflict: "group_id,student_id", ignoreDuplicates: true });
+  if (error) return { success: false, count: 0, error: error.message };
+  return { success: true, count: studentIds.length };
+}
+
 export async function removeStudentFromGroup(
   groupId: string, studentId: string
 ): Promise<{ success: boolean; error?: string }> {
@@ -764,6 +777,7 @@ export async function getSubjectLessons(subjectId: string): Promise<VideoLesson[
 }
 
 export const assignStudentToGroup = addStudentToGroup;
+export const assignMultipleStudentsToGroup = addMultipleStudentsToGroup;
 export const demoteToStudent = demoteTeacher;
 
 
