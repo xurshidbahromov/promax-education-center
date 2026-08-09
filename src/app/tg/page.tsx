@@ -81,9 +81,13 @@ export default function TelegramMiniAppPage() {
  window.location.href = '/tg/link';
  return;
  }
- // Successfully auto-logged in (via session, deterministic auth, or auto-register)
- window.location.href = '/dashboard';
- return; // Do not set loading to false so it stays on loading screen while redirecting
+  // Successfully auto-logged in — redirect based on role
+  const role = data.profile?.role;
+  const targetPath = (role === 'admin' || role === 'teacher' || role === 'staff')
+    ? '/admin'
+    : '/dashboard';
+  window.location.href = targetPath;
+  return; // Do not set loading to false so it stays on loading screen while redirecting
  }
 
  setAuthState(data);
