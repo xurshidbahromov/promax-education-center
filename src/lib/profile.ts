@@ -11,6 +11,8 @@ export interface UserProfile {
  bio?: string | null;
  location?: string | null;
  coins?: number;
+ parent_phone?: string | null;
+ parent_name?: string | null;
  settings?: {
  theme?: string;
  language?: string;

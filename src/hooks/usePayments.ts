@@ -2,6 +2,7 @@ import { useState } from "react";
 import useSWR from "swr";
 import { createClient } from "@/utils/supabase/client";
 import { Group, GroupStudent } from "@/lib/admin-queries";
+import { sendPaymentReceiptToStudentAndParents } from "@/lib/notifications-bridge";
 
 export interface Payment {
   id: string;
@@ -153,6 +154,16 @@ export async function processPayment(
       .update({ amount, payment_method: method, status, payment_date: new Date().toISOString() })
       .eq('id', existing.id);
     if (error) return { success: false, error: error.message };
+
+    // Trigger instant Telegram receipt notification to student and parents
+    sendPaymentReceiptToStudentAndParents({
+      studentId,
+      groupId,
+      amount,
+      paymentMethod: method,
+      monthYear,
+    }).catch(console.error);
+
     return { success: true };
   } else {
     // Insert
@@ -168,6 +179,16 @@ export async function processPayment(
         payment_date: new Date().toISOString()
       });
     if (error) return { success: false, error: error.message };
+
+    // Trigger instant Telegram receipt notification to student and parents
+    sendPaymentReceiptToStudentAndParents({
+      studentId,
+      groupId,
+      amount,
+      paymentMethod: method,
+      monthYear,
+    }).catch(console.error);
+
     return { success: true };
   }
 }

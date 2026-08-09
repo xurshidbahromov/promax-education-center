@@ -16,8 +16,12 @@ import {
   XCircle,
   AlertCircle,
   Clock,
-  ShieldCheck
+  ShieldCheck,
+  TrendingUp,
+  UserCheck,
+  PhoneCall
 } from "lucide-react";
+import { formatUzPhone } from "@/lib/phone-formatter";
 
 interface StudentProfile {
   id: string;
@@ -25,6 +29,8 @@ interface StudentProfile {
   phone: string | null;
   role: string;
   created_at: string;
+  parent_phone?: string | null;
+  parent_name?: string | null;
 }
 
 interface EnrolledGroup {
@@ -221,12 +227,24 @@ export default function StudentDetailPage({ params }: PageProps) {
                 O'quvchi
               </span>
             </div>
-            <div className="flex flex-wrap items-center gap-3 text-xs sm:text-sm font-medium text-slate-500 mt-1">
-              <span className="flex items-center gap-1.5">
+            <div className="flex flex-wrap items-center gap-3 text-xs sm:text-sm font-medium text-slate-500 mt-2">
+              <span className="flex items-center gap-1.5 font-bold text-slate-700 dark:text-slate-200">
                 <Phone size={14} className="text-slate-400" />
-                {student.phone || "Telefon ko'rsatilmadi"}
+                {student.phone ? formatUzPhone(student.phone) : "Telefon ko'rsatilmadi"}
               </span>
-              <span className="flex items-center gap-1.5">
+              {student.parent_phone ? (
+                <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-blue-50/80 dark:bg-blue-950/40 text-brand-blue border border-blue-200/50 dark:border-blue-900/50 text-xs font-bold shadow-xs">
+                  <UserCheck size={14} className="text-brand-blue shrink-0" />
+                  <span className="text-slate-500 dark:text-slate-400 font-semibold">Ota-onasi:</span>
+                  <span className="text-slate-800 dark:text-slate-200 font-extrabold">{student.parent_name || 'Ota-ona'} ({formatUzPhone(student.parent_phone)})</span>
+                </span>
+              ) : (
+                <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-400 text-xs font-medium">
+                  <PhoneCall size={13} className="shrink-0" />
+                  <span>Ota-ona biriktirilmagan</span>
+                </span>
+              )}
+              <span className="flex items-center gap-1.5 text-slate-400">
                 <Calendar size={14} className="text-slate-400" />
                 Ro'yxatdan o'tgan: {formattedJoinedDate}
               </span>

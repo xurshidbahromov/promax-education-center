@@ -7,65 +7,104 @@ const APP_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://promaxedu.uz';
 // ─── Keyboards ─────────────────────────────────────────────────────────────────
 
 export function buildReplyKeyboard(linked: boolean, role: string = 'student') {
- if (!linked) {
- return {
- keyboard: [
- [
- {
- text: '🔗 Platformaga ulash',
- web_app: { url: `${APP_URL}/tg/link` },
- },
- ]
- ],
- resize_keyboard: true,
- is_persistent: true,
- };
- }
+  if (!linked) {
+    return {
+      keyboard: [
+        [
+          {
+            text: '🔗 Platformaga ulash',
+            web_app: { url: `${APP_URL}/tg/link` },
+          },
+        ],
+        [
+          {
+            text: '📱 Ota-ona sifatida ulanish',
+            request_contact: true,
+          },
+        ],
+      ],
+      resize_keyboard: true,
+      is_persistent: true,
+    };
+  }
 
- if (role === 'staff' || role === 'admin') {
- return {
- keyboard: [
- [
- {
- text: '📱 Mini App ochish',
- web_app: { url: `${APP_URL}/tg` },
- },
- ],
- [
- { text: '👥 O\'quvchilar' },
- { text: '📝 Testlarni tekshirish' },
- ],
- [
- { text: '🏫 Guruhlar' },
- { text: '👤 Profil' },
- ],
- ],
- resize_keyboard: true,
- is_persistent: true,
- };
- }
+  if (role === 'parent') {
+    return buildParentReplyKeyboard();
+  }
 
- // Default: Student
- return {
- keyboard: [
- [
- {
- text: '📱 Mini App ochish',
- web_app: { url: `${APP_URL}/tg` },
- },
- ],
- [
- { text: '📝 Testlar' },
- { text: '📊 Natijalarim' },
- ],
- [
- { text: '📚 Darslar' },
- { text: '👤 Profil' },
- ],
- ],
- resize_keyboard: true,
- is_persistent: true,
- };
+  if (role === 'staff' || role === 'admin') {
+    return {
+      keyboard: [
+        [
+          {
+            text: '📱 Mini App ochish',
+            web_app: { url: `${APP_URL}/tg` },
+          },
+        ],
+        [
+          { text: '👥 O\'quvchilar' },
+          { text: '📝 Testlarni tekshirish' },
+        ],
+        [
+          { text: '🏫 Guruhlar' },
+          { text: '👤 Profil' },
+        ],
+      ],
+      resize_keyboard: true,
+      is_persistent: true,
+    };
+  }
+
+  // Default: Student
+  return {
+    keyboard: [
+      [
+        {
+          text: '📱 Mini App ochish',
+          web_app: { url: `${APP_URL}/tg` },
+        },
+      ],
+      [
+        { text: '📝 Testlar' },
+        { text: '📊 Natijalarim' },
+      ],
+      [
+        { text: '📚 Darslar' },
+        { text: '👤 Profil' },
+      ],
+      [
+        {
+          text: '📱 Ota-ona sifatida ulanish',
+          request_contact: true,
+        },
+      ],
+    ],
+    resize_keyboard: true,
+    is_persistent: true,
+  };
+}
+
+export function buildParentReplyKeyboard() {
+  return {
+    keyboard: [
+      [
+        {
+          text: '📱 Mini App ochish',
+          web_app: { url: `${APP_URL}/tg` },
+        },
+      ],
+      [
+        { text: '👨‍👩‍👧‍👦 Farzandim Natijalari' },
+        { text: '💳 To\'lovlar Tarixi' },
+      ],
+      [
+        { text: '🏫 Farzandim Guruhlari' },
+        { text: '📞 Markaz Bilan Bog\'lanish' },
+      ],
+    ],
+    resize_keyboard: true,
+    is_persistent: true,
+  };
 }
 
 export function buildMainMenuKeyboard(linked: boolean, role: string = 'student') {
@@ -236,18 +275,61 @@ export function buildNotificationMessage(
 }
 
 export function buildNewResultNotification(
- studentName: string,
- examTitle: string,
- score: number,
- maxScore: number
+  studentName: string,
+  examTitle: string,
+  score: number,
+  maxScore: number
 ): string {
- const percent = Math.round((score / maxScore) * 100);
- const emoji = percent >= 70 ? '🏆' : percent >= 50 ? '📈' : '💪';
- return (
- `${emoji} <b>Yangi natija!</b>\n\n`+
- `O'quvchi: <b>${studentName}</b>\n`+
- `Imtihon: <b>${examTitle}</b>\n`+
- `Ball: <b>${score}/${maxScore}</b> (${percent}%)\n\n`+
- `Batafsil ko'rish uchun Mini App-ni oching:`
- );
+  const percent = Math.round((score / maxScore) * 100);
+  const emoji = percent >= 70 ? '🏆' : percent >= 50 ? '📈' : '💪';
+  return (
+    `${emoji} <b>Yangi natija!</b>\n\n`+
+    `O'quvchi: <b>${studentName}</b>\n`+
+    `Imtihon: <b>${examTitle}</b>\n`+
+    `Ball: <b>${score}/${maxScore}</b> (${percent}%)\n\n`+
+    `Batafsil ko'rish uchun Mini App-ni oching:`
+  );
+}
+
+export function buildParentLinkSuccessMessage(parentName: string, studentNames: string[]): string {
+  return (
+    `✅ <b>Muvaffaqiyatli ulandi!</b>\n\n`+
+    `Salom, <b>${parentName}</b>!\n\n`+
+    `Telegram hisobingiz quyidagi farzandingiz(lar)ga bog'landi:\n`+
+    studentNames.map(s => `• <b>${s}</b>`).join('\n') + `\n\n`+
+    `Endi farzandingizning test natijalari, dars davomati hamda to'lov cheklari ushbu botga avtomatik yetib keladi. 🎓✨`
+  );
+}
+
+export function buildPaymentReceiptMessage({
+  studentName,
+  groupName,
+  amount,
+  method,
+  monthYear,
+  date,
+  receiptNumber
+}: {
+  studentName: string;
+  groupName?: string;
+  amount: number;
+  method: string;
+  monthYear: string;
+  date?: string;
+  receiptNumber?: string;
+}): string {
+  const formattedAmount = amount.toLocaleString('uz-UZ');
+  const methodLabel = method === 'card' ? '💳 Plastik karta' : method === 'transfer' ? '🏦 Bank o\'tkazmasi' : '💵 Naqd pul';
+  const payDate = date ? new Date(date).toLocaleDateString('uz-UZ') : new Date().toLocaleDateString('uz-UZ');
+
+  return (
+    `🧾 <b>TO'LOV QABUL QILINDI #CHEK-${receiptNumber || Date.now().toString().slice(-6)}</b>\n\n`+
+    `🎓 O'quvchi: <b>${studentName}</b>\n`+
+    (groupName ? `🏫 Guruh / Fan: <b>${groupName}</b>\n` : '') +
+    `📅 Oylik To'lov: <b>${monthYear}</b>\n`+
+    `💰 Summa: <b>${formattedAmount} so'm</b>\n`+
+    `💳 To'lov Usuli: <b>${methodLabel}</b>\n`+
+    `⏱️ Sana: <b>${payDate}</b>\n\n`+
+    `✅ <i>To'lovingiz uchun rahmat! Promax Education o'quv markazi.</i>`
+  );
 }

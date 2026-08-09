@@ -195,22 +195,26 @@ export async function getStudent(id: string): Promise<Student | null> {
 }
 
 // Update Student
-export async function updateStudent(id: string, updates: { full_name: string; phone: string }): Promise<{ success: boolean; error?: string }> {
- const supabase = createClient();
+export async function updateStudent(id: string, updates: { full_name: string; phone: string; parent_phone?: string | null; parent_name?: string | null }): Promise<{ success: boolean; error?: string }> {
+  const supabase = createClient();
 
- const { error } = await supabase
- .from('profiles')
- .update({
- full_name: updates.full_name,
- phone: updates.phone
- })
- .eq('id', id);
+  const payload: any = {
+    full_name: updates.full_name,
+    phone: updates.phone,
+  };
+  if (updates.parent_phone !== undefined) payload.parent_phone = updates.parent_phone;
+  if (updates.parent_name !== undefined) payload.parent_name = updates.parent_name;
 
- if (error) {
- return { success: false, error: error.message };
- }
+  const { error } = await supabase
+    .from('profiles')
+    .update(payload)
+    .eq('id', id);
 
- return { success: true };
+  if (error) {
+    return { success: false, error: error.message };
+  }
+
+  return { success: true };
 }
 
 // Delete Student (Hard Delete or Deactivate? Let's do Hard Delete for now as per usual admin req, or check constraints)

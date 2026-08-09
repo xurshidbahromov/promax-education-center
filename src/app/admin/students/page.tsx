@@ -5,12 +5,13 @@ import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
 import {
   Search, Users, Edit2, Trash2, Phone, X, GraduationCap,
-  ChevronRight, UserPlus
+  ChevronRight, UserPlus, UserCheck, ShieldCheck, Smartphone, PhoneCall
 } from "lucide-react";
-import { deleteStudent, promoteToTeacher } from "@/lib/admin-queries";
+import { deleteStudent, promoteToTeacher, updateStudent } from "@/lib/admin-queries";
 import { getSubjects, Subject } from "@/lib/supabase-queries";
 import { useQueryClient } from "@tanstack/react-query";
 import { useStudents } from "@/hooks/useAdminData";
+import { formatUzPhone, cleanUzPhone } from "@/lib/phone-formatter";
 
 export default function AdminStudentsPage() {
   const router = useRouter();
@@ -24,6 +25,58 @@ export default function AdminStudentsPage() {
   const [subjects, setSubjects] = useState<Subject[]>([]);
   const [selectedSubjects, setSelectedSubjects] = useState<string[]>([]);
   const [isPromoting, setIsPromoting] = useState(false);
+
+  // Edit Student & Parent CRM Modal states
+  const [editModal, setEditModal] = useState<{
+    open: boolean;
+    studentId: string;
+    fullName: string;
+    phone: string;
+    parentName: string;
+    parentPhone: string;
+  } | null>(null);
+  const [isSavingStudent, setIsSavingStudent] = useState(false);
+
+  const openEditModal = (student: any) => {
+    setEditModal({
+      open: true,
+      studentId: student.id,
+      fullName: student.full_name || "",
+      phone: student.phone ? formatUzPhone(student.phone) : "+998 ",
+      parentName: student.parent_name || "",
+      parentPhone: student.parent_phone ? formatUzPhone(student.parent_phone) : "+998 ",
+    });
+  };
+
+  const handleSaveStudentConfirm = async () => {
+    if (!editModal) return;
+    if (!editModal.fullName.trim()) {
+      toast.error("Ismni kiriting!");
+      return;
+    }
+
+    setIsSavingStudent(true);
+    try {
+      const res = await updateStudent(editModal.studentId, {
+        full_name: editModal.fullName,
+        phone: cleanUzPhone(editModal.phone) || "",
+        parent_name: editModal.parentName || null,
+        parent_phone: cleanUzPhone(editModal.parentPhone) || null,
+      });
+
+      if (res.success) {
+        queryClient.invalidateQueries({ queryKey: ['students'] });
+        toast.success("O'quvchi ma'lumotlari saqlandi!");
+        setEditModal(null);
+      } else {
+        toast.error("Xatolik: " + res.error);
+      }
+    } catch (err) {
+      console.error("Save student error:", err);
+    } finally {
+      setIsSavingStudent(false);
+    }
+  };
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -162,8 +215,24 @@ export default function AdminStudentsPage() {
                       </h3>
                       <p className="text-xs text-slate-400 font-medium flex items-center gap-1.5 mt-0.5 truncate">
                         <Phone size={13} className="text-slate-400 shrink-0" />
-                        <span>{student.phone || "Telefon yo'q"}</span>
+                        <span>{student.phone ? formatUzPhone(student.phone) : "Telefon kiritilmagan"}</span>
                       </p>
+                      <div className="mt-2.5">
+                        {student.parent_phone ? (
+                          <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-blue-50/80 dark:bg-blue-950/40 text-brand-blue border border-blue-200/50 dark:border-blue-900/50 text-[11px] font-bold shadow-xs">
+                            <UserCheck size={13} className="text-brand-blue shrink-0" />
+                            <span className="text-slate-500 dark:text-slate-400 font-semibold">Ota-onasi:</span>
+                            <span className="text-slate-800 dark:text-slate-200 font-extrabold truncate">
+                              {student.parent_name || 'Ota-ona'} ({formatUzPhone(student.parent_phone)})
+                            </span>
+                          </div>
+                        ) : (
+                          <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-400 text-[11px] font-medium">
+                            <PhoneCall size={12} className="shrink-0" />
+                            <span>Ota-ona biriktirilmagan</span>
+                          </div>
+                        )}
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -180,6 +249,13 @@ export default function AdminStudentsPage() {
                   </button>
 
                   <div className="flex items-center gap-1.5">
+                    <button
+                      onClick={() => openEditModal(student)}
+                      className="p-1.5 text-slate-400 hover:text-brand-blue transition-colors"
+                      title="Ota-ona ma'lumotlarini tahrirlash"
+                    >
+                      <Edit2 size={16} />
+                    </button>
                     <button
                       onClick={() => router.push(`/admin/students/${student.id}`)}
                       className="p-1.5 text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 transition-colors"
@@ -266,6 +342,111 @@ export default function AdminStudentsPage() {
                 className="px-4 py-2 text-xs font-bold text-white bg-emerald-500 hover:bg-emerald-600 rounded-xl transition-colors disabled:opacity-50"
               >
                 {isPromoting ? "Saqlanmoqda..." : "Saqlash"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Edit Student & Parent CRM Modal */}
+      {editModal?.open && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-sm">
+          <div className="bg-white dark:bg-slate-900 rounded-3xl shadow-xl w-full max-w-lg overflow-hidden border border-slate-200/80 dark:border-slate-800">
+            <div className="px-6 py-4 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between">
+              <div className="flex items-center gap-2 text-slate-800 dark:text-slate-100">
+                <Edit2 size={18} className="text-brand-blue" />
+                <h3 className="font-bold text-base">O'quvchi va Ota-ona Ma'lumotlarini Tahrirlash</h3>
+              </div>
+              <button
+                onClick={() => setEditModal(null)}
+                className="p-1.5 text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 transition-colors"
+              >
+                <X size={18} />
+              </button>
+            </div>
+            
+            <div className="p-6 space-y-4">
+              <div className="space-y-3">
+                <h4 className="text-xs font-bold uppercase tracking-wider text-slate-400">O'quvchi Ma'lumotlari</h4>
+                <div>
+                  <label className="block text-xs font-bold text-slate-600 dark:text-slate-300 mb-1">To'liq Ismi *</label>
+                  <input
+                    type="text"
+                    value={editModal.fullName}
+                    onChange={(e) => setEditModal({ ...editModal, fullName: e.target.value })}
+                    className="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs sm:text-sm font-bold text-slate-800 dark:text-slate-100 focus:outline-none focus:border-slate-400 dark:focus:border-slate-500 transition-colors"
+                    placeholder="Masalan: Aliyev Vali"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-bold text-slate-600 dark:text-slate-300 mb-1">O'quvchi Telefon Raqami</label>
+                  <div className="relative flex items-center">
+                    <span className="absolute left-3 flex items-center text-slate-400 select-none">
+                      <Smartphone size={15} className="text-slate-400" />
+                    </span>
+                    <input
+                      type="text"
+                      value={editModal.phone}
+                      onChange={(e) => setEditModal({ ...editModal, phone: formatUzPhone(e.target.value) })}
+                      className="w-full pl-9 pr-4 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs sm:text-sm font-bold text-slate-800 dark:text-slate-100 focus:outline-none focus:border-slate-400 dark:focus:border-slate-500 transition-colors"
+                      placeholder="+998 (90) 123-45-67"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              <div className="pt-4 border-t border-slate-100 dark:border-slate-800 space-y-3">
+                <div className="flex items-center gap-2 text-brand-blue">
+                  <UserCheck size={16} className="text-brand-blue shrink-0" />
+                  <h4 className="text-xs font-extrabold uppercase tracking-wider">Ota-ona Ma'lumotlari (CRM Telegram Bot)</h4>
+                </div>
+                <div>
+                  <label className="block text-xs font-bold text-slate-600 dark:text-slate-300 mb-1">Ota-ona Ismi / Kimligi</label>
+                  <input
+                    type="text"
+                    value={editModal.parentName}
+                    onChange={(e) => setEditModal({ ...editModal, parentName: e.target.value })}
+                    className="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs sm:text-sm font-bold text-slate-800 dark:text-slate-100 focus:outline-none focus:border-slate-400 dark:focus:border-slate-500 transition-colors"
+                    placeholder="Masalan: Aliyeva Muxlisa (Onasi)"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-bold text-slate-600 dark:text-slate-300 mb-1">
+                    Ota-ona Telefon Raqami (Telegram Bot Ulanishi Uchun) *
+                  </label>
+                  <div className="relative flex items-center">
+                    <span className="absolute left-3 flex items-center text-slate-400 select-none">
+                      <PhoneCall size={15} className="text-slate-400" />
+                    </span>
+                    <input
+                      type="text"
+                      value={editModal.parentPhone}
+                      onChange={(e) => setEditModal({ ...editModal, parentPhone: formatUzPhone(e.target.value) })}
+                      className="w-full pl-9 pr-4 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs sm:text-sm font-bold text-slate-800 dark:text-slate-100 focus:outline-none focus:border-slate-400 dark:focus:border-slate-500 transition-colors"
+                      placeholder="+998 (90) 123-45-67"
+                    />
+                  </div>
+                  <p className="text-[11px] text-slate-400 font-medium mt-1.5 flex items-center gap-1">
+                    <ShieldCheck size={13} className="text-emerald-500 shrink-0" />
+                    <span>Ota-ona botimizga kirib kontaktingizni yuborganda, shu raqam orqali avtomatik bog'lanadi.</span>
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <div className="flex items-center justify-end gap-3 px-6 py-4 border-t border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/50">
+              <button
+                onClick={() => setEditModal(null)}
+                className="px-4 py-2 text-xs font-bold text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-100 transition-colors"
+              >
+                Bekor qilish
+              </button>
+              <button
+                onClick={handleSaveStudentConfirm}
+                disabled={isSavingStudent}
+                className="px-5 py-2.5 text-xs font-bold text-white bg-brand-blue hover:bg-blue-600 rounded-xl transition-colors disabled:opacity-50 shadow-md shadow-brand-blue/10"
+              >
+                {isSavingStudent ? "Saqlanmoqda..." : "Saqlash"}
               </button>
             </div>
           </div>
