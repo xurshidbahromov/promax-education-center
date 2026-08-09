@@ -211,23 +211,42 @@ export default function LoginPage() {
  throw new Error('Could not determine user role');
  }
 
- // Validate login type matches user role
- if (loginAs === 'staff' && userRole === 'student') {
- toast.error(t('auth.error_wrong_portal') || 'Please use student login portal');
- await supabase.auth.signOut();
- return;
- }
+  // Portal tekshiruvi va yo'naltirish mantiq:
+  // - admin   → istalgan portaldan kiradi, har doim /admin ga boradi
+  // - teacher → ikkala portaldan ham kirishi mumkin:
+  //             "O'quvchi" tanlaganda → /dashboard
+  //             "O'qituvchi/Xodim" tanlaganda → /admin
+  // - staff   → faqat staff portalidan kiradi → /admin
+  // - student → faqat student portalidan kiradi → /dashboard
 
- if (loginAs === 'student' && ['teacher', 'staff', 'admin'].includes(userRole)) {
- toast.error(t('auth.error_wrong_portal') || 'Please use teacher/staff login portal');
- await supabase.auth.signOut();
- return;
- }
+  let redirectPath: string;
 
- toast.success(t('auth.login_success') || 'Muvaffaqiyatli kirdingiz');
- // Redirect based on role
- const redirectPath = getRedirectPath(userRole);
- router.push(redirectPath);
+  if (userRole === 'admin') {
+    // Admin har doim admin paneliga boradi
+    redirectPath = '/admin';
+  } else if (userRole === 'teacher') {
+    // O'qituvchi tanlagan portalga qarab yo'naltiriladi
+    redirectPath = loginAs === 'student' ? '/dashboard' : '/admin';
+  } else if (userRole === 'staff') {
+    // Staff faqat staff portalidan kirishi mumkin
+    if (loginAs === 'student') {
+      toast.error("O'qituvchi / Xodim portalidan foydalaning");
+      await supabase.auth.signOut();
+      return;
+    }
+    redirectPath = '/admin';
+  } else {
+    // Student — faqat student portalidan
+    if (loginAs === 'staff') {
+      toast.error("O'quvchi portalidan foydalaning");
+      await supabase.auth.signOut();
+      return;
+    }
+    redirectPath = '/dashboard';
+  }
+
+  toast.success(t('auth.login_success') || 'Muvaffaqiyatli kirdingiz');
+  router.push(redirectPath);
  } catch (err: any) {
  console.error('Login error:', err);
  // Use translation for common errors
