@@ -373,6 +373,55 @@ export async function getStudentResults(studentId: string): Promise<any[]> {
  return data;
 }
 
+export async function updateResult(id: string, updates: { total_score?: number; notes?: string }) {
+  const supabase = createClient();
+
+  const { data, error } = await supabase
+    .from('results')
+    .update(updates)
+    .eq('id', id)
+    .select();
+
+  if (error) {
+    const { data: attData, error: attError } = await supabase
+      .from('test_attempts')
+      .update({ score: updates.total_score })
+      .eq('id', id)
+      .select();
+
+    if (attError) {
+      console.error('Error updating result:', error || attError);
+      return { success: false, error: (error || attError).message };
+    }
+    return { success: true, data: attData };
+  }
+
+  return { success: true, data };
+}
+
+export async function deleteResult(id: string) {
+  const supabase = createClient();
+
+  const { error } = await supabase
+    .from('results')
+    .delete()
+    .eq('id', id);
+
+  if (error) {
+    const { error: attError } = await supabase
+      .from('test_attempts')
+      .delete()
+      .eq('id', id);
+
+    if (attError) {
+      console.error('Error deleting result:', error || attError);
+      return { success: false, error: (error || attError).message };
+    }
+  }
+
+  return { success: true };
+}
+
 // Admin Dashboard Stats
 export async function getAdminStats() {
   const supabase = createClient();

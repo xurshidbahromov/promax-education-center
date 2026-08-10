@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
 import {
   Search, Users, Edit2, Trash2, Phone, X, GraduationCap,
-  ChevronRight, UserPlus, UserCheck, ShieldCheck, Smartphone, PhoneCall
+  ChevronRight, UserPlus, UserCheck, ShieldCheck, Smartphone, PhoneCall, FileCheck
 } from "lucide-react";
 import { deleteStudent, promoteToTeacher, updateStudent } from "@/lib/admin-queries";
 import { getSubjects, Subject } from "@/lib/supabase-queries";
@@ -36,6 +36,9 @@ export default function AdminStudentsPage() {
     parentPhone: string;
   } | null>(null);
   const [isSavingStudent, setIsSavingStudent] = useState(false);
+
+  // Report Card Modal state
+  const [reportModal, setReportModal] = useState<{ open: boolean; studentId: string; studentName: string } | null>(null);
 
   const openEditModal = (student: any) => {
     setEditModal({

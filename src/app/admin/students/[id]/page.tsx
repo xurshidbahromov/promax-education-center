@@ -19,7 +19,8 @@ import {
   ShieldCheck,
   TrendingUp,
   UserCheck,
-  PhoneCall
+  PhoneCall,
+  FileCheck
 } from "lucide-react";
 import { formatUzPhone } from "@/lib/phone-formatter";
 
@@ -72,6 +73,7 @@ export default function StudentDetailPage({ params }: PageProps) {
   const [payments, setPayments] = useState<PaymentRecord[]>([]);
   const [examResults, setExamResults] = useState<ExamResult[]>([]);
   const [loading, setLoading] = useState(true);
+  const [showReportModal, setShowReportModal] = useState(false);
 
   useEffect(() => {
     async function loadData() {

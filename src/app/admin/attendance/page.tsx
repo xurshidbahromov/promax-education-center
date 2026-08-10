@@ -21,7 +21,8 @@ import {
   GraduationCap,
   MessageSquare,
   Copy,
-  Info
+  Info,
+  FileCheck
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 
@@ -64,6 +65,9 @@ export default function AttendancePage() {
   const [saving, setSaving] = useState<boolean>(false);
   const [tableMissing, setTableMissing] = useState<boolean>(false);
   const [searchQuery, setSearchQuery] = useState<string>('');
+
+  // Report Card Modal state
+  const [reportModal, setReportModal] = useState<{ open: boolean; studentId: string; studentName: string } | null>(null);
 
   const supabase = createClient();
 
@@ -515,7 +519,7 @@ CREATE POLICY "Allow manage attendance" ON public.attendance FOR ALL USING (true
                     </div>
 
                     <div>
-                      <div className="flex items-center gap-2">
+                      <div className="flex flex-wrap items-center gap-2">
                         <h3 className="font-extrabold text-slate-800 dark:text-slate-100 text-sm sm:text-base">
                           {student.full_name}
                         </h3>

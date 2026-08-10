@@ -4,10 +4,12 @@ import { useEffect, useState, useMemo } from "react";
 import Link from "next/link";
 import {
   Plus, Search, FileText, Download, Calendar, GraduationCap,
-  Award, TrendingUp, CheckCircle2
+  Award, TrendingUp, CheckCircle2, Edit2, Trash2, X, Save, Printer, FileCheck
 } from "lucide-react";
 import { useAllResults } from "@/hooks/useAdminData";
 import { exportStudentResults } from "@/lib/excel-export";
+import { updateResult, deleteResult } from "@/lib/admin-queries";
+import { useQueryClient } from "@tanstack/react-query";
 import toast from "react-hot-toast";
 
 export default function ResultsListPage() {
@@ -15,6 +17,25 @@ export default function ResultsListPage() {
   const [debouncedSearchTerm, setDebouncedSearchTerm] = useState("");
   const [limit] = useState(50);
   const [isExporting, setIsExporting] = useState(false);
+
+  // Edit Modal state
+  const [editModal, setEditModal] = useState<{
+    open: boolean;
+    resultId: string;
+    studentName: string;
+    examTitle: string;
+    score: number;
+  } | null>(null);
+  const [savingEdit, setSavingEdit] = useState(false);
+
+  // Report Card Modal state
+  const [reportModal, setReportModal] = useState<{
+    open: boolean;
+    studentId: string;
+    studentName: string;
+  } | null>(null);
+
+  const queryClient = useQueryClient();
 
   useEffect(() => {
     const timer = setTimeout(() => setDebouncedSearchTerm(searchTerm), 400);
@@ -43,7 +64,7 @@ export default function ResultsListPage() {
     let max = 0;
 
     results.forEach(r => {
-      const score = Number(r.total_score) || 0;
+      const score = Number(r.total_score || r.score) || 0;
       sumScore += score;
       if (score > max) max = score;
       if (score >= 107.1) passed++;
@@ -69,11 +90,11 @@ export default function ResultsListPage() {
         phone: r.student?.phone || 'N/A',
         test_title: r.exam?.title || 'N/A',
         subject: r.direction?.title || 'N/A',
-        score: r.total_score || 0,
+        score: Number(r.total_score || r.score) || 0,
         max_score: 189,
-        percentage: ((r.total_score || 0) / 189) * 100,
+        percentage: ((Number(r.total_score || r.score) || 0) / 189) * 100,
         passing_score: 60,
-        completed_at: r.exam?.date || new Date().toISOString(),
+        completed_at: r.exam?.date || r.created_at || new Date().toISOString(),
         time_spent_seconds: null
       }));
 
@@ -85,6 +106,55 @@ export default function ResultsListPage() {
       toast.error("Export qilishda xatolik yuz berdi");
     } finally {
       setIsExporting(false);
+    }
+  };
+
+  // Open Edit Modal
+  const openEditModal = (result: any) => {
+    setEditModal({
+      open: true,
+      resultId: result.id,
+      studentName: result.student?.full_name || "O'quvchi",
+      examTitle: result.exam?.title || "Imtihon",
+      score: Number(result.total_score || result.score) || 0
+    });
+  };
+
+  // Confirm Save Edit
+  const handleSaveEdit = async () => {
+    if (!editModal) return;
+    setSavingEdit(true);
+
+    try {
+      const res = await updateResult(editModal.resultId, { total_score: Number(editModal.score) });
+      if (res.success) {
+        toast.success("Natija yangilandi!");
+        queryClient.invalidateQueries({ queryKey: ['allResults'] });
+        setEditModal(null);
+      } else {
+        toast.error("Xatolik: " + res.error);
+      }
+    } catch (err: any) {
+      toast.error("Natijani saqlashda xatolik: " + err.message);
+    } finally {
+      setSavingEdit(false);
+    }
+  };
+
+  // Delete Result
+  const handleDelete = async (id: string, studentName: string) => {
+    if (!window.confirm(`${studentName} ning natijasini o'chirishni tasdiqlaysizmi?`)) return;
+
+    try {
+      const res = await deleteResult(id);
+      if (res.success) {
+        toast.success("Natija o'chirildi!");
+        queryClient.invalidateQueries({ queryKey: ['allResults'] });
+      } else {
+        toast.error("O'chirishda xatolik: " + res.error);
+      }
+    } catch (err: any) {
+      toast.error("Xatolik: " + err.message);
     }
   };
 
@@ -121,7 +191,7 @@ export default function ResultsListPage() {
         </div>
       </div>
 
-      {/* Goldilocks Summary Stats Grid */}
+      {/* Summary Stats Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
         {[
           { label: "Jami Natijalar", value: `${summaryStats.total} ta`, icon: FileText, color: "text-blue-500" },
@@ -137,8 +207,6 @@ export default function ResultsListPage() {
               <p className="text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider truncate mb-1">{stat.label}</p>
               <p className="text-2xl font-black text-slate-800 dark:text-slate-100 tracking-tight truncate">{stat.value}</p>
             </div>
-            
-            {/* Box-free Icon */}
             <stat.icon size={26} className={`${stat.color} shrink-0 opacity-90`} />
           </div>
         ))}
@@ -181,27 +249,30 @@ export default function ResultsListPage() {
                   <th className="px-6 py-4 text-xs font-bold text-slate-400 uppercase tracking-wider">Yo'nalish</th>
                   <th className="px-6 py-4 text-xs font-bold text-slate-400 uppercase tracking-wider">To'plangan Ball</th>
                   <th className="px-6 py-4 text-xs font-bold text-slate-400 uppercase tracking-wider">O'zlashtirish (%)</th>
+                  <th className="px-6 py-4 text-xs font-bold text-slate-400 uppercase tracking-wider text-right">Amallar</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100 dark:divide-slate-800/50">
                 {filteredResults.map((result) => {
-                  const score = Number(result.total_score) || 0;
-                  const percentage = (score / 189) * 100;
+                  const score = Number(result.total_score || result.score) || 0;
+                  const maxScore = Number(result.max_score) || 189;
+                  const percentage = (score / maxScore) * 100;
                   const isHigh = percentage >= 56.6;
                   const isMedium = percentage >= 30 && percentage < 56.6;
+                  const studentName = result.student?.full_name || "Noma'lum O'quvchi";
 
                   return (
                     <tr key={result.id} className="hover:bg-slate-50/50 dark:hover:bg-slate-800/30 transition-colors">
                       <td className="px-6 py-4 font-bold text-xs sm:text-sm text-slate-800 dark:text-slate-100">
-                        {result.student?.full_name || "Noma'lum O'quvchi"}
+                        {studentName}
                       </td>
                       <td className="px-6 py-4">
                         <div className="text-xs sm:text-sm font-semibold text-slate-700 dark:text-slate-200">
-                          {result.exam?.title || "DTM Mock Imtihon"}
+                          {result.exam?.title || result.test?.title || "DTM Mock Imtihon"}
                         </div>
                         <div className="text-xs text-slate-400 flex items-center gap-1 mt-0.5 font-medium">
                           <Calendar size={12} />
-                          {result.exam?.date ? new Date(result.exam.date).toLocaleDateString('uz-UZ') : "-"}
+                          {result.exam?.date || result.created_at ? new Date(result.exam?.date || result.created_at).toLocaleDateString('uz-UZ') : "-"}
                         </div>
                       </td>
                       <td className="px-6 py-4">
@@ -214,7 +285,7 @@ export default function ResultsListPage() {
                         <span className="font-black text-sm sm:text-base text-slate-800 dark:text-slate-100">
                           {score.toFixed(1)}
                         </span>
-                        <span className="text-xs text-slate-400 font-semibold ml-1">/ 189.0</span>
+                        <span className="text-xs text-slate-400 font-semibold ml-1">/ {maxScore.toFixed(1)}</span>
                       </td>
                       <td className="px-6 py-4">
                         <div className="flex items-center gap-3 min-w-[130px]">
@@ -235,6 +306,28 @@ export default function ResultsListPage() {
                           </span>
                         </div>
                       </td>
+                      {/* Actions */}
+                      <td className="px-6 py-4 text-right">
+                        <div className="flex items-center justify-end gap-2">
+                          {/* Edit result score */}
+                          <button
+                            onClick={() => openEditModal(result)}
+                            className="p-1.5 text-slate-400 hover:text-slate-800 dark:hover:text-slate-200 transition-colors"
+                            title="Tahrirlash"
+                          >
+                            <Edit2 size={16} />
+                          </button>
+
+                          {/* Delete result */}
+                          <button
+                            onClick={() => handleDelete(result.id, studentName)}
+                            className="p-1.5 text-slate-400 hover:text-red-500 transition-colors"
+                            title="O'chirish"
+                          >
+                            <Trash2 size={16} />
+                          </button>
+                        </div>
+                      </td>
                     </tr>
                   );
                 })}
@@ -243,6 +336,66 @@ export default function ResultsListPage() {
           </div>
         )}
       </div>
+
+      {/* Edit Result Modal */}
+      {editModal?.open && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/60 backdrop-blur-sm">
+          <div className="bg-white dark:bg-slate-900 rounded-3xl shadow-2xl w-full max-w-md overflow-hidden border border-slate-200 dark:border-slate-800">
+            <div className="px-6 py-4 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <Edit2 size={18} className="text-brand-blue" />
+                <h3 className="font-bold text-base text-slate-800 dark:text-slate-100">Natijani Tahrirlash</h3>
+              </div>
+              <button onClick={() => setEditModal(null)} className="p-1 text-slate-400 hover:text-slate-700">
+                <X size={18} />
+              </button>
+            </div>
+
+            <div className="p-6 space-y-4">
+              <div>
+                <span className="text-xs font-bold text-slate-400 block">O'quvchi</span>
+                <p className="text-sm font-extrabold text-slate-800 dark:text-slate-100">{editModal.studentName}</p>
+              </div>
+
+              <div>
+                <span className="text-xs font-bold text-slate-400 block">Imtihon</span>
+                <p className="text-xs font-semibold text-slate-600 dark:text-slate-300">{editModal.examTitle}</p>
+              </div>
+
+              <div className="space-y-1.5">
+                <label className="text-xs font-extrabold text-slate-700 dark:text-slate-300 block">
+                  To'plangan Ball:
+                </label>
+                <input
+                  type="number"
+                  step="0.1"
+                  value={editModal.score}
+                  onChange={(e) => setEditModal(prev => prev ? { ...prev, score: parseFloat(e.target.value) || 0 } : null)}
+                  className="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-800 text-sm font-extrabold text-slate-800 dark:text-slate-100 outline-none focus:ring-2 focus:ring-brand-blue"
+                />
+              </div>
+            </div>
+
+            <div className="flex items-center justify-end gap-3 px-6 py-4 border-t border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/50">
+              <button
+                onClick={() => setEditModal(null)}
+                className="px-4 py-2 text-xs font-bold text-slate-500 hover:text-slate-800 transition-colors"
+              >
+                Bekor qilish
+              </button>
+
+              <button
+                onClick={handleSaveEdit}
+                disabled={savingEdit}
+                className="px-5 py-2.5 bg-brand-blue hover:bg-blue-600 text-white rounded-xl text-xs font-bold transition-all disabled:opacity-50 flex items-center gap-1.5 shadow-md shadow-brand-blue/20"
+              >
+                <Save size={14} />
+                <span>{savingEdit ? "Saqlanmoqda..." : "Saqlash"}</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
