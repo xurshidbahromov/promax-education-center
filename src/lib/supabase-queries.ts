@@ -47,53 +47,75 @@ export interface DashboardStats {
  * Get student's exam results with related data
  */
 export async function getStudentResults(studentId: string): Promise<ExamResult[]> {
- const supabase = createClient();
+  const supabase = createClient();
 
- // Step 1: Get result rows without joins
- const { data: results, error } = await supabase
- .from('results')
- .select('*')
- .eq('student_id', studentId)
- .order('created_at', { ascending: false });
+  // 1. Get DTM results
+  const { data: results } = await supabase
+    .from('results')
+    .select('*')
+    .eq('student_id', studentId)
+    .order('created_at', { ascending: false });
 
- if (error) {
- console.error('Error fetching results:', error.message, JSON.stringify(error));
- return [];
- }
+  // 2. Get completed online test attempts
+  const { data: attempts } = await supabase
+    .from('test_attempts')
+    .select('id, student_id, test_id, score, max_score, completed_at, created_at, test:tests(id, title)')
+    .eq('student_id', studentId)
+    .eq('status', 'completed')
+    .order('completed_at', { ascending: false });
 
- if (!results || results.length === 0) return [];
+  // 3. Map DTM exams
+  const examIds = [...new Set((results || []).map(r => r.exam_id).filter(Boolean))];
+  let examsMap: Record<string, ExamResult['exam']> = {};
+  if (examIds.length > 0) {
+    const { data: exams } = await supabase
+      .from('exams')
+      .select('id, title, date, type, max_score')
+      .in('id', examIds);
+    if (exams) {
+      exams.forEach(e => { examsMap[e.id] = e; });
+    }
+  }
 
- // Step 2: Get unique exam_ids and fetch exam data in one query
- const examIds = [...new Set(results.map(r => r.exam_id).filter(Boolean))];
- let examsMap: Record<string, ExamResult['exam']> = {};
- if (examIds.length > 0) {
-   const { data: exams } = await supabase
-     .from('exams')
-     .select('id, title, date, type, max_score')
-     .in('id', examIds);
-   if (exams) {
-     exams.forEach(e => { examsMap[e.id] = e; });
-   }
- }
+  // 4. Map DTM directions
+  const dirIds = [...new Set((results || []).map(r => r.direction_id).filter(Boolean))];
+  let directionsMap: Record<string, ExamResult['direction']> = {};
+  if (dirIds.length > 0) {
+    const { data: directions } = await supabase
+      .from('directions')
+      .select('id, title, code')
+      .in('id', dirIds);
+    if (directions) {
+      directions.forEach(d => { directionsMap[d.id] = d; });
+    }
+  }
 
- // Step 3: Get unique direction_ids and fetch direction data
- const dirIds = [...new Set(results.map(r => r.direction_id).filter(Boolean))];
- let directionsMap: Record<string, ExamResult['direction']> = {};
- if (dirIds.length > 0) {
-   const { data: directions } = await supabase
-     .from('directions')
-     .select('id, title, code')
-     .in('id', dirIds);
-   if (directions) {
-     directions.forEach(d => { directionsMap[d.id] = d; });
-   }
- }
+  const dtmResults = (results || []).map(r => ({
+    ...r,
+    exam: r.exam_id ? examsMap[r.exam_id] : undefined,
+    direction: r.direction_id ? directionsMap[r.direction_id] : undefined,
+  }));
 
- return results.map(r => ({
-   ...r,
-   exam: r.exam_id ? examsMap[r.exam_id] : undefined,
-   direction: r.direction_id ? directionsMap[r.direction_id] : undefined,
- }));
+  const onlineTestResults = (attempts || []).map((a: any) => ({
+    id: a.id,
+    student_id: a.student_id,
+    exam_id: a.test_id,
+    direction_id: null,
+    total_score: a.score,
+    created_at: a.completed_at || a.created_at,
+    exam: {
+      id: a.test?.id || a.test_id,
+      title: a.test?.title || 'Online Test',
+      date: a.completed_at || a.created_at,
+      type: 'quiz',
+      max_score: a.max_score || 100
+    }
+  }));
+
+  const combined = [...dtmResults, ...onlineTestResults];
+  combined.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+
+  return combined;
 }
 
 
@@ -199,28 +221,37 @@ export async function getDashboardStats(studentId: string): Promise<DashboardSta
  const attemptScores = attempts?.map(a => a.score) || [];
  const allScores = [...resultScores, ...attemptScores];
 
- if (allScores.length === 0) {
- return {
- totalTests: 0,
- averageScore: 0,
- bestScore: 0,
- totalCoins: 0
- };
- }
+  // Fetch profile coins
+  const { data: profile } = await supabase
+    .from('profiles')
+    .select('coins')
+    .eq('id', studentId)
+    .maybeSingle();
 
- const totalTests = allScores.length;
- const averageScore = allScores.reduce((a, b) => a+ b, 0) / totalTests;
- const bestScore = Math.max(...allScores);
+  if (allScores.length === 0) {
+    return {
+      totalTests: 0,
+      averageScore: 0,
+      bestScore: 0,
+      totalCoins: profile?.coins || 0
+    };
+  }
 
- // Calculate coins (1 coin per 10 points)
- const totalCoins = Math.floor(allScores.reduce((a, b) => a+ b, 0) / 10);
+  const totalTests = allScores.length;
+  const averageScore = allScores.reduce((a, b) => a + b, 0) / totalTests;
+  const bestScore = Math.max(...allScores);
 
- return {
- totalTests,
- averageScore: Math.round(averageScore * 10) / 10,
- bestScore,
- totalCoins
- };
+  // Coins from profile or calculated
+  const totalCoins = profile?.coins !== undefined && profile?.coins !== null
+    ? profile.coins
+    : Math.floor(allScores.reduce((a, b) => a + b, 0) / 10);
+
+  return {
+    totalTests,
+    averageScore: Math.round(averageScore * 10) / 10,
+    bestScore,
+    totalCoins
+  };
 }
 
 /**

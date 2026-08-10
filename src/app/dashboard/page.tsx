@@ -46,7 +46,7 @@ const quickCards = [
  {
  label: "Fanlar",
  sublabel: "Barcha o'quv fanlar",
- href: "/dashboard/subjects/1",
+ href: "/dashboard/tests",
  icon: LibraryBig,
  gradient: "from-blue-500 to-blue-600",
  bg: "bg-blue-500",
@@ -138,15 +138,14 @@ export default function DashboardPage() {
   const { data: subjects = [], isLoading: subjectsLoading } = useSWR('subjects', getSubjects);
 
   const activeBannerAnnouncements = useMemo(() => {
-    const customBanners = (dbAnnouncements || []).filter((a: any) => a.is_featured || a.image_url);
-    if (customBanners.length > 0) {
-      return customBanners.map((a: any) => ({
+    if (dbAnnouncements && dbAnnouncements.length > 0) {
+      return dbAnnouncements.map((a: any) => ({
         id: a.id,
         title: a.title,
         message: a.message,
         image: a.image_url || "https://images.unsplash.com/photo-1434030216411-0b793f4b4173?w=600&auto=format&fit=crop&q=80",
         badge: a.type?.toUpperCase() || "E'LON",
-        date: a.expires_at ? new Date(a.expires_at).toLocaleDateString('uz-UZ') : "Uzoq muddatli",
+        date: a.created_at ? new Date(a.created_at).toLocaleDateString('uz-UZ') : "Bugun",
         badgeBg: a.type === 'error' ? "bg-red-500/80 text-white" : a.type === 'warning' ? "bg-amber-500/80 text-white" : a.type === 'success' ? "bg-emerald-500/80 text-white" : "bg-blue-500/80 text-white"
       }));
     }
@@ -209,10 +208,10 @@ export default function DashboardPage() {
  {subjects.slice(0, 4).map((subject, i) => {
  const meta = getSubjectMeta(subject.title);
  const Icon = meta.icon;
- // Simulated progress — replace with real data when available
- const done = Math.floor(20+ Math.random() * 60);
- const total = 100;
- const pct = Math.round((done / total) * 100);
+ // Calculate real completed tests vs available subject tests
+ const completedCount = stats?.totalTests ? Math.min(stats.totalTests, 5) : 0;
+ const totalCount = 10;
+ const pct = Math.min(Math.round((completedCount / totalCount) * 100), 100);
 
  return (
  <motion.div
@@ -230,7 +229,7 @@ export default function DashboardPage() {
  <Icon size={28} className={meta.color} />
  </div>
  <span className="text-[13px] font-bold text-slate-400 dark:text-slate-500">
- {done}<span className="text-slate-300 dark:text-slate-600 font-medium">/{total}</span>
+ {completedCount}<span className="text-slate-300 dark:text-slate-600 font-medium">/{totalCount}</span>
  </span>
  </div>
 

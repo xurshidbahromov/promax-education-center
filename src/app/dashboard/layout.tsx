@@ -174,39 +174,42 @@ export default function DashboardLayout({
 
  {/* Main Content */}
  <div className="flex-1 flex flex-col min-w-0 relative z-10 h-screen overflow-hidden">
- {/* Desktop Header (Island Style) */}
- {!isTakeTestPage && (
- <div className="hidden lg:flex absolute top-4 right-8 z-50 justify-end pointer-events-none">
- <div className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-2xl border border-gray-200/50 dark:border-slate-800/50 rounded-full flex items-center gap-2 px-4 py-2 shadow-xl shadow-brand-blue/5 pointer-events-auto transition-all duration-300 ">
- <NotificationBell />
- </div>
- </div>
- )}
+  {/* Desktop Header (Island Style) */}
+  {!isTakeTestPage && (
+  <div className="hidden lg:flex absolute top-4 right-8 z-50 justify-end pointer-events-none">
+  <div className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-2xl border border-gray-200/50 dark:border-slate-800/50 rounded-full flex items-center gap-3 px-4 py-2 shadow-xl shadow-brand-blue/5 pointer-events-auto transition-all duration-300">
+  <SidebarBetaWidget variant="pill" />
+  <div className="w-px h-5 bg-slate-200 dark:bg-slate-800" />
+  <NotificationBell />
+  </div>
+  </div>
+  )}
 
- {/* Mobile Top Bar (Split Islands) */}
- {!isTakeTestPage && (
- <div className="lg:hidden absolute top-4 left-4 right-4 z-50 flex items-center justify-between pointer-events-none">
- {/* Logo Island */}
- <Link href="/dashboard" className="h-12 bg-white/80 dark:bg-slate-900/80 backdrop-blur-2xl border border-gray-200/50 dark:border-slate-800/50 rounded-full flex items-center justify-center gap-2.5 px-5 shadow-lg shadow-brand-blue/5 pointer-events-auto">
- <div className="relative w-6 h-5 flex-shrink-0">
- <Image src="/favicon.ico" alt="Logo" fill className="object-contain" />
- </div>
- <div className="flex flex-col">
- <span className="font-sans-pro font-black text-base text-slate-800 dark:text-slate-100 uppercase tracking-wider leading-none">
- Promax
- </span>
- <span className="text-[7px] font-semibold text-brand-orange dark:text-brand-orange tracking-[0.25em] uppercase leading-none mt-0.5 pl-[0.5px]">
- Education
- </span>
- </div>
- </Link>
- 
- {/* Bell Island */}
- <div className="h-12 bg-white/80 dark:bg-slate-900/80 backdrop-blur-2xl border border-gray-200/50 dark:border-slate-800/50 rounded-full flex items-center justify-center px-3 shadow-lg shadow-brand-blue/5 pointer-events-auto">
- <NotificationBell />
- </div>
- </div>
- )}
+  {/* Mobile Top Bar (Split Islands) */}
+  {!isTakeTestPage && (
+  <div className="lg:hidden absolute top-4 left-4 right-4 z-50 flex items-center justify-between pointer-events-none">
+  {/* Logo Island */}
+  <Link href="/dashboard" className="h-12 bg-white/80 dark:bg-slate-900/80 backdrop-blur-2xl border border-gray-200/50 dark:border-slate-800/50 rounded-full flex items-center justify-center gap-2.5 px-4 shadow-lg shadow-brand-blue/5 pointer-events-auto">
+  <div className="relative w-5 h-5 flex-shrink-0">
+  <Image src="/favicon.ico" alt="Logo" fill className="object-contain" />
+  </div>
+  <div className="flex flex-col">
+  <span className="font-sans-pro font-black text-sm text-slate-800 dark:text-slate-100 uppercase tracking-wider leading-none">
+  Promax
+  </span>
+  <span className="text-[6px] font-semibold text-brand-orange dark:text-brand-orange tracking-[0.2em] uppercase leading-none mt-0.5 pl-[0.5px]">
+  Education
+  </span>
+  </div>
+  </Link>
+  
+  {/* Bell & Test Rejimi Island */}
+  <div className="h-12 bg-white/80 dark:bg-slate-900/80 backdrop-blur-2xl border border-gray-200/50 dark:border-slate-800/50 rounded-full flex items-center justify-center gap-2 px-3 shadow-lg shadow-brand-blue/5 pointer-events-auto">
+  <SidebarBetaWidget variant="pill" />
+  <NotificationBell />
+  </div>
+  </div>
+  )}
 
  {/* Page Content */}
  <main className={`flex-1 overflow-y-auto w-full relative z-0 ${isTakeTestPage ? '' : 'p-4 pt-24 pb-32 lg:p-8 lg:pt-24 lg:pb-8'}`}>

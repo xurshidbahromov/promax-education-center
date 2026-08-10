@@ -26,6 +26,7 @@ import Image from "next/image";
 import toast from "react-hot-toast";
 import { createClient } from "@/utils/supabase/client";
 import RealtimeSyncEnabler from "@/components/RealtimeSyncEnabler";
+import SidebarBetaWidget from "@/components/ui/SidebarBetaWidget";
 
 export default function AdminLayout({
   children,
@@ -345,8 +346,9 @@ export default function AdminLayout({
               <Menu size={20} />
             </button>
 
-            <div className="hidden sm:flex items-center gap-2 text-xs font-bold text-slate-500">
-              <span className="px-2.5 py-1 rounded-full bg-emerald-50 dark:bg-emerald-950/30 text-emerald-600 dark:text-emerald-400 flex items-center gap-1.5">
+            <div className="flex items-center gap-2 text-xs font-bold text-slate-500">
+              <SidebarBetaWidget variant="pill" />
+              <span className="hidden sm:flex px-2.5 py-1 rounded-full bg-emerald-50 dark:bg-emerald-950/30 text-emerald-600 dark:text-emerald-400 items-center gap-1.5">
                 <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
                 Tizim Faol
               </span>

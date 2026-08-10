@@ -111,7 +111,7 @@ export default function GameZonePage() {
  description: "Solve arithmetic problems quickly to earn coins!",
  icon: Calculator,
  color: "from-blue-500 to-indigo-600",
- available: false
+ available: true
  },
  {
  id: 'word',
