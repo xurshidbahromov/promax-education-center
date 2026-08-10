@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createClient } from '@/utils/supabase/server';
+import { createTelegramBotClient } from '@/utils/supabase/server';
 import {
   verifyWebhookSignature,
   sendMessage,
@@ -31,7 +31,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'Invalid JSON' }, { status: 400 });
   }
 
-  const supabase = await createClient();
+  const supabase = await createTelegramBotClient();
 
   // ─── Handle message ────────────────────────────────────────────────────────
   if (update.message) {
@@ -390,7 +390,7 @@ export async function POST(request: NextRequest) {
         const studentIds = parentLinks.map((p: any) => p.student_id);
         const { data: attempts } = await supabase
           .from('test_attempts')
-          .select('score, max_score, completed_at, student:profiles!test_attempts_student_id_fkey(full_name), test:tests(title)')
+          .select('score, max_score, completed_at, student:profiles(full_name), test:tests(title)')
           .in('student_id', studentIds)
           .eq('status', 'completed')
           .order('completed_at', { ascending: false })
@@ -417,7 +417,7 @@ export async function POST(request: NextRequest) {
         const studentIds = parentLinks.map((p: any) => p.student_id);
         const { data: paymentsData } = await supabase
           .from('payments')
-          .select('amount, payment_method, month_year, payment_date, student:profiles!payments_student_id_fkey(full_name)')
+          .select('amount, payment_method, month_year, payment_date, student:profiles(full_name)')
           .in('student_id', studentIds)
           .order('payment_date', { ascending: false })
           .limit(5);
