@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
 import {
   ArrowLeft, Plus, Edit2, Trash2, Users, Video, Clock, DollarSign,
-  GraduationCap, BookOpen, UserPlus, X, Play, CheckCircle2, Search, CheckSquare, Square
+  GraduationCap, BookOpen, UserPlus, X, Play, CheckCircle2, Search, CheckSquare, Square, CalendarCheck
 } from "lucide-react";
 import {
   getSubjectById,
@@ -313,14 +313,24 @@ export default function SubjectDetailPage({ params }: PageProps) {
                   </div>
 
                   {/* Box-free Group Actions */}
-                  <div className="pt-3 border-t border-slate-100 dark:border-slate-800/50 flex items-center justify-between">
-                    <button
-                      onClick={() => setAssignModalGroup(group)}
-                      className="inline-flex items-center gap-1.5 text-xs font-bold text-emerald-600 hover:text-emerald-700 transition-colors"
-                    >
-                      <UserPlus size={16} />
-                      <span>O'quvchi qo'shish</span>
-                    </button>
+                  <div className="pt-3 border-t border-slate-100 dark:border-slate-800/50 flex items-center justify-between gap-2">
+                    <div className="flex items-center gap-3">
+                      <button
+                        onClick={() => setAssignModalGroup(group)}
+                        className="inline-flex items-center gap-1 text-xs font-bold text-emerald-600 hover:text-emerald-700 transition-colors"
+                      >
+                        <UserPlus size={15} />
+                        <span>O'quvchi qo'shish</span>
+                      </button>
+
+                      <button
+                        onClick={() => router.push(`/admin/attendance?groupId=${group.id}`)}
+                        className="inline-flex items-center gap-1 text-xs font-bold text-brand-blue hover:text-blue-700 transition-colors"
+                      >
+                        <CalendarCheck size={15} />
+                        <span>Davomat</span>
+                      </button>
+                    </div>
 
                     <div className="flex items-center gap-1.5">
                       <button

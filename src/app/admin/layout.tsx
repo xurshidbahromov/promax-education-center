@@ -19,7 +19,8 @@ import {
   BookOpen,
   DollarSign,
   Library,
-  ChevronRight
+  ChevronRight,
+  CalendarCheck
 } from "lucide-react";
 import Image from "next/image";
 import toast from "react-hot-toast";
@@ -177,6 +178,7 @@ export default function AdminLayout({
     { icon: Users, label: "O'quvchilar", href: "/admin/students", roles: ['admin', 'teacher', 'staff'] },
     { icon: GraduationCap, label: "O'qituvchilar", href: "/admin/teachers", roles: ['admin'] },
     { icon: Library, label: "Fanlar & Darslar", href: "/admin/courses", roles: ['admin', 'teacher', 'staff'] },
+    { icon: CalendarCheck, label: "Davomat & Vazifalar", href: "/admin/attendance", roles: ['admin', 'teacher', 'staff'] },
     { icon: BookOpen, label: "Testlar", href: "/admin/tests", roles: ['admin', 'teacher', 'staff'] },
     { icon: FileText, label: "Natijalar", href: "/admin/results", roles: ['admin', 'teacher', 'staff'] },
     { icon: DollarSign, label: "To'lovlar", href: "/admin/payments", roles: ['admin', 'staff'] },
