@@ -860,3 +860,47 @@ export async function adminUpdateOrderStatus(orderId: string, status: 'delivered
 
   return { success: true };
 }
+
+export async function adminUpdateShopItem(itemId: string, updates: Partial<ShopItem>): Promise<{ success: boolean; error?: string }> {
+  const supabase = createClient();
+
+  // If mock item with string ID like 'item-1', insert as new DB item
+  if (itemId.startsWith('item-')) {
+    const { error } = await supabase.from('shop_items').insert({
+      title: updates.title || "Sovg'a",
+      description: updates.description || "",
+      price_coins: updates.price_coins || 100,
+      stock: updates.stock || 10,
+      category: updates.category || "merch",
+      image_url: updates.image_url || "https://images.unsplash.com/photo-1521572267360-ee0c2909d518?w=500&auto=format&fit=crop&q=80",
+      is_active: true
+    });
+
+    if (error) return { success: false, error: error.message };
+    return { success: true };
+  }
+
+  const { error } = await supabase
+    .from('shop_items')
+    .update(updates)
+    .eq('id', itemId);
+
+  if (error) return { success: false, error: error.message };
+  return { success: true };
+}
+
+export async function adminDeleteShopItem(itemId: string): Promise<{ success: boolean; error?: string }> {
+  const supabase = createClient();
+
+  if (itemId.startsWith('item-')) {
+    return { success: true };
+  }
+
+  const { error } = await supabase
+    .from('shop_items')
+    .delete()
+    .eq('id', itemId);
+
+  if (error) return { success: false, error: error.message };
+  return { success: true };
+}
