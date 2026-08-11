@@ -351,3 +351,27 @@ export function ShopPageSkeleton() {
     </div>
   );
 }
+
+export function GamesPageSkeleton() {
+  return (
+    <div className="space-y-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {[1, 2, 3, 4, 5, 6].map((i) => (
+          <div key={i} className="h-64 bg-white/70 dark:bg-slate-900/70 backdrop-blur-2xl rounded-[2rem] border border-white/80 dark:border-slate-800/80 p-6 flex flex-col justify-between">
+            <div className="flex items-center gap-4">
+              <Skeleton className="w-16 h-16 rounded-2xl bg-slate-200/80 dark:bg-slate-800/60" />
+              <div className="space-y-2 flex-1">
+                <Skeleton className="h-5 w-3/4 rounded-md bg-slate-200/80 dark:bg-slate-800/60" />
+                <Skeleton className="h-3 w-full rounded-md bg-slate-200/80 dark:bg-slate-800/60" />
+              </div>
+            </div>
+            <div className="flex justify-between items-center pt-4 border-t border-slate-100 dark:border-slate-800">
+              <Skeleton className="h-4 w-20 rounded-md bg-slate-200/80 dark:bg-slate-800/60" />
+              <Skeleton className="h-9 w-28 rounded-xl bg-slate-200/80 dark:bg-slate-800/60" />
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}

@@ -1,7 +1,8 @@
 "use client";
 
 import { useLanguage } from "@/context/LanguageContext";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { createPortal } from "react-dom";
 import useSWR, { mutate } from "swr";
 import {
   Coins,
@@ -37,6 +38,11 @@ export default function StudentShopPage() {
   const [purchasingItem, setPurchasingItem] = useState<ShopItem | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [activeTab, setActiveTab] = useState<'shop' | 'my_orders'>('shop');
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   // Fetch shop items & student orders
   const { data: items = [], isLoading: itemsLoading } = useSWR('shopItems', getShopItems);
@@ -198,7 +204,8 @@ export default function StudentShopPage() {
                   return (
                     <div
                       key={item.id}
-                      className="bg-white/70 dark:bg-slate-900/70 backdrop-blur-2xl border border-white/80 dark:border-slate-800/80 rounded-[2rem] overflow-hidden shadow-lg shadow-black/5 hover:border-amber-500/40 dark:hover:border-amber-500/40 transition-all flex flex-col justify-between text-left group"
+                      onClick={() => setPurchasingItem(item)}
+                      className="bg-white/70 dark:bg-slate-900/70 backdrop-blur-2xl border border-white/80 dark:border-slate-800/80 rounded-[2rem] overflow-hidden shadow-lg shadow-black/5 hover:border-amber-500/40 dark:hover:border-amber-500/40 active:scale-[0.99] transition-all flex flex-col justify-between text-left group cursor-pointer"
                     >
                       {/* Top Full-Bleed Image (Touches top, left, right directly) */}
                       <div className="relative w-full h-48 bg-slate-100 dark:bg-slate-800 overflow-hidden">
@@ -332,9 +339,9 @@ export default function StudentShopPage() {
         )}
       </div>
 
-      {/* CONFIRMATION MODAL */}
-      {purchasingItem && (
-        <div className="fixed inset-0 z-[999999] flex items-center justify-center p-4 bg-slate-950/70 backdrop-blur-sm pointer-events-auto">
+      {/* CONFIRMATION MODAL (Rendered directly into document.body via Portal) */}
+      {purchasingItem && mounted && createPortal(
+        <div className="fixed inset-0 z-[9999999] flex items-center justify-center p-4 bg-slate-950/70 backdrop-blur-sm pointer-events-auto">
           <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 max-w-sm w-full shadow-xl relative space-y-4 text-left">
             <button
               type="button"
@@ -407,7 +414,8 @@ export default function StudentShopPage() {
               </button>
             </div>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
     </div>
   );
