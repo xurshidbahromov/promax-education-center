@@ -315,3 +315,39 @@ export function DashboardHomeSkeleton() {
  </div>
  );
 }
+
+export function ShopItemSkeleton() {
+  return (
+    <div className="bg-white/70 dark:bg-slate-900/70 backdrop-blur-2xl border border-white/80 dark:border-slate-800/80 rounded-[2rem] overflow-hidden shadow-lg shadow-black/5 flex flex-col justify-between text-left">
+      <Skeleton className="w-full h-48 rounded-none bg-slate-200/80 dark:bg-slate-800/60" />
+      <div className="p-5 flex-1 flex flex-col justify-between space-y-4">
+        <div className="space-y-2">
+          <Skeleton className="h-5 w-2/3 rounded-lg bg-slate-200/80 dark:bg-slate-800/60" />
+          <Skeleton className="h-4 w-full rounded-md bg-slate-200/80 dark:bg-slate-800/60" />
+          <Skeleton className="h-4 w-4/5 rounded-md bg-slate-200/80 dark:bg-slate-800/60" />
+        </div>
+        <div className="pt-3 border-t border-slate-200/50 dark:border-slate-800/80 flex items-center justify-between gap-3">
+          <Skeleton className="h-5 w-20 rounded-lg bg-slate-200/80 dark:bg-slate-800/60" />
+          <Skeleton className="h-8 w-24 rounded-xl bg-slate-200/80 dark:bg-slate-800/60" />
+        </div>
+      </div>
+    </div>
+  );
+}
+
+export function ShopPageSkeleton() {
+  return (
+    <div className="space-y-6">
+      <div className="flex items-center gap-2 overflow-x-auto pb-1">
+        {[1, 2, 3, 4, 5].map((i) => (
+          <Skeleton key={i} className="h-9 w-28 rounded-2xl bg-slate-200/80 dark:bg-slate-800/60 shrink-0" />
+        ))}
+      </div>
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 gap-6">
+        {[1, 2, 3, 4, 5, 6].map((i) => (
+          <ShopItemSkeleton key={i} />
+        ))}
+      </div>
+    </div>
+  );
+}

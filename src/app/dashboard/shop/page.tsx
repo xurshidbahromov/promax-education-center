@@ -26,6 +26,7 @@ import {
   type ShopOrder
 } from "@/lib/supabase-queries";
 import { useCurrentUser, useUserProfile } from "@/hooks/useDashboardData";
+import { ShopPageSkeleton } from "@/components/ui/Skeleton";
 
 export default function StudentShopPage() {
   const { t } = useLanguage();
@@ -182,11 +183,7 @@ export default function StudentShopPage() {
 
             {/* Pristine Minimalist Grid */}
             {itemsLoading ? (
-              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 gap-6">
-                {[1, 2, 3, 4, 5, 6].map((i) => (
-                  <div key={i} className="h-72 bg-white/60 dark:bg-slate-900/60 rounded-3xl animate-pulse border border-slate-200 dark:border-slate-800" />
-                ))}
-              </div>
+              <ShopPageSkeleton />
             ) : filteredItems.length === 0 ? (
               <div className="py-16 text-center bg-white/60 dark:bg-slate-900/60 backdrop-blur-xl rounded-3xl border border-dashed border-slate-200 dark:border-slate-800">
                 <Gift size={40} className="mx-auto mb-3 text-slate-400 opacity-50" />

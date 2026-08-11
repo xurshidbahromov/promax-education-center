@@ -157,9 +157,6 @@ export default function DashboardLayout({
  })}
  </nav>
 
- {/* Sidebar Beta Widget */}
- <SidebarBetaWidget />
-
  {/* User Profile & Logout */}
  <div className="p-4 border-t border-gray-200/50 dark:border-slate-800/50">
  <button
