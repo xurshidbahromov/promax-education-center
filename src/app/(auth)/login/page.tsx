@@ -382,63 +382,67 @@ export default function LoginPage() {
  <GraduationCap className="w-32 h-32" />
  </motion.div>
 
- <div className="relative z-10 flex flex-col items-center gap-3">
- <div className="w-14 h-14 rounded-2xl bg-brand-blue/10 group-hover:bg-brand-blue group-active:bg-brand-blue active:bg-brand-blue flex items-center justify-center transition-all duration-300 group-hover:shadow-lg group-hover:shadow-brand-blue/20 group-hover:scale-110 group-active:scale-95">
- <GraduationCap className="text-brand-blue group-hover:text-white group-active:text-white active:text-white transition-colors duration-300" size={26} />
- </div>
- <div className="text-center">
- <div className="font-fredoka text-lg font-medium text-slate-800 dark:text-slate-100 group-hover:text-brand-blue group-active:text-brand-blue active:text-brand-blue transition-colors duration-300">
- O'quvchi
- </div>
- <div className="text-xs text-gray-400 dark:text-gray-500 font-medium mt-0.5">
- Student
- </div>
- </div>
- </div>
- </motion.button>
+          <div className="relative z-10 flex flex-col items-center gap-3">
+            {/* Clean Floating Hero Icon without background box */}
+            <div className="relative p-2 group-hover:scale-110 transition-transform duration-300">
+              <div className="absolute inset-0 bg-brand-blue/15 rounded-full blur-md opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+              <GraduationCap className="text-brand-blue relative z-10 drop-shadow-[0_4px_12px_rgba(0,86,210,0.2)]" size={38} />
+            </div>
+            <div className="text-center">
+              <div className="font-fredoka text-lg font-medium text-slate-800 dark:text-slate-100 group-hover:text-brand-blue transition-colors duration-300">
+                O'quvchi
+              </div>
+              <div className="text-xs text-gray-400 dark:text-gray-500 font-medium mt-0.5">
+                Student
+              </div>
+            </div>
+          </div>
+        </motion.button>
 
- <motion.button
- onClick={() => handleRoleSelect('staff')}
- whileTap={{ scale: 0.95 }}
- className="relative overflow-hidden flex flex-col items-center justify-center p-6 sm:p-7 rounded-3xl border border-slate-100 dark:border-slate-800/60 bg-white/70 dark:bg-slate-900/70 backdrop-blur-xl hover:border-brand-orange/30 active:border-brand-orange/30 dark:hover:border-brand-orange/20 active:border-brand-orange/20 transition-all duration-300 group shadow-[0_8px_30px_rgb(0,0,0,0.02)]"
- >
- {/* Dynamic Glowing Blobs */}
- <div className="absolute inset-0 z-0 pointer-events-none opacity-40 group-hover:opacity-100 group-active:opacity-100 active:opacity-100 transition-opacity duration-700">
- <motion.div 
- animate={{ y: [0, -15, 0], scale: [1, 1.1, 1] }}
- transition={{ duration: 4.5, repeat: Infinity, ease: "easeInOut" }}
- className="absolute -right-4 -top-8 w-24 h-24 bg-brand-orange/10 rounded-full blur-xl"
- />
- <motion.div 
- animate={{ y: [0, 15, 0], scale: [1, 1.2, 1] }}
- transition={{ duration: 5.5, repeat: Infinity, ease: "easeInOut", delay: 1 }}
- className="absolute -left-8 bottom-0 w-32 h-32 bg-orange-400/10 rounded-full blur-2xl"
- />
- </div>
+        <motion.button
+          onClick={() => handleRoleSelect('staff')}
+          whileTap={{ scale: 0.95 }}
+          className="relative overflow-hidden flex flex-col items-center justify-center p-6 sm:p-7 rounded-3xl border border-slate-100 dark:border-slate-800/60 bg-white/70 dark:bg-slate-900/70 backdrop-blur-xl hover:border-brand-orange/30 active:border-brand-orange/30 dark:hover:border-brand-orange/20 active:border-brand-orange/20 transition-all duration-300 group shadow-[0_8px_30px_rgb(0,0,0,0.02)] cursor-pointer"
+        >
+          {/* Dynamic Glowing Blobs */}
+          <div className="absolute inset-0 z-0 pointer-events-none opacity-40 group-hover:opacity-100 group-active:opacity-100 active:opacity-100 transition-opacity duration-700">
+            <motion.div 
+              animate={{ y: [0, -15, 0], scale: [1, 1.1, 1] }}
+              transition={{ duration: 4.5, repeat: Infinity, ease: "easeInOut" }}
+              className="absolute -right-4 -top-8 w-24 h-24 bg-brand-orange/10 rounded-full blur-xl"
+            />
+            <motion.div 
+              animate={{ y: [0, 15, 0], scale: [1, 1.2, 1] }}
+              transition={{ duration: 5.5, repeat: Infinity, ease: "easeInOut", delay: 1 }}
+              className="absolute -left-8 bottom-0 w-32 h-32 bg-orange-400/10 rounded-full blur-2xl"
+            />
+          </div>
 
- {/* Main Animated Watermark */}
- <motion.div 
- animate={{ y: [0, -6, 0], rotate: [-12, -8, -12] }}
- transition={{ duration: 6, repeat: Infinity, ease: "easeInOut", delay: 0.5 }}
- className="absolute -right-4 -bottom-4 z-0 text-brand-orange/5 dark:text-brand-orange/10 group-hover:text-brand-orange/10 group-active:text-brand-orange/10 active:text-brand-orange/10 dark:group-hover:text-brand-orange/20 group-active:text-brand-orange/20 active:text-brand-orange/20 transition-colors duration-500"
- >
- <Users className="w-32 h-32" />
- </motion.div>
+          {/* Main Animated Watermark */}
+          <motion.div 
+            animate={{ y: [0, -6, 0], rotate: [-12, -8, -12] }}
+            transition={{ duration: 6, repeat: Infinity, ease: "easeInOut", delay: 0.5 }}
+            className="absolute -right-4 -bottom-4 z-0 text-brand-orange/5 dark:text-brand-orange/10 group-hover:text-brand-orange/10 group-active:text-brand-orange/10 active:text-brand-orange/10 dark:group-hover:text-brand-orange/20 group-active:text-brand-orange/20 active:text-brand-orange/20 transition-colors duration-500"
+          >
+            <Users className="w-32 h-32" />
+          </motion.div>
 
- <div className="relative z-10 flex flex-col items-center gap-3">
- <div className="w-14 h-14 rounded-2xl bg-brand-orange/10 group-hover:bg-brand-orange group-active:bg-brand-orange active:bg-brand-orange flex items-center justify-center transition-all duration-300 group-hover:shadow-lg group-hover:shadow-brand-orange/20 group-hover:scale-110 group-active:scale-95">
- <Users className="text-brand-orange group-hover:text-white group-active:text-white active:text-white transition-colors duration-300" size={26} />
- </div>
- <div className="text-center">
- <div className="font-fredoka text-lg font-medium text-slate-800 dark:text-slate-100 group-hover:text-brand-orange group-active:text-brand-orange active:text-brand-orange transition-colors duration-300">
- O'qituvchi
- </div>
- <div className="text-xs text-gray-400 dark:text-gray-500 font-medium mt-0.5">
- Teacher/Staff
- </div>
- </div>
- </div>
- </motion.button>
+          <div className="relative z-10 flex flex-col items-center gap-3">
+            {/* Clean Floating Hero Icon without background box */}
+            <div className="relative p-2 group-hover:scale-110 transition-transform duration-300">
+              <div className="absolute inset-0 bg-brand-orange/15 rounded-full blur-md opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+              <Users className="text-brand-orange relative z-10 drop-shadow-[0_4px_12px_rgba(249,115,22,0.2)]" size={38} />
+            </div>
+            <div className="text-center">
+              <div className="font-fredoka text-lg font-medium text-slate-800 dark:text-slate-100 group-hover:text-brand-orange transition-colors duration-300">
+                O'qituvchi
+              </div>
+              <div className="text-xs text-gray-400 dark:text-gray-500 font-medium mt-0.5">
+                Teacher/Staff
+              </div>
+            </div>
+          </div>
+        </motion.button>
  </div>
 
 
