@@ -289,6 +289,7 @@ export const en = {
 
  // Dashboard Keys
  "sidebar.dashboard": "Dashboard",
+ "sidebar.shop": "Shop",
  "sidebar.lessons": "Lessons",
  "sidebar.onlinetests": "Online Tests",
  "sidebar.results": "Practice test",

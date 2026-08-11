@@ -11,6 +11,7 @@ import {
   TrendingUp,
   Gamepad2,
   CircleUserRound,
+  ShoppingBag,
   LogOut,
   Menu,
   X,
@@ -89,6 +90,7 @@ export default function DashboardLayout({
     { name: t('sidebar.onlinetests'), href: '/dashboard/tests', icon: FileCheck },
     { name: t('sidebar.results'), href: '/dashboard/results', icon: TrendingUp },
     { name: t('sidebar.games'), href: '/dashboard/games', icon: Gamepad2, beta: true },
+    { name: t('sidebar.shop') || 'Do\'kon', href: '/dashboard/shop', icon: ShoppingBag },
     { name: t('sidebar.profile'), href: '/dashboard/profile', icon: CircleUserRound },
  ];
 

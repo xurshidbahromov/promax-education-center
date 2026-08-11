@@ -648,16 +648,215 @@ export async function getLessonById(id: string): Promise<Lesson | null> {
 }
 
 export async function getMaterialsByLessonId(lessonId: string): Promise<Material[]> {
- const supabase = createClient();
- const { data, error } = await supabase
- .from('materials')
- .select('*')
- .eq('lesson_id', lessonId)
- .order('created_at', { ascending: true });
+  const supabase = createClient();
+  const { data, error } = await supabase
+    .from('materials')
+    .select('*')
+    .eq('lesson_id', lessonId)
+    .order('created_at', { ascending: true });
 
- if (error) {
- console.error('Error fetching materials:', error);
- return [];
- }
- return data || [];
+  if (error) {
+    console.error('Error fetching materials:', error);
+    return [];
+  }
+  return data || [];
+}
+
+// -------------------------------------------------------------
+// PROMAX COIN SHOP FUNCTIONS
+// -------------------------------------------------------------
+
+export interface ShopItem {
+  id: string;
+  title: string;
+  description: string;
+  price_coins: number;
+  category: 'merch' | 'exam' | 'discount' | 'gadget';
+  image_url?: string;
+  stock: number;
+  is_active: boolean;
+  created_at?: string;
+}
+
+export interface ShopOrder {
+  id: string;
+  student_id: string;
+  item_id: string;
+  coins_spent: number;
+  status: 'pending' | 'delivered' | 'cancelled';
+  notes?: string;
+  created_at: string;
+  item?: ShopItem;
+  student?: { full_name: string; phone?: string };
+}
+
+export const defaultShopItems: ShopItem[] = [
+  {
+    id: 'item-1',
+    title: "Promax Brended Futbolka",
+    description: "Paxtadan tikilgan, sifatli va qulay Promax Education rasmiy futbolkasi.",
+    price_coins: 500,
+    category: 'merch',
+    image_url: "https://images.unsplash.com/photo-1521572267360-ee0c2909d518?w=500&auto=format&fit=crop&q=80",
+    stock: 12,
+    is_active: true
+  },
+  {
+    id: 'item-2',
+    title: "Mock Exam Bepul Chipta",
+    description: "Navbatdagi har qanday haftalik MOCK DTM imtihonida tekin qatnashish chiptasi.",
+    price_coins: 250,
+    category: 'exam',
+    image_url: "https://images.unsplash.com/photo-1434030216411-0b793f4b4173?w=500&auto=format&fit=crop&q=80",
+    stock: 50,
+    is_active: true
+  },
+  {
+    id: 'item-3',
+    title: "Branded Bloknot va Ruchka",
+    description: "Darslarda qeydlar olib borish uchun zamonaviy Promax kundaligi va ruchkasi.",
+    price_coins: 150,
+    category: 'merch',
+    image_url: "https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?w=500&auto=format&fit=crop&q=80",
+    stock: 25,
+    is_active: true
+  },
+  {
+    id: 'item-4',
+    title: "Promax Stikerlar To'plami",
+    description: "Noutbuk va telefonlar uchun 15 ta eksklyuziv ilmiy va motivatsion stikerlar.",
+    price_coins: 80,
+    category: 'merch',
+    image_url: "https://images.unsplash.com/photo-1572375992501-4b0892d50c69?w=500&auto=format&fit=crop&q=80",
+    stock: 100,
+    is_active: true
+  },
+  {
+    id: 'item-5',
+    title: "Oylik To'lov uchun 20% Chegirma",
+    description: "Keyingi oy to'lovi uchun maxsus 20 foizli vaucher.",
+    price_coins: 1200,
+    category: 'discount',
+    image_url: "https://images.unsplash.com/photo-1554224155-8d04cb21cd6c?w=500&auto=format&fit=crop&q=80",
+    stock: 5,
+    is_active: true
+  },
+  {
+    id: 'item-6',
+    title: "Promax Thermos Idishi",
+    description: "Issiq va sovuq ichimliklarni 12 soat saqlaydigan metall termos idish.",
+    price_coins: 750,
+    category: 'gadget',
+    image_url: "https://images.unsplash.com/photo-1602143407151-7111542de6e8?w=500&auto=format&fit=crop&q=80",
+    stock: 8,
+    is_active: true
+  }
+];
+
+export async function getShopItems(): Promise<ShopItem[]> {
+  const supabase = createClient();
+  const { data, error } = await supabase
+    .from('shop_items')
+    .select('*')
+    .eq('is_active', true)
+    .order('created_at', { ascending: false });
+
+  if (error || !data || data.length === 0) {
+    return defaultShopItems;
+  }
+  return data;
+}
+
+export async function purchaseShopItem(studentId: string, item: ShopItem): Promise<{ success: boolean; error?: string }> {
+  const supabase = createClient();
+
+  // 1. Get student profile & coins balance
+  const { data: profile, error: profileErr } = await supabase
+    .from('profiles')
+    .select('coins')
+    .eq('id', studentId)
+    .single();
+
+  if (profileErr || !profile) {
+    return { success: false, error: "Profil topilmadi" };
+  }
+
+  const currentCoins = profile.coins || 0;
+  if (currentCoins < item.price_coins) {
+    return { success: false, error: `Tangalaringiz yetarli emas! Sizda ${currentCoins} tanga bor, sovg'a narxi ${item.price_coins} tanga.` };
+  }
+
+  // 2. Deduct coins
+  const newBalance = currentCoins - item.price_coins;
+  const { error: updateErr } = await supabase
+    .from('profiles')
+    .update({ coins: newBalance })
+    .eq('id', studentId);
+
+  if (updateErr) {
+    return { success: false, error: "Tangani ayirishda xatolik" };
+  }
+
+  // 3. Create order row (if table exists)
+  try {
+    await supabase.from('shop_orders').insert({
+      student_id: studentId,
+      item_id: item.id.startsWith('item-') ? null : item.id,
+      coins_spent: item.price_coins,
+      status: 'pending',
+      notes: `Sovg'a: ${item.title}`
+    });
+
+    // Reduce stock if DB item
+    if (!item.id.startsWith('item-')) {
+      await supabase.from('shop_items').update({ stock: Math.max(0, item.stock - 1) }).eq('id', item.id);
+    }
+  } catch (err) {
+    console.error("Order creation fallback:", err);
+  }
+
+  return { success: true };
+}
+
+export async function getStudentOrders(studentId: string): Promise<ShopOrder[]> {
+  const supabase = createClient();
+  const { data, error } = await supabase
+    .from('shop_orders')
+    .select('*, item:shop_items(*)')
+    .eq('student_id', studentId)
+    .order('created_at', { ascending: false });
+
+  if (error) return [];
+  return data || [];
+}
+
+export async function adminGetShopOrders(): Promise<ShopOrder[]> {
+  const supabase = createClient();
+  const { data, error } = await supabase
+    .from('shop_orders')
+    .select('*, item:shop_items(*), student:profiles!student_id(full_name, phone)')
+    .order('created_at', { ascending: false });
+
+  if (error) return [];
+  return data || [];
+}
+
+export async function adminUpdateOrderStatus(orderId: string, status: 'delivered' | 'cancelled', studentId?: string, coinsSpent?: number): Promise<{ success: boolean }> {
+  const supabase = createClient();
+  const { error } = await supabase
+    .from('shop_orders')
+    .update({ status })
+    .eq('id', orderId);
+
+  if (error) return { success: false };
+
+  // Refund coins if order was cancelled
+  if (status === 'cancelled' && studentId && coinsSpent) {
+    const { data: profile } = await supabase.from('profiles').select('coins').eq('id', studentId).single();
+    if (profile) {
+      await supabase.from('profiles').update({ coins: (profile.coins || 0) + coinsSpent }).eq('id', studentId);
+    }
+  }
+
+  return { success: true };
 }

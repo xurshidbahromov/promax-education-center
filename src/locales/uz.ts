@@ -351,6 +351,7 @@ export const uz = {
 
  // Dashboard Keys
  "sidebar.dashboard": "Kabinet",
+ "sidebar.shop": "Do'kon",
  "sidebar.lessons": "Darslar",
  "sidebar.onlinetests": "Online Testlar",
  "sidebar.results": "Test sinov imtihoni",

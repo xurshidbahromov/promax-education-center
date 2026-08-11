@@ -20,7 +20,8 @@ import {
   DollarSign,
   Library,
   ChevronRight,
-  CalendarCheck
+  CalendarCheck,
+  ShoppingBag
 } from "lucide-react";
 import Image from "next/image";
 import toast from "react-hot-toast";
@@ -104,7 +105,7 @@ export default function AdminLayout({
 
     // Protection rules for Teacher role
     if (userInfo.role === 'teacher') {
-      const restrictedForTeacher = ['/admin/payments', '/admin/teachers', '/admin/settings'];
+      const restrictedForTeacher = ['/admin/payments', '/admin/teachers', '/admin/settings', '/admin/shop'];
       if (restrictedForTeacher.some(path => pathname.startsWith(path))) {
         toast.error("Ushbu bo'limga faqat Bosh Admin kirishi mumkin");
         router.push('/admin');
@@ -183,6 +184,7 @@ export default function AdminLayout({
     { icon: BookOpen, label: "Testlar", href: "/admin/tests", roles: ['admin', 'teacher', 'staff'] },
     { icon: FileText, label: "Natijalar", href: "/admin/results", roles: ['admin', 'teacher', 'staff'] },
     { icon: DollarSign, label: "To'lovlar", href: "/admin/payments", roles: ['admin', 'staff'] },
+    { icon: ShoppingBag, label: "Do'kon & Buyurtmalar", href: "/admin/shop", roles: ['admin', 'staff'] },
     { icon: Bell, label: "E'lonlar", href: "/admin/announcements", roles: ['admin', 'teacher', 'staff'] },
     { icon: Settings, label: "Sozlamalar", href: "/admin/settings", roles: ['admin'] },
   ];

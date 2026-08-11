@@ -287,6 +287,7 @@ export const ru = {
 
  // Dashboard Keys
  "sidebar.dashboard": "Кабинет",
+ "sidebar.shop": "Магазин",
  "sidebar.lessons": "Уроки",
  "sidebar.onlinetests": "Онлайн Тесты",
  "sidebar.results": "Пробный тест",

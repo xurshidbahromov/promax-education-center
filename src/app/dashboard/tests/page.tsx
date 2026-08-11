@@ -71,12 +71,6 @@ export default function OnlineTestsPage() {
 
  return (
  <div className="relative min-h-screen text-slate-800 dark:text-white font-sans pb-24">
- {/* Ambient bg */}
- <div className="fixed inset-0 z-0 overflow-hidden pointer-events-none">
- <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] rounded-full bg-blue-300/20 dark:bg-blue-500/10 blur-[130px]" />
- <div className="absolute bottom-[-15%] right-[-10%] w-[45%] h-[45%] rounded-full bg-violet-300/20 dark:bg-purple-500/10 blur-[130px]" />
- </div>
-
  <div className="relative z-10 flex flex-col gap-8 max-w-[1600px] mx-auto pt-4 sm:pt-6">
 
  {/* ── PAGE HEADER & SEARCH ── */}
