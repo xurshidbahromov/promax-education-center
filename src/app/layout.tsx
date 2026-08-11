@@ -12,31 +12,31 @@ import NextTopLoader from "nextjs-toploader";
 import Script from "next/script";
 
 const atkinson = Atkinson_Hyperlegible({
- variable: "--font-atkinson",
- subsets: ["latin"],
- weight: ["400", "700"],
- display: "swap",
+  variable: "--font-atkinson",
+  subsets: ["latin"],
+  weight: ["400", "700"],
+  display: "swap",
 });
 
 const inter = Inter({
- variable: "--font-inter",
- subsets: ["latin"],
- weight: ["300", "400", "500", "600", "700", "800", "900"],
- display: "swap",
+  variable: "--font-inter",
+  subsets: ["latin"],
+  weight: ["300", "400", "500", "600", "700", "800", "900"],
+  display: "swap",
 });
 
 const fredoka = Fredoka({
- variable: "--font-fredoka",
- subsets: ["latin"],
- weight: ["300", "400", "500", "600", "700"],
- display: "swap",
+  variable: "--font-fredoka",
+  subsets: ["latin"],
+  weight: ["300", "400", "500", "600", "700"],
+  display: "swap",
 });
 
 const sourceSans = Source_Sans_3({
- variable: "--font-sans-pro",
- subsets: ["latin"],
- weight: ["300", "400", "500", "600", "700", "800", "900"],
- display: "swap",
+  variable: "--font-sans-pro",
+  subsets: ["latin"],
+  weight: ["300", "400", "500", "600", "700", "800", "900"],
+  display: "swap",
 });
 
 export const metadata: Metadata = {
