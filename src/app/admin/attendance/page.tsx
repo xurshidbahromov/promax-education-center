@@ -303,30 +303,13 @@ CREATE POLICY "Allow manage attendance" ON public.attendance FOR ALL USING (true
     <div className="w-full max-w-[1400px] mx-auto space-y-6">
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-2 border-b border-slate-200/50 dark:border-slate-800/50">
-        <div className="flex items-center gap-3">
-          <button
-            type="button"
-            onClick={() => router.back()}
-            className="p-2.5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 text-slate-500 hover:text-slate-900 dark:hover:text-slate-100 transition-colors shadow-sm shrink-0 flex items-center gap-1.5 text-xs font-bold"
-            title="Orqaga qaytish"
-          >
-            <ArrowLeft size={18} />
-            <span className="hidden sm:inline">Orqaga</span>
-          </button>
-
-          <div className="flex items-center gap-2.5">
-            <div className="p-2.5 rounded-2xl bg-emerald-500/10 text-emerald-500 dark:bg-emerald-500/20 shrink-0">
-              <CalendarCheck size={24} />
-            </div>
-            <div>
-              <h1 className="text-xl sm:text-2xl font-black text-slate-800 dark:text-slate-100 tracking-tight font-sans-pro">
-                Davomat va Uy Vazifasi
-              </h1>
-              <p className="text-xs font-medium text-slate-500 dark:text-slate-400">
-                Guruhlar bo'yicha kundalik davomat va uy vazifalarini belgilash hamda Telegram xabarnoma yuborish
-              </p>
-            </div>
-          </div>
+        <div>
+          <h1 className="text-3xl font-black text-slate-800 dark:text-slate-100 tracking-tight font-sans-pro">
+            Davomat va Uy Vazifasi
+          </h1>
+          <p className="text-xs sm:text-sm font-medium text-slate-400 dark:text-slate-500 mt-1">
+            Guruhlar bo'yicha kundalik davomat va uy vazifalarini belgilash hamda Telegram xabarnoma yuborish
+          </p>
         </div>
 
         <div className="flex items-center gap-3">
