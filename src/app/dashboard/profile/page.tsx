@@ -635,14 +635,14 @@ export default function ProfilePage() {
  );
 
  return (
- <div className="relative min-h-screen text-slate-800 dark:text-white font-sans pb-24">
+ <div className="relative text-slate-800 dark:text-white font-sans pb-4">
  {/* Ambient bg */}
  <div className="fixed inset-0 z-0 overflow-hidden pointer-events-none">
  <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] rounded-full bg-blue-300/20 dark:bg-blue-500/10 blur-[130px]" />
  <div className="absolute bottom-[-15%] right-[-10%] w-[45%] h-[45%] rounded-full bg-violet-300/20 dark:bg-purple-500/10 blur-[130px]" />
  </div>
 
- <div className="relative z-10 w-full max-w-3xl mx-auto pt-4 sm:pt-6 pb-10 overflow-x-hidden min-h-[400px]">
+ <div className="relative z-10 w-full max-w-3xl mx-auto pt-1 sm:pt-2 pb-4 overflow-x-hidden min-h-[400px]">
  <AnimatePresence mode="wait" custom={direction} initial={false}>
  {activeView === 'main' && renderAnimatedView(renderMain(), 'main')}
  {activeView === 'statistics' && renderAnimatedView(renderStatistics(), 'statistics')}

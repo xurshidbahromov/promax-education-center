@@ -63,8 +63,8 @@ export default function ResultsPage() {
  });
 
   return (
-    <div className="relative min-h-screen text-slate-800 dark:text-white font-sans pb-24">
-      <div className="relative z-10 flex flex-col gap-8 max-w-[1600px] mx-auto pt-4 sm:pt-6">
+    <div className="relative text-slate-800 dark:text-white font-sans pb-4">
+      <div className="relative z-10 flex flex-col gap-6 max-w-[1600px] mx-auto pt-1 sm:pt-2">
 
  {/* ── PAGE HEADER & SEARCH ── */}
  <div className="flex flex-col gap-4">

@@ -175,7 +175,7 @@ export default function DashboardLayout({
  <div className="flex-1 flex flex-col min-w-0 relative z-10 h-screen overflow-hidden">
   {/* Desktop Header (Island Style) */}
   {!isTakeTestPage && (
-  <div className="hidden lg:flex absolute top-4 right-8 z-50 justify-end pointer-events-none">
+  <div className="hidden lg:flex absolute top-4 right-6 z-50 justify-end pointer-events-none">
   <div className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-2xl border border-gray-200/50 dark:border-slate-800/50 rounded-full flex items-center gap-3 px-4 py-2 shadow-xl shadow-brand-blue/5 pointer-events-auto transition-all duration-300">
   <SidebarBetaWidget variant="pill" />
   <div className="w-px h-5 bg-slate-200 dark:bg-slate-800" />
@@ -211,7 +211,7 @@ export default function DashboardLayout({
   )}
 
  {/* Page Content */}
- <main className={`flex-1 overflow-y-auto w-full relative z-0 ${isTakeTestPage ? '' : 'p-4 pt-24 pb-32 lg:p-8 lg:pt-24 lg:pb-8'}`}>
+ <main className={`flex-1 overflow-y-auto w-full relative z-0 ${isTakeTestPage ? '' : 'p-4 pt-20 pb-20 lg:p-6 lg:pt-16 lg:pb-6'}`}>
  <div className={`w-full max-w-full mx-auto min-h-full ${isTakeTestPage ? 'pt-safe' : ''}`}>
  {children}
  </div>
