@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from 'react';
-import { Calculator, Sparkles, Variable, Binary, Beaker, ChevronDown } from 'lucide-react';
+import { Calculator, Sparkles, Variable, Binary, Beaker, X } from 'lucide-react';
 import MathRenderer from './MathRenderer';
 
 interface MathToolbarProps {
@@ -9,86 +9,166 @@ interface MathToolbarProps {
   currentValue?: string;
 }
 
-export default function MathToolbar({ onInsert, currentValue = "" }: MathToolbarProps) {
-  const [activeCategory, setActiveCategory] = useState<'basic' | 'symbols' | 'greek' | 'chemistry' | 'calculus'>('basic');
-  const [isOpen, setIsOpen] = useState(false);
+// Common Formula Dataset
+export const FORMULA_CATEGORIES = {
+  basic: {
+    label: "Asosiy Formulalar",
+    icon: Calculator,
+    items: [
+      { label: "Kasr (a/b)", formula: "\\frac{a}{b}", display: "a/b" },
+      { label: "Daraja (x²)", formula: "x^{2}", display: "x²" },
+      { label: "Indeks (x₁)", formula: "x_{1}", display: "x₁" },
+      { label: "Kvadrat Ildiz", formula: "\\sqrt{x}", display: "√x" },
+      { label: "N-dara Ildiz", formula: "\\sqrt[n]{x}", display: "ⁿ√x" },
+      { label: "Qavs ( )", formula: "\\left( x \\right)", display: "(x)" },
+      { label: "Modul |x|", formula: "|x|", display: "|x|" },
+      { label: "Qavs { }", formula: "\\{ x \\}", display: "{x}" },
+    ]
+  },
+  symbols: {
+    label: "Matematik Belgilar",
+    icon: Variable,
+    items: [
+      { label: "Plyus-Minus", formula: "\\pm", display: "±" },
+      { label: "Ko'paytirish", formula: "\\times", display: "×" },
+      { label: "Bo'lish", formula: "\\div", display: "÷" },
+      { label: "Teng emas", formula: "\\neq", display: "≠" },
+      { label: "Kichik yoki teng", formula: "\\le", display: "≤" },
+      { label: "Katta yoki teng", formula: "\\ge", display: "≥" },
+      { label: "Taqriban", formula: "\\approx", display: "≈" },
+      { label: "Cheksizlik", formula: "\\infty", display: "∞" },
+      { label: "Tegishli", formula: "\\in", display: "∈" },
+      { label: "Burchak", formula: "\\angle", display: "∠" },
+      { label: "Daraja °", formula: "^\\circ", display: "°" },
+    ]
+  },
+  greek: {
+    label: "Yunon & Trigonometriya",
+    icon: Binary,
+    items: [
+      { label: "Pi (π)", formula: "\\pi", display: "π" },
+      { label: "Alfa (α)", formula: "\\alpha", display: "α" },
+      { label: "Beta (β)", formula: "\\beta", display: "β" },
+      { label: "Gamma (γ)", formula: "\\gamma", display: "γ" },
+      { label: "Teta (θ)", formula: "\\theta", display: "θ" },
+      { label: "Delta (Δ)", formula: "\\Delta", display: "Δ" },
+      { label: "Sinus", formula: "\\sin(x)", display: "sin(x)" },
+      { label: "Kosinus", formula: "\\cos(x)", display: "cos(x)" },
+      { label: "Tangens", formula: "\\tan(x)", display: "tan(x)" },
+      { label: "Limes (Lim)", formula: "\\lim_{x \\to 0}", display: "lim" },
+    ]
+  },
+  chemistry: {
+    label: "Kimyo & Fizika",
+    icon: Beaker,
+    items: [
+      { label: "Suv (H₂O)", formula: "H_{2}O", display: "H₂O" },
+      { label: "Karbonat (CO₂)", formula: "CO_{2}", display: "CO₂" },
+      { label: "Kislota (H₂SO₄)", formula: "H_{2}SO_{4}", display: "H₂SO₄" },
+      { label: "Reaksiya Strelkasi", formula: "\\rightarrow", display: "→" },
+      { label: "Qaytuvchan Strelka", formula: "\\rightleftharpoons", display: "⇌" },
+      { label: "Vektor (v)", formula: "\\vec{v}", display: "v⃗" },
+      { label: "Zichlik (ρ)", formula: "\\rho", display: "ρ" },
+      { label: "Om (Ω)", formula: "\\Omega", display: "Ω" },
+    ]
+  },
+  calculus: {
+    label: "Oliy Matematika",
+    icon: Sparkles,
+    items: [
+      { label: "Integral", formula: "\\int x \\, dx", display: "∫ dx" },
+      { label: "Aniq Integral", formula: "\\int_{a}^{b} x \\, dx", display: "∫ₐᵇ" },
+      { label: "Yig'indi (Summa)", formula: "\\sum_{i=1}^{n} i", display: "∑" },
+      { label: "Hosila (dy/dx)", formula: "\\frac{dy}{dx}", display: "dy/dx" },
+      { label: "Matritsa 2x2", formula: "\\begin{pmatrix} a & b \\\\ c & d \\end{pmatrix}", display: "Matritsa" },
+      { label: "Sistema", formula: "\\begin{cases} x + y = 1 \\\\ x - y = 0 \\end{cases}", display: "Sistema" },
+    ]
+  }
+};
 
-  // Formula Templates
-  const categories = {
-    basic: {
-      label: "Asosiy Formulalar",
-      icon: Calculator,
-      items: [
-        { label: "Kasr (a/b)", formula: "\\frac{a}{b}", display: "a/b" },
-        { label: "Daraja (x²)", formula: "x^{2}", display: "x²" },
-        { label: "Indeks (x₁)", formula: "x_{1}", display: "x₁" },
-        { label: "Kvadrat Ildiz", formula: "\\sqrt{x}", display: "√x" },
-        { label: "N-dara Ildiz", formula: "\\sqrt[n]{x}", display: "ⁿ√x" },
-        { label: "Qavs ( )", formula: "\\left( x \\right)", display: "(x)" },
-        { label: "Modul |x|", formula: "|x|", display: "|x|" },
-        { label: "Qavs { }", formula: "\\{ x \\}", display: "{x}" },
-      ]
-    },
-    symbols: {
-      label: "Matematik Belgilar",
-      icon: Variable,
-      items: [
-        { label: "Plyus-Minus", formula: "\\pm", display: "±" },
-        { label: "Ko'paytirish", formula: "\\times", display: "×" },
-        { label: "Bo'lish", formula: "\\div", display: "÷" },
-        { label: "Teng emas", formula: "\\neq", display: "≠" },
-        { label: "Kichik yoki teng", formula: "\\le", display: "≤" },
-        { label: "Katta yoki teng", formula: "\\ge", display: "≥" },
-        { label: "Taqriban", formula: "\\approx", display: "≈" },
-        { label: "Cheksizlik", formula: "\\infty", display: "∞" },
-        { label: "Tegishli", formula: "\\in", display: "∈" },
-        { label: "Burchak", formula: "\\angle", display: "∠" },
-        { label: "Daraja °", formula: "^\\circ", display: "°" },
-      ]
-    },
-    greek: {
-      label: "Yunon & Trigonometriya",
-      icon: Binary,
-      items: [
-        { label: "Pi (π)", formula: "\\pi", display: "π" },
-        { label: "Alfa (α)", formula: "\\alpha", display: "α" },
-        { label: "Beta (β)", formula: "\\beta", display: "β" },
-        { label: "Gamma (γ)", formula: "\\gamma", display: "γ" },
-        { label: "Teta (θ)", formula: "\\theta", display: "θ" },
-        { label: "Delta (Δ)", formula: "\\Delta", display: "Δ" },
-        { label: "Sinus", formula: "\\sin(x)", display: "sin(x)" },
-        { label: "Kosinus", formula: "\\cos(x)", display: "cos(x)" },
-        { label: "Tangens", formula: "\\tan(x)", display: "tan(x)" },
-        { label: "Limes (Lim)", formula: "\\lim_{x \\to 0}", display: "lim" },
-      ]
-    },
-    chemistry: {
-      label: "Kimyo & Fizika",
-      icon: Beaker,
-      items: [
-        { label: "Suv (H₂O)", formula: "H_{2}O", display: "H₂O" },
-        { label: "Karbonat (CO₂)", formula: "CO_{2}", display: "CO₂" },
-        { label: "Kislota (H₂SO₄)", formula: "H_{2}SO_{4}", display: "H₂SO₄" },
-        { label: "Reaksiya Strelkasi", formula: "\\rightarrow", display: "→" },
-        { label: "Qaytuvchan Strelka", formula: "\\rightleftharpoons", display: "⇌" },
-        { label: "Vektor (v)", formula: "\\vec{v}", display: "v⃗" },
-        { label: "Zichlik (ρ)", formula: "\\rho", display: "ρ" },
-        { label: "Om (Ω)", formula: "\\Omega", display: "Ω" },
-      ]
-    },
-    calculus: {
-      label: "Oliy Matematika",
-      icon: Sparkles,
-      items: [
-        { label: "Integral", formula: "\\int x \\, dx", display: "∫ dx" },
-        { label: "Aniq Integral", formula: "\\int_{a}^{b} x \\, dx", display: "∫ₐᵇ" },
-        { label: "Yig'indi (Summa)", formula: "\\sum_{i=1}^{n} i", display: "∑" },
-        { label: "Hosila (dy/dx)", formula: "\\frac{dy}{dx}", display: "dy/dx" },
-        { label: "Matritsa 2x2", formula: "\\begin{pmatrix} a & b \\\\ c & d \\end{pmatrix}", display: "Matritsa" },
-        { label: "Sistema", formula: "\\begin{cases} x + y = 1 \\\\ x - y = 0 \\end{cases}", display: "Sistema" },
-      ]
-    }
-  };
+// 1. INLINE EXPANDABLE FORMULA PANEL FOR A SPECIFIC INPUT FIELD
+interface InlineMathPanelProps {
+  isOpen: boolean;
+  onClose?: () => void;
+  onInsert: (formulaText: string) => void;
+  title?: string;
+}
+
+export function InlineMathPanel({ isOpen, onClose, onInsert, title = "Formulani Tanlang" }: InlineMathPanelProps) {
+  const [activeCategory, setActiveCategory] = useState<keyof typeof FORMULA_CATEGORIES>('basic');
+
+  if (!isOpen) return null;
+
+  return (
+    <div className="w-full bg-slate-50 dark:bg-slate-900/90 border border-slate-200 dark:border-slate-800 rounded-2xl p-3 space-y-2.5 my-2.5 text-left shadow-sm transition-all">
+      <div className="flex items-center justify-between border-b border-slate-200/60 dark:border-slate-800 pb-2">
+        <span className="text-xs font-black text-brand-blue dark:text-blue-400 flex items-center gap-1.5 uppercase tracking-wider">
+          <Calculator size={14} />
+          <span>{title}</span>
+        </span>
+        {onClose && (
+          <button
+            type="button"
+            onClick={onClose}
+            className="p-1 rounded-lg text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-200/50 dark:hover:bg-slate-800 transition-colors"
+          >
+            <X size={14} />
+          </button>
+        )}
+      </div>
+
+      {/* Category Selector */}
+      <div className="flex items-center gap-1.5 overflow-x-auto custom-scrollbar pb-1">
+        {(Object.keys(FORMULA_CATEGORIES) as Array<keyof typeof FORMULA_CATEGORIES>).map((catKey) => {
+          const cat = FORMULA_CATEGORIES[catKey];
+          const Icon = cat.icon;
+          const isActive = activeCategory === catKey;
+
+          return (
+            <button
+              key={catKey}
+              type="button"
+              onClick={() => setActiveCategory(catKey)}
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition-all shrink-0 cursor-pointer ${
+                isActive
+                  ? "bg-brand-blue text-white shadow-sm shadow-brand-blue/20"
+                  : "bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-700 hover:bg-slate-100"
+              }`}
+            >
+              <Icon size={14} />
+              <span>{cat.label}</span>
+            </button>
+          );
+        })}
+      </div>
+
+      {/* Items Grid */}
+      <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-6 gap-2 bg-white dark:bg-slate-850 p-2.5 rounded-xl border border-slate-200/70 dark:border-slate-800">
+        {FORMULA_CATEGORIES[activeCategory].items.map((item, idx) => (
+          <button
+            key={idx}
+            type="button"
+            onClick={() => onInsert(`$${item.formula}$`)}
+            className="flex flex-col items-center justify-center p-2 rounded-xl border border-slate-100 dark:border-slate-800 bg-slate-50/70 dark:bg-slate-800/50 hover:bg-brand-blue/10 hover:border-brand-blue/30 dark:hover:border-brand-blue/40 transition-all group cursor-pointer"
+            title={`Qo'shish: ${item.formula}`}
+          >
+            <div className="text-sm font-bold text-slate-800 dark:text-slate-100 group-hover:text-brand-blue transition-colors">
+              <MathRenderer content={`$${item.formula}$`} inline />
+            </div>
+            <span className="text-[10px] font-semibold text-slate-400 mt-1 truncate max-w-full">
+              {item.label}
+            </span>
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+// 2. MAIN TOOLBAR (FOR BACKWARD COMPATIBILITY)
+export default function MathToolbar({ onInsert, currentValue = "" }: MathToolbarProps) {
+  const [activeCategory, setActiveCategory] = useState<keyof typeof FORMULA_CATEGORIES>('basic');
+  const [isOpen, setIsOpen] = useState(false);
 
   return (
     <div className="w-full bg-slate-50 dark:bg-slate-900/80 border border-slate-200 dark:border-slate-800 rounded-2xl p-3 space-y-3 my-2">
@@ -96,10 +176,10 @@ export default function MathToolbar({ onInsert, currentValue = "" }: MathToolbar
         <button
           type="button"
           onClick={() => setIsOpen(!isOpen)}
-          className="flex items-center gap-2 text-xs font-extrabold text-brand-blue hover:text-blue-600 transition-colors"
+          className="flex items-center gap-2 text-xs font-extrabold text-brand-blue hover:text-blue-600 transition-colors cursor-pointer"
         >
           <Calculator size={16} />
-          <span>Formula & Matematik Panel {isOpen ? "▼" : "▶"}</span>
+          <span>Barcha Formulalar Paneli {isOpen ? "▼" : "▶"}</span>
         </button>
 
         {currentValue && (
@@ -118,11 +198,11 @@ export default function MathToolbar({ onInsert, currentValue = "" }: MathToolbar
       </div>
 
       {isOpen && (
-        <div className="space-y-3 pt-2 border-t border-slate-200/60 dark:border-slate-800">
+        <div className="space-y-3 pt-2 border-t border-slate-200/60 dark:border-slate-800 text-left">
           {/* Category Tabs */}
           <div className="flex items-center gap-1.5 overflow-x-auto custom-scrollbar pb-1">
-            {(Object.keys(categories) as Array<keyof typeof categories>).map((catKey) => {
-              const cat = categories[catKey];
+            {(Object.keys(FORMULA_CATEGORIES) as Array<keyof typeof FORMULA_CATEGORIES>).map((catKey) => {
+              const cat = FORMULA_CATEGORIES[catKey];
               const Icon = cat.icon;
               const isActive = activeCategory === catKey;
 
@@ -131,7 +211,7 @@ export default function MathToolbar({ onInsert, currentValue = "" }: MathToolbar
                   key={catKey}
                   type="button"
                   onClick={() => setActiveCategory(catKey)}
-                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition-all shrink-0 ${
+                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition-all shrink-0 cursor-pointer ${
                     isActive
                       ? "bg-brand-blue text-white shadow-sm shadow-brand-blue/20"
                       : "bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-700 hover:bg-slate-100"
@@ -146,12 +226,12 @@ export default function MathToolbar({ onInsert, currentValue = "" }: MathToolbar
 
           {/* Formulas & Symbols Grid */}
           <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-6 gap-2 bg-white dark:bg-slate-850 p-2.5 rounded-xl border border-slate-200/70 dark:border-slate-800">
-            {categories[activeCategory].items.map((item, idx) => (
+            {FORMULA_CATEGORIES[activeCategory].items.map((item, idx) => (
               <button
                 key={idx}
                 type="button"
                 onClick={() => onInsert(`$${item.formula}$`)}
-                className="flex flex-col items-center justify-center p-2 rounded-xl border border-slate-100 dark:border-slate-800 bg-slate-50/70 dark:bg-slate-800/50 hover:bg-brand-blue/10 hover:border-brand-blue/30 dark:hover:border-brand-blue/40 transition-all group"
+                className="flex flex-col items-center justify-center p-2 rounded-xl border border-slate-100 dark:border-slate-800 bg-slate-50/70 dark:bg-slate-800/50 hover:bg-brand-blue/10 hover:border-brand-blue/30 dark:hover:border-brand-blue/40 transition-all group cursor-pointer"
                 title={`Kiriting: ${item.formula}`}
               >
                 <div className="text-sm font-bold text-slate-800 dark:text-slate-100 group-hover:text-brand-blue transition-colors">

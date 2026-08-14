@@ -19,10 +19,11 @@ import {
   Edit3,
   Image as ImageIcon,
   UploadCloud,
-  Loader2
+  Loader2,
+  Calculator
 } from "lucide-react";
 import MathRenderer from "@/components/MathRenderer";
-import MathToolbar from "@/components/MathToolbar";
+import { InlineMathPanel } from "@/components/MathToolbar";
 import { createTest, uploadQuestionImage, type Subject, type TestType } from "@/lib/tests";
 import { useSubjects } from "@/hooks/useAdminData";
 import Link from "next/link";
@@ -56,7 +57,7 @@ export default function CreateTestPage() {
   // Questions state
   const [questions, setQuestions] = useState<Question[]>([]);
   const [editingQuestion, setEditingQuestion] = useState<Question | null>(null);
-  const [mathTargetField, setMathTargetField] = useState<'question' | 'A' | 'B' | 'C' | 'D'>('question');
+  const [activeMathField, setActiveMathField] = useState<'question' | 'A' | 'B' | 'C' | 'D' | null>(null);
   const [uploadingImg, setUploadingImg] = useState(false);
 
   // Load real subjects from DB
@@ -470,70 +471,43 @@ export default function CreateTestPage() {
                   </div>
 
                   <div className="space-y-3.5 max-h-[70vh] overflow-y-auto custom-scrollbar pr-1">
-                    {/* Math Target Selector Bar */}
-                    <div className="flex items-center justify-between text-xs font-bold text-slate-600 dark:text-slate-300">
-                      <span>Formulani qaysi maydonga kiritasiz?</span>
-                      <div className="flex items-center gap-1 bg-slate-100 dark:bg-slate-800 p-1 rounded-xl">
-                        {[
-                          { id: 'question', label: 'Savol' },
-                          { id: 'A', label: 'A' },
-                          { id: 'B', label: 'B' },
-                          { id: 'C', label: 'C' },
-                          { id: 'D', label: 'D' },
-                        ].map((item) => (
-                          <button
-                            key={item.id}
-                            type="button"
-                            onClick={() => setMathTargetField(item.id as any)}
-                            className={`px-2.5 py-1 rounded-lg text-xs font-extrabold transition-all ${
-                              mathTargetField === item.id
-                                ? 'bg-brand-blue text-white shadow-sm'
-                                : 'text-slate-500 hover:text-slate-800 dark:hover:text-slate-200'
-                            }`}
-                          >
-                            {item.label}
-                          </button>
-                        ))}
-                      </div>
-                    </div>
-
-                    {/* Math & Formula Insertion Toolbar */}
-                    <MathToolbar
-                      currentValue={
-                        mathTargetField === 'question'
-                          ? editingQuestion.question_text
-                          : editingQuestion.options?.[mathTargetField] || ''
-                      }
-                      onInsert={(formulaText) => {
-                        if (mathTargetField === 'question') {
-                          setEditingQuestion({
-                            ...editingQuestion,
-                            question_text: editingQuestion.question_text
-                              ? `${editingQuestion.question_text} ${formulaText}`
-                              : formulaText
-                          });
-                        } else {
-                          const prevVal = editingQuestion.options?.[mathTargetField] || '';
-                          setEditingQuestion({
-                            ...editingQuestion,
-                            options: {
-                              ...editingQuestion.options,
-                              [mathTargetField]: prevVal ? `${prevVal} ${formulaText}` : formulaText
-                            }
-                          });
-                        }
-                      }}
-                    />
-
                     <div>
-                      <label className="block text-xs font-bold text-slate-600 dark:text-slate-300 uppercase tracking-wider mb-1.5">Savol Matni *</label>
+                      <div className="flex items-center justify-between mb-1.5">
+                        <label className="text-xs font-bold text-slate-600 dark:text-slate-300 uppercase tracking-wider">Savol Matni *</label>
+                        <button
+                          type="button"
+                          onClick={() => setActiveMathField(activeMathField === 'question' ? null : 'question')}
+                          className={`px-2.5 py-1 rounded-lg font-black text-[11px] transition-all flex items-center gap-1 border cursor-pointer ${
+                            activeMathField === 'question'
+                              ? 'bg-brand-blue text-white border-brand-blue shadow-sm'
+                              : 'bg-brand-blue/10 hover:bg-brand-blue hover:text-white text-brand-blue dark:text-blue-300 border-brand-blue/20'
+                          }`}
+                        >
+                          <Calculator size={13} />
+                          <span>Formula ∑</span>
+                        </button>
+                      </div>
                       <textarea
                         value={editingQuestion.question_text}
-                        onFocus={() => setMathTargetField('question')}
                         onChange={(e) => setEditingQuestion({ ...editingQuestion, question_text: e.target.value })}
                         className="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs sm:text-sm font-medium outline-none resize-none h-24"
                         placeholder="Savol matnini kiriting (masalan: $x^2 + y^2 = z^2$)..."
                       />
+
+                      {/* Inline Expandable Formula Panel for Question */}
+                      <InlineMathPanel
+                        isOpen={activeMathField === 'question'}
+                        onClose={() => setActiveMathField(null)}
+                        title="Savol uchun formulalar"
+                        onInsert={(formulaText) => {
+                          const current = editingQuestion.question_text || "";
+                          setEditingQuestion({
+                            ...editingQuestion,
+                            question_text: current ? `${current} ${formulaText}` : formulaText
+                          });
+                        }}
+                      />
+
                       {editingQuestion.question_text && (
                         <div className="mt-2 p-3 bg-brand-blue/5 dark:bg-brand-blue/10 border border-brand-blue/20 rounded-xl space-y-1">
                           <span className="text-[10px] uppercase font-bold text-brand-blue tracking-wider block">
@@ -621,12 +595,11 @@ export default function CreateTestPage() {
                         const optVal = editingQuestion.options?.[optKey] || "";
                         return (
                           <div key={optKey} className="space-y-1">
-                            <div className="flex items-center gap-2.5">
+                            <div className="flex items-center gap-2">
                               <span className="text-xs font-bold text-slate-400 w-5 text-center">{optKey}:</span>
                               <input
                                 type="text"
                                 value={optVal}
-                                onFocus={() => setMathTargetField(optKey as any)}
                                 onChange={(e) => setEditingQuestion({
                                   ...editingQuestion,
                                   options: { ...editingQuestion.options, [optKey]: e.target.value }
@@ -634,7 +607,19 @@ export default function CreateTestPage() {
                                 className="flex-1 px-3.5 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs sm:text-sm font-medium outline-none"
                                 placeholder={`Variant ${optKey}`}
                               />
-                              <label className="flex items-center gap-1 cursor-pointer">
+                              <button
+                                type="button"
+                                onClick={() => setActiveMathField(activeMathField === optKey ? null : (optKey as any))}
+                                className={`px-2.5 py-1.5 rounded-lg font-black text-[11px] transition-all flex items-center gap-1 border cursor-pointer shrink-0 ${
+                                  activeMathField === optKey
+                                    ? 'bg-brand-blue text-white border-brand-blue shadow-sm'
+                                    : 'bg-brand-blue/10 hover:bg-brand-blue hover:text-white text-brand-blue dark:text-blue-300 border-brand-blue/20'
+                                }`}
+                              >
+                                <Calculator size={13} />
+                                <span>∑</span>
+                              </button>
+                              <label className="flex items-center gap-1 cursor-pointer shrink-0">
                                 <input
                                   type="radio"
                                   name="correct_opt"
@@ -645,6 +630,23 @@ export default function CreateTestPage() {
                                 <span className="text-[11px] font-bold text-slate-500">To'g'ri</span>
                               </label>
                             </div>
+
+                            {/* Inline Expandable Formula Panel for Options */}
+                            <InlineMathPanel
+                              isOpen={activeMathField === optKey}
+                              onClose={() => setActiveMathField(null)}
+                              title={`Variant ${optKey} uchun formulalar`}
+                              onInsert={(formulaText) => {
+                                const prevVal = editingQuestion.options?.[optKey] || "";
+                                setEditingQuestion({
+                                  ...editingQuestion,
+                                  options: {
+                                    ...editingQuestion.options,
+                                    [optKey]: prevVal ? `${prevVal} ${formulaText}` : formulaText
+                                  }
+                                });
+                              }}
+                            />
                             {/* Live Option Formula Preview */}
                             {optVal && (optVal.includes('$') || optVal.includes('\\') || optVal.includes('^') || optVal.includes('_')) && (
                               <div className="ml-7 text-xs font-semibold text-slate-500 flex items-center gap-2 bg-slate-50 dark:bg-slate-800/40 px-3 py-1 rounded-lg border border-slate-200/50 dark:border-slate-700/50">

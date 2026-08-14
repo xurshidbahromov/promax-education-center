@@ -13,11 +13,12 @@ import {
  AlertCircle,
  Image as ImageIcon,
  UploadCloud,
- Loader2
+ Loader2,
+ Calculator
 } from "lucide-react";
 import { getTestById, updateTest, uploadQuestionImage, type Subject, type TestType, type Question } from "@/lib/tests";
 import MathRenderer from "@/components/MathRenderer";
-import MathToolbar from "@/components/MathToolbar";
+import { InlineMathPanel } from "@/components/MathToolbar";
 
 // Extend Question type to optionally include ID for UI state
 interface UIQuestion extends Omit<Question, 'test_id'> {
@@ -122,7 +123,7 @@ function EditTestContent({ id }: { id: string }) {
 
  const [questions, setQuestions] = useState<UIQuestion[]>([]);
  const [editingQuestion, setEditingQuestion] = useState<UIQuestion | null>(null);
- const [mathTargetField, setMathTargetField] = useState<'question' | 'A' | 'B' | 'C' | 'D'>('question');
+ const [activeMathField, setActiveMathField] = useState<'question' | 'A' | 'B' | 'C' | 'D' | null>(null);
  const [uploadingImg, setUploadingImg] = useState(false);
 
  const subjects: { value: Subject; label: string }[] = [
@@ -482,181 +483,183 @@ function EditTestContent({ id }: { id: string }) {
  </h3>
 
   <div className="space-y-6">
-  {/* Math Target Selector Bar */}
-  <div className="flex items-center justify-between text-xs font-bold text-slate-600 dark:text-slate-300 bg-slate-50 dark:bg-slate-800/60 p-3 rounded-2xl border border-slate-200 dark:border-slate-700">
-    <span>Formulani qaysi maydonga kiritasiz?</span>
-    <div className="flex items-center gap-1 bg-white dark:bg-slate-800 p-1 rounded-xl border border-slate-200 dark:border-slate-700">
-      {[
-        { id: 'question', label: 'Savol' },
-        { id: 'A', label: 'A' },
-        { id: 'B', label: 'B' },
-        { id: 'C', label: 'C' },
-        { id: 'D', label: 'D' },
-      ].map((item) => (
+    <div>
+      <div className="flex items-center justify-between mb-1.5">
+        <label className="text-xs font-bold text-slate-600 dark:text-slate-300 uppercase tracking-wider">Savol Matni *</label>
         <button
-          key={item.id}
           type="button"
-          onClick={() => setMathTargetField(item.id as any)}
-          className={`px-3 py-1 rounded-lg text-xs font-extrabold transition-all ${
-            mathTargetField === item.id
-              ? 'bg-brand-blue text-white shadow-sm'
-              : 'text-slate-500 hover:text-slate-800 dark:hover:text-slate-200'
+          onClick={() => setActiveMathField(activeMathField === 'question' ? null : 'question')}
+          className={`px-2.5 py-1 rounded-lg font-black text-[11px] transition-all flex items-center gap-1 border cursor-pointer ${
+            activeMathField === 'question'
+              ? 'bg-brand-blue text-white border-brand-blue shadow-sm'
+              : 'bg-brand-blue/10 hover:bg-brand-blue hover:text-white text-brand-blue dark:text-blue-300 border-brand-blue/20'
           }`}
         >
-          {item.label}
+          <Calculator size={13} />
+          <span>Formula ∑</span>
         </button>
-      ))}
-    </div>
-  </div>
-
-  {/* Math & Formula Insertion Toolbar */}
-  <MathToolbar
-    currentValue={
-      mathTargetField === 'question'
-        ? editingQuestion.question_text
-        : editingQuestion.options?.[mathTargetField] || ''
-    }
-    onInsert={(formulaText) => {
-      if (!editingQuestion) return;
-      if (mathTargetField === 'question') {
-        setEditingQuestion({
-          ...editingQuestion,
-          question_text: editingQuestion.question_text
-            ? `${editingQuestion.question_text} ${formulaText}`
-            : formulaText
-        });
-      } else {
-        const prevVal = editingQuestion.options?.[mathTargetField] || '';
-        setEditingQuestion({
-          ...editingQuestion,
-          options: {
-            ...editingQuestion.options,
-            [mathTargetField]: prevVal ? `${prevVal} ${formulaText}` : formulaText
-          } as any
-        });
-      }
-    }}
-  />
-
-  <div>
-  <label className="block text-sm font-medium mb-1">Savol Matni</label>
-  <textarea
-  value={editingQuestion.question_text}
-  onFocus={() => setMathTargetField('question')}
-  onChange={(e) => setEditingQuestion({ ...editingQuestion, question_text: e.target.value })}
-  className="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-slate-700 bg-gray-50 dark:bg-slate-800 h-32"
-  placeholder="Savolni kiriting (masalan: $x^2 + y^2 = z^2$)..."
-  />
-  {editingQuestion.question_text && (
-    <div className="mt-2 p-3 bg-brand-blue/5 dark:bg-brand-blue/10 border border-brand-blue/20 rounded-xl space-y-1">
-      <span className="text-[10px] uppercase font-bold text-brand-blue tracking-wider block">
-        Savol Matni Ko'rinishi (Formula Live Preview):
-      </span>
-      <div className="text-xs sm:text-sm font-bold text-slate-800 dark:text-slate-100">
-        <MathRenderer content={editingQuestion.question_text} />
       </div>
-    </div>
-  )}
-  </div>
+      <textarea
+        value={editingQuestion.question_text}
+        onChange={(e) => setEditingQuestion({ ...editingQuestion, question_text: e.target.value })}
+        className="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-slate-700 bg-gray-50 dark:bg-slate-800 h-32"
+        placeholder="Savolni kiriting (masalan: $x^2 + y^2 = z^2$)..."
+      />
 
-  {/* Question Image Upload Section */}
-  <div>
-    <div className="flex items-center justify-between mb-1.5">
-      <label className="text-xs font-bold text-slate-600 dark:text-slate-300 uppercase tracking-wider flex items-center gap-1.5">
-        <ImageIcon size={14} className="text-brand-blue" />
-        Savol Rasmi (Ixtiyoriy)
-      </label>
-      {editingQuestion.image_url && (
-        <button
-          type="button"
-          onClick={() => setEditingQuestion({ ...editingQuestion, image_url: null })}
-          className="text-[11px] font-bold text-red-500 hover:underline"
-        >
-          Rasmni o'chirish
-        </button>
-      )}
-    </div>
+      {/* Inline Expandable Formula Panel for Question */}
+      <InlineMathPanel
+        isOpen={activeMathField === 'question'}
+        onClose={() => setActiveMathField(null)}
+        title="Savol uchun formulalar"
+        onInsert={(formulaText) => {
+          if (!editingQuestion) return;
+          const current = editingQuestion.question_text || "";
+          setEditingQuestion({
+            ...editingQuestion,
+            question_text: current ? `${current} ${formulaText}` : formulaText
+          });
+        }}
+      />
 
-    {editingQuestion.image_url ? (
-      <div className="relative rounded-2xl overflow-hidden border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 p-2 group max-h-48 flex items-center justify-center">
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img
-          src={editingQuestion.image_url}
-          alt="Savol rasmi"
-          className="max-h-44 w-auto rounded-xl object-contain shadow-sm"
-        />
-      </div>
-    ) : (
-      <label className="flex flex-col items-center justify-center p-3.5 border-2 border-dashed border-slate-200 dark:border-slate-700 rounded-2xl bg-slate-50/50 dark:bg-slate-800/30 hover:bg-slate-100/50 dark:hover:bg-slate-800/60 cursor-pointer transition-colors text-center">
-        {uploadingImg ? (
-          <div className="flex items-center gap-2 text-xs font-bold text-brand-blue py-1.5">
-            <Loader2 size={16} className="animate-spin" />
-            <span>Rasm yuklanmoqda...</span>
+      {editingQuestion.question_text && (
+        <div className="mt-2 p-3 bg-brand-blue/5 dark:bg-brand-blue/10 border border-brand-blue/20 rounded-xl space-y-1">
+          <span className="text-[10px] uppercase font-bold text-brand-blue tracking-wider block">
+            Savol Matni Ko'rinishi (Formula Live Preview):
+          </span>
+          <div className="text-xs sm:text-sm font-bold text-slate-800 dark:text-slate-100">
+            <MathRenderer content={editingQuestion.question_text} />
           </div>
-        ) : (
-          <>
-            <UploadCloud size={22} className="text-brand-blue mb-1" />
-            <span className="text-xs font-bold text-slate-700 dark:text-slate-200">
-              Savol uchun rasm yuklang
-            </span>
-            <span className="text-[10px] text-slate-400 font-medium mt-0.5">
-              PNG, JPG, WEBP (Maks: 5MB)
-            </span>
-          </>
-        )}
-        <input
-          type="file"
-          accept="image/*"
-          disabled={uploadingImg}
-          onChange={async (e) => {
-            const file = e.target.files?.[0];
-            if (!file) return;
-            setUploadingImg(true);
-            const url = await uploadQuestionImage(file);
-            setUploadingImg(false);
-            if (url) {
-              setEditingQuestion({ ...editingQuestion, image_url: url });
-              toast.success("Rasm yuklandi!");
-            } else {
-              toast.error("Rasm yuklashda xatolik yuz berdi");
-            }
-          }}
-          className="hidden"
-        />
-      </label>
-    )}
-  </div>
-  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-  {['A', 'B', 'C', 'D'].map((opt) => {
-    const optVal = editingQuestion.options?.[opt] || "";
-    return (
-      <div key={opt}>
-      <label className="block text-sm font-medium mb-1 flex items-center justify-between">
-      <span>Variant {opt}</span>
-      <input
-      type="radio"
-      name="correct_answer"
-      checked={editingQuestion.correct_answer === opt}
-      onChange={() => setEditingQuestion({ ...editingQuestion, correct_answer: opt })}
-      className="w-4 h-4 text-brand-blue focus:ring-brand-blue cursor-pointer"
-      />
-      </label>
-      <div className={`relative rounded-xl border transition-colors ${editingQuestion.correct_answer === opt ? 'border-brand-blue ring-1 ring-brand-blue' : 'border-gray-200 dark:border-slate-700'}`}>
-      <input
-      type="text"
-      value={optVal}
-      onFocus={() => setMathTargetField(opt as any)}
-      onChange={(e) => setEditingQuestion({
-      ...editingQuestion,
-      options: { ...editingQuestion.options, [opt]: e.target.value } as any
-      })}
-      className="w-full px-4 py-2 bg-transparent rounded-xl focus:outline-none"
-      placeholder={`Javob varianti ${opt}`}
-      />
-      {editingQuestion.correct_answer === opt && (
-      <CheckCircle size={16} className="absolute right-3 top-1/2 -translate-y-1/2 text-brand-blue" />
+        </div>
       )}
+    </div>
+
+    {/* Question Image Upload Section */}
+    <div>
+      <div className="flex items-center justify-between mb-1.5">
+        <label className="text-xs font-bold text-slate-600 dark:text-slate-300 uppercase tracking-wider flex items-center gap-1.5">
+          <ImageIcon size={14} className="text-brand-blue" />
+          Savol Rasmi (Ixtiyoriy)
+        </label>
+        {editingQuestion.image_url && (
+          <button
+            type="button"
+            onClick={() => setEditingQuestion({ ...editingQuestion, image_url: null })}
+            className="text-[11px] font-bold text-red-500 hover:underline"
+          >
+            Rasmni o'chirish
+          </button>
+        )}
       </div>
+
+      {editingQuestion.image_url ? (
+        <div className="relative rounded-2xl overflow-hidden border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 p-2 group max-h-48 flex items-center justify-center">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src={editingQuestion.image_url}
+            alt="Savol rasmi"
+            className="max-h-44 w-auto rounded-xl object-contain shadow-sm"
+          />
+        </div>
+      ) : (
+        <label className="flex flex-col items-center justify-center p-3.5 border-2 border-dashed border-slate-200 dark:border-slate-700 rounded-2xl bg-slate-50/50 dark:bg-slate-800/30 hover:bg-slate-100/50 dark:hover:bg-slate-800/60 cursor-pointer transition-colors text-center">
+          {uploadingImg ? (
+            <div className="flex items-center gap-2 text-xs font-bold text-brand-blue py-1.5">
+              <Loader2 size={16} className="animate-spin" />
+              <span>Rasm yuklanmoqda...</span>
+            </div>
+          ) : (
+            <>
+              <UploadCloud size={22} className="text-brand-blue mb-1" />
+              <span className="text-xs font-bold text-slate-700 dark:text-slate-200">
+                Savol uchun rasm yuklang
+              </span>
+              <span className="text-[10px] text-slate-400 font-medium mt-0.5">
+                PNG, JPG, WEBP (Maks: 5MB)
+              </span>
+            </>
+          )}
+          <input
+            type="file"
+            accept="image/*"
+            disabled={uploadingImg}
+            onChange={async (e) => {
+              const file = e.target.files?.[0];
+              if (!file) return;
+              setUploadingImg(true);
+              const url = await uploadQuestionImage(file);
+              setUploadingImg(false);
+              if (url) {
+                setEditingQuestion({ ...editingQuestion, image_url: url });
+                toast.success("Rasm yuklandi!");
+              } else {
+                toast.error("Rasm yuklashda xatolik yuz berdi");
+              }
+            }}
+            className="hidden"
+          />
+        </label>
+      )}
+    </div>
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+    {['A', 'B', 'C', 'D'].map((opt) => {
+      const optVal = editingQuestion.options?.[opt] || "";
+      return (
+        <div key={opt}>
+        <div className="flex items-center justify-between mb-1">
+          <label className="text-xs font-bold text-slate-600 dark:text-slate-300">Variant {opt}</label>
+          <button
+            type="button"
+            onClick={() => setActiveMathField(activeMathField === opt ? null : (opt as any))}
+            className={`px-2.5 py-1.5 rounded-lg font-black text-[11px] transition-all flex items-center gap-1 border cursor-pointer shrink-0 ${
+              activeMathField === opt
+                ? 'bg-brand-blue text-white border-brand-blue shadow-sm'
+                : 'bg-brand-blue/10 hover:bg-brand-blue hover:text-white text-brand-blue dark:text-blue-300 border-brand-blue/20'
+            }`}
+          >
+            <Calculator size={13} />
+            <span>∑</span>
+          </button>
+        </div>
+        <div className={`relative rounded-xl border flex items-center pr-2 transition-colors ${editingQuestion.correct_answer === opt ? 'border-brand-blue ring-1 ring-brand-blue' : 'border-gray-200 dark:border-slate-700'}`}>
+        <input
+        type="text"
+        value={optVal}
+        onChange={(e) => setEditingQuestion({
+        ...editingQuestion,
+        options: { ...editingQuestion.options, [opt]: e.target.value } as any
+        })}
+        className="w-full px-4 py-2 bg-transparent rounded-xl focus:outline-none"
+        placeholder={`Javob varianti ${opt}`}
+        />
+        <label className="flex items-center gap-1 cursor-pointer shrink-0 ml-2">
+          <input
+            type="radio"
+            name="correct_answer"
+            checked={editingQuestion.correct_answer === opt}
+            onChange={() => setEditingQuestion({ ...editingQuestion, correct_answer: opt })}
+            className="w-4 h-4 text-brand-blue focus:ring-brand-blue cursor-pointer"
+          />
+          <span className="text-[11px] font-bold text-slate-500">To'g'ri</span>
+        </label>
+        </div>
+
+        {/* Inline Expandable Formula Panel for Options */}
+        <InlineMathPanel
+          isOpen={activeMathField === opt}
+          onClose={() => setActiveMathField(null)}
+          title={`Variant ${opt} uchun formulalar`}
+          onInsert={(formulaText) => {
+            if (!editingQuestion) return;
+            const prevVal = editingQuestion.options?.[opt] || "";
+            setEditingQuestion({
+              ...editingQuestion,
+              options: {
+                ...editingQuestion.options,
+                [opt]: prevVal ? `${prevVal} ${formulaText}` : formulaText
+              } as any
+            });
+          }}
+        />
       {/* Live Option Formula Preview */}
       {optVal && (optVal.includes('$') || optVal.includes('\\') || optVal.includes('^') || optVal.includes('_')) && (
         <div className="mt-1 text-xs font-semibold text-slate-500 flex items-center gap-2 bg-slate-50 dark:bg-slate-800/40 px-3 py-1 rounded-lg border border-slate-200/50 dark:border-slate-700/50">
