@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { createPortal } from "react-dom";
 import toast from "react-hot-toast";
 import Link from "next/link";
+import { useLanguage } from "@/context/LanguageContext";
 import {
   Trophy,
   Medal,
@@ -139,6 +140,7 @@ export const SAMPLE_OLYMPIADS: OlympiadItem[] = [
 ];
 
 export function OlympiadBannerTeaser() {
+  const { t } = useLanguage();
   const heroItem = SAMPLE_OLYMPIADS[0];
 
   return (
@@ -160,7 +162,7 @@ export function OlympiadBannerTeaser() {
           >
             <h3 className="text-sm sm:text-xl font-black font-fredoka text-slate-900 dark:text-white leading-tight truncate flex items-center gap-2">
               <Trophy size={18} className="text-brand-blue dark:text-blue-400 shrink-0" />
-              <span>Bilimni Sinash</span>
+              <span>{t("olympiad.shelf_title")}</span>
             </h3>
           </Link>
 
@@ -168,7 +170,7 @@ export function OlympiadBannerTeaser() {
           <div className="flex-1 bg-white/80 dark:bg-slate-900/80 text-slate-900 dark:text-white px-3 sm:px-6 py-2.5 sm:py-3.5 rounded-t-3xl border-t border-r border-white/80 dark:border-slate-800/80 border-b-0 border-l-0 flex items-center justify-center gap-1.5 z-20 backdrop-blur-2xl min-w-0">
             <Users size={14} className="text-brand-blue shrink-0" />
             <span className="text-xs sm:text-sm font-bold text-slate-700 dark:text-slate-300 truncate">
-              {heroItem.participantsCount} nafar qatnashuvchi
+              {t("olympiad.participants_count", { count: heroItem.participantsCount })}
             </span>
           </div>
         </div>
@@ -182,12 +184,12 @@ export function OlympiadBannerTeaser() {
           {/* Left Text Content Area (Crisp & Simple Copy with Gift Icon) */}
           <div className="relative z-10 space-y-1 min-w-0 flex-1 w-full xs:w-auto">
             <h4 className="text-base sm:text-xl font-black font-fredoka text-slate-900 dark:text-white leading-tight truncate">
-              Milliy bilim musobaqalari
+              {t("olympiad.banner_title")}
             </h4>
 
             <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-300 font-medium flex items-center gap-1.5 truncate">
               <Gift size={14} className="text-amber-500 shrink-0" />
-              <span>Top o'rinlar uchun mukofotlar</span>
+              <span>{t("olympiad.top_prizes")}</span>
             </p>
           </div>
 
@@ -197,7 +199,7 @@ export function OlympiadBannerTeaser() {
               href="/dashboard/olympiads"
               className="group/btn w-full xs:w-auto px-5 sm:px-6 py-2 sm:py-2.5 rounded-full bg-slate-100/90 hover:bg-slate-200 dark:bg-slate-800/90 dark:hover:bg-slate-700/90 border border-slate-200/90 dark:border-slate-700 text-slate-900 dark:text-white font-black text-xs sm:text-sm uppercase tracking-wider flex items-center justify-center gap-1.5 backdrop-blur-md active:scale-95 transition-all cursor-pointer shadow-none"
             >
-              <span>Batafsil</span>
+              <span>{t("olympiad.btn_details")}</span>
               <ArrowUpRight size={15} className="group-hover/btn:translate-x-0.5 group-hover/btn:-translate-y-0.5 transition-transform duration-200" />
             </Link>
           </div>

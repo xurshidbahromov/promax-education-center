@@ -4,6 +4,7 @@ import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
 import toast from "react-hot-toast";
+import { useLanguage } from "@/context/LanguageContext";
 import { 
   Trophy, 
   ArrowLeft, 
@@ -61,6 +62,7 @@ const INITIAL_COMMENTS: CommentItem[] = [
 ];
 
 export default function OlympiadsPage() {
+  const { t } = useLanguage();
   const [activeTab, setActiveTab] = useState<"tournaments" | "comments">("tournaments");
   const [selectedItem, setSelectedItem] = useState<OlympiadItem | null>(null);
   const [registeredIds, setRegisteredIds] = useState<string[]>([]);
@@ -72,13 +74,13 @@ export default function OlympiadsPage() {
 
   const handleRegister = (id: string, title: string) => {
     if (registeredIds.includes(id)) {
-      toast.success("Siz ushbu musobaqaga allaqachon ro'yxatdan o'tgansiz!", {
+      toast.success(t("olympiad.btn_registered"), {
         icon: "✅"
       });
       return;
     }
     setRegisteredIds((prev) => [...prev, id]);
-    toast.success(`"${title}" musobaqasiga muvaffaqiyatli ro'yxatdan o'tdingiz!`, {
+    toast.success(`"${title}" - ${t("olympiad.btn_registered")}!`, {
       icon: "🎉"
     });
   };
@@ -86,23 +88,22 @@ export default function OlympiadsPage() {
   const handleAddComment = (e: React.FormEvent) => {
     e.preventDefault();
     if (!newCommentText.trim()) {
-      toast.error("Iltimos, izoh matnini kiriting!");
       return;
     }
 
     const newComment: CommentItem = {
       id: `c_${Date.now()}`,
-      author: "Men (Siz)",
+      author: "User",
       avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=StudentUser",
-      role: "O'quvchi",
-      time: "Hozirgincha",
+      role: "User",
+      time: "Just now",
       text: newCommentText.trim(),
       likes: 0,
     };
 
     setComments((prev) => [newComment, ...prev]);
     setNewCommentText("");
-    toast.success("Fikringiz muvaffaqiyatli joylandi!", { icon: "💬" });
+    toast.success("OK!", { icon: "💬" });
   };
 
   const handleToggleLike = (id: string) => {
@@ -130,17 +131,17 @@ export default function OlympiadsPage() {
             className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-slate-100 dark:bg-slate-800 text-xs font-bold text-slate-700 dark:text-slate-300 active:scale-95 transition-all"
           >
             <ArrowLeft size={15} />
-            <span>Dashboardga qaytish</span>
+            <span>{t("olympiad.back_dashboard")}</span>
           </Link>
 
           {/* Minimalist Header Banner */}
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white/80 dark:bg-slate-900/80 p-5 sm:p-6 rounded-3xl border border-white/80 dark:border-slate-800/80 shadow-none">
             <div>
               <h1 className="text-xl sm:text-2xl font-black font-fredoka text-slate-900 dark:text-white leading-tight">
-                Milliy bilim musobaqalari
+                {t("olympiad.banner_title")}
               </h1>
               <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 font-medium mt-0.5">
-                Bilimingizni sinang va mukofotlarni qo'lga kiriting
+                {t("olympiad.banner_subtitle")}
               </p>
             </div>
 
@@ -148,17 +149,17 @@ export default function OlympiadsPage() {
             <div className="flex items-center gap-4 text-xs font-bold text-slate-600 dark:text-slate-300 flex-wrap">
               <span className="flex items-center gap-1.5">
                 <Trophy size={14} className="text-amber-500" />
-                <span>Bilim musobaqalari</span>
+                <span>{t("olympiad.stat_tournaments")}</span>
               </span>
               <span>•</span>
               <span className="flex items-center gap-1.5">
                 <Users size={14} className="text-brand-blue" />
-                <span>1,240+ qatnashuvchi</span>
+                <span>{t("olympiad.stat_participants")}</span>
               </span>
               <span>•</span>
               <span className="flex items-center gap-1.5 text-amber-600 dark:text-amber-400 font-bold">
                 <Gift size={14} className="text-amber-500" />
-                <span>Top mukofotlar</span>
+                <span>{t("olympiad.stat_prizes")}</span>
               </span>
             </div>
           </div>
@@ -176,7 +177,7 @@ export default function OlympiadsPage() {
               }`}
             >
               <Trophy size={16} />
-              <span>Musobaqalar</span>
+              <span>{t("olympiad.tab_tournaments")}</span>
             </button>
 
             <button
@@ -188,13 +189,9 @@ export default function OlympiadsPage() {
               }`}
             >
               <MessageSquare size={16} />
-              <span>Izohlar</span>
+              <span>{t("olympiad.tab_comments")}</span>
             </button>
           </div>
-
-          <span className="hidden md:inline-block text-xs text-slate-500 dark:text-slate-400 font-medium px-3">
-            {activeTab === "tournaments" ? "Barcha musobaqalar ro'yxati" : "Savol-javoblar va muhokamalar"}
-          </span>
         </div>
 
         {/* ── TAB 1: TOURNAMENTS GRID ── */}
@@ -218,7 +215,7 @@ export default function OlympiadsPage() {
                       {item.status === "live" ? (
                         <span className="text-xs font-bold text-emerald-600 dark:text-emerald-400 flex items-center gap-1">
                           <span className="w-2 h-2 rounded-full bg-emerald-500" />
-                          <span>Faol</span>
+                          <span>{t("olympiad.status_live")}</span>
                         </span>
                       ) : item.status === "upcoming" ? (
                         <span className="text-xs font-bold text-amber-600 dark:text-amber-400">
@@ -226,7 +223,7 @@ export default function OlympiadsPage() {
                         </span>
                       ) : (
                         <span className="text-xs font-bold text-slate-400">
-                          Yakunlangan
+                          {t("olympiad.status_finished")}
                         </span>
                       )}
                     </div>
@@ -246,30 +243,30 @@ export default function OlympiadsPage() {
                       <div className="flex items-center justify-between">
                         <span className="flex items-center gap-1.5 text-slate-500">
                           <Clock size={13} />
-                          Vaqti:
+                          {t("olympiad.time_label")}
                         </span>
                         <span className="font-bold text-slate-900 dark:text-white">
-                          {item.startTime} ({item.durationMinutes} daqiqa)
+                          {item.startTime} ({item.durationMinutes} min)
                         </span>
                       </div>
 
                       <div className="flex items-center justify-between">
                         <span className="flex items-center gap-1.5 text-slate-500">
                           <Users size={13} />
-                          Qatnashuvchilar:
+                          {t("olympiad.participants_label")}
                         </span>
                         <span className="font-bold text-slate-900 dark:text-white">
-                          {item.participantsCount} nafar
+                          {t("olympiad.participants_count", { count: item.participantsCount })}
                         </span>
                       </div>
 
                       <div className="flex items-center justify-between">
                         <span className="flex items-center gap-1.5 text-slate-500">
                           <Gift size={13} />
-                          Mukofotlar:
+                          {t("olympiad.prizes_label")}
                         </span>
                         <span className="font-bold text-amber-600 dark:text-amber-400">
-                          Top o'rinlar uchun
+                          {t("olympiad.top_prizes")}
                         </span>
                       </div>
                     </div>
@@ -281,7 +278,7 @@ export default function OlympiadsPage() {
                       onClick={() => setSelectedItem(item)}
                       className="flex-1 py-2 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-white font-bold text-xs active:scale-95"
                     >
-                      Nizamnoma
+                      {t("olympiad.btn_rules")}
                     </button>
 
                     <button
@@ -295,11 +292,11 @@ export default function OlympiadsPage() {
                       {isRegistered ? (
                         <>
                           <CheckCircle2 size={13} />
-                          <span>Ro'yxatdasiz</span>
+                          <span>{t("olympiad.btn_registered")}</span>
                         </>
                       ) : (
                         <>
-                          <span>Qatnashish</span>
+                          <span>{t("olympiad.btn_join")}</span>
                           <ArrowUpRight size={13} />
                         </>
                       )}
@@ -319,10 +316,10 @@ export default function OlympiadsPage() {
             <div className="flex items-center justify-between gap-4 pb-4 border-b border-slate-100 dark:border-slate-800">
               <div>
                 <h3 className="text-lg font-black font-fredoka text-slate-900 dark:text-white leading-tight">
-                  Izohlar
+                  {t("olympiad.comments_title")}
                 </h3>
                 <p className="text-xs text-slate-500 dark:text-slate-400 font-medium">
-                  Musobaqalar bo'yicha savollaringizni qoldiring va o'zaro fikr almashing
+                  {t("olympiad.comments_subtitle")}
                 </p>
               </div>
             </div>
@@ -334,7 +331,7 @@ export default function OlympiadsPage() {
                   type="text"
                   value={newCommentText}
                   onChange={(e) => setNewCommentText(e.target.value)}
-                  placeholder="Musobaqa bo'yicha savolingiz yoki fikringizni yozing..."
+                  placeholder={t("olympiad.comment_placeholder")}
                   className="w-full px-4 py-3 rounded-2xl bg-slate-50 dark:bg-slate-800/70 border border-slate-200 dark:border-slate-700 text-xs sm:text-sm text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:border-brand-blue transition-colors"
                 />
               </div>
@@ -342,7 +339,7 @@ export default function OlympiadsPage() {
                 type="submit"
                 className="px-5 py-3 rounded-2xl bg-brand-blue hover:bg-blue-600 text-white font-bold text-xs sm:text-sm flex items-center justify-center gap-2 transition-all active:scale-95 shrink-0"
               >
-                <span>Yuborish</span>
+                <span>{t("olympiad.btn_send")}</span>
                 <Send size={14} />
               </button>
             </form>
@@ -372,7 +369,7 @@ export default function OlympiadsPage() {
                             {comment.author}
                           </span>
                           <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
-                            comment.role === "Tashkilotchi"
+                            comment.role === "Tashkilotchi" || comment.role === "Admin"
                               ? "bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20"
                               : "bg-slate-200 dark:bg-slate-700 text-slate-600 dark:text-slate-300"
                           }`}>
@@ -400,7 +397,7 @@ export default function OlympiadsPage() {
                           }`}
                         >
                           <ThumbsUp size={13} className={isLiked ? "fill-brand-blue" : ""} />
-                          <span>Foydali ({comment.likes})</span>
+                          <span>{t("olympiad.useful")} ({comment.likes})</span>
                         </button>
                       </div>
                     </div>
@@ -440,7 +437,7 @@ export default function OlympiadsPage() {
               </p>
 
               <div className="space-y-1.5 text-xs text-slate-600 dark:text-slate-300">
-                <p className="font-bold text-slate-900 dark:text-white">Musobaqa Qoidalari:</p>
+                <p className="font-bold text-slate-900 dark:text-white">{t("olympiad.rules_header")}</p>
                 <ul className="space-y-1 list-disc list-inside">
                   {selectedItem.rules.map((rule, idx) => (
                     <li key={idx}>{rule}</li>
@@ -453,7 +450,7 @@ export default function OlympiadsPage() {
                   onClick={() => setSelectedItem(null)}
                   className="flex-1 py-2.5 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-bold text-xs"
                 >
-                  Yopish
+                  {t("olympiad.close")}
                 </button>
 
                 <button
@@ -463,7 +460,7 @@ export default function OlympiadsPage() {
                   }}
                   className="flex-1 py-2.5 rounded-xl bg-brand-blue text-white font-bold text-xs flex items-center justify-center gap-1"
                 >
-                  <span>Musobaqaga kirish</span>
+                  <span>{t("olympiad.btn_enter")}</span>
                   <ArrowUpRight size={14} />
                 </button>
               </div>
