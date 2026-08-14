@@ -34,7 +34,7 @@ const fredoka = Fredoka({
 
 export const metadata: Metadata = {
  title: "Promax Education Center | Zamonaviy Ta'lim Markazi",
- description: "Xorazm Urganch shahridagi eng zamonaviy o'quv markazi. OTM larga, IELTS, SAT va Xalqaro Universitetlarga tayyorlov.",
+ description: "Toshkent Chilonzor shahridagi eng zamonaviy o'quv markazi. OTM larga, IELTS, SAT va Xalqaro Universitetlarga tayyorlov.",
  keywords: ["O'quv markazi", "Urganch", "Xorazm", "IELTS", "SAT", "OTM", "Abituriyent", "Matematika", "Ingliz tili", "Promax Education"],
  openGraph: {
  title: "Promax Education Center",

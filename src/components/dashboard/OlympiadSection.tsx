@@ -48,7 +48,7 @@ export interface OlympiadItem {
   topRankings?: { name: string; score: number; rank: number; avatar: string }[];
 }
 
-const SAMPLE_OLYMPIADS: OlympiadItem[] = [
+export const SAMPLE_OLYMPIADS: OlympiadItem[] = [
   {
     id: "math-pro-2026",
     title: "Respublika Matematika Pro Onlayn Olimpiadasi",

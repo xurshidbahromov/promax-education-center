@@ -13,11 +13,11 @@ export default function Home() {
  "@type": "EducationalOrganization",
  "name": "Promax Education Center",
  "url": "https://promaxedu.uz",
- "description": "Xorazm Urganch shahridagi eng zamonaviy o'quv markazi. OTM larga, IELTS, SAT va Xalqaro Universitetlarga tayyorlov.",
+ "description": "Toshkent Chilonzor shahridagi eng zamonaviy o'quv markazi. OTM larga, IELTS, SAT va Xalqaro Universitetlarga tayyorlov.",
  "address": {
  "@type": "PostalAddress",
- "addressLocality": "Urgench",
- "addressRegion": "Xorazm",
+ "addressLocality": "Toshkent",
+ "addressRegion": "Chilonzor",
  "addressCountry": "UZ"
  },
  "contactPoint": {
