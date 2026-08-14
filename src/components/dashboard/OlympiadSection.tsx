@@ -164,8 +164,8 @@ export function OlympiadBannerTeaser() {
             </h3>
           </Link>
 
-          {/* Top-Right Header Box (Identical background, NO bottom/left border!) */}
-          <div className="flex-1 bg-white/80 dark:bg-slate-900/80 text-slate-900 dark:text-white px-3 sm:px-6 py-2.5 sm:py-3.5 rounded-t-3xl border-t border-r border-white/80 dark:border-slate-800/80 border-b-0 border-l-0 flex items-center justify-end sm:justify-start gap-1.5 z-20 -mb-px backdrop-blur-2xl min-w-0">
+          {/* Top-Right Header Box (Centered participant count text) */}
+          <div className="flex-1 bg-white/80 dark:bg-slate-900/80 text-slate-900 dark:text-white px-3 sm:px-6 py-2.5 sm:py-3.5 rounded-t-3xl border-t border-r border-white/80 dark:border-slate-800/80 border-b-0 border-l-0 flex items-center justify-center gap-1.5 z-20 backdrop-blur-2xl min-w-0">
             <Users size={14} className="text-brand-blue shrink-0" />
             <span className="text-xs sm:text-sm font-bold text-slate-700 dark:text-slate-300 truncate">
               {heroItem.participantsCount} nafar qatnashuvchi
@@ -173,8 +173,11 @@ export function OlympiadBannerTeaser() {
           </div>
         </div>
 
-        {/* ── MAIN CARD BODY (Native smooth rounded-tl-3xl curved border, 0 sticking out lines!) ── */}
-        <div className="relative z-10 w-full rounded-b-3xl rounded-tl-3xl rounded-tr-none bg-white/80 dark:bg-slate-900/80 backdrop-blur-2xl text-slate-800 dark:text-white p-4.5 sm:p-6 flex flex-col xs:flex-row items-start xs:items-center justify-between gap-3 sm:gap-4 border border-white/80 dark:border-slate-800/80 shadow-none">
+        {/* ── MAIN CARD BODY (Zero top border under top-right header box, zero double-layer lines!) ── */}
+        <div className="relative z-10 w-full rounded-b-3xl rounded-tl-3xl rounded-tr-none bg-white/80 dark:bg-slate-900/80 backdrop-blur-2xl text-slate-800 dark:text-white p-4.5 sm:p-6 flex flex-col xs:flex-row items-start xs:items-center justify-between gap-3 sm:gap-4 border-b border-l border-r border-t-0 border-white/80 dark:border-slate-800/80 shadow-none">
+          
+          {/* Smooth Top-Left Corner Curved Border (Applies top & left border ONLY on top-left 40% curved gap) */}
+          <div className="absolute top-0 left-0 w-[45%] sm:w-[40%] h-6 rounded-tl-3xl border-t border-l border-white/80 dark:border-slate-800/80 pointer-events-none z-10" />
           
           {/* Left Text Content Area (Crisp & Simple Copy with Gift Icon) */}
           <div className="relative z-10 space-y-1 min-w-0 flex-1 w-full xs:w-auto">
