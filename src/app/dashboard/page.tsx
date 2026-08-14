@@ -184,15 +184,24 @@ export default function DashboardPage() {
  {greeting}, <span className="font-semibold text-slate-700 dark:text-slate-200">{firstName}!</span>
  </p>
  <h1 className="text-2xl sm:text-3xl font-bold font-fredoka text-slate-900 dark:text-white leading-tight">
- Bugun nima o'rganasiz?
+ Bugun nima o'rganamiz?
  </h1>
  </motion.div>
 
- {/* ── 2. SUBJECT PROGRESS CARDS ── */}
+  {/* ── 2. ONLAYN OLIMPIADALAR BANNER (Tepada - Fanlardan avval) ── */}
+  <motion.div
+    initial={{ opacity: 0, y: 16 }}
+    animate={{ opacity: 1, y: 0 }}
+    transition={{ delay: 0.08 }}
+  >
+    <OlympiadBannerTeaser />
+  </motion.div>
+
+ {/* ── 3. SUBJECT PROGRESS CARDS (Fanlarim) ── */}
  <motion.section
  initial={{ opacity: 0, y: 16 }}
  animate={{ opacity: 1, y: 0 }}
- transition={{ delay: 0.1 }}
+ transition={{ delay: 0.12 }}
  >
  {subjects.length > 0 && (
  <>
@@ -258,16 +267,7 @@ export default function DashboardPage() {
  )}
  </motion.section>
 
-  {/* ── 3. ONLAYN OLIMPIADALAR BANNER ── */}
-  <motion.div
-    initial={{ opacity: 0, y: 16 }}
-    animate={{ opacity: 1, y: 0 }}
-    transition={{ delay: 0.15 }}
-  >
-    <OlympiadBannerTeaser />
-  </motion.div>
-
-  {/* ── 4. QUICK ACCESS (O'QISH BO'LIMI) ── */}
+ {/* ── 4. QUICK ACCESS (O'QISH BO'LIMI) ── */}
  <motion.section
  initial={{ opacity: 0, y: 16 }}
  animate={{ opacity: 1, y: 0 }}

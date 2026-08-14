@@ -150,13 +150,13 @@ export function OlympiadBannerTeaser() {
     >
       <div className="relative block w-full">
         
-        {/* ── TOP ROW: CONNECTED 40% SHELF + RIGHT GLASS HEADER (Fully Responsive) ── */}
-        <div className="flex items-stretch">
+        {/* ── TOP ROW: DISTINCT 40% FULLY TRANSPARENT SHELF TAB + SEAMLESS RIGHT GLASS HEADER ── */}
+        <div className="flex items-stretch relative z-20">
           
-          {/* Top-Left Shelf (40% width, bold enlarged text without arrow) */}
+          {/* Top-Left Shelf Tab (100% Fully Transparent, no background fill, no blur) */}
           <Link
             href="/dashboard/olympiads"
-            className="w-[45%] sm:w-[40%] bg-transparent px-3 sm:px-6 py-2.5 sm:py-3.5 rounded-t-3xl border-none flex items-center shrink-0 z-10 cursor-pointer group/step"
+            className="w-[45%] sm:w-[40%] bg-transparent backdrop-blur-none px-3 sm:px-6 py-2.5 sm:py-3.5 border-none flex items-center shrink-0 z-10 cursor-pointer group/step"
           >
             <h3 className="text-sm sm:text-xl font-black font-fredoka text-slate-900 dark:text-white leading-tight truncate flex items-center gap-2">
               <Trophy size={18} className="text-brand-blue dark:text-blue-400 shrink-0" />
@@ -164,49 +164,31 @@ export function OlympiadBannerTeaser() {
             </h3>
           </Link>
 
-          {/* Top-Right Header (Platform Brand Gradient Glass Box, Responsive) */}
-          <div className="flex-1 bg-gradient-to-r from-blue-600/95 via-indigo-600/95 to-purple-600/95 text-white px-3 sm:px-6 py-2.5 sm:py-3.5 rounded-t-3xl border-t border-r border-white/20 flex items-center gap-1.5 -ml-px z-0 backdrop-blur-xl min-w-0">
-            <Sparkles size={14} className="text-amber-300 shrink-0" />
-            <h3 className="text-xs sm:text-base font-black font-fredoka text-white leading-tight uppercase tracking-wider truncate">
-              PROMAX TOURNAMENTS
-            </h3>
+          {/* Top-Right Header Box (Identical background, NO bottom/left border!) */}
+          <div className="flex-1 bg-white/80 dark:bg-slate-900/80 text-slate-900 dark:text-white px-3 sm:px-6 py-2.5 sm:py-3.5 rounded-t-3xl border-t border-r border-white/80 dark:border-slate-800/80 border-b-0 border-l-0 flex items-center justify-end sm:justify-start gap-1.5 z-20 -mb-px backdrop-blur-2xl min-w-0">
+            <Users size={14} className="text-brand-blue shrink-0" />
+            <span className="text-xs sm:text-sm font-bold text-slate-700 dark:text-slate-300 truncate">
+              {heroItem.participantsCount} nafar qatnashuvchi
+            </span>
           </div>
         </div>
 
-        {/* ── MAIN CARD BODY (Platform Glassmorphism, Fully Responsive Layout) ── */}
-        <div className="relative w-full rounded-b-3xl rounded-tl-3xl rounded-tr-none overflow-hidden border border-white/80 dark:border-slate-800/80 bg-white/75 dark:bg-slate-900/75 backdrop-blur-2xl text-slate-800 dark:text-white p-4 sm:p-6 flex flex-col xs:flex-row items-start xs:items-center justify-between gap-3 sm:gap-4 -mt-px shadow-none">
+        {/* ── MAIN CARD BODY (Native smooth rounded-tl-3xl curved border, 0 sticking out lines!) ── */}
+        <div className="relative z-10 w-full rounded-b-3xl rounded-tl-3xl rounded-tr-none bg-white/80 dark:bg-slate-900/80 backdrop-blur-2xl text-slate-800 dark:text-white p-4.5 sm:p-6 flex flex-col xs:flex-row items-start xs:items-center justify-between gap-3 sm:gap-4 border border-white/80 dark:border-slate-800/80 shadow-none">
           
-          {/* Ambient Platform Glowing Gradients */}
-          <div className="absolute top-0 right-0 w-[50%] h-full bg-gradient-to-l from-brand-blue/20 via-purple-500/15 to-amber-500/10 blur-[80px] pointer-events-none" />
-          <div className="absolute bottom-0 left-10 w-40 h-40 bg-blue-500/15 rounded-full blur-[70px] pointer-events-none" />
-
-          {/* Left Text Content Area (Clean & Minimalist Typography) */}
-          <div className="relative z-10 space-y-1 sm:space-y-1.5 min-w-0 flex-1 w-full xs:w-auto">
-            <div className="flex items-center gap-1.5 sm:gap-2 flex-wrap">
-              <span className="text-[10px] sm:text-[11px] font-black bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 px-2.5 sm:px-3 py-0.5 rounded-full border border-slate-200 dark:border-slate-700/60 flex items-center gap-1">
-                <Users size={11} className="text-brand-blue" />
-                <span>{heroItem.participantsCount} nafar qatnashmoqda</span>
-              </span>
-            </div>
-
-            <h4 className="text-sm sm:text-xl font-black font-fredoka text-slate-900 dark:text-white leading-tight truncate">
-              Milliy Bilim Musobaqalari
+          {/* Left Text Content Area (Crisp & Simple Copy with Gift Icon) */}
+          <div className="relative z-10 space-y-1 min-w-0 flex-1 w-full xs:w-auto">
+            <h4 className="text-base sm:text-xl font-black font-fredoka text-slate-900 dark:text-white leading-tight truncate">
+              Milliy bilim musobaqalari
             </h4>
 
-            <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-300 font-semibold flex flex-wrap items-center gap-2 sm:gap-2.5 truncate">
-              <span className="flex items-center gap-1 text-amber-600 dark:text-amber-400 font-bold">
-                <Trophy size={13} className="sm:w-3.5 sm:h-3.5" />
-                Mukofot: {heroItem.prizePool}
-              </span>
-              <span className="hidden xs:inline">•</span>
-              <span className="flex items-center gap-1 text-brand-blue dark:text-blue-400 font-bold">
-                <Coins size={12} className="text-amber-500 sm:w-3.5 sm:h-3.5" />
-                {heroItem.entryCoins > 0 ? `${heroItem.entryCoins} Tanga` : "BEPUL"}
-              </span>
+            <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-300 font-medium flex items-center gap-1.5 truncate">
+              <Gift size={14} className="text-amber-500 shrink-0" />
+              <span>Top o'rinlar uchun mukofotlar</span>
             </p>
           </div>
 
-          {/* Right Corner Glassy Button (Responsive Positioning) */}
+          {/* Right Glassy Button */}
           <div className="relative z-10 shrink-0 w-full xs:w-auto flex justify-end">
             <Link
               href="/dashboard/olympiads"
