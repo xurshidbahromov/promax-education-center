@@ -25,6 +25,7 @@ import { useState, useMemo } from "react";
 import useSWR from "swr";
 import { getSubjects, type Subject } from "@/lib/supabase-queries";
 import { DashboardHomeSkeleton } from "@/components/ui/Skeleton";
+import { OlympiadBannerTeaser } from "@/components/dashboard/OlympiadSection";
 
 // Subject colors & icons
 const subjectMeta: Record<string, { color: string; bg: string; icon: any }> = {
@@ -257,7 +258,16 @@ export default function DashboardPage() {
  )}
  </motion.section>
 
- {/* ── 3. QUICK ACCESS (O'QISH BO'LIMI) ── */}
+  {/* ── 3. ONLAYN OLIMPIADALAR BANNER ── */}
+  <motion.div
+    initial={{ opacity: 0, y: 16 }}
+    animate={{ opacity: 1, y: 0 }}
+    transition={{ delay: 0.15 }}
+  >
+    <OlympiadBannerTeaser />
+  </motion.div>
+
+  {/* ── 4. QUICK ACCESS (O'QISH BO'LIMI) ── */}
  <motion.section
  initial={{ opacity: 0, y: 16 }}
  animate={{ opacity: 1, y: 0 }}

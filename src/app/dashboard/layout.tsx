@@ -15,6 +15,7 @@ import {
   LogOut,
   Menu,
   X,
+  Trophy,
   BellRing
 } from "lucide-react";
 import Link from "next/link";
