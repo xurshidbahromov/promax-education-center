@@ -395,9 +395,8 @@ export default function DashboardPage() {
  key={item.id}
  initial={{ opacity: 0, scale: 0.95 }}
  animate={{ opacity: 1, scale: 1 }}
- transition={{ delay: 0.4+ i * 0.08, duration: 0.4 }}
- whileHover={{ y: -4 }}
- className="snap-start shrink-0 w-[290px] sm:w-[380px] relative overflow-hidden rounded-[2rem] border border-white/60 dark:border-slate-800/60 shadow-sm transition-all duration-300 h-[210px] sm:h-[250px] bg-slate-100 dark:bg-slate-900 group"
+ transition={{ delay: 0.4 + i * 0.08, duration: 0.4 }}
+ className="snap-start shrink-0 w-[290px] sm:w-[380px] relative overflow-hidden rounded-[2rem] border border-white/60 dark:border-slate-800/60 shadow-sm h-[210px] sm:h-[250px] bg-slate-100 dark:bg-slate-900"
  >
  {/* Background Image */}
  <div className="absolute inset-0 z-0">
@@ -407,7 +406,7 @@ export default function DashboardPage() {
  fill
  sizes="(max-width: 640px) 290px, 380px"
  priority={i < 2}
- className="object-cover transition-transform duration-700 group-active:scale-95"
+ className="object-cover"
  />
  {/* Glassy/Dark Overlay */}
  <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/60 to-slate-900/10 dark:from-slate-950 dark:via-slate-950/70 dark:to-slate-950/20 z-10" />
