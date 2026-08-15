@@ -586,7 +586,7 @@ export const ru = {
   "olympiad.stat_tournaments": "Олимпиады знаний",
   "olympiad.stat_participants": "1,240+ участников",
   "olympiad.stat_prizes": "Главные призы",
-  "olympiad.comments_title": "Комментарии",
+  "olympiad.comments_title": "Комментарии и обсуждения",
   "olympiad.comments_subtitle": "Задавайте вопросы и обсуждайте олимпиады",
   "olympiad.comment_placeholder": "Напишите ваш вопрос или комментарий об олимпиаде...",
   "olympiad.btn_send": "Отправить",
