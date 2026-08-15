@@ -24,7 +24,8 @@ import {
   Star,
   Info,
   ArrowUpRight,
-  ArrowDownRight
+  ArrowDownRight,
+  ArrowRight
 } from "lucide-react";
 
 export interface OlympiadItem {
@@ -160,14 +161,20 @@ export function OlympiadBannerTeaser() {
             href="/dashboard/olympiads"
             className="w-[45%] sm:w-[40%] bg-transparent backdrop-blur-none px-3 sm:px-6 py-2.5 sm:py-3.5 border-none flex items-center shrink-0 z-10 cursor-pointer group/step"
           >
-            <h3 className="text-sm sm:text-xl font-black font-fredoka text-slate-900 dark:text-white leading-tight truncate flex items-center gap-2">
-              <Trophy size={18} className="text-brand-blue dark:text-blue-400 shrink-0" />
+            <h3 className="text-base sm:text-2xl font-medium font-fredoka text-slate-800 dark:text-slate-100 leading-tight truncate flex items-center gap-1.5 sm:gap-2">
               <span>{t("olympiad.shelf_title")}</span>
+              <motion.span
+                animate={{ x: [0, 3, 0], y: [0, 3, 0] }}
+                transition={{ duration: 1.4, repeat: Infinity, ease: "easeInOut" }}
+                className="inline-flex text-brand-blue dark:text-blue-400 shrink-0"
+              >
+                <ArrowDownRight size={22} className="stroke-[2.5]" />
+              </motion.span>
             </h3>
           </Link>
 
-          {/* Top-Right Header Box (Centered participant count text) */}
-          <div className="flex-1 bg-white/80 dark:bg-slate-900/80 text-slate-900 dark:text-white px-3 sm:px-6 py-2.5 sm:py-3.5 rounded-t-3xl border-t border-r border-white/80 dark:border-slate-800/80 border-b-0 border-l-0 flex items-center justify-center gap-1.5 z-20 backdrop-blur-2xl min-w-0">
+          {/* Top-Right Header Box (Matched to dashboard cards: bg-white/60 dark:bg-slate-900/60) */}
+          <div className="flex-1 bg-white/60 dark:bg-slate-900/60 text-slate-900 dark:text-white px-3 sm:px-6 py-2.5 sm:py-3.5 rounded-t-3xl border-t border-r border-white/60 dark:border-slate-700/50 border-b-0 border-l-0 flex items-center justify-center gap-1.5 z-20 backdrop-blur-xl min-w-0">
             <Users size={14} className="text-brand-blue shrink-0" />
             <span className="text-xs sm:text-sm font-bold text-slate-700 dark:text-slate-300 truncate">
               {t("olympiad.participants_count", { count: heroItem.participantsCount })}
@@ -175,11 +182,11 @@ export function OlympiadBannerTeaser() {
           </div>
         </div>
 
-        {/* ── MAIN CARD BODY (Zero top border under top-right header box, zero double-layer lines!) ── */}
-        <div className="relative z-10 w-full rounded-b-3xl rounded-tl-3xl rounded-tr-none bg-white/80 dark:bg-slate-900/80 backdrop-blur-2xl text-slate-800 dark:text-white p-4.5 sm:p-6 flex flex-col xs:flex-row items-start xs:items-center justify-between gap-3 sm:gap-4 border-b border-l border-r border-t-0 border-white/80 dark:border-slate-800/80 shadow-none">
+        {/* ── MAIN CARD BODY (Matched to dashboard cards: bg-white/60 dark:bg-slate-900/60 backdrop-blur-xl border-white/60 dark:border-slate-700/50 shadow-sm) ── */}
+        <div className="relative z-10 w-full rounded-b-3xl rounded-tl-3xl rounded-tr-none bg-white/60 dark:bg-slate-900/60 backdrop-blur-xl text-slate-800 dark:text-white p-4.5 sm:p-6 flex flex-col xs:flex-row items-start xs:items-center justify-between gap-3 sm:gap-4 border-b border-l border-r border-t-0 border-white/60 dark:border-slate-700/50 shadow-sm">
           
           {/* Smooth Top-Left Corner Curved Border (Applies top & left border ONLY on top-left 40% curved gap) */}
-          <div className="absolute top-0 left-0 w-[45%] sm:w-[40%] h-6 rounded-tl-3xl border-t border-l border-white/80 dark:border-slate-800/80 pointer-events-none z-10" />
+          <div className="absolute top-0 left-0 w-[45%] sm:w-[40%] h-6 rounded-tl-3xl border-t border-l border-white/60 dark:border-slate-700/50 pointer-events-none z-10" />
           
           {/* Left Text Content Area (Crisp & Simple Copy with Gift Icon) */}
           <div className="relative z-10 space-y-1 min-w-0 flex-1 w-full xs:w-auto">
@@ -193,11 +200,11 @@ export function OlympiadBannerTeaser() {
             </p>
           </div>
 
-          {/* Right Glassy Button */}
+          {/* Right Recessed Glassy Button (Zero shadow, clean inset feel) */}
           <div className="relative z-10 shrink-0 w-full xs:w-auto flex justify-end">
             <Link
               href="/dashboard/olympiads"
-              className="group/btn w-full xs:w-auto px-5 sm:px-6 py-2 sm:py-2.5 rounded-full bg-slate-100/90 hover:bg-slate-200 dark:bg-slate-800/90 dark:hover:bg-slate-700/90 border border-slate-200/90 dark:border-slate-700 text-slate-900 dark:text-white font-black text-xs sm:text-sm uppercase tracking-wider flex items-center justify-center gap-1.5 backdrop-blur-md active:scale-95 transition-all cursor-pointer shadow-none"
+              className="group/btn w-full xs:w-auto px-5 sm:px-6 py-2 sm:py-2.5 rounded-full bg-slate-100/70 hover:bg-slate-200/80 dark:bg-slate-800/60 dark:hover:bg-slate-800/90 border border-slate-200/60 dark:border-slate-700/40 text-slate-800 dark:text-slate-200 font-bold text-xs sm:text-sm uppercase tracking-wider flex items-center justify-center gap-1.5 shadow-none active:scale-95 transition-all cursor-pointer"
             >
               <span>{t("olympiad.btn_details")}</span>
               <ArrowUpRight size={15} className="group-hover/btn:translate-x-0.5 group-hover/btn:-translate-y-0.5 transition-transform duration-200" />
