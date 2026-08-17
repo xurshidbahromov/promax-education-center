@@ -836,159 +836,33 @@ export const assignMultipleStudentsToGroup = addMultipleStudentsToGroup;
 export const demoteToStudent = demoteTeacher;
 
 // ── TOURNAMENTS (MUSOBAQALAR) ADMIN QUERIES ──
-export interface TournamentQuestion {
-  id: string;
-  question_text: string;
-  question_type?: 'multiple_choice' | 'true_false' | 'short_answer';
-  options: Record<string, string>;
-  correct_answer: string;
-  explanation?: string;
-  points: number;
-  image_url?: string | null;
-}
+import type { AdminTournamentComment } from './tournaments';
+export type {
+  TournamentQuestion,
+  AdminTournament,
+  AdminTournamentComment,
+  TournamentParticipant,
+  TournamentLeaderboardEntry
+} from './tournaments';
 
-export interface AdminTournament {
-  id: string;
-  title: string;
-  subject: string;
-  description: string;
-  status: 'live' | 'upcoming' | 'finished';
-  startDate: string;
-  startTime: string;
-  durationMinutes: number;
-  totalQuestions: number;
-  entryCoins: number;
-  prizePool: string;
-  topPrizes: string[];
-  rules: string[];
-  participantsCount: number;
-  questions?: TournamentQuestion[];
-  created_at?: string;
-}
-
-export interface AdminTournamentComment {
-  id: string;
-  tournament_id?: string;
-  author: string;
-  avatar: string;
-  role: string;
-  time: string;
-  text: string;
-  likes: number;
-  created_at?: string;
-}
-
-const SAMPLE_MATH_QUESTIONS: TournamentQuestion[] = [
-  {
-    id: "mq-1",
-    question_text: "Agar $f(x) = x^2 - 4x + 3$ bo'lsa, funksiyaning eng kichik qiymatini toping.",
-    question_type: "multiple_choice",
-    options: { A: "-1", B: "0", C: "1", D: "3" },
-    correct_answer: "A",
-    explanation: "Parabola uchi $x_0 = -b/(2a) = 4/2 = 2$. $f(2) = 4 - 8 + 3 = -1$.",
-    points: 3.1
-  },
-  {
-    id: "mq-2",
-    question_text: "Uchburchakning tomonlari 6, 8 va 10 ga teng. Uchburchakning yuzini hisoblang.",
-    question_type: "multiple_choice",
-    options: { A: "24", B: "48", C: "30", D: "40" },
-    correct_answer: "A",
-    explanation: "Bu to'g'ri burchakli uchburchak: $6^2 + 8^2 = 10^2$. Yuzi $S = (6 \\cdot 8)/2 = 24$.",
-    points: 3.1
-  },
-  {
-    id: "mq-3",
-    question_text: "Tenglamani yeching: $\\log_2(x - 3) = 4$",
-    question_type: "multiple_choice",
-    options: { A: "19", B: "16", C: "11", D: "7" },
-    correct_answer: "A",
-    explanation: "$x - 3 = 2^4 = 16 \\Rightarrow x = 19$.",
-    points: 3.1
-  }
-];
-
-export const INITIAL_ADMIN_TOURNAMENTS: AdminTournament[] = [
-  {
-    id: "math-pro-2026",
-    title: "Respublika Matematika Pro Onlayn Musobaqasi",
-    subject: "Matematika",
-    description: "Mantiqiy va murakkab masalalar bo'yicha eng kuchli o'quvchilar bellashuvi.",
-    status: "upcoming",
-    startDate: "18-Avgust, 2026",
-    startTime: "15:00",
-    durationMinutes: 60,
-    totalQuestions: 30,
-    entryCoins: 100,
-    prizePool: "1,500,000 SO'M + Planshet",
-    topPrizes: [
-      "🥇 1-O'rin: 1,000,000 So'm + Oltin Medal + Planshet",
-      "🥈 2-O'rin: 300,000 So'm + Kumush Medal + Premium Akkaunt",
-      "🥉 3-O'rin: 200,000 So'm + Bronza Medal + Kitoblar to'plami"
-    ],
-    rules: [
-      "Test vaqti 60 daqiqa, jami 30 ta savol.",
-      "Har bir to'g'ri javob uchun 3.1 ball beriladi.",
-      "Vaqt tugaganda test avtomatik yakunlanadi."
-    ],
-    participantsCount: 428,
-    questions: SAMPLE_MATH_QUESTIONS
-  },
-  {
-    id: "physics-master-2026",
-    title: "Fizika Fanidan Milliy Musobaqa",
-    subject: "Fizika",
-    description: "Mexanika, termodinamika va optika bo'yicha kuchlilar bellashuvi.",
-    status: "live",
-    startDate: "15-Avgust, 2026",
-    startTime: "18:00",
-    durationMinutes: 45,
-    totalQuestions: 25,
-    entryCoins: 50,
-    prizePool: "800,000 SO'M",
-    topPrizes: [
-      "🥇 1-O'rin: 500,000 So'm + Maxsus Sertifikat",
-      "🥈 2-O'rin: 200,000 So'm",
-      "🥉 3-O'rin: 100,000 So'm"
-    ],
-    rules: [
-      "Test davomiyligi 45 daqiqa.",
-      "Kalkulyatordan foydalanish taqiqlanadi.",
-      "Natijalar test tugashi bilan e'lon qilinadi."
-    ],
-    participantsCount: 312,
-    questions: SAMPLE_MATH_QUESTIONS
-  },
-  {
-    id: "english-clash-2026",
-    title: "English Grammar & Lexis Clash",
-    subject: "Ingliz Tili",
-    description: "IELTS va CEFR darajasidagi so'z boyligi va grammatika musobaqasi.",
-    status: "upcoming",
-    startDate: "22-Avgust, 2026",
-    startTime: "20:00",
-    durationMinutes: 50,
-    totalQuestions: 40,
-    entryCoins: 50,
-    prizePool: "1,000,000 SO'M",
-    topPrizes: [
-      "🥇 1-O'rin: 600,000 So'm + IELTS Mock bepul",
-      "🥈 2-O'rin: 300,000 So'm",
-      "🥉 3-O'rin: 100,000 So'm"
-    ],
-    rules: [
-      "Reading va Use of English savollari.",
-      "Jami 40 ta savol, 50 daqiqa.",
-      "Top 10 talikka sovg'alar beriladi."
-    ],
-    participantsCount: 504,
-    questions: SAMPLE_MATH_QUESTIONS
-  }
-];
+export {
+  INITIAL_TOURNAMENTS as INITIAL_ADMIN_TOURNAMENTS,
+  SAMPLE_MATH_QUESTIONS,
+  getAdminTournaments,
+  getTournamentById,
+  duplicateAdminTournament,
+  saveAdminTournament,
+  deleteAdminTournament,
+  registerForTournament,
+  getTournamentRegistrations,
+  getTournamentLeaderboard,
+  submitTournamentAttempt
+} from './tournaments';
 
 export const INITIAL_ADMIN_COMMENTS: AdminTournamentComment[] = [
   {
     id: "c1",
+    tournament_id: "math-pro-2026",
     author: "Jasurbek Aliyev",
     avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=Jasurbek",
     role: "O'quvchi",
@@ -998,113 +872,15 @@ export const INITIAL_ADMIN_COMMENTS: AdminTournamentComment[] = [
   },
   {
     id: "c2",
+    tournament_id: "math-pro-2026",
     author: "Promax Admin",
     avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=PromaxAdmin",
     role: "Tashkilotchi",
     time: "5 daqiqa avval",
-    text: "Assalomu alaykum! Musobaqa testlari mantiqiy va standart murakkablikda bo'ladi. Dashboardning Testlar bo'limida tayyorgarlik testlarini yechishingiz mumkin.",
+    text: "Assalomu alaykum! Musobaqa testlari mantiqiy va standart murakkablikda bo'ladi. Testlar bo'limida tayyorgarlik testlarini yechishingiz mumkin.",
     likes: 15
-  },
-  {
-    id: "c3",
-    author: "Sevinch Usmonova",
-    avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=Sevinch",
-    role: "O'quvchi",
-    time: "1 soat avval",
-    text: "Top o'rin egalari uchun sertifikatlar elektron tarzda taqdim etiladimi?",
-    likes: 4
   }
 ];
-
-export async function getAdminTournaments(): Promise<AdminTournament[]> {
-  const supabase = createClient();
-  try {
-    const { data, error } = await supabase
-      .from('tournaments')
-      .select('*')
-      .order('created_at', { ascending: false });
-    
-    if (error || !data || data.length === 0) {
-      return INITIAL_ADMIN_TOURNAMENTS;
-    }
-    return data;
-  } catch (err) {
-    return INITIAL_ADMIN_TOURNAMENTS;
-  }
-}
-
-export async function getTournamentById(id: string): Promise<AdminTournament | null> {
-  const supabase = createClient();
-  try {
-    const { data, error } = await supabase
-      .from('tournaments')
-      .select('*')
-      .eq('id', id)
-      .single();
-    
-    if (data) return data;
-  } catch (err) {
-    // fallback
-  }
-
-  const found = INITIAL_ADMIN_TOURNAMENTS.find((t) => t.id === id);
-  return found || null;
-}
-
-export async function duplicateAdminTournament(id: string): Promise<AdminTournament | null> {
-  const original = await getTournamentById(id);
-  if (!original) return null;
-
-  const duplicated: AdminTournament = {
-    ...original,
-    id: `tournament_${Date.now()}`,
-    title: `${original.title} (Nusxa)`,
-    status: 'upcoming',
-    participantsCount: 0,
-    created_at: new Date().toISOString()
-  };
-
-  await saveAdminTournament(duplicated);
-  return duplicated;
-}
-
-export async function saveAdminTournament(tournament: Partial<AdminTournament>): Promise<{ success: boolean; data?: any; error?: string }> {
-  const supabase = createClient();
-  try {
-    if (tournament.id && !tournament.id.startsWith('temp_') && !tournament.id.includes('-2026')) {
-      const { data, error } = await supabase
-        .from('tournaments')
-        .update(tournament)
-        .eq('id', tournament.id)
-        .select()
-        .single();
-      if (error) return { success: false, error: error.message };
-      return { success: true, data };
-    } else {
-      const { id, ...insertData } = tournament;
-      const { data, error } = await supabase
-        .from('tournaments')
-        .insert(insertData)
-        .select()
-        .single();
-      if (error) return { success: false, error: error.message };
-      return { success: true, data };
-    }
-  } catch (err: any) {
-    return { success: true, data: tournament };
-  }
-}
-
-export async function deleteAdminTournament(id: string): Promise<{ success: boolean; error?: string }> {
-  const supabase = createClient();
-  try {
-    const { error } = await supabase.from('tournaments').delete().eq('id', id);
-    if (error) return { success: false, error: error.message };
-    return { success: true };
-  } catch (err: any) {
-    return { success: true };
-  }
-}
 
 export async function getAdminTournamentComments(): Promise<AdminTournamentComment[]> {
   const supabase = createClient();
@@ -1133,6 +909,3 @@ export async function deleteAdminTournamentComment(id: string): Promise<{ succes
     return { success: true };
   }
 }
-
-
-

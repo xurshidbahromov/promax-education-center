@@ -67,6 +67,8 @@ export default function EditTournamentPage({ params }: PageProps) {
   const [description, setDescription] = useState("");
   const [startDate, setStartDate] = useState("");
   const [startTime, setStartTime] = useState("15:00");
+  const [endDate, setEndDate] = useState("");
+  const [endTime, setEndTime] = useState("18:00");
   const [durationMinutes, setDurationMinutes] = useState<number | null>(60);
   const [entryCoins, setEntryCoins] = useState(0);
   const [prizePool, setPrizePool] = useState("");
@@ -94,6 +96,8 @@ export default function EditTournamentPage({ params }: PageProps) {
         setDescription(data.description || "");
         setStartDate(data.startDate || "");
         setStartTime(data.startTime || "15:00");
+        setEndDate(data.endDate || data.startDate || "");
+        setEndTime(data.endTime || "18:00");
         setDurationMinutes(data.durationMinutes || 60);
         setEntryCoins(data.entryCoins || 0);
         setPrizePool(data.prizePool || "");
@@ -208,6 +212,8 @@ export default function EditTournamentPage({ params }: PageProps) {
       description: description.trim(),
       startDate: startDate.trim() || new Date().toLocaleDateString('uz-UZ'),
       startTime: startTime.trim(),
+      endDate: endDate.trim() || startDate.trim() || new Date().toLocaleDateString('uz-UZ'),
+      endTime: endTime.trim(),
       durationMinutes: Number(durationMinutes) || 60,
       totalQuestions: questions.length,
       entryCoins: Number(entryCoins) || 0,
@@ -402,8 +408,8 @@ export default function EditTournamentPage({ params }: PageProps) {
                 </div>
               </div>
 
-              {/* Tournament Specific Fields: Date, Time, Prize Pool */}
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              {/* Tournament Specific Fields: Start/End Date, Time, Prize Pool */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                 <div>
                   <label className="block text-xs font-bold text-slate-600 dark:text-slate-300 uppercase tracking-wider mb-1.5">
                     Boshlanish Sanasi
@@ -432,16 +438,42 @@ export default function EditTournamentPage({ params }: PageProps) {
 
                 <div>
                   <label className="block text-xs font-bold text-slate-600 dark:text-slate-300 uppercase tracking-wider mb-1.5">
-                    Mukofot Jamg'armasi
+                    Tugash Sanasi
                   </label>
                   <input
                     type="text"
-                    value={prizePool}
-                    onChange={(e) => setPrizePool(e.target.value)}
-                    placeholder="Masalan: 1,500,000 SO'M"
+                    value={endDate}
+                    onChange={(e) => setEndDate(e.target.value)}
+                    placeholder="Masalan: 20-Avgust, 2026"
                     className="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-brand-blue/30 outline-none text-xs sm:text-sm font-bold text-slate-800 dark:text-slate-100"
                   />
                 </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-slate-600 dark:text-slate-300 uppercase tracking-wider mb-1.5">
+                    Tugash Vaqti
+                  </label>
+                  <input
+                    type="text"
+                    value={endTime}
+                    onChange={(e) => setEndTime(e.target.value)}
+                    placeholder="Masalan: 18:00"
+                    className="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-brand-blue/30 outline-none text-xs sm:text-sm font-bold text-slate-800 dark:text-slate-100"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold text-slate-600 dark:text-slate-300 uppercase tracking-wider mb-1.5">
+                  Mukofot Jamg'armasi
+                </label>
+                <input
+                  type="text"
+                  value={prizePool}
+                  onChange={(e) => setPrizePool(e.target.value)}
+                  placeholder="Masalan: 1,500,000 SO'M + Noutbuk"
+                  className="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-brand-blue/30 outline-none text-xs sm:text-sm font-bold text-slate-800 dark:text-slate-100"
+                />
               </div>
 
               {/* Top Prizes & Rules */}
@@ -750,7 +782,7 @@ export default function EditTournamentPage({ params }: PageProps) {
                       <label className="block text-xs font-bold text-slate-600 dark:text-slate-300 uppercase tracking-wider">
                         Javob Variantlari
                       </label>
-                      {["A", "B", "C", "D"].map((optKey) => {
+                      {(["A", "B", "C", "D"] as const).map((optKey) => {
                         const optVal = editingQuestion.options?.[optKey] || "";
                         return (
                           <div key={optKey} className="space-y-1">
@@ -777,7 +809,7 @@ export default function EditTournamentPage({ params }: PageProps) {
                                 type="button"
                                 onClick={() =>
                                   setActiveMathField(
-                                    activeMathField === optKey ? null : (optKey as any)
+                                    activeMathField === optKey ? null : optKey
                                   )
                                 }
                                 className={`px-2.5 py-1.5 rounded-lg font-black text-[11px] transition-all flex items-center gap-1 border cursor-pointer shrink-0 ${
@@ -797,7 +829,7 @@ export default function EditTournamentPage({ params }: PageProps) {
                                   onChange={() =>
                                     setEditingQuestion({
                                       ...editingQuestion,
-                                      correct_answer: optKey
+                                      correct_answer: optKey as "A" | "B" | "C" | "D"
                                     })
                                   }
                                   className="w-4 h-4 text-emerald-500 focus:ring-emerald-500"
