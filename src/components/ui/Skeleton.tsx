@@ -375,3 +375,195 @@ export function GamesPageSkeleton() {
     </div>
   );
 }
+
+// ─── Olympiads & Tournaments Skeletons ─────────────────────────────────────────
+
+export function OlympiadsBannerSkeleton() {
+  return (
+    <div className="bg-white/60 dark:bg-slate-900/60 backdrop-blur-xl rounded-3xl p-6 sm:p-7 border border-white/60 dark:border-slate-800/60 space-y-3">
+      <Skeleton className="h-7 w-64 rounded-xl bg-slate-200/80 dark:bg-slate-700/50" />
+      <Skeleton className="h-4 w-96 max-w-full rounded-lg bg-slate-200/80 dark:bg-slate-700/50" />
+      <div className="flex items-center gap-3 pt-1">
+        <Skeleton className="h-4 w-28 rounded-md bg-slate-200/80 dark:bg-slate-700/50" />
+        <Skeleton className="h-4 w-32 rounded-md bg-slate-200/80 dark:bg-slate-700/50" />
+        <Skeleton className="h-4 w-28 rounded-md bg-slate-200/80 dark:bg-slate-700/50" />
+      </div>
+    </div>
+  );
+}
+
+export function TournamentsSkeleton() {
+  return (
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5">
+      {[1, 2, 3, 4, 5, 6].map((i) => (
+        <div
+          key={i}
+          className="bg-white/60 dark:bg-slate-900/60 backdrop-blur-xl rounded-3xl p-6 border border-white/60 dark:border-slate-800/60 shadow-none flex flex-col justify-between gap-5 h-[340px]"
+        >
+          <div className="space-y-4">
+            <div className="flex items-center justify-between">
+              <Skeleton className="h-5 w-24 rounded-md bg-slate-200/80 dark:bg-slate-700/50" />
+              <Skeleton className="h-5 w-20 rounded-md bg-slate-200/80 dark:bg-slate-700/50" />
+            </div>
+            <Skeleton className="h-6 w-4/5 rounded-xl bg-slate-200/80 dark:bg-slate-700/50" />
+            <div className="space-y-2">
+              <Skeleton className="h-3.5 w-full rounded-lg bg-slate-200/80 dark:bg-slate-700/50" />
+              <Skeleton className="h-3.5 w-3/4 rounded-lg bg-slate-200/80 dark:bg-slate-700/50" />
+            </div>
+            <div className="space-y-2.5 pt-2">
+              <div className="flex justify-between items-center">
+                <Skeleton className="h-4 w-20 rounded bg-slate-200/80 dark:bg-slate-700/50" />
+                <Skeleton className="h-4 w-28 rounded bg-slate-200/80 dark:bg-slate-700/50" />
+              </div>
+              <div className="flex justify-between items-center">
+                <Skeleton className="h-4 w-28 rounded bg-slate-200/80 dark:bg-slate-700/50" />
+                <Skeleton className="h-4 w-24 rounded bg-slate-200/80 dark:bg-slate-700/50" />
+              </div>
+              <div className="flex justify-between items-center">
+                <Skeleton className="h-4 w-20 rounded bg-slate-200/80 dark:bg-slate-700/50" />
+                <Skeleton className="h-4 w-32 rounded bg-slate-200/80 dark:bg-slate-700/50" />
+              </div>
+            </div>
+          </div>
+          <div className="flex items-center gap-3 pt-2">
+            <Skeleton className="flex-1 h-11 rounded-2xl bg-slate-200/80 dark:bg-slate-700/50" />
+            <Skeleton className="flex-1 h-11 rounded-2xl bg-slate-200/80 dark:bg-slate-700/50" />
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+export function LeaderboardSkeleton() {
+  return (
+    <div className="space-y-4 sm:space-y-5">
+      {/* Control Bar Skeleton */}
+      <div className="bg-white/60 dark:bg-slate-900/60 backdrop-blur-xl rounded-3xl p-5 border border-white/60 dark:border-slate-800/60">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div className="space-y-2">
+            <Skeleton className="h-5 w-48 rounded-lg bg-slate-200/80 dark:bg-slate-700/50" />
+            <Skeleton className="h-3.5 w-64 rounded-md bg-slate-200/80 dark:bg-slate-700/50" />
+          </div>
+          <div className="flex flex-col sm:flex-row items-center gap-3 w-full md:w-auto">
+            <Skeleton className="h-11 w-full sm:w-60 rounded-2xl bg-slate-200/80 dark:bg-slate-700/50" />
+            <Skeleton className="h-11 w-full sm:w-60 rounded-2xl bg-slate-200/80 dark:bg-slate-700/50" />
+          </div>
+        </div>
+      </div>
+
+      {/* 3D Isometric Stands Skeleton */}
+      <div className="bg-gradient-to-b from-white/70 via-slate-50/50 to-white/70 dark:from-slate-900/70 dark:via-slate-850/50 dark:to-slate-900/70 backdrop-blur-xl rounded-[2.5rem] p-6 sm:p-8 border border-white/60 dark:border-slate-800/60">
+        <div className="max-w-lg mx-auto pt-6 pb-2 grid grid-cols-3 items-end gap-3 sm:gap-4">
+          {/* Stand 2 */}
+          <div className="flex flex-col items-center space-y-2.5">
+            <Skeleton className="w-14 h-14 rounded-full bg-slate-200/80 dark:bg-slate-700/50" />
+            <Skeleton className="h-3.5 w-20 rounded bg-slate-200/80 dark:bg-slate-700/50" />
+            <Skeleton className="h-3 w-16 rounded bg-slate-200/80 dark:bg-slate-700/50" />
+            <Skeleton className="w-full h-32 rounded-2xl bg-slate-200/80 dark:bg-slate-700/50" />
+          </div>
+          {/* Stand 1 */}
+          <div className="flex flex-col items-center space-y-2.5 -mt-6">
+            <Skeleton className="w-18 h-18 rounded-full bg-slate-200/80 dark:bg-slate-700/50" />
+            <Skeleton className="h-4 w-24 rounded bg-slate-200/80 dark:bg-slate-700/50" />
+            <Skeleton className="h-3 w-20 rounded bg-slate-200/80 dark:bg-slate-700/50" />
+            <Skeleton className="w-full h-44 rounded-2xl bg-slate-200/80 dark:bg-slate-700/50" />
+          </div>
+          {/* Stand 3 */}
+          <div className="flex flex-col items-center space-y-2.5">
+            <Skeleton className="w-14 h-14 rounded-full bg-slate-200/80 dark:bg-slate-700/50" />
+            <Skeleton className="h-3.5 w-20 rounded bg-slate-200/80 dark:bg-slate-700/50" />
+            <Skeleton className="h-3 w-16 rounded bg-slate-200/80 dark:bg-slate-700/50" />
+            <Skeleton className="w-full h-26 rounded-2xl bg-slate-200/80 dark:bg-slate-700/50" />
+          </div>
+        </div>
+      </div>
+
+      {/* Ranked List Skeleton */}
+      <div className="bg-white/60 dark:bg-slate-900/60 backdrop-blur-xl rounded-3xl p-5 sm:p-6 border border-white/60 dark:border-slate-800/60 space-y-3">
+        <div className="flex justify-between items-center pb-2 border-b border-slate-100/70 dark:border-slate-800/60">
+          <Skeleton className="h-5 w-40 rounded-md bg-slate-200/80 dark:bg-slate-700/50" />
+          <Skeleton className="h-4 w-24 rounded-md bg-slate-200/80 dark:bg-slate-700/50" />
+        </div>
+        {[1, 2, 3, 4].map((n) => (
+          <div
+            key={n}
+            className="flex items-center justify-between p-3.5 rounded-2xl bg-white/40 dark:bg-slate-800/30 border border-slate-100/50 dark:border-slate-800/40"
+          >
+            <div className="flex items-center gap-3">
+              <Skeleton className="w-6 h-6 rounded-full bg-slate-200/80 dark:bg-slate-700/50" />
+              <Skeleton className="w-10 h-10 rounded-full bg-slate-200/80 dark:bg-slate-700/50" />
+              <div className="space-y-1.5">
+                <Skeleton className="h-4 w-28 rounded bg-slate-200/80 dark:bg-slate-700/50" />
+                <Skeleton className="h-3 w-20 rounded bg-slate-200/80 dark:bg-slate-700/50" />
+              </div>
+            </div>
+            <div className="space-y-1.5 items-end flex flex-col">
+              <Skeleton className="h-4 w-16 rounded bg-slate-200/80 dark:bg-slate-700/50" />
+              <Skeleton className="h-3 w-12 rounded bg-slate-200/80 dark:bg-slate-700/50" />
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {/* Additional Info Cards Skeleton */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-5 pt-1">
+        <div className="bg-white/60 dark:bg-slate-900/60 backdrop-blur-xl rounded-3xl p-5 border border-white/60 dark:border-slate-800/60 space-y-3">
+          <div className="flex items-center gap-3">
+            <Skeleton className="w-9 h-9 rounded-xl bg-slate-200/80 dark:bg-slate-700/50" />
+            <div className="space-y-1.5">
+              <Skeleton className="h-4 w-32 rounded bg-slate-200/80 dark:bg-slate-700/50" />
+              <Skeleton className="h-3 w-40 rounded bg-slate-200/80 dark:bg-slate-700/50" />
+            </div>
+          </div>
+          <div className="space-y-2 pt-1">
+            <Skeleton className="h-10 w-full rounded-2xl bg-slate-100/70 dark:bg-slate-800/40" />
+            <Skeleton className="h-10 w-full rounded-2xl bg-slate-100/70 dark:bg-slate-800/40" />
+            <Skeleton className="h-10 w-full rounded-2xl bg-slate-100/70 dark:bg-slate-800/40" />
+          </div>
+        </div>
+
+        <div className="bg-white/60 dark:bg-slate-900/60 backdrop-blur-xl rounded-3xl p-5 border border-white/60 dark:border-slate-800/60 space-y-3">
+          <div className="flex items-center gap-3">
+            <Skeleton className="w-9 h-9 rounded-xl bg-slate-200/80 dark:bg-slate-700/50" />
+            <div className="space-y-1.5">
+              <Skeleton className="h-4 w-36 rounded bg-slate-200/80 dark:bg-slate-700/50" />
+              <Skeleton className="h-3 w-44 rounded bg-slate-200/80 dark:bg-slate-700/50" />
+            </div>
+          </div>
+          <div className="space-y-2 pt-1">
+            <Skeleton className="h-10 w-full rounded-2xl bg-slate-100/70 dark:bg-slate-800/40" />
+            <Skeleton className="h-10 w-full rounded-2xl bg-slate-100/70 dark:bg-slate-800/40" />
+            <Skeleton className="h-10 w-full rounded-2xl bg-slate-100/70 dark:bg-slate-800/40" />
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+export function CommentsSkeleton() {
+  return (
+    <div className="bg-white/60 dark:bg-slate-900/60 backdrop-blur-xl rounded-3xl p-6 border border-white/60 dark:border-slate-800/60 space-y-5">
+      <div className="flex flex-col sm:flex-row gap-3">
+        <Skeleton className="flex-1 h-12 rounded-2xl bg-slate-200/80 dark:bg-slate-700/50" />
+        <Skeleton className="w-full sm:w-28 h-12 rounded-2xl bg-slate-200/80 dark:bg-slate-700/50" />
+      </div>
+      <div className="space-y-3 pt-2">
+        {[1, 2, 3].map((n) => (
+          <div key={n} className="p-4 rounded-2xl bg-white/40 dark:bg-slate-800/30 border border-slate-100/50 dark:border-slate-800/40 flex items-start gap-3.5">
+            <Skeleton className="w-9 h-9 rounded-full shrink-0 bg-slate-200/80 dark:bg-slate-700/50" />
+            <div className="flex-1 space-y-2">
+              <div className="flex items-center gap-2">
+                <Skeleton className="h-4 w-28 rounded bg-slate-200/80 dark:bg-slate-700/50" />
+                <Skeleton className="h-3.5 w-16 rounded bg-slate-200/80 dark:bg-slate-700/50" />
+              </div>
+              <Skeleton className="h-3.5 w-full rounded bg-slate-200/80 dark:bg-slate-700/50" />
+              <Skeleton className="h-3.5 w-2/3 rounded bg-slate-200/80 dark:bg-slate-700/50" />
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}

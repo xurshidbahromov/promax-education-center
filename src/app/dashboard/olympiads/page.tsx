@@ -38,6 +38,12 @@ import {
   getTournamentRegistrations
 } from "@/lib/tournaments";
 import { useCurrentUser } from "@/hooks/useDashboardData";
+import {
+  OlympiadsBannerSkeleton,
+  TournamentsSkeleton,
+  LeaderboardSkeleton,
+  CommentsSkeleton
+} from "@/components/ui/Skeleton";
 
 interface CommentItem {
   id: string;
@@ -92,6 +98,7 @@ export default function OlympiadsPage() {
   // Tournaments State
   const [tournaments, setTournaments] = useState<AdminTournament[]>([]);
   const [loading, setLoading] = useState(true);
+  const [leaderboardLoading, setLeaderboardLoading] = useState(false);
   const [selectedItem, setSelectedItem] = useState<AdminTournament | null>(null);
   const [registeredIds, setRegisteredIds] = useState<string[]>([]);
 
@@ -133,8 +140,15 @@ export default function OlympiadsPage() {
 
   const handleTournamentSelectForLeaderboard = async (id: string) => {
     setSelectedTournamentId(id);
-    const lb = await getTournamentLeaderboard(id);
-    setLeaderboard(lb);
+    setLeaderboardLoading(true);
+    try {
+      const lb = await getTournamentLeaderboard(id);
+      setLeaderboard(lb);
+    } catch (e) {
+      console.error("Error loading tournament leaderboard:", e);
+    } finally {
+      setLeaderboardLoading(false);
+    }
   };
 
   const handleRegister = async (item: AdminTournament) => {
@@ -214,36 +228,40 @@ export default function OlympiadsPage() {
           </Link>
         </div>
 
-        {/* ── TOP BANNER CARD (EXACTLY AS IN SCREENSHOT) ── */}
-        <div className="bg-white/80 dark:bg-slate-900/80 rounded-3xl p-6 sm:p-7 border border-white/80 dark:border-slate-800/80 shadow-none space-y-3">
-          <h1 className="text-xl sm:text-2xl font-black font-fredoka text-slate-900 dark:text-white leading-tight">
-            Milliy bilim musobaqalari
-          </h1>
-          <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 font-medium">
-            Bilimingizni sinang va mukofotlarni qo'lga kiriting
-          </p>
+        {/* ── TOP BANNER CARD ── */}
+        {loading ? (
+          <OlympiadsBannerSkeleton />
+        ) : (
+          <div className="bg-white/60 dark:bg-slate-900/60 backdrop-blur-xl rounded-3xl p-6 sm:p-7 border border-white/60 dark:border-slate-800/60 shadow-none space-y-3">
+            <h1 className="text-xl sm:text-2xl font-black font-fredoka text-slate-900 dark:text-white leading-tight">
+              Milliy bilim musobaqalari
+            </h1>
+            <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 font-medium">
+              Bilimingizni sinang va mukofotlarni qo'lga kiriting
+            </p>
 
-          {/* Stats Row */}
-          <div className="flex items-center gap-4 text-xs sm:text-sm font-bold text-slate-700 dark:text-slate-300 flex-wrap pt-1">
-            <span className="flex items-center gap-1.5 text-amber-600 dark:text-amber-400">
-              <Trophy size={16} className="text-amber-500" />
-              <span>Bilim musobaqalari</span>
-            </span>
-            <span className="text-slate-300 dark:text-slate-700">•</span>
-            <span className="flex items-center gap-1.5 text-slate-700 dark:text-slate-300">
-              <Users size={16} className="text-brand-blue" />
-              <span>{tournaments.reduce((acc, t) => acc + (t.participantsCount || 0), 0) || 1240}+ qatnashuvchi</span>
-            </span>
-            <span className="text-slate-300 dark:text-slate-700">•</span>
-            <span className="flex items-center gap-1.5 text-[#EB7C0E] dark:text-orange-400 font-bold">
-              <Gift size={16} className="text-[#EB7C0E]" />
-              <span>Top mukofotlar</span>
-            </span>
+            {/* Stats Row */}
+            <div className="flex items-center gap-4 text-xs sm:text-sm font-bold text-slate-700 dark:text-slate-300 flex-wrap pt-1">
+              <span className="flex items-center gap-1.5 text-amber-600 dark:text-amber-400">
+                <Trophy size={16} className="text-amber-500" />
+                <span>Bilim musobaqalari</span>
+              </span>
+              <span className="text-slate-300 dark:text-slate-700">•</span>
+              <span className="flex items-center gap-1.5 text-slate-700 dark:text-slate-300">
+                <Users size={16} className="text-brand-blue" />
+                <span>{tournaments.reduce((acc, t) => acc + (t.participantsCount || 0), 0) || 1240}+ qatnashuvchi</span>
+              </span>
+              <span className="text-slate-300 dark:text-slate-700">•</span>
+              <span className="flex items-center gap-1.5 text-[#EB7C0E] dark:text-orange-400 font-bold">
+                <Gift size={16} className="text-[#EB7C0E]" />
+                <span>Top mukofotlar</span>
+              </span>
+            </div>
           </div>
-        </div>
+        )}
 
         {/* ── 3-TAB SWITCHER (ULTRA-ROUNDED PILL WITH EQUAL DISTRIBUTION) ── */}
-        <div className="relative w-full bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl border border-white/80 dark:border-slate-800/80 p-1.5 sm:p-2 rounded-full grid grid-cols-3 gap-1 sm:gap-2 shadow-sm">
+        <div className="relative w-full bg-white/60 dark:bg-slate-900/60 backdrop-blur-xl border border-white/60 dark:border-slate-800/60 p-1.5 sm:p-2 rounded-full grid grid-cols-3 gap-1 sm:gap-2 shadow-sm">
           
           {/* Tab 1: Musobaqalar */}
           <button
@@ -310,7 +328,10 @@ export default function OlympiadsPage() {
         {/* ── TAB 1: MUSOBAQALAR (TOURNAMENTS GRID MATCHING SCREENSHOT) ── */}
         {/* ══════════════════════════════════════════════════════════════ */}
         {activeTab === "tournaments" && (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5">
+          loading ? (
+            <TournamentsSkeleton />
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5">
             {tournaments.map((item) => {
               const isRegistered = registeredIds.includes(item.id);
               const isLive = item.status === "live";
@@ -318,7 +339,7 @@ export default function OlympiadsPage() {
               return (
                 <div
                   key={item.id}
-                  className="bg-white/80 dark:bg-slate-900/80 rounded-3xl p-6 border border-white/80 dark:border-slate-800/80 shadow-none flex flex-col justify-between gap-5 transition-all"
+                  className="bg-white/60 dark:bg-slate-900/60 backdrop-blur-xl rounded-3xl p-6 border border-white/60 dark:border-slate-800/60 shadow-none flex flex-col justify-between gap-5 transition-all"
                 >
                   <div className="space-y-3.5">
                     {/* Top Row: Subject + Status Badge & Date */}
@@ -445,16 +466,20 @@ export default function OlympiadsPage() {
               );
             })}
           </div>
+          )
         )}
 
         {/* ══════════════════════════════════════════════════════════════ */}
         {/* ── TAB 2: REYTING (3D ISOMETRIC PODIUM LEADERBOARD) ── */}
         {/* ══════════════════════════════════════════════════════════════ */}
         {activeTab === "leaderboard" && (
+          loading || leaderboardLoading ? (
+            <LeaderboardSkeleton />
+          ) : (
           <div className="space-y-4 sm:space-y-6">
             
             {/* Top Toolbar: Tournament Selector & Search */}
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white/80 dark:bg-slate-900/80 p-4 sm:p-5 rounded-3xl border border-white/80 dark:border-slate-800/80 shadow-none">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white/60 dark:bg-slate-900/60 backdrop-blur-xl p-4 sm:p-5 rounded-3xl border border-white/60 dark:border-slate-800/60 shadow-none">
               <div className="flex items-center gap-3.5">
                 <div className="w-11 h-11 rounded-2xl bg-amber-500/15 text-amber-600 dark:text-amber-400 flex items-center justify-center shrink-0 font-bold shadow-sm">
                   <Award size={22} />
@@ -498,7 +523,7 @@ export default function OlympiadsPage() {
 
             {/* ── 3D ISOMETRIC OLYMPIC PODIUM (TOP 3 - PREMIUM GLASSY 3D) ── */}
             {leaderboard.length >= 3 && (
-              <div className="relative w-full bg-gradient-to-b from-white/95 via-slate-50/70 to-white/95 dark:from-slate-900/95 dark:via-slate-850/70 dark:to-slate-900/95 rounded-[2.5rem] p-5 sm:p-8 border border-white/90 dark:border-slate-800 shadow-xl shadow-slate-200/50 dark:shadow-none overflow-hidden">
+              <div className="relative w-full bg-gradient-to-b from-white/70 via-slate-50/50 to-white/70 dark:from-slate-900/70 dark:via-slate-850/50 dark:to-slate-900/70 backdrop-blur-xl rounded-[2.5rem] p-5 sm:p-8 border border-white/60 dark:border-slate-800/60 shadow-none overflow-hidden">
                 
                 {/* Luminous Gold Halo & Ray Glow behind Champion */}
                 <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[28rem] h-[28rem] bg-gradient-to-b from-amber-400/20 via-amber-300/10 to-transparent dark:from-amber-500/15 dark:via-amber-500/5 dark:to-transparent rounded-full blur-3xl pointer-events-none" />
@@ -665,7 +690,7 @@ export default function OlympiadsPage() {
             )}
 
             {/* ── RANKED LIST ── */}
-            <div className="bg-white/80 dark:bg-slate-900/80 rounded-3xl p-4 sm:p-6 border border-white/80 dark:border-slate-800/80 space-y-3">
+            <div className="bg-white/60 dark:bg-slate-900/60 backdrop-blur-xl rounded-3xl p-4 sm:p-6 border border-white/60 dark:border-slate-800/60 space-y-3">
               <div className="flex items-center justify-between pb-2 border-b border-slate-100 dark:border-slate-800">
                 <h4 className="font-black font-fredoka text-sm sm:text-base text-slate-900 dark:text-white">
                   Ishtirokchilar Natijalari
@@ -695,7 +720,7 @@ export default function OlympiadsPage() {
                           className={`p-3 sm:p-3.5 rounded-2xl border flex items-center justify-between gap-3 transition-all ${
                             isSelf
                               ? "bg-blue-50/80 dark:bg-blue-950/30 border-brand-blue/40 shadow-sm"
-                              : "bg-slate-50/60 dark:bg-slate-800/40 hover:bg-slate-100/70 dark:hover:bg-slate-800/70 border-slate-100 dark:border-slate-800/80"
+                              : "bg-white/40 dark:bg-slate-800/30 hover:bg-white/70 dark:hover:bg-slate-800/60 border-slate-100/60 dark:border-slate-800/60"
                           }`}
                         >
                           {/* Left: Rank + Avatar + Name + Submission Date */}
@@ -761,7 +786,7 @@ export default function OlympiadsPage() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5 sm:gap-5 pt-1">
               
               {/* Card 1: Mukofotlar & Sovrinlar */}
-              <div className="bg-white/80 dark:bg-slate-900/80 rounded-3xl p-4 sm:p-6 border border-white/80 dark:border-slate-800/80 space-y-3.5 shadow-none">
+              <div className="bg-white/60 dark:bg-slate-900/60 backdrop-blur-xl rounded-3xl p-4 sm:p-6 border border-white/60 dark:border-slate-800/60 space-y-3.5 shadow-none">
                 <div className="flex items-center gap-3">
                   <div className="w-9 h-9 rounded-xl bg-amber-500/10 text-amber-600 dark:text-amber-400 flex items-center justify-center shrink-0 font-bold">
                     <Gift size={18} />
@@ -787,7 +812,7 @@ export default function OlympiadsPage() {
                       return (
                         <div
                           key={idx}
-                          className="flex items-center gap-2.5 p-2.5 sm:p-3 rounded-2xl bg-slate-50/60 dark:bg-slate-800/40 border border-slate-100 dark:border-slate-800/80"
+                          className="flex items-center gap-2.5 p-2.5 sm:p-3 rounded-2xl bg-white/40 dark:bg-slate-800/30 border border-slate-100/50 dark:border-slate-800/40"
                         >
                           <span className="shrink-0">
                             {idx === 0 ? (
@@ -808,7 +833,7 @@ export default function OlympiadsPage() {
                       );
                     })
                   ) : (
-                    <div className="p-3 rounded-2xl bg-slate-50/60 dark:bg-slate-800/40 border border-slate-100 dark:border-slate-800/80 text-slate-500 font-medium">
+                    <div className="p-3 rounded-2xl bg-white/40 dark:bg-slate-800/30 border border-slate-100/50 dark:border-slate-800/40 text-slate-500 font-medium">
                       {selectedTournament?.prizePool || "Top o'rinlar uchun esdalik sovg'alari va sertifikatlar"}
                     </div>
                   )}
@@ -816,7 +841,7 @@ export default function OlympiadsPage() {
               </div>
 
               {/* Card 2: Baholash & Nizom Qoidalari */}
-              <div className="bg-white/80 dark:bg-slate-900/80 rounded-3xl p-4 sm:p-6 border border-white/80 dark:border-slate-800/80 space-y-3.5 shadow-none">
+              <div className="bg-white/60 dark:bg-slate-900/60 backdrop-blur-xl rounded-3xl p-4 sm:p-6 border border-white/60 dark:border-slate-800/60 space-y-3.5 shadow-none">
                 <div className="flex items-center gap-3">
                   <div className="w-9 h-9 rounded-xl bg-blue-500/10 text-brand-blue dark:text-blue-400 flex items-center justify-center shrink-0 font-bold">
                     <ShieldCheck size={18} />
@@ -832,21 +857,21 @@ export default function OlympiadsPage() {
                 </div>
 
                 <div className="space-y-2 text-xs">
-                  <div className="flex items-start gap-2.5 p-2.5 sm:p-3 rounded-2xl bg-slate-50/60 dark:bg-slate-800/40 border border-slate-100 dark:border-slate-800/80">
+                  <div className="flex items-start gap-2.5 p-2.5 sm:p-3 rounded-2xl bg-white/40 dark:bg-slate-800/30 border border-slate-100/50 dark:border-slate-800/40">
                     <CheckCircle2 size={15} className="text-emerald-500 shrink-0 mt-0.5" />
                     <p className="text-slate-600 dark:text-slate-300 font-medium leading-relaxed">
                       Har bir to'g'ri javob uchun belgilangan ball beriladi va xatolar uchun ball chegirilmaydi.
                     </p>
                   </div>
 
-                  <div className="flex items-start gap-2.5 p-2.5 sm:p-3 rounded-2xl bg-slate-50/60 dark:bg-slate-800/40 border border-slate-100 dark:border-slate-800/80">
+                  <div className="flex items-start gap-2.5 p-2.5 sm:p-3 rounded-2xl bg-white/40 dark:bg-slate-800/30 border border-slate-100/50 dark:border-slate-800/40">
                     <Clock size={15} className="text-brand-blue shrink-0 mt-0.5" />
                     <p className="text-slate-600 dark:text-slate-300 font-medium leading-relaxed">
                       Ballar teng kelganda, testni kamroq vaqtda bajargan ishtirokchi yuqori o'ringa loyiq ko'riladi.
                     </p>
                   </div>
 
-                  <div className="flex items-start gap-2.5 p-2.5 sm:p-3 rounded-2xl bg-slate-50/60 dark:bg-slate-800/40 border border-slate-100 dark:border-slate-800/80">
+                  <div className="flex items-start gap-2.5 p-2.5 sm:p-3 rounded-2xl bg-white/40 dark:bg-slate-800/30 border border-slate-100/50 dark:border-slate-800/40">
                     <Award size={15} className="text-amber-500 shrink-0 mt-0.5" />
                     <p className="text-slate-600 dark:text-slate-300 font-medium leading-relaxed">
                       Barcha g'oliblar natijasi moderatorlar tomonidan tekshirilib, diplomlar topshiriladi.
@@ -858,13 +883,17 @@ export default function OlympiadsPage() {
             </div>
 
           </div>
+          )
         )}
 
         {/* ══════════════════════════════════════════════════════════════ */}
         {/* ── TAB 3: IZOHLAR (COMMENTS) ── */}
         {/* ══════════════════════════════════════════════════════════════ */}
         {activeTab === "comments" && (
-          <div className="w-full bg-white/80 dark:bg-slate-900/80 rounded-3xl p-6 border border-white/80 dark:border-slate-800/80 space-y-5 shadow-none">
+          loading ? (
+            <CommentsSkeleton />
+          ) : (
+          <div className="w-full bg-white/60 dark:bg-slate-900/60 backdrop-blur-xl rounded-3xl p-6 border border-white/60 dark:border-slate-800/60 space-y-5 shadow-none">
             
             <form onSubmit={handleAddComment} className="flex flex-col sm:flex-row gap-3">
               <input
@@ -891,7 +920,7 @@ export default function OlympiadsPage() {
                 return (
                   <div
                     key={comment.id}
-                    className="p-4 rounded-2xl bg-slate-50/60 dark:bg-slate-800/40 border border-slate-100 dark:border-slate-800/60 flex items-start gap-3.5"
+                    className="p-4 rounded-2xl bg-white/40 dark:bg-slate-800/30 border border-slate-100/50 dark:border-slate-800/40 flex items-start gap-3.5"
                   >
                     <img
                       src={comment.avatar}
@@ -939,6 +968,7 @@ export default function OlympiadsPage() {
             </div>
 
           </div>
+          )
         )}
 
       </div>
@@ -947,7 +977,7 @@ export default function OlympiadsPage() {
       <AnimatePresence>
         {selectedItem && (
           <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm">
-            <div className="relative w-full max-w-md bg-white dark:bg-slate-900 rounded-3xl p-6 border border-white/80 dark:border-slate-800 shadow-xl space-y-4">
+            <div className="relative w-full max-w-md bg-white/95 dark:bg-slate-900/95 backdrop-blur-2xl rounded-3xl p-6 border border-white/80 dark:border-slate-800 shadow-2xl space-y-4">
               <button
                 onClick={() => setSelectedItem(null)}
                 className="absolute top-4 right-4 p-1.5 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-500 hover:text-slate-900 dark:hover:text-white"
