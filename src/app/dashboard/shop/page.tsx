@@ -112,7 +112,7 @@ export default function StudentShopPage() {
           </div>
 
           {/* Coins Balance Card */}
-          <div className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl border border-slate-200/50 dark:border-slate-800/50 rounded-3xl p-4 flex items-center gap-3 shadow-sm shrink-0">
+          <div className="bg-white/60 dark:bg-slate-900/60 backdrop-blur-xl border border-white/60 dark:border-slate-800/60 rounded-3xl p-4 flex items-center gap-3 shadow-none shrink-0">
             <div className="w-10 h-10 rounded-2xl bg-amber-500 text-white flex items-center justify-center font-bold shadow-md shadow-amber-500/20 shrink-0">
               <Coins size={20} />
             </div>
@@ -205,7 +205,7 @@ export default function StudentShopPage() {
                     <div
                       key={item.id}
                       onClick={() => setPurchasingItem(item)}
-                      className="bg-white/70 dark:bg-slate-900/70 backdrop-blur-2xl border border-white/80 dark:border-slate-800/80 rounded-[2rem] overflow-hidden shadow-lg shadow-black/5 hover:border-amber-500/40 dark:hover:border-amber-500/40 active:scale-[0.99] transition-all flex flex-col justify-between text-left group cursor-pointer"
+                      className="bg-white/60 dark:bg-slate-900/60 backdrop-blur-xl border border-white/60 dark:border-slate-800/60 rounded-[2rem] overflow-hidden shadow-none hover:border-amber-500/40 dark:hover:border-amber-500/40 active:scale-[0.99] transition-all flex flex-col justify-between text-left group cursor-pointer"
                     >
                       {/* Top Full-Bleed Image (Touches top, left, right directly) */}
                       <div className="relative w-full h-48 bg-slate-100 dark:bg-slate-800 overflow-hidden">
@@ -303,7 +303,7 @@ export default function StudentShopPage() {
                   return (
                     <div
                       key={order.id}
-                      className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl rounded-2xl p-4 border border-slate-200/80 dark:border-slate-800 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-sm"
+                      className="bg-white/60 dark:bg-slate-900/60 backdrop-blur-xl rounded-2xl p-4 border border-white/60 dark:border-slate-800/60 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-none"
                     >
                       <div className="flex items-center gap-3">
                         <div className="w-10 h-10 rounded-xl bg-amber-500/10 text-amber-500 flex items-center justify-center font-bold shrink-0">
@@ -342,7 +342,7 @@ export default function StudentShopPage() {
       {/* CONFIRMATION MODAL (Rendered directly into document.body via Portal) */}
       {purchasingItem && mounted && createPortal(
         <div className="fixed inset-0 z-[9999999] flex items-center justify-center p-4 bg-slate-950/70 backdrop-blur-sm pointer-events-auto">
-          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 max-w-sm w-full shadow-xl relative space-y-4 text-left">
+          <div className="bg-white/95 dark:bg-slate-900/95 backdrop-blur-2xl border border-white/80 dark:border-slate-800 rounded-3xl p-6 max-w-sm w-full shadow-2xl relative space-y-4 text-left">
             <button
               type="button"
               onClick={() => setPurchasingItem(null)}

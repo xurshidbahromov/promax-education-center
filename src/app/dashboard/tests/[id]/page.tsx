@@ -100,39 +100,39 @@ export default function TestDetailsPage() {
 
  {/* ── TEST STATS (Minimalist Grid) ── */}
  <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mt-2">
- {/* Savollar */}
- <div className="bg-white/60 dark:bg-slate-900/60 backdrop-blur-xl rounded-[20px] p-4 border border-gray-200/50 dark:border-slate-800/50 flex flex-col items-center justify-center text-center gap-1 shadow-sm">
- <BookOpen size={18} className="text-brand-blue mb-1" />
- <span className="text-2xl font-bold text-slate-800 dark:text-slate-100 font-fredoka leading-none">{test.total_questions}</span>
- <span className="text-[12px] font-medium text-slate-500 dark:text-slate-400">Savollar</span>
- </div>
+   {/* Savollar */}
+   <div className="bg-white/60 dark:bg-slate-900/60 backdrop-blur-xl rounded-2xl p-4 border border-white/60 dark:border-slate-800/60 flex flex-col items-center justify-center text-center gap-1 shadow-none">
+     <BookOpen size={18} className="text-brand-blue mb-1" />
+     <span className="text-2xl font-bold text-slate-800 dark:text-slate-100 font-fredoka leading-none">{test.total_questions}</span>
+     <span className="text-[12px] font-medium text-slate-500 dark:text-slate-400">Savollar</span>
+   </div>
 
- {/* Vaqt */}
- <div className="bg-white/60 dark:bg-slate-900/60 backdrop-blur-xl rounded-[20px] p-4 border border-gray-200/50 dark:border-slate-800/50 flex flex-col items-center justify-center text-center gap-1 shadow-sm">
- <Clock size={18} className="text-orange-500 mb-1" />
- <span className="text-2xl font-bold text-slate-800 dark:text-slate-100 font-fredoka leading-none">{test.duration_minutes || "∞"}</span>
- <span className="text-[12px] font-medium text-slate-500 dark:text-slate-400">Daqiqa</span>
- </div>
+   {/* Vaqt */}
+   <div className="bg-white/60 dark:bg-slate-900/60 backdrop-blur-xl rounded-2xl p-4 border border-white/60 dark:border-slate-800/60 flex flex-col items-center justify-center text-center gap-1 shadow-none">
+     <Clock size={18} className="text-orange-500 mb-1" />
+     <span className="text-2xl font-bold text-slate-800 dark:text-slate-100 font-fredoka leading-none">{test.duration_minutes || "∞"}</span>
+     <span className="text-[12px] font-medium text-slate-500 dark:text-slate-400">Daqiqa</span>
+   </div>
 
- {/* Qiyinlik */}
- <div className="bg-white/60 dark:bg-slate-900/60 backdrop-blur-xl rounded-[20px] p-4 border border-gray-200/50 dark:border-slate-800/50 flex flex-col items-center justify-center text-center gap-1 shadow-sm">
- <BarChart size={18} className="text-emerald-500 mb-1" />
- <span className="text-[16px] font-bold text-slate-800 dark:text-slate-100 leading-none capitalize mt-1 mb-1">{test.difficulty_level}</span>
- <span className="text-[12px] font-medium text-slate-500 dark:text-slate-400">Qiyinlik</span>
- </div>
+   {/* Qiyinlik */}
+   <div className="bg-white/60 dark:bg-slate-900/60 backdrop-blur-xl rounded-2xl p-4 border border-white/60 dark:border-slate-800/60 flex flex-col items-center justify-center text-center gap-1 shadow-none">
+     <BarChart size={18} className="text-emerald-500 mb-1" />
+     <span className="text-[16px] font-bold text-slate-800 dark:text-slate-100 leading-none capitalize mt-1 mb-1">{test.difficulty_level}</span>
+     <span className="text-[12px] font-medium text-slate-500 dark:text-slate-400">Qiyinlik</span>
+   </div>
 
- {/* Eng yaxshi natija */}
- <div className="bg-white/60 dark:bg-slate-900/60 backdrop-blur-xl rounded-[20px] p-4 border border-gray-200/50 dark:border-slate-800/50 flex flex-col items-center justify-center text-center gap-1 shadow-sm">
- <Award size={18} className="text-purple-500 mb-1" />
- <span className="text-2xl font-bold text-slate-800 dark:text-slate-100 font-fredoka leading-none">
- {bestScore !== null ? `${bestScore.toFixed(0)}%` : "0%"}
- </span>
- <span className="text-[12px] font-medium text-slate-500 dark:text-slate-400">Eng yaxshi</span>
- </div>
+   {/* Eng yaxshi natija */}
+   <div className="bg-white/60 dark:bg-slate-900/60 backdrop-blur-xl rounded-2xl p-4 border border-white/60 dark:border-slate-800/60 flex flex-col items-center justify-center text-center gap-1 shadow-none">
+     <Award size={18} className="text-purple-500 mb-1" />
+     <span className="text-2xl font-bold text-slate-800 dark:text-slate-100 font-fredoka leading-none">
+       {bestScore !== null ? `${bestScore.toFixed(0)}%` : "0%"}
+     </span>
+     <span className="text-[12px] font-medium text-slate-500 dark:text-slate-400">Eng yaxshi</span>
+   </div>
  </div>
 
  {/* ── TEST RULES ── */}
- <div className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl rounded-[28px] p-6 sm:p-8 border border-gray-200/50 dark:border-slate-800/50 shadow-sm flex flex-col gap-5 mt-2">
+ <div className="bg-white/60 dark:bg-slate-900/60 backdrop-blur-xl rounded-3xl p-6 sm:p-8 border border-white/60 dark:border-slate-800/60 shadow-none flex flex-col gap-5 mt-2">
  <h2 className="text-[16px] font-bold text-slate-800 dark:text-slate-100 flex items-center gap-2">
  <AlertCircle className="text-brand-blue" size={18} />
  Test qoidalari

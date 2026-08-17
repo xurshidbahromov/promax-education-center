@@ -67,7 +67,7 @@ export default function SubjectsList() {
  animate={{ opacity: 1, y: 0 }}
  whileTap={{ scale: 0.98 }}
  transition={{ delay: index * 0.05 }}
- className="bg-white dark:bg-slate-900 rounded-[1.5rem] overflow-hidden shadow-sm border border-slate-200 dark:border-slate-800 transition-all duration-300 flex flex-col h-[280px] cursor-pointer relative group/card w-full"
+ className="bg-white/60 dark:bg-slate-900/60 backdrop-blur-xl rounded-[1.5rem] overflow-hidden shadow-none border border-white/60 dark:border-slate-800/60 transition-all duration-300 flex flex-col h-[280px] cursor-pointer relative group/card w-full"
  >
  {/* Top 40% Image */}
  <div className="relative h-[40%] w-full bg-slate-100 dark:bg-slate-800 shrink-0">
@@ -87,7 +87,7 @@ export default function SubjectsList() {
  </div>
 
  {/* Bottom 60% Content */}
- <div className="p-5 flex flex-col flex-1 relative z-10 bg-white dark:bg-slate-900">
+ <div className="p-5 flex flex-col flex-1 relative z-10">
  <h3 className="text-xl font-bold text-slate-800 dark:text-slate-100 mb-1.5 leading-tight tracking-wide line-clamp-1">
  {subject.title}
  </h3>
@@ -96,7 +96,7 @@ export default function SubjectsList() {
  </p>
  
  {/* Bottom Row: Minimal UI & Action Button */}
- <div className="flex items-center justify-between mt-auto pt-4 border-t border-slate-100 dark:border-slate-800">
+ <div className="flex items-center justify-between mt-auto pt-4 border-t border-slate-200/50 dark:border-slate-800/50">
  <div className="flex items-center gap-2">
  <BookOpen className="w-4 h-4 text-slate-400 dark:text-slate-500" />
  <span className="text-xs text-slate-500 dark:text-slate-400 font-medium tracking-wide">{t('dashboard.active_course') === 'dashboard.active_course' ? "Faol Dars" : t('dashboard.active_course')}</span>

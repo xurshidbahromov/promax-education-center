@@ -28,7 +28,7 @@ export default function AnnouncementsList() {
  const { data: announcements, isLoading } = useAnnouncements();
 
  return (
- <div className="bg-white/40 dark:bg-slate-900/40 backdrop-blur-xl p-4 sm:p-6 rounded-3xl border border-white/60 dark:border-slate-800/60 shadow-lg relative overflow-hidden h-full flex flex-col group">
+ <div className="bg-white/60 dark:bg-slate-900/60 backdrop-blur-xl p-4 sm:p-6 rounded-3xl border border-white/60 dark:border-slate-800/60 shadow-none relative overflow-hidden h-full flex flex-col group">
  <div className="absolute top-0 right-0 w-40 h-40 bg-brand-blue/10 rounded-full blur-[60px] -z-10 pointer-events-none transition-all duration-700 group-active:scale-95"></div>
  
  <div className="flex items-center justify-between mb-6 relative z-10">

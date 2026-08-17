@@ -64,7 +64,7 @@ export default function SubjectDetailPage() {
  </button>
 
  {/* Subject Banner */}
- <div className="bg-white/40 dark:bg-slate-900/40 backdrop-blur-xl border border-white/60 dark:border-slate-800/60 rounded-[2rem] md:rounded-[3rem] overflow-hidden shadow-lg flex flex-col relative">
+ <div className="bg-white/60 dark:bg-slate-900/60 backdrop-blur-xl border border-white/60 dark:border-slate-800/60 rounded-[2rem] md:rounded-[3rem] overflow-hidden shadow-none flex flex-col relative">
  
  {/* Full-width Cover Image */}
  <div className="w-full h-48 md:h-64 relative bg-gradient-to-br from-brand-blue to-blue-900 flex items-center justify-center text-white shrink-0">
@@ -79,7 +79,7 @@ export default function SubjectDetailPage() {
  </div>
  
  {/* Content Area */}
- <div className="p-6 sm:p-8 md:p-10 flex-1 bg-white/40 dark:bg-slate-900/40">
+ <div className="p-6 sm:p-8 md:p-10 flex-1">
  <h1 className="text-3xl sm:text-4xl lg:text-5xl font-semibold text-slate-800 dark:text-slate-100 font-fredoka uppercase tracking-tighter mb-3">
  {subject.title}
  </h1>
@@ -97,7 +97,7 @@ export default function SubjectDetailPage() {
  </h2>
 
  {lessons.length === 0 ? (
- <div className="bg-white/40 dark:bg-slate-900/40 backdrop-blur-xl rounded-3xl border border-white/60 dark:border-slate-800/60 p-8 text-center shadow-sm">
+ <div className="bg-white/60 dark:bg-slate-900/60 backdrop-blur-xl rounded-3xl border border-white/60 dark:border-slate-800/60 p-8 text-center shadow-none">
  <p className="text-gray-500 dark:text-gray-400 font-medium">Hozircha bu fanda darslar kiritilmagan.</p>
  </div>
  ) : (
@@ -109,10 +109,10 @@ export default function SubjectDetailPage() {
  animate={{ opacity: 1, x: 0 }}
  whileTap={{ scale: 0.96 }}
  transition={{ delay: index * 0.05 }}
- className="bg-white/60 dark:bg-slate-800/60 backdrop-blur-md rounded-2xl border border-white/80 dark:border-slate-700/80 p-4 sm:p-5 shadow-sm active:scale-95 transition-all duration-300 flex items-center gap-3 sm:gap-5 group"
+ className="bg-white/60 dark:bg-slate-900/60 backdrop-blur-xl rounded-2xl border border-white/60 dark:border-slate-700/50 p-4 sm:p-5 shadow-none active:scale-95 transition-all duration-300 flex items-center gap-3 sm:gap-5 group"
  >
  <div className="w-10 h-10 sm:w-12 sm:h-12 shrink-0 rounded-full bg-brand-blue/10 dark:bg-brand-blue/20 flex items-center justify-center text-brand-blue font-medium font-fredoka text-base sm:text-lg group-active:bg-brand-blue group-active:text-white transition-colors">
- {index+ 1}
+ {index + 1}
  </div>
  <div className="flex-1">
  <h3 className="text-base sm:text-lg font-medium text-slate-800 dark:text-slate-100 group-active:text-brand-blue transition-colors line-clamp-2 sm:line-clamp-1">

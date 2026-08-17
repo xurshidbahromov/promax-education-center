@@ -12,7 +12,7 @@ export default function LeaderboardWidget({ userId }: { userId?: string }) {
  const { data: userRank } = useUserRank(userId);
 
  return (
- <div className="bg-white/40 dark:bg-slate-900/40 backdrop-blur-xl p-4 sm:p-6 rounded-3xl border border-white/60 dark:border-slate-800/60 shadow-lg flex-1 flex flex-col min-h-[300px] relative overflow-hidden h-full group">
+ <div className="bg-white/60 dark:bg-slate-900/60 backdrop-blur-xl p-4 sm:p-6 rounded-3xl border border-white/60 dark:border-slate-800/60 shadow-none flex-1 flex flex-col min-h-[300px] relative overflow-hidden h-full group">
  <div className="absolute top-0 right-0 w-48 h-48 bg-yellow-400/10 rounded-full blur-[70px] pointer-events-none -z-10 transition-transform duration-700 group-active:scale-95"></div>
  
  <div className="flex items-center justify-between mb-6 relative z-10">

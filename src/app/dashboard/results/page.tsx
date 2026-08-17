@@ -77,70 +77,70 @@ export default function ResultsPage() {
  </h1>
  </div>
 
- <div className="flex flex-col xl:flex-row gap-3">
- {/* Minimalist Search */}
- <div className="flex items-center gap-2.5 bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl p-2 rounded-[20px] border border-gray-200/50 dark:border-slate-800/50 shadow-sm focus-within:ring-2 focus-within:ring-brand-blue/20 transition-all flex-1">
- <div className="w-9 h-9 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-400 shrink-0">
- <Search size={16} />
- </div>
- <input
- type="text"
- placeholder="Imtihon nomini qidiring..."
- className="bg-transparent border-none focus:ring-0 text-[14px] w-full text-slate-700 dark:text-slate-200 placeholder-slate-400 py-1.5 px-1 outline-none"
- value={searchQuery}
- onChange={(e) => setSearchQuery(e.target.value)}
- />
- </div>
+        <div className="flex flex-col xl:flex-row gap-3">
+          {/* Minimalist Search */}
+          <div className="flex items-center gap-2.5 bg-white/60 dark:bg-slate-900/60 backdrop-blur-xl p-2 rounded-2xl border border-white/60 dark:border-slate-800/60 shadow-none focus-within:ring-2 focus-within:ring-brand-blue/20 transition-all flex-1">
+            <div className="w-9 h-9 rounded-xl bg-slate-100/80 dark:bg-slate-800/80 flex items-center justify-center text-slate-400 shrink-0">
+              <Search size={16} />
+            </div>
+            <input
+              type="text"
+              placeholder="Imtihon nomini qidiring..."
+              className="bg-transparent border-none focus:ring-0 text-[14px] w-full text-slate-700 dark:text-slate-200 placeholder-slate-400 py-1.5 px-1 outline-none"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+            />
+          </div>
 
- {/* Filters */}
- <div className="flex gap-2 overflow-x-auto no-scrollbar pb-1">
- <div className="relative min-w-[140px]">
- <select
- className="w-full appearance-none bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl border border-gray-200/50 dark:border-slate-800/50 rounded-[18px] pl-4 pr-10 py-3 text-[13px] font-medium text-slate-600 dark:text-slate-300 outline-none focus:ring-2 focus:ring-brand-blue/20 cursor-pointer shadow-sm transition-all h-full"
- value={filterSubject}
- onChange={(e) => setFilterSubject(e.target.value)}
- >
- <option value="all">Barcha fanlar</option>
- <option value="matematika">Matematika</option>
- <option value="ingliz_tili">Ingliz tili</option>
- <option value="ona_tili">Ona tili</option>
- <option value="tarix">Tarix</option>
- <option value="biologiya">Biologiya</option>
- <option value="fizika">Fizika</option>
- <option value="kimyo">Kimyo</option>
- </select>
- <ChevronDown size={16} className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
- </div>
+          {/* Filters */}
+          <div className="flex gap-2 overflow-x-auto no-scrollbar pb-1">
+            <div className="relative min-w-[140px]">
+              <select
+                className="w-full appearance-none bg-white/60 dark:bg-slate-900/60 backdrop-blur-xl border border-white/60 dark:border-slate-800/60 rounded-2xl pl-4 pr-10 py-3 text-[13px] font-bold text-slate-600 dark:text-slate-300 outline-none focus:ring-2 focus:ring-brand-blue/20 cursor-pointer shadow-none transition-all h-full"
+                value={filterSubject}
+                onChange={(e) => setFilterSubject(e.target.value)}
+              >
+                <option value="all">Barcha fanlar</option>
+                <option value="matematika">Matematika</option>
+                <option value="ingliz_tili">Ingliz tili</option>
+                <option value="ona_tili">Ona tili</option>
+                <option value="tarix">Tarix</option>
+                <option value="biologiya">Biologiya</option>
+                <option value="fizika">Fizika</option>
+                <option value="kimyo">Kimyo</option>
+              </select>
+              <ChevronDown size={16} className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
+            </div>
 
- <div className="relative min-w-[140px]">
- <select
- className="w-full appearance-none bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl border border-gray-200/50 dark:border-slate-800/50 rounded-[18px] pl-4 pr-10 py-3 text-[13px] font-medium text-slate-600 dark:text-slate-300 outline-none focus:ring-2 focus:ring-brand-blue/20 cursor-pointer shadow-sm transition-all h-full"
- value={filterTestType}
- onChange={(e) => setFilterTestType(e.target.value)}
- >
- <option value="all">Barcha turlar</option>
- <option value="dtm">DTM</option>
- <option value="quiz">Quiz</option>
- <option value="topic">Mavzu</option>
- </select>
- <ChevronDown size={16} className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
- </div>
+            <div className="relative min-w-[140px]">
+              <select
+                className="w-full appearance-none bg-white/60 dark:bg-slate-900/60 backdrop-blur-xl border border-white/60 dark:border-slate-800/60 rounded-2xl pl-4 pr-10 py-3 text-[13px] font-bold text-slate-600 dark:text-slate-300 outline-none focus:ring-2 focus:ring-brand-blue/20 cursor-pointer shadow-none transition-all h-full"
+                value={filterTestType}
+                onChange={(e) => setFilterTestType(e.target.value)}
+              >
+                <option value="all">Barcha turlar</option>
+                <option value="dtm">DTM</option>
+                <option value="quiz">Quiz</option>
+                <option value="topic">Mavzu</option>
+              </select>
+              <ChevronDown size={16} className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
+            </div>
 
- <div className="relative min-w-[140px]">
- <select
- className="w-full appearance-none bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl border border-gray-200/50 dark:border-slate-800/50 rounded-[18px] pl-4 pr-10 py-3 text-[13px] font-medium text-slate-600 dark:text-slate-300 outline-none focus:ring-2 focus:ring-brand-blue/20 cursor-pointer shadow-sm transition-all h-full"
- value={filterStatus}
- onChange={(e) => setFilterStatus(e.target.value)}
- >
- <option value="all">Barcha holatlar</option>
- <option value="passed">O'tgan</option>
- <option value="failed">O'tmagan</option>
- </select>
- <ChevronDown size={16} className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
- </div>
- </div>
- </div>
- </div>
+            <div className="relative min-w-[140px]">
+              <select
+                className="w-full appearance-none bg-white/60 dark:bg-slate-900/60 backdrop-blur-xl border border-white/60 dark:border-slate-800/60 rounded-2xl pl-4 pr-10 py-3 text-[13px] font-bold text-slate-600 dark:text-slate-300 outline-none focus:ring-2 focus:ring-brand-blue/20 cursor-pointer shadow-none transition-all h-full"
+                value={filterStatus}
+                onChange={(e) => setFilterStatus(e.target.value)}
+              >
+                <option value="all">Barcha holatlar</option>
+                <option value="passed">O'tgan</option>
+                <option value="failed">O'tmagan</option>
+              </select>
+              <ChevronDown size={16} className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
+            </div>
+          </div>
+        </div>
+      </div>
 
  {/* ── RESULTS LIST ── */}
  <div className="flex flex-col gap-4 mt-2">

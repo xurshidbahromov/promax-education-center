@@ -106,7 +106,7 @@ export default function GameZonePage() {
           </div>
 
           {/* Coins Balance Card */}
-          <div className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl border border-slate-200/50 dark:border-slate-800/50 rounded-3xl p-4 flex items-center gap-3 shadow-sm shrink-0">
+          <div className="bg-white/60 dark:bg-slate-900/60 backdrop-blur-xl border border-white/60 dark:border-slate-800/60 rounded-3xl p-4 flex items-center gap-3 shadow-none shrink-0">
             <div className="w-10 h-10 rounded-2xl bg-amber-500 text-white flex items-center justify-center font-bold shadow-md shadow-amber-500/20 shrink-0">
               <Coins size={20} />
             </div>
@@ -131,7 +131,7 @@ export default function GameZonePage() {
               return (
                 <div
                   key={game.id}
-                  className="bg-white/70 dark:bg-slate-900/70 backdrop-blur-2xl border border-slate-200/80 dark:border-slate-800/80 rounded-[2rem] p-6 shadow-sm flex flex-col justify-between text-left relative overflow-hidden active:scale-[0.99] transition-all"
+                  className="bg-white/60 dark:bg-slate-900/60 backdrop-blur-xl border border-white/60 dark:border-slate-800/60 rounded-[2rem] p-6 shadow-none flex flex-col justify-between text-left relative overflow-hidden active:scale-[0.99] transition-all"
                 >
                   <div className="space-y-4">
                     <div className="flex items-center justify-between gap-3">

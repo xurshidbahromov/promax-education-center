@@ -37,7 +37,7 @@ export default function ActivityFeed({ userId }: { userId?: string }) {
  const { data: activityFeed, isLoading } = useActivityFeed(userId);
 
  return (
- <div className="bg-white/40 dark:bg-slate-900/40 backdrop-blur-xl p-4 sm:p-6 rounded-3xl border border-white/60 dark:border-slate-800/60 shadow-lg relative overflow-hidden h-full flex flex-col group">
+ <div className="bg-white/60 dark:bg-slate-900/60 backdrop-blur-xl p-4 sm:p-6 rounded-3xl border border-white/60 dark:border-slate-800/60 shadow-none relative overflow-hidden h-full flex flex-col group">
  <div className="absolute -bottom-10 -right-10 w-40 h-40 bg-brand-orange/10 rounded-full blur-[60px] -z-10 pointer-events-none transition-transform duration-700 group-active:scale-95"></div>
  
  <h3 className="text-xl font-medium text-slate-800 dark:text-slate-100 mb-5 flex items-center gap-2 font-fredoka tracking-wide relative z-10">

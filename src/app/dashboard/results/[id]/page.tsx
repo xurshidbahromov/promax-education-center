@@ -123,7 +123,7 @@ export default function ResultDetailPage() {
             </div>
 
             {/* Score Card */}
-            <div className="flex flex-col items-center bg-white dark:bg-slate-800 p-6 rounded-[1.5rem] shadow-md border border-gray-100 dark:border-slate-700 min-w-[180px] text-center">
+            <div className="flex flex-col items-center bg-white/60 dark:bg-slate-800/60 backdrop-blur-xl p-6 rounded-[1.5rem] shadow-none border border-white/60 dark:border-slate-700/50 min-w-[180px] text-center">
               <div className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-1">Umumiy Ball</div>
               <div className={`text-5xl font-black font-fredoka leading-none ${scoreColor}`}>
                 {result.total_score.toFixed(1)}
