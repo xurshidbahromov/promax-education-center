@@ -51,6 +51,7 @@ export const ru = {
  "courses.prep.aut.desc": "Вступительные экзамены AUT и академические библиотеки.",
  "contact.form.success": "Ваше сообщение успешно отправлено!",
  "cta.title": "Постройте свое будущее с нами",
+ "cta.subtitle": "Достигайте своих целей с нашими опытными преподавателями и современными образовательными программами.",
  "beta.pill": "Тест Режим",
  "beta.badge": "PROMAX BETA v2.0",
  "beta.title": "Платформа в Тестовом Режиме",
@@ -304,7 +305,10 @@ export const ru = {
  "sidebar.profile": "Профиль",
  "sidebar.logout": "Выйти",
 
- "dashboard.welcome": "С возвращением",
+ "dashboard.welcome": "Добро пожаловать",
+ "dashboard.active_course": "Активный курс",
+ "dashboard.chart.monthly": "Ежемесячные Результаты",
+ "locale": "ru-RU",
  "dashboard.game_zone": "Игровая Зона",
  "dashboard.stats.coins": "Коины",
  "dashboard.stats.coins.trend": "на этой неделе",
@@ -406,6 +410,8 @@ export const ru = {
  "profile.error_update": "Ошибка при обновлении профиля",
 
  // Profile Menu and Subviews
+ "profile.menu.statistics": "Статистика",
+ "profile.menu.statistics_desc": "Статистика тестов и результатов",
  "profile.menu.settings": "Настройки",
  "profile.menu.settings_desc": "Личная информация",
  "profile.menu.parental": "Безопасность",

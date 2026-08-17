@@ -308,6 +308,9 @@ export const en = {
  "sidebar.logout": "Logout",
 
  "dashboard.welcome": "Welcome Back",
+ "dashboard.active_course": "Active Course",
+ "dashboard.chart.monthly": "Monthly Results",
+ "locale": "en-US",
  "dashboard.game_zone": "Game Zone",
  "dashboard.stats.coins": "Coins",
  "dashboard.stats.coins.trend": "this week",
@@ -407,6 +410,8 @@ export const en = {
  "profile.error_update": "Error updating profile",
 
  // Profile Menu and Subviews
+ "profile.menu.statistics": "Statistics",
+ "profile.menu.statistics_desc": "Tests and results statistics",
  "profile.menu.settings": "Settings",
  "profile.menu.settings_desc": "Customize your experience",
  "profile.menu.parental": "Security",
