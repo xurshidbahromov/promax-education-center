@@ -9,21 +9,30 @@ import {
   ArrowRight,
   Plus,
   Trash2,
+  Save,
   CheckCircle2,
   BookOpen,
+  Clock,
   HelpCircle,
   X,
   Lock,
   Image as ImageIcon,
   UploadCloud,
   Loader2,
-  Calculator
+  Calculator,
+  Trophy,
+  Award
 } from "lucide-react";
-import { getTestById, updateTest, uploadQuestionImage, type Subject, type TestType, type Question } from "@/lib/tests";
 import MathRenderer from "@/components/MathRenderer";
 import { InlineMathPanel } from "@/components/MathToolbar";
 import { useLanguage } from "@/context/LanguageContext";
-import { createClient } from "@/utils/supabase/client";
+import {
+  AdminTournament,
+  TournamentQuestion,
+  getTournamentById,
+  saveAdminTournament
+} from "@/lib/admin-queries";
+import { uploadQuestionImage } from "@/lib/tests";
 
 interface PageProps {
   params: Promise<{ id: string }>;
@@ -31,29 +40,21 @@ interface PageProps {
 
 type Step = "basic" | "questions" | "preview";
 
-interface UIQuestion extends Omit<Question, "test_id"> {
-  id: string;
-  isNew?: boolean;
-}
-
-const SUBJECT_OPTIONS: { value: Subject; label: string }[] = [
-  { value: "math", label: "Matematika" },
-  { value: "english", label: "Ingliz tili" },
-  { value: "physics", label: "Fizika" },
-  { value: "chemistry", label: "Kimyo" },
-  { value: "biology", label: "Biologiya" },
-  { value: "general", label: "Umumiy" }
+const SUBJECT_OPTIONS = [
+  "Matematika",
+  "Fizika",
+  "Ona Tili",
+  "Ingliz Tili",
+  "Tarix",
+  "Biologiya",
+  "Kimyo",
+  "Huquq",
+  "Dasturlash & IT",
+  "Mantiqiy Fikrlash"
 ];
 
-const TEST_TYPES: { value: TestType; label: string }[] = [
-  { value: "subject", label: "Fan Testi" },
-  { value: "practice", label: "Mashq" },
-  { value: "progress", label: "Baholash" },
-  { value: "mock", label: "Namunaviy Imtihon" }
-];
-
-export default function EditTestPage({ params }: PageProps) {
-  const { id: testId } = use(params);
+export default function EditTournamentPage({ params }: PageProps) {
+  const { id: tournamentId } = use(params);
   const router = useRouter();
   const { t } = useLanguage();
   const [currentStep, setCurrentStep] = useState<Step>("basic");
@@ -62,66 +63,53 @@ export default function EditTestPage({ params }: PageProps) {
 
   // ── STEP 1: BASIC INFO ──
   const [title, setTitle] = useState("");
+  const [subject, setSubject] = useState("Matematika");
   const [description, setDescription] = useState("");
-  const [subject, setSubject] = useState<Subject>("math");
-  const [testType, setTestType] = useState<TestType>("subject");
-  const [difficultyLevel, setDifficultyLevel] = useState<"easy" | "medium" | "hard">("medium");
+  const [startDate, setStartDate] = useState("");
+  const [startTime, setStartTime] = useState("15:00");
   const [durationMinutes, setDurationMinutes] = useState<number | null>(60);
-  const [passingScore, setPassingScore] = useState<number>(60);
-  const [isPublished, setIsPublished] = useState(false);
+  const [entryCoins, setEntryCoins] = useState(0);
+  const [prizePool, setPrizePool] = useState("");
+  const [topPrizesText, setTopPrizesText] = useState("");
+  const [rulesText, setRulesText] = useState("");
+  const [status, setStatus] = useState<"upcoming" | "live" | "finished">("upcoming");
 
   // ── STEP 2: QUESTIONS BUILDER ──
-  const [questions, setQuestions] = useState<UIQuestion[]>([]);
-  const [editingQuestion, setEditingQuestion] = useState<UIQuestion | null>(null);
+  const [questions, setQuestions] = useState<TournamentQuestion[]>([]);
+  const [editingQuestion, setEditingQuestion] = useState<TournamentQuestion | null>(null);
   const [activeMathField, setActiveMathField] = useState<'question' | 'A' | 'B' | 'C' | 'D' | null>(null);
   const [uploadingImg, setUploadingImg] = useState(false);
 
   useEffect(() => {
-    loadData();
-  }, [testId]);
+    loadTournament();
+  }, [tournamentId]);
 
-  const loadData = async () => {
+  const loadTournament = async () => {
     setLoading(true);
-    const supabase = createClient();
-
     try {
-      const { data: testData, error: testError } = await supabase
-        .from("tests")
-        .select("*")
-        .eq("id", testId)
-        .single();
-
-      if (testError || !testData) {
-        toast.error("Test topilmadi");
-        router.push("/admin/tests");
-        return;
-      }
-
-      setTitle(testData.title || "");
-      setDescription(testData.description || "");
-      setSubject(testData.subject || "math");
-      setTestType(testData.test_type || "subject");
-      setDifficultyLevel(testData.difficulty_level || "medium");
-      setDurationMinutes(testData.duration_minutes || 60);
-      setPassingScore(testData.passing_score || 60);
-      setIsPublished(testData.is_published || false);
-
-      const { data: qs } = await supabase
-        .from("questions")
-        .select("*")
-        .eq("test_id", testId)
-        .order("order_index", { ascending: true });
-
-      if (qs) {
-        setQuestions(qs.map((q) => ({ ...q })));
+      const data = await getTournamentById(tournamentId);
+      if (data) {
+        setTitle(data.title || "");
+        setSubject(data.subject || "Matematika");
+        setDescription(data.description || "");
+        setStartDate(data.startDate || "");
+        setStartTime(data.startTime || "15:00");
+        setDurationMinutes(data.durationMinutes || 60);
+        setEntryCoins(data.entryCoins || 0);
+        setPrizePool(data.prizePool || "");
+        setTopPrizesText((data.topPrizes || []).join("\n"));
+        setRulesText((data.rules || []).join("\n"));
+        setStatus(data.status || "upcoming");
+        setQuestions(data.questions || []);
       }
     } catch (err) {
-      toast.error("Ma'lumot yuklashda xatolik");
+      toast.error("Musobaqa ma'lumotlarini yuklashda xatolik");
     } finally {
       setLoading(false);
     }
   };
 
+  // Validation functions for sequential progression
   const canGoToQuestions = () => {
     return title.trim().length > 0;
   };
@@ -137,7 +125,7 @@ export default function EditTestPage({ params }: PageProps) {
     }
     if (targetStep === "questions") {
       if (!canGoToQuestions()) {
-        toast.error("Avval 1-bosqichda test nomini kiriting!");
+        toast.error("Avval 1-bosqichda musobaqa nomini kiriting!");
         return;
       }
       setCurrentStep("questions");
@@ -145,7 +133,7 @@ export default function EditTestPage({ params }: PageProps) {
     }
     if (targetStep === "preview") {
       if (!canGoToQuestions()) {
-        toast.error("Avval 1-bosqichda test nomini kiriting!");
+        toast.error("Avval 1-bosqichda musobaqa nomini kiriting!");
         return;
       }
       if (questions.length === 0) {
@@ -158,16 +146,14 @@ export default function EditTestPage({ params }: PageProps) {
   };
 
   const addQuestion = () => {
-    const newQuestion: UIQuestion = {
+    const newQuestion: TournamentQuestion = {
       id: crypto.randomUUID(),
-      isNew: true,
       question_text: "",
       question_type: "multiple_choice",
       options: { A: "", B: "", C: "", D: "" },
       correct_answer: "A",
       explanation: "",
       points: 1,
-      order_index: questions.length,
       image_url: null
     };
     setEditingQuestion(newQuestion);
@@ -189,9 +175,9 @@ export default function EditTestPage({ params }: PageProps) {
     setQuestions(questions.filter((q) => q.id !== id));
   };
 
-  const handleSaveTest = async (publish: boolean = false) => {
+  const handleSaveTournament = async (publish: boolean = false) => {
     if (!title.trim()) {
-      toast.error("Test nomini kiriting!");
+      toast.error("Musobaqa nomini kiriting!");
       setCurrentStep("basic");
       return;
     }
@@ -202,32 +188,46 @@ export default function EditTestPage({ params }: PageProps) {
     }
 
     setSaving(true);
-    try {
-      await updateTest(testId, {
-        title: title.trim(),
-        description: description.trim() || null,
-        subject,
-        test_type: testType,
-        difficulty_level: difficultyLevel,
-        duration_minutes: durationMinutes,
-        passing_score: passingScore,
-        is_published: publish ? true : isPublished,
-        questions: questions.map((q, index) => ({
-          question_text: q.question_text,
-          question_type: q.question_type,
-          options: q.options || null,
-          correct_answer: q.correct_answer,
-          explanation: q.explanation || null,
-          points: q.points,
-          order_index: index,
-          image_url: q.image_url || null
-        }))
-      });
 
-      toast.success("Test muvaffaqiyatli yangilandi!");
-      router.push(`/admin/tests/${testId}`);
+    const topPrizes = topPrizesText
+      .split("\n")
+      .map((l) => l.trim())
+      .filter(Boolean);
+
+    const rules = rulesText
+      .split("\n")
+      .map((l) => l.trim())
+      .filter(Boolean);
+
+    const finalStatus = publish ? "live" : status;
+
+    const payload: Partial<AdminTournament> = {
+      id: tournamentId,
+      title: title.trim(),
+      subject,
+      description: description.trim(),
+      startDate: startDate.trim() || new Date().toLocaleDateString('uz-UZ'),
+      startTime: startTime.trim(),
+      durationMinutes: Number(durationMinutes) || 60,
+      totalQuestions: questions.length,
+      entryCoins: Number(entryCoins) || 0,
+      prizePool: prizePool.trim() || "Foydali Sovg'alar",
+      topPrizes: topPrizes.length > 0 ? topPrizes : ["Top o'rinlar uchun sovg'alar"],
+      rules: rules.length > 0 ? rules : ["Musobaqa qoidalariga rioya qiling."],
+      status: finalStatus,
+      questions
+    };
+
+    try {
+      const res = await saveAdminTournament(payload);
+      if (res.success) {
+        toast.success("Musobaqa muvaffaqiyatli saqlandi!");
+        router.push(`/admin/tournaments/${tournamentId}`);
+      } else {
+        toast.error("Musobaqa saqlashda xatolik yuz berdi");
+      }
     } catch (error) {
-      console.error("Error updating test:", error);
+      console.error("Save tournament error:", error);
       toast.error("Xatolik yuz berdi");
     } finally {
       setSaving(false);
@@ -245,11 +245,11 @@ export default function EditTestPage({ params }: PageProps) {
 
   return (
     <div className="w-full max-w-[1400px] mx-auto space-y-6 pb-20">
-      {/* ── Page Header ── */}
+      {/* Page Header (1:1 with EditTestPage) */}
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 pb-2 border-b border-slate-200/50 dark:border-slate-800/50">
         <div className="flex items-center gap-3">
           <Link
-            href={`/admin/tests/${testId}`}
+            href={`/admin/tournaments/${tournamentId}`}
             className="p-2 text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 transition-colors"
             title="Orqaga"
           >
@@ -257,15 +257,15 @@ export default function EditTestPage({ params }: PageProps) {
           </Link>
           <div>
             <h1 className="text-3xl font-black text-slate-800 dark:text-slate-100 tracking-tight font-sans-pro">
-              Testni Tahrirlash
+              Musobaqani Tahrirlash
             </h1>
             <p className="text-xs sm:text-sm font-medium text-slate-400 dark:text-slate-500 mt-1">
-              Test parametrlari va savollarini tahrirlang
+              Musobaqa parametrlari va savollarini tahrirlash
             </p>
           </div>
         </div>
 
-        {/* ── Sequential Step Navigation Bar ── */}
+        {/* Sequential Step Navigation Bar (1:1 with EditTestPage) */}
         <div className="flex items-center gap-2 bg-slate-100 dark:bg-slate-800/60 p-1.5 rounded-2xl self-start md:self-auto">
           {/* Step 1 */}
           <button
@@ -320,7 +320,7 @@ export default function EditTestPage({ params }: PageProps) {
         </div>
       </div>
 
-      {/* ── Main Form Container ── */}
+      {/* Main Form Container (Uniform Max-Width & Card Box Scale 1:1) */}
       <div className="max-w-4xl mx-auto">
         {/* STEP 1: Basic Info */}
         {currentStep === "basic" && (
@@ -333,7 +333,7 @@ export default function EditTestPage({ params }: PageProps) {
                     1-Bosqich: Asosiy Ma'lumotlar
                   </h2>
                   <p className="text-xs text-slate-400 font-medium mt-0.5">
-                    Test nomi va parametrlarini tahrirlang
+                    Musobaqa nomi va parametrlarini tahrirlang
                   </p>
                 </div>
               </div>
@@ -345,13 +345,13 @@ export default function EditTestPage({ params }: PageProps) {
             <div className="space-y-4">
               <div>
                 <label className="block text-xs font-bold text-slate-600 dark:text-slate-300 uppercase tracking-wider mb-1.5">
-                  Test Nomi *
+                  Musobaqa Sarlavhasi *
                 </label>
                 <input
                   type="text"
                   value={title}
                   onChange={(e) => setTitle(e.target.value)}
-                  placeholder="Masalan: Matematika 1-Chorak Yakuniy Testi"
+                  placeholder="Masalan: Respublika Matematika Pro Musobaqasi 2026"
                   className="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-brand-blue/30 outline-none text-xs sm:text-sm font-bold text-slate-800 dark:text-slate-100"
                 />
               </div>
@@ -363,7 +363,7 @@ export default function EditTestPage({ params }: PageProps) {
                 <textarea
                   value={description}
                   onChange={(e) => setDescription(e.target.value)}
-                  placeholder="Test haqida qisqacha ma'lumot yoki yo'riqnoma..."
+                  placeholder="Musobaqa haqida qisqacha ma'lumot yoki yo'riqnoma..."
                   className="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-brand-blue/30 outline-none text-xs sm:text-sm font-medium text-slate-800 dark:text-slate-100 resize-none h-24"
                 />
               </div>
@@ -375,48 +375,14 @@ export default function EditTestPage({ params }: PageProps) {
                   </label>
                   <select
                     value={subject}
-                    onChange={(e) => setSubject(e.target.value as Subject)}
+                    onChange={(e) => setSubject(e.target.value)}
                     className="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-brand-blue/30 outline-none text-xs sm:text-sm font-bold text-slate-800 dark:text-slate-100"
                   >
                     {SUBJECT_OPTIONS.map((s) => (
-                      <option key={s.value} value={s.value}>
-                        {s.label}
+                      <option key={s} value={s}>
+                        {s}
                       </option>
                     ))}
-                  </select>
-                </div>
-
-                <div>
-                  <label className="block text-xs font-bold text-slate-600 dark:text-slate-300 uppercase tracking-wider mb-1.5">
-                    Test Turi *
-                  </label>
-                  <select
-                    value={testType}
-                    onChange={(e) => setTestType(e.target.value as TestType)}
-                    className="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-brand-blue/30 outline-none text-xs sm:text-sm font-bold text-slate-800 dark:text-slate-100"
-                  >
-                    {TEST_TYPES.map((t) => (
-                      <option key={t.value} value={t.value}>
-                        {t.label}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-              </div>
-
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                <div>
-                  <label className="block text-xs font-bold text-slate-600 dark:text-slate-300 uppercase tracking-wider mb-1.5">
-                    Qiyinlik Darajasi
-                  </label>
-                  <select
-                    value={difficultyLevel}
-                    onChange={(e) => setDifficultyLevel(e.target.value as any)}
-                    className="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-brand-blue/30 outline-none text-xs sm:text-sm font-bold text-slate-800 dark:text-slate-100"
-                  >
-                    <option value="easy">Oson</option>
-                    <option value="medium">O'rta</option>
-                    <option value="hard">Qiyin</option>
                   </select>
                 </div>
 
@@ -434,29 +400,86 @@ export default function EditTestPage({ params }: PageProps) {
                     className="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-brand-blue/30 outline-none text-xs sm:text-sm font-bold text-slate-800 dark:text-slate-100"
                   />
                 </div>
+              </div>
+
+              {/* Tournament Specific Fields: Date, Time, Prize Pool */}
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                <div>
+                  <label className="block text-xs font-bold text-slate-600 dark:text-slate-300 uppercase tracking-wider mb-1.5">
+                    Boshlanish Sanasi
+                  </label>
+                  <input
+                    type="text"
+                    value={startDate}
+                    onChange={(e) => setStartDate(e.target.value)}
+                    placeholder="Masalan: 20-Avgust, 2026"
+                    className="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-brand-blue/30 outline-none text-xs sm:text-sm font-bold text-slate-800 dark:text-slate-100"
+                  />
+                </div>
 
                 <div>
                   <label className="block text-xs font-bold text-slate-600 dark:text-slate-300 uppercase tracking-wider mb-1.5">
-                    O'tish Bali (%)
+                    Boshlanish Vaqti
                   </label>
                   <input
-                    type="number"
-                    value={passingScore}
-                    onChange={(e) => setPassingScore(parseInt(e.target.value) || 60)}
-                    placeholder="Masalan: 60"
+                    type="text"
+                    value={startTime}
+                    onChange={(e) => setStartTime(e.target.value)}
+                    placeholder="Masalan: 15:00"
                     className="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-brand-blue/30 outline-none text-xs sm:text-sm font-bold text-slate-800 dark:text-slate-100"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-slate-600 dark:text-slate-300 uppercase tracking-wider mb-1.5">
+                    Mukofot Jamg'armasi
+                  </label>
+                  <input
+                    type="text"
+                    value={prizePool}
+                    onChange={(e) => setPrizePool(e.target.value)}
+                    placeholder="Masalan: 1,500,000 SO'M"
+                    className="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-brand-blue/30 outline-none text-xs sm:text-sm font-bold text-slate-800 dark:text-slate-100"
+                  />
+                </div>
+              </div>
+
+              {/* Top Prizes & Rules */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-xs font-bold text-slate-600 dark:text-slate-300 uppercase tracking-wider mb-1.5">
+                    G'oliblar Sovg'alari (har qatorda bittadan)
+                  </label>
+                  <textarea
+                    value={topPrizesText}
+                    onChange={(e) => setTopPrizesText(e.target.value)}
+                    placeholder="1-O'rin: 1,000,000 So'm&#10;2-O'rin: 300,000 So'm&#10;3-O'rin: 200,000 So'm"
+                    className="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-brand-blue/30 outline-none text-xs font-medium text-slate-800 dark:text-slate-100 resize-none h-20 font-mono"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-slate-600 dark:text-slate-300 uppercase tracking-wider mb-1.5">
+                    Nizomnoma Qoidalari (har qatorda bittadan)
+                  </label>
+                  <textarea
+                    value={rulesText}
+                    onChange={(e) => setRulesText(e.target.value)}
+                    placeholder="Test vaqti 60 daqiqa.&#10;Kalkulyator taqiqlanadi.&#10;Vaqt tugaganda avtomatik yakunlanadi."
+                    className="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-brand-blue/30 outline-none text-xs font-medium text-slate-800 dark:text-slate-100 resize-none h-20 font-mono"
                   />
                 </div>
               </div>
             </div>
 
+            {/* Sequential Step Footer Action (1:1 with EditTestPage) */}
             <div className="pt-4 border-t border-slate-100 dark:border-slate-800/50 flex items-center justify-between">
               <span className="text-xs text-slate-400 font-medium">
-                Davom etish uchun test nomini to'ldiring
+                Davom etish uchun musobaqa nomini to'ldiring
               </span>
               <button
                 onClick={() => {
-                  if (!canGoToQuestions()) return toast.error("Test nomini kiriting!");
+                  if (!canGoToQuestions()) return toast.error("Musobaqa nomini kiriting!");
                   setCurrentStep("questions");
                 }}
                 className="inline-flex items-center gap-2 px-5 py-2.5 bg-brand-blue text-white rounded-xl text-xs sm:text-sm font-bold hover:bg-blue-600 transition-colors shadow-md shadow-brand-blue/10"
@@ -468,7 +491,7 @@ export default function EditTestPage({ params }: PageProps) {
           </div>
         )}
 
-        {/* STEP 2: Questions Editor */}
+        {/* STEP 2: Questions Editor (1:1 with EditTestPage) */}
         {currentStep === "questions" && (
           <div className="bg-white/70 dark:bg-slate-900/70 backdrop-blur-xl border border-slate-200/60 dark:border-slate-800/60 rounded-3xl p-6 sm:p-8 space-y-6">
             <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-4">
@@ -479,7 +502,7 @@ export default function EditTestPage({ params }: PageProps) {
                     2-Bosqich: Savollar Ro'yxati ({questions.length} ta)
                   </h2>
                   <p className="text-xs text-slate-400 font-medium mt-0.5">
-                    Test savollari va javob variantlarini tahrirlang
+                    Musobaqa savollari va javob variantlarini qo'shing
                   </p>
                 </div>
               </div>
@@ -556,6 +579,7 @@ export default function EditTestPage({ params }: PageProps) {
               </div>
             )}
 
+            {/* Sequential Step Controls (1:1 with EditTestPage) */}
             <div className="flex items-center justify-between pt-4 border-t border-slate-100 dark:border-slate-800/50">
               <button
                 onClick={() => setCurrentStep("basic")}
@@ -576,7 +600,7 @@ export default function EditTestPage({ params }: PageProps) {
               </button>
             </div>
 
-            {/* Question Editor Modal */}
+            {/* Question Editor Modal (1:1 with EditTestPage) */}
             {editingQuestion && (
               <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-sm">
                 <div className="bg-white dark:bg-slate-900 rounded-3xl shadow-xl w-full max-w-lg overflow-hidden border border-slate-200/80 dark:border-slate-800 p-6 space-y-4">
@@ -625,7 +649,7 @@ export default function EditTestPage({ params }: PageProps) {
                         placeholder="Savol matnini kiriting (masalan: $x^2 + y^2 = z^2$)..."
                       />
 
-                      {/* Inline Expandable Formula Panel */}
+                      {/* Inline Expandable Formula Panel for Question */}
                       <InlineMathPanel
                         isOpen={activeMathField === "question"}
                         onClose={() => setActiveMathField(null)}
@@ -651,7 +675,7 @@ export default function EditTestPage({ params }: PageProps) {
                       )}
                     </div>
 
-                    {/* Image Upload Section */}
+                    {/* Question Image Upload Section */}
                     <div>
                       <div className="flex items-center justify-between mb-1.5">
                         <label className="text-xs font-bold text-slate-600 dark:text-slate-300 uppercase tracking-wider flex items-center gap-1.5">
@@ -782,7 +806,7 @@ export default function EditTestPage({ params }: PageProps) {
                               </label>
                             </div>
 
-                            {/* Inline Expandable Formula Panel */}
+                            {/* Inline Expandable Formula Panel for Options */}
                             <InlineMathPanel
                               isOpen={activeMathField === optKey}
                               onClose={() => setActiveMathField(null)}
@@ -877,7 +901,7 @@ export default function EditTestPage({ params }: PageProps) {
           </div>
         )}
 
-        {/* STEP 3: Preview & Save */}
+        {/* STEP 3: Preview & Save (1:1 with EditTestPage) */}
         {currentStep === "preview" && (
           <div className="bg-white/70 dark:bg-slate-900/70 backdrop-blur-xl border border-slate-200/60 dark:border-slate-800/60 rounded-3xl p-6 sm:p-8 space-y-6">
             <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-4">
@@ -885,7 +909,7 @@ export default function EditTestPage({ params }: PageProps) {
                 <CheckCircle2 size={22} className="text-emerald-500" />
                 <div>
                   <h2 className="text-lg font-extrabold text-slate-800 dark:text-slate-100">
-                    3-Bosqich: Testni Yakunlash & Saqlash
+                    3-Bosqich: Musobaqani Yakunlash & Saqlash
                   </h2>
                   <p className="text-xs text-slate-400 font-medium mt-0.5">
                     Ma'lumotlarni ko'rib chiqing va saqlang
@@ -899,15 +923,15 @@ export default function EditTestPage({ params }: PageProps) {
 
             <div className="p-5 rounded-2xl bg-slate-50/50 dark:bg-slate-800/30 border border-slate-100 dark:border-slate-800 space-y-3">
               <p className="text-base font-extrabold text-slate-800 dark:text-slate-100">
-                {title || "Sarlavhasiz Test"}
+                {title || "Sarlavhasiz Musobaqa"}
               </p>
               <p className="text-xs text-slate-500 font-medium">{description || "Tavsif berilmagan"}</p>
               <div className="flex flex-wrap items-center gap-4 text-xs font-bold text-slate-500 pt-2 border-t border-slate-200/50 dark:border-slate-700/50">
-                <span>Fan: {SUBJECT_OPTIONS.find((s) => s.value === subject)?.label || subject}</span>
+                <span>Fan: {subject}</span>
                 <span>Savollar: {questions.length} ta</span>
                 <span>Vaqt: {durationMinutes ? `${durationMinutes} daqiqa` : "Cheksiz"}</span>
-                <span>O'tish bali: {passingScore}%</span>
-                <span>Holat: {isPublished ? "Nashr qilingan" : "Qoralama"}</span>
+                {startDate && <span>Sana: {startDate}, {startTime}</span>}
+                {prizePool && <span className="text-amber-600 dark:text-amber-400">Sovrin: {prizePool}</span>}
               </div>
             </div>
 
@@ -921,18 +945,18 @@ export default function EditTestPage({ params }: PageProps) {
 
               <div className="flex items-center gap-3">
                 <button
-                  onClick={() => handleSaveTest(false)}
+                  onClick={() => handleSaveTournament(false)}
                   disabled={saving}
                   className="px-4 py-2.5 text-xs sm:text-sm font-bold text-slate-700 dark:text-slate-200 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 rounded-xl disabled:opacity-50"
                 >
                   Qoralama Sifatida Saqlash
                 </button>
                 <button
-                  onClick={() => handleSaveTest(true)}
+                  onClick={() => handleSaveTournament(true)}
                   disabled={saving}
                   className="px-5 py-2.5 text-xs sm:text-sm font-bold text-white bg-emerald-500 hover:bg-emerald-600 rounded-xl disabled:opacity-50 shadow-md shadow-emerald-500/10"
                 >
-                  {saving ? "Saqlanmoqda..." : "Nashr Qilish & Saqlash"}
+                  {saving ? "Saqlanmoqda..." : "Jonli E'lon Qilish & Saqlash"}
                 </button>
               </div>
             </div>

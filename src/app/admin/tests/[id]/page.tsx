@@ -5,24 +5,43 @@ import Link from "next/link";
 import { useQueryClient } from "@tanstack/react-query";
 import toast from "react-hot-toast";
 import {
-  ArrowLeft, Edit, CheckCircle, XCircle, Clock, Target, Users,
-  FileText, PlayCircle, Trash2, Plus, BookOpen, BarChart3,
-  UserCheck, TrendingUp, X, ChevronDown, ChevronUp, Check
+  ArrowLeft,
+  Edit,
+  CheckCircle,
+  XCircle,
+  Clock,
+  Target,
+  Users,
+  FileText,
+  Trash2,
+  Plus,
+  BookOpen,
+  BarChart3,
+  ChevronDown,
+  ChevronUp,
+  Check
 } from "lucide-react";
 import { toggleTestPublish, assignTestToGroup, removeTestFromGroup, type Question } from "@/lib/tests";
 import { useTestDetail, useTestResults, useTestGroups, useGroups, useSubjects } from "@/hooks/useAdminData";
 import MathRenderer from "@/components/MathRenderer";
 
-interface PageProps { params: Promise<{ id: string }> }
+interface PageProps {
+  params: Promise<{ id: string }>;
+}
 
 const SUBJECT_LABELS: Record<string, string> = {
-  math: "Matematika", english: "Ingliz tili", physics: "Fizika",
-  chemistry: "Kimyo", biology: "Biologiya", general: "Umumiy",
+  math: "Matematika",
+  english: "Ingliz tili",
+  physics: "Fizika",
+  chemistry: "Kimyo",
+  biology: "Biologiya",
+  general: "Umumiy",
 };
+
 const DIFFICULTY_CONFIG: Record<string, { label: string; color: string }> = {
-  easy: { label: "Oson", color: "text-emerald-600 bg-emerald-50 dark:bg-emerald-900/20" },
-  medium: { label: "O'rta", color: "text-amber-600 bg-amber-50 dark:bg-amber-900/20" },
-  hard: { label: "Qiyin", color: "text-red-600 bg-red-50 dark:bg-red-900/20" },
+  easy: { label: "Oson", color: "text-emerald-600 dark:text-emerald-400" },
+  medium: { label: "O'rta", color: "text-amber-600 dark:text-amber-400" },
+  hard: { label: "Qiyin", color: "text-red-600 dark:text-red-400" },
 };
 
 export default function TestDetailPage({ params }: PageProps) {
@@ -62,6 +81,7 @@ export default function TestDetailPage({ params }: PageProps) {
     } else {
       queryClient.invalidateQueries({ queryKey: ["testGroups", testId] });
       toast.success("Guruhga biriktirildi!");
+      setShowAssignModal(false);
     }
   };
 
@@ -87,15 +107,16 @@ export default function TestDetailPage({ params }: PageProps) {
 
   if (!test) {
     return (
-      <div className="py-20 text-center">
-        <FileText className="mx-auto text-slate-300 mb-4" size={56} />
-        <p className="text-slate-500 mb-4">Test topilmadi</p>
-        <Link href="/admin/tests" className="text-brand-blue hover:underline text-sm">← Testlar ro'yxatiga qaytish</Link>
+      <div className="py-20 text-center space-y-4">
+        <FileText className="mx-auto text-slate-300 dark:text-slate-700" size={56} />
+        <p className="text-slate-500 font-semibold">Test topilmadi</p>
+        <Link href="/admin/tests" className="inline-flex items-center gap-2 text-brand-blue hover:underline text-sm font-bold">
+          ← Testlar ro'yxatiga qaytish
+        </Link>
       </div>
     );
   }
 
-  const difficulty = DIFFICULTY_CONFIG[test.difficulty_level] || { label: test.difficulty_level, color: "text-slate-600 bg-slate-50" };
   const completedResults = results.filter(r => r.status === "completed");
   const avgScore = completedResults.length > 0
     ? Math.round(completedResults.reduce((s, r) => s + (r.percentage || 0), 0) / completedResults.length)
@@ -103,43 +124,62 @@ export default function TestDetailPage({ params }: PageProps) {
   const passedCount = completedResults.filter(r => (r.percentage || 0) >= test.passing_score).length;
 
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div className="flex items-start gap-4">
-        <Link href="/admin/tests" className="p-2 rounded-xl text-slate-500 hover:text-slate-800 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors active:scale-95 mt-0.5">
+    <div className="w-full max-w-[1400px] mx-auto space-y-6 pb-20">
+      {/* ── HEADER ── */}
+      <div className="flex items-start gap-4 pb-2 border-b border-slate-200/50 dark:border-slate-800/50">
+        <Link
+          href="/admin/tests"
+          className="p-2 rounded-xl text-slate-500 hover:text-slate-800 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors active:scale-95 mt-0.5"
+        >
           <ArrowLeft size={20} />
         </Link>
+
         <div className="flex-1 min-w-0">
-          <div className="flex items-center gap-1.5 text-sm mb-1">
-            <Link href="/admin/tests" className="text-slate-400 hover:text-brand-blue transition-colors">Testlar</Link>
+          <div className="flex items-center gap-1.5 text-xs text-slate-400 mb-1">
+            <Link href="/admin/tests" className="text-slate-400 hover:text-brand-blue transition-colors font-medium">
+              Testlar
+            </Link>
             <span className="text-slate-300 dark:text-slate-600">›</span>
-            <span className="text-slate-700 dark:text-slate-200 font-semibold truncate">{test.title}</span>
+            <span className="text-slate-700 dark:text-slate-300 font-semibold truncate">{test.title}</span>
           </div>
-          <h1 className="text-xl font-bold text-slate-800 dark:text-slate-100 leading-snug">{test.title}</h1>
-          {test.description && <p className="text-sm text-slate-500 mt-1">{test.description}</p>}
+
+          <h1 className="text-2xl font-black text-slate-800 dark:text-slate-100 tracking-tight font-sans-pro">
+            {test.title}
+          </h1>
+          {test.description && <p className="text-xs sm:text-sm text-slate-500 font-medium mt-1">{test.description}</p>}
         </div>
-        <div className="flex items-center gap-2 flex-shrink-0">
+
+        <div className="flex items-center gap-2 shrink-0">
           <button
             onClick={handleTogglePublish}
-            className={`flex items-center gap-1.5 px-3 py-2 rounded-xl text-sm font-medium transition-colors active:scale-95 ${
+            className={`flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs sm:text-sm font-bold transition-all active:scale-95 cursor-pointer ${
               test.is_published
-                ? "bg-amber-50 text-amber-600 hover:bg-amber-100 dark:bg-amber-900/20"
-                : "bg-emerald-50 text-emerald-600 hover:bg-emerald-100 dark:bg-emerald-900/20"
+                ? "bg-amber-50 dark:bg-amber-950/30 text-amber-600 dark:text-amber-400 hover:bg-amber-100"
+                : "bg-emerald-50 dark:bg-emerald-950/30 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-100"
             }`}
           >
-            {test.is_published ? <><XCircle size={15} /> Qoralamaga</> : <><CheckCircle size={15} /> Nashr qilish</>}
+            {test.is_published ? (
+              <>
+                <XCircle size={15} /> <span>Qoralamaga</span>
+              </>
+            ) : (
+              <>
+                <CheckCircle size={15} /> <span>Nashr qilish</span>
+              </>
+            )}
           </button>
+
           <Link
             href={`/admin/tests/${testId}/edit`}
-            className="flex items-center gap-1.5 px-3 py-2 bg-brand-blue hover:bg-blue-600 text-white rounded-xl text-sm font-medium transition-colors shadow-md shadow-brand-blue/20 active:scale-95"
+            className="flex items-center gap-1.5 px-4 py-2 bg-brand-blue hover:bg-blue-600 text-white rounded-xl text-xs sm:text-sm font-bold transition-all shadow-md shadow-brand-blue/10 active:scale-95"
           >
-            <Edit size={15} /> Tahrirlash
+            <Edit size={15} /> <span>Tahrirlash</span>
           </Link>
         </div>
       </div>
 
-      {/* Info Cards */}
-      <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
+      {/* ── INFO CARDS GRID (5 Cols) ── */}
+      <div className="grid grid-cols-2 sm:grid-cols-5 gap-4">
         {[
           { label: "Fan", value: SUBJECT_LABELS[test.subject] || test.subject, icon: BookOpen, color: "text-brand-blue" },
           { label: "Savollar", value: `${test.questions.length} ta`, icon: FileText, color: "text-purple-600" },
@@ -147,18 +187,21 @@ export default function TestDetailPage({ params }: PageProps) {
           { label: "O'tish bali", value: `${test.passing_score}%`, icon: Target, color: "text-emerald-600" },
           { label: "Urinishlar", value: `${results.length} ta`, icon: Users, color: "text-rose-500" },
         ].map((item, i) => (
-          <div key={i} className="bg-white dark:bg-slate-900 rounded-2xl border border-gray-100 dark:border-slate-800 p-3 shadow-sm flex flex-col gap-1">
-            <div className="flex items-center gap-1.5 text-xs text-slate-500">
+          <div
+            key={i}
+            className="bg-white/70 dark:bg-slate-900/70 backdrop-blur-xl border border-slate-200/60 dark:border-slate-800/60 p-4 sm:p-5 rounded-3xl shadow-sm flex flex-col gap-1 min-w-0"
+          >
+            <div className="flex items-center gap-1.5 text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">
               <item.icon size={13} className={item.color} />
-              {item.label}
+              <span>{item.label}</span>
             </div>
-            <p className={`font-bold text-base ${item.color}`}>{item.value}</p>
+            <p className={`text-xl sm:text-2xl font-black tracking-tight ${item.color} truncate`}>{item.value}</p>
           </div>
         ))}
       </div>
 
-      {/* Tabs */}
-      <div className="flex items-center gap-2 border-b border-gray-200 dark:border-slate-800 pb-px">
+      {/* ── TABS ── */}
+      <div className="flex items-center gap-2 border-b border-slate-200/60 dark:border-slate-800/60 pb-px">
         {[
           { id: "questions", label: "Savollar", icon: FileText, count: test.questions.length },
           { id: "results", label: "Natijalar", icon: BarChart3, count: results.length },
@@ -167,79 +210,114 @@ export default function TestDetailPage({ params }: PageProps) {
           <button
             key={tab.id}
             onClick={() => setActiveTab(tab.id as any)}
-            className={`flex items-center gap-2 px-4 py-3 font-medium text-sm border-b-2 transition-colors ${
+            className={`flex items-center gap-2 px-4 py-3 font-bold text-xs sm:text-sm border-b-2 transition-all cursor-pointer ${
               activeTab === tab.id
                 ? "border-brand-blue text-brand-blue"
-                : "border-transparent text-slate-500 hover:text-slate-700 dark:hover:text-slate-300"
+                : "border-transparent text-slate-500 hover:text-slate-800 dark:hover:text-slate-200"
             }`}
           >
             <tab.icon size={16} />
-            {tab.label}
-            <span className={`text-xs px-1.5 py-0.5 rounded-full font-semibold ${
-              activeTab === tab.id ? "bg-brand-blue/10 text-brand-blue" : "bg-slate-100 dark:bg-slate-800 text-slate-500"
-            }`}>{tab.count}</span>
+            <span>{tab.label}</span>
+            <span
+              className={`text-xs px-2 py-0.5 rounded-full font-bold ${
+                activeTab === tab.id
+                  ? "bg-brand-blue/10 text-brand-blue"
+                  : "bg-slate-100 dark:bg-slate-800 text-slate-500"
+              }`}
+            >
+              {tab.count}
+            </span>
           </button>
         ))}
       </div>
 
-      {/* QUESTIONS TAB */}
+      {/* ── TAB 1: QUESTIONS ── */}
       {activeTab === "questions" && (
         <div className="space-y-3">
           {test.questions.length === 0 ? (
-            <div className="py-16 text-center bg-white dark:bg-slate-900 rounded-2xl border border-dashed border-gray-200 dark:border-slate-800">
-              <FileText className="mx-auto text-slate-300 mb-3" size={48} />
-              <p className="text-slate-500 text-sm">Savollar hali qo'shilmagan</p>
-              <Link href={`/admin/tests/${testId}/edit`} className="mt-4 inline-flex items-center gap-2 text-sm font-semibold text-brand-blue bg-blue-50 hover:bg-blue-100 px-4 py-2 rounded-xl transition-colors">
-                <Plus size={15} /> Savol qo'shish
+            <div className="py-16 text-center bg-white/70 dark:bg-slate-900/70 backdrop-blur-xl rounded-3xl border border-dashed border-slate-200 dark:border-slate-800">
+              <FileText className="mx-auto text-slate-300 dark:text-slate-700 mb-3" size={48} />
+              <p className="text-slate-500 text-sm font-semibold">Savollar hali qo'shilmagan</p>
+              <Link
+                href={`/admin/tests/${testId}/edit`}
+                className="mt-4 inline-flex items-center gap-2 text-xs sm:text-sm font-bold text-brand-blue bg-blue-50 dark:bg-blue-900/30 hover:bg-blue-100 px-4 py-2 rounded-xl transition-colors"
+              >
+                <Plus size={15} /> <span>Savol qo'shish</span>
               </Link>
             </div>
           ) : (
             test.questions.map((q: Question, idx: number) => (
-              <div key={q.id} className="bg-white dark:bg-slate-900 rounded-2xl border border-gray-100 dark:border-slate-800 shadow-sm overflow-hidden">
+              <div
+                key={q.id}
+                className="bg-white/70 dark:bg-slate-900/70 backdrop-blur-xl border border-slate-200/60 dark:border-slate-800/60 rounded-3xl shadow-sm overflow-hidden"
+              >
                 <button
-                  className="w-full flex items-start gap-3 p-4 text-left"
+                  className="w-full flex items-start gap-3.5 p-5 text-left transition-colors hover:bg-slate-50/50 dark:hover:bg-slate-800/30 cursor-pointer"
                   onClick={() => setExpandedQ(expandedQ === q.id ? null : q.id)}
                 >
-                  <span className="flex-shrink-0 w-7 h-7 rounded-lg bg-brand-blue/10 text-brand-blue text-xs font-bold flex items-center justify-center mt-0.5">{idx + 1}</span>
-                  <div className="flex-1 text-sm font-medium text-slate-800 dark:text-slate-100 leading-relaxed">
+                  <span className="shrink-0 w-7 h-7 rounded-xl bg-brand-blue/10 text-brand-blue text-xs font-black flex items-center justify-center mt-0.5">
+                    {idx + 1}
+                  </span>
+                  <div className="flex-1 text-xs sm:text-sm font-medium text-slate-800 dark:text-slate-100 leading-relaxed">
                     <MathRenderer content={q.question_text} />
                     {q.image_url && (
                       <div className="mt-2.5">
                         {/* eslint-disable-next-line @next/next/no-img-element */}
-                        <img src={q.image_url} alt="Savol rasmi" className="max-h-56 w-auto rounded-xl border border-slate-200 dark:border-slate-800 object-contain shadow-sm" />
+                        <img
+                          src={q.image_url}
+                          alt="Savol rasmi"
+                          className="max-h-56 w-auto rounded-xl border border-slate-200 dark:border-slate-800 object-contain shadow-sm"
+                        />
                       </div>
                     )}
                   </div>
-                  <div className="flex items-center gap-2 flex-shrink-0">
-                    <span className="text-xs text-slate-400">{q.points} ball</span>
-                    {expandedQ === q.id ? <ChevronUp size={16} className="text-slate-400" /> : <ChevronDown size={16} className="text-slate-400" />}
+                  <div className="flex items-center gap-2 shrink-0">
+                    <span className="text-xs font-bold text-slate-400">{q.points} ball</span>
+                    {expandedQ === q.id ? (
+                      <ChevronUp size={16} className="text-slate-400" />
+                    ) : (
+                      <ChevronDown size={16} className="text-slate-400" />
+                    )}
                   </div>
                 </button>
+
                 {expandedQ === q.id && (
-                  <div className="px-4 pb-4 border-t border-gray-100 dark:border-slate-800 pt-3">
+                  <div className="px-5 pb-5 border-t border-slate-100 dark:border-slate-800 pt-3.5">
                     {q.question_type === "multiple_choice" && q.options && (
                       <div className="space-y-2 mb-3">
                         {Object.entries(q.options).map(([key, value]) => (
-                          <div key={key} className={`flex items-center gap-2.5 px-3 py-2 rounded-xl text-sm ${
-                            key === q.correct_answer
-                              ? "bg-emerald-50 text-emerald-700 dark:bg-emerald-900/20 dark:text-emerald-400 font-medium"
-                              : "bg-slate-50 dark:bg-slate-800/50 text-slate-600 dark:text-slate-400"
-                          }`}>
-                            <span className={`w-5 h-5 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0 ${
-                              key === q.correct_answer ? "bg-emerald-500 text-white" : "bg-slate-200 dark:bg-slate-700 text-slate-600 dark:text-slate-400"
-                            }`}>{key === q.correct_answer ? <Check size={11} /> : key.toUpperCase()}</span>
-                            <MathRenderer content={String(value || '')} inline />
+                          <div
+                            key={key}
+                            className={`flex items-center gap-2.5 px-3.5 py-2.5 rounded-xl text-xs sm:text-sm ${
+                              key === q.correct_answer
+                                ? "bg-emerald-50/80 text-emerald-800 dark:bg-emerald-950/30 dark:text-emerald-300 border border-emerald-200/60 dark:border-emerald-800/60 font-bold"
+                                : "bg-slate-50 dark:bg-slate-800/50 text-slate-600 dark:text-slate-400 border border-slate-200/50 dark:border-slate-800"
+                            }`}
+                          >
+                            <span
+                              className={`w-5 h-5 rounded-full flex items-center justify-center text-xs font-bold shrink-0 ${
+                                key === q.correct_answer
+                                  ? "bg-emerald-500 text-white"
+                                  : "bg-slate-200 dark:bg-slate-700 text-slate-600 dark:text-slate-400"
+                              }`}
+                            >
+                              {key === q.correct_answer ? <Check size={11} /> : key.toUpperCase()}
+                            </span>
+                            <MathRenderer content={String(value || "")} inline />
                           </div>
                         ))}
                       </div>
                     )}
                     {q.question_type === "true_false" && (
-                      <p className="text-sm mb-3">
-                        To'g'ri javob: <span className="font-bold text-emerald-600">{q.correct_answer === "true" ? "To'g'ri" : "Noto'g'ri"}</span>
+                      <p className="text-xs sm:text-sm mb-3">
+                        To'g'ri javob:{" "}
+                        <span className="font-bold text-emerald-600">
+                          {q.correct_answer === "true" ? "To'g'ri" : "Noto'g'ri"}
+                        </span>
                       </p>
                     )}
                     {q.explanation && (
-                      <p className="text-xs text-slate-500 bg-slate-50 dark:bg-slate-800/50 rounded-lg px-3 py-2">
+                      <p className="text-xs text-slate-500 bg-slate-50 dark:bg-slate-800/50 rounded-xl px-3.5 py-2.5 border border-slate-100 dark:border-slate-800">
                         💡 {q.explanation}
                       </p>
                     )}
@@ -251,84 +329,88 @@ export default function TestDetailPage({ params }: PageProps) {
         </div>
       )}
 
-      {/* RESULTS TAB */}
+      {/* ── TAB 2: RESULTS ── */}
       {activeTab === "results" && (
         <div className="space-y-4">
           {completedResults.length > 0 && (
-            <div className="grid grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
               {[
-                { label: "Topshirdi", value: completedResults.length, color: "text-brand-blue" },
-                { label: "O'rtacha ball", value: `${avgScore}%`, color: avgScore >= test.passing_score ? "text-emerald-600" : "text-red-500" },
-                { label: "O'tdi", value: `${passedCount} ta`, color: "text-emerald-600" },
+                { label: "Topshirdi", value: `${completedResults.length} ta`, color: "text-brand-blue" },
+                {
+                  label: "O'rtacha ball",
+                  value: `${avgScore}%`,
+                  color: avgScore >= test.passing_score ? "text-emerald-600" : "text-red-500"
+                },
+                { label: "O'tdi", value: `${passedCount} ta`, color: "text-emerald-600" }
               ].map((s, i) => (
-                <div key={i} className="bg-white dark:bg-slate-900 rounded-2xl border border-gray-100 dark:border-slate-800 p-4 text-center shadow-sm">
-                  <p className={`text-2xl font-bold ${s.color}`}>{s.value}</p>
-                  <p className="text-xs text-slate-500 mt-1">{s.label}</p>
+                <div
+                  key={i}
+                  className="bg-white/70 dark:bg-slate-900/70 backdrop-blur-xl border border-slate-200/60 dark:border-slate-800/60 p-5 rounded-3xl text-center shadow-sm"
+                >
+                  <p className={`text-2xl font-black ${s.color}`}>{s.value}</p>
+                  <p className="text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider mt-1">{s.label}</p>
                 </div>
               ))}
             </div>
           )}
           {results.length === 0 ? (
-            <div className="py-16 text-center bg-white dark:bg-slate-900 rounded-2xl border border-dashed border-gray-200 dark:border-slate-800">
-              <BarChart3 className="mx-auto text-slate-300 mb-3" size={48} />
-              <p className="text-slate-500 text-sm">Hali hech kim bu testni topshirmagan</p>
+            <div className="py-16 text-center bg-white/70 dark:bg-slate-900/70 backdrop-blur-xl rounded-3xl border border-dashed border-slate-200 dark:border-slate-800">
+              <BarChart3 className="mx-auto text-slate-300 dark:text-slate-700 mb-3" size={48} />
+              <p className="text-slate-500 text-sm font-semibold">Hali hech kim bu testni topshirmagan</p>
             </div>
           ) : (
-            <div className="bg-white dark:bg-slate-900 rounded-2xl border border-gray-100 dark:border-slate-800 shadow-sm overflow-hidden">
+            <div className="bg-white/70 dark:bg-slate-900/70 backdrop-blur-xl border border-slate-200/60 dark:border-slate-800/60 rounded-3xl shadow-sm overflow-hidden">
               <div className="overflow-x-auto">
                 <table className="w-full">
-                  <thead className="bg-slate-50 dark:bg-slate-800 border-b border-gray-100 dark:border-slate-700">
+                  <thead className="bg-slate-50/80 dark:bg-slate-800/60 border-b border-slate-200/60 dark:border-slate-800">
                     <tr>
-                      {["O'quvchi", "Sana", "Ball", "Holat"].map(h => (
-                        <th key={h} className="px-4 py-3 text-left text-xs font-semibold text-slate-600 dark:text-slate-300 uppercase tracking-wide">{h}</th>
+                      {["O'quvchi", "Sana", "Ball", "Holat"].map((h) => (
+                        <th
+                          key={h}
+                          className="px-5 py-3.5 text-left text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider"
+                        >
+                          {h}
+                        </th>
                       ))}
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-gray-100 dark:divide-slate-800">
+                  <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
                     {results.map((r) => {
                       const pct = r.percentage || 0;
                       const passed = pct >= test.passing_score;
                       return (
-                        <tr key={r.id} className="hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors">
-                          <td className="px-4 py-3">
-                            <div className="flex items-center gap-2">
-                              <div className="w-8 h-8 rounded-full bg-brand-blue/10 flex items-center justify-center text-brand-blue font-semibold text-sm flex-shrink-0">
+                        <tr key={r.id} className="hover:bg-slate-50/50 dark:hover:bg-slate-800/30 transition-colors">
+                          <td className="px-5 py-3.5">
+                            <div className="flex items-center gap-3">
+                              <div className="w-8 h-8 rounded-xl bg-brand-blue/10 flex items-center justify-center text-brand-blue font-bold text-xs shrink-0">
                                 {r.student?.full_name?.[0]?.toUpperCase() || "?"}
                               </div>
                               <div>
-                                <p className="text-sm font-medium text-slate-800 dark:text-slate-100">{r.student?.full_name || "Noma'lum"}</p>
-                                <p className="text-xs text-slate-400">{r.student?.phone || ""}</p>
+                                <p className="text-xs sm:text-sm font-bold text-slate-800 dark:text-slate-100">
+                                  {r.student?.full_name || "Noma'lum"}
+                                </p>
+                                <p className="text-[11px] text-slate-400">{r.student?.phone || ""}</p>
                               </div>
                             </div>
                           </td>
-                          <td className="px-4 py-3 text-xs text-slate-500">
-                            {r.completed_at ? new Date(r.completed_at).toLocaleDateString("uz-UZ") : "Davom etmoqda"}
+                          <td className="px-5 py-3.5 text-xs text-slate-500">
+                            {new Date(r.completed_at || r.started_at).toLocaleDateString("uz-UZ")}
                           </td>
-                          <td className="px-4 py-3">
-                            <div className="flex items-center gap-2">
-                              <div className="h-1.5 w-20 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
-                                <div
-                                  className={`h-full rounded-full transition-all ${passed ? "bg-emerald-500" : "bg-red-400"}`}
-                                  style={{ width: `${Math.min(pct, 100)}%` }}
-                                />
-                              </div>
-                              <span className={`text-sm font-bold ${passed ? "text-emerald-600" : "text-red-500"}`}>{pct}%</span>
-                            </div>
+                          <td className="px-5 py-3.5">
+                            <span className="text-xs font-bold text-slate-800 dark:text-slate-200">
+                              {r.score} / {r.max_score} ({pct}%)
+                            </span>
                           </td>
-                          <td className="px-4 py-3">
-                            {r.status === "completed" ? (
-                              <span className={`inline-flex items-center gap-1 text-xs font-semibold px-2 py-0.5 rounded-full ${
+                          <td className="px-5 py-3.5">
+                            <span
+                              className={`px-2.5 py-0.5 rounded-full text-xs font-bold ${
                                 passed
-                                  ? "bg-emerald-50 text-emerald-700 dark:bg-emerald-900/20"
-                                  : "bg-red-50 text-red-600 dark:bg-red-900/20"
-                              }`}>
-                                {passed ? <><CheckCircle size={11} /> O'tdi</> : <><XCircle size={11} /> O'tmadi</>}
-                              </span>
-                            ) : (
-                              <span className="inline-flex items-center gap-1 text-xs font-semibold px-2 py-0.5 rounded-full bg-amber-50 text-amber-600">
-                                <PlayCircle size={11} /> Davom etmoqda
-                              </span>
-                            )}
+                                  ? "bg-emerald-50 text-emerald-600 dark:bg-emerald-950/30 dark:text-emerald-400"
+                                  : "bg-red-50 text-red-600 dark:bg-red-950/30 dark:text-red-400"
+                              }`}
+                            >
+                              {passed ? "O'tdi" : "O'tmadi"}
+                            </span>
                           </td>
                         </tr>
                       );
@@ -341,124 +423,93 @@ export default function TestDetailPage({ params }: PageProps) {
         </div>
       )}
 
-      {/* GROUPS TAB */}
+      {/* ── TAB 3: GROUPS ── */}
       {activeTab === "groups" && (
         <div className="space-y-4">
-          <div className="flex justify-between items-center">
-            <p className="text-sm text-slate-500">Ushbu test biriktirilgan guruhlar</p>
+          <div className="flex justify-end">
             <button
               onClick={() => setShowAssignModal(true)}
-              className="flex items-center gap-2 bg-brand-blue hover:bg-blue-600 text-white px-4 py-2 rounded-xl text-sm font-medium transition-colors shadow-md shadow-brand-blue/20 active:scale-95"
+              className="inline-flex items-center gap-2 px-4 py-2.5 bg-brand-blue text-white rounded-xl text-xs sm:text-sm font-bold hover:bg-blue-600 transition-colors shadow-md shadow-brand-blue/10"
             >
-              <Plus size={16} /> Guruhga biriktirish
+              <Plus size={16} /> <span>Guruhga Biriktirish</span>
             </button>
           </div>
 
           {assignedGroups.length === 0 ? (
-            <div className="py-16 text-center bg-white dark:bg-slate-900 rounded-2xl border border-dashed border-gray-200 dark:border-slate-800">
-              <Users className="mx-auto text-slate-300 mb-3" size={48} />
-              <p className="text-slate-500 text-sm mb-4">Bu test hali hech qaysi guruhga biriktirilmagan</p>
-              <button
-                onClick={() => setShowAssignModal(true)}
-                className="inline-flex items-center gap-2 bg-brand-blue hover:bg-blue-600 text-white px-4 py-2.5 rounded-xl text-sm font-medium transition-colors"
-              >
-                <Plus size={15} /> Guruhga biriktirish
-              </button>
+            <div className="py-16 text-center bg-white/70 dark:bg-slate-900/70 backdrop-blur-xl rounded-3xl border border-dashed border-slate-200 dark:border-slate-800">
+              <Users className="mx-auto text-slate-300 dark:text-slate-700 mb-3" size={48} />
+              <p className="text-slate-500 text-sm font-semibold">Bu test hali birorta guruhga biriktirilmagan</p>
             </div>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
               {assignedGroups.map((g) => (
-                <div key={g.id} className="bg-white dark:bg-slate-900 rounded-2xl border border-gray-100 dark:border-slate-800 p-4 shadow-sm flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-xl bg-brand-blue/10 flex items-center justify-center">
-                      <Users size={18} className="text-brand-blue" />
-                    </div>
-                    <div>
-                      <p className="font-semibold text-slate-800 dark:text-slate-100 text-sm">{g.group?.name || "Noma'lum guruh"}</p>
-                      <p className="text-xs text-slate-400">{new Date(g.assigned_at).toLocaleDateString("uz-UZ")}</p>
-                    </div>
+                <div
+                  key={g.id}
+                  className="bg-white/70 dark:bg-slate-900/70 backdrop-blur-xl border border-slate-200/60 dark:border-slate-800/60 p-5 rounded-3xl flex items-center justify-between shadow-sm"
+                >
+                  <div className="space-y-1">
+                    <p className="text-xs sm:text-sm font-bold text-slate-800 dark:text-slate-100">{g.group?.name}</p>
+                    <p className="text-xs text-slate-400">Biriktirilgan sana: {new Date(g.assigned_at).toLocaleDateString('uz-UZ')}</p>
                   </div>
                   <button
                     onClick={() => handleRemoveGroup(g.group_id)}
-                    className="p-1.5 text-slate-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"
+                    className="p-2 text-slate-400 hover:text-red-500 rounded-xl hover:bg-red-50 dark:hover:bg-red-950/30 transition-colors"
+                    title="Guruhdan o'chirish"
                   >
-                    <X size={15} />
+                    <Trash2 size={16} />
                   </button>
                 </div>
               ))}
             </div>
           )}
 
-          {/* Assign Modal */}
+          {/* Assign to Group Modal */}
           {showAssignModal && (
-            <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
-              <div className="bg-white dark:bg-slate-900 rounded-3xl shadow-2xl w-full max-w-md overflow-hidden">
-                <div className="px-6 py-4 border-b border-gray-100 dark:border-slate-800 flex items-center justify-between">
-                  <h3 className="font-semibold text-lg text-slate-800 dark:text-slate-100 flex items-center gap-2">
-                    <Users size={20} className="text-brand-blue" />
-                    Guruhga biriktirish
-                  </h3>
-                  <button onClick={() => setShowAssignModal(false)} className="p-1.5 text-slate-400 hover:text-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-colors">
-                    <X size={20} />
+            <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-sm">
+              <div className="bg-white dark:bg-slate-900 rounded-3xl shadow-xl w-full max-w-md border border-slate-200 dark:border-slate-800 p-6 space-y-4">
+                <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-3">
+                  <h3 className="text-base font-bold text-slate-800 dark:text-slate-100">Guruhga Biriktirish</h3>
+                  <button onClick={() => setShowAssignModal(false)} className="text-slate-400 hover:text-slate-600">
+                    ✕
                   </button>
                 </div>
-                <div className="p-6 space-y-4">
+
+                <div className="space-y-3">
                   <div>
-                    <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">Fan tanlang</label>
+                    <label className="block text-xs font-bold text-slate-600 dark:text-slate-300 uppercase tracking-wider mb-1.5">
+                      Fanni tanlang
+                    </label>
                     <select
                       value={selectedSubjectForGroup}
-                      onChange={e => setSelectedSubjectForGroup(e.target.value)}
-                      className="w-full px-4 py-2.5 bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-brand-blue/30 outline-none text-slate-800 dark:text-slate-100"
+                      onChange={(e) => setSelectedSubjectForGroup(e.target.value)}
+                      className="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs sm:text-sm font-bold text-slate-800 dark:text-slate-100 outline-none"
                     >
-                      <option value="">— Fan tanlang —</option>
-                      {subjects.map(s => (
-                        <option key={s.id} value={s.id}>{s.title}</option>
+                      <option value="">Barcha Fanlar</option>
+                      {(subjects as any[]).map((s) => (
+                        <option key={s.id} value={s.id}>
+                          {s.name}
+                        </option>
                       ))}
                     </select>
                   </div>
-                  {selectedSubjectForGroup && (
-                    <div>
-                      <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">Guruh tanlang</label>
-                      {groupsForSubject.length === 0 ? (
-                        <p className="text-sm text-slate-400 text-center py-4 bg-slate-50 dark:bg-slate-800 rounded-xl">Bu fanda guruhlar yo'q</p>
-                      ) : (
-                        <div className="space-y-2 max-h-60 overflow-y-auto">
-                          {groupsForSubject.map(g => {
-                            const alreadyAssigned = assignedGroups.some(ag => ag.group_id === g.id);
-                            return (
-                              <button
-                                key={g.id}
-                                onClick={() => !alreadyAssigned && handleAssignGroup(g.id)}
-                                disabled={alreadyAssigned || assigning}
-                                className={`w-full flex items-center justify-between p-3 rounded-xl text-sm transition-colors ${
-                                  alreadyAssigned
-                                    ? "bg-emerald-50 dark:bg-emerald-900/20 text-emerald-700 dark:text-emerald-400 cursor-default"
-                                    : "bg-slate-50 dark:bg-slate-800 hover:bg-brand-blue/5 text-slate-700 dark:text-slate-300 hover:text-brand-blue"
-                                }`}
-                              >
-                                <span className="font-medium">{g.name}</span>
-                                {alreadyAssigned ? (
-                                  <span className="flex items-center gap-1 text-xs font-semibold text-emerald-600">
-                                    <CheckCircle size={13} /> Biriktirilgan
-                                  </span>
-                                ) : (
-                                  <span className="text-xs text-slate-400">Biriktirish</span>
-                                )}
-                              </button>
-                            );
-                          })}
-                        </div>
-                      )}
-                    </div>
-                  )}
-                </div>
-                <div className="flex justify-end px-6 py-4 border-t border-gray-100 dark:border-slate-800">
-                  <button
-                    onClick={() => setShowAssignModal(false)}
-                    className="px-5 py-2.5 text-slate-600 dark:text-slate-300 font-medium hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl transition-colors"
-                  >
-                    Yopish
-                  </button>
+
+                  <div className="space-y-2 max-h-60 overflow-y-auto custom-scrollbar">
+                    {groupsForSubject.length === 0 ? (
+                      <p className="text-xs text-slate-400 text-center py-4">Guruhlar topilmadi</p>
+                    ) : (
+                      groupsForSubject.map((grp) => (
+                        <button
+                          key={grp.id}
+                          disabled={assigning}
+                          onClick={() => handleAssignGroup(grp.id)}
+                          className="w-full p-3 text-left rounded-2xl border border-slate-100 dark:border-slate-800 hover:border-brand-blue/40 bg-slate-50/50 dark:bg-slate-800/40 transition-colors flex items-center justify-between text-xs sm:text-sm font-bold text-slate-800 dark:text-slate-100"
+                        >
+                          <span>{grp.name}</span>
+                          <Plus size={15} className="text-brand-blue" />
+                        </button>
+                      ))
+                    )}
+                  </div>
                 </div>
               </div>
             </div>

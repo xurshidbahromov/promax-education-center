@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Atkinson_Hyperlegible, Inter, Fredoka } from "next/font/google";
+import { Atkinson_Hyperlegible, Inter, Fredoka, DM_Sans } from "next/font/google";
 import "./globals.css";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
@@ -15,6 +15,13 @@ const atkinson = Atkinson_Hyperlegible({
   variable: "--font-atkinson",
   subsets: ["latin"],
   weight: ["400", "700"],
+  display: "swap",
+});
+
+const dmSans = DM_Sans({
+  variable: "--font-dm-sans",
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700"],
   display: "swap",
 });
 
@@ -59,7 +66,7 @@ export default function RootLayout({
  return (
  <html lang="en" className="scroll-smooth" suppressHydrationWarning>
  <body
- className={`${atkinson.variable} ${inter.variable} ${fredoka.variable} antialiased text-slate-800 dark:text-slate-50 min-h-screen flex flex-col font-sans selection:bg-brand-blue/20 transition-colors duration-300`}
+ className={`${dmSans.variable} ${atkinson.variable} ${inter.variable} ${fredoka.variable} antialiased text-slate-800 dark:text-slate-50 min-h-screen flex flex-col font-sans selection:bg-brand-blue/20 transition-colors duration-300`}
  >
  <Script src="https://telegram.org/js/telegram-web-app.js" strategy="beforeInteractive" />
  <NextTopLoader color="#F97316" height={3} showSpinner={false} />

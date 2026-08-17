@@ -118,7 +118,7 @@ export async function getPublishedTests(filters?: TestFilters): Promise<Test[]> 
  return [];
  }
 
- return data || [];
+  return data || [];
 }
 
 /**
@@ -529,24 +529,25 @@ export async function getAttemptResponses(attemptId: string): Promise<QuestionRe
  * Update logic for editing a test
  */
 export async function updateTest(
- testId: string,
- testData: {
- title: string;
- description: string | null;
- subject: Subject;
- test_type: TestType;
- difficulty_level: DifficultyLevel;
- duration_minutes: number | null;
- is_published: boolean;
- questions: (Omit<Question, 'test_id' | 'id'> & { id?: string })[];
- }
+  testId: string,
+  testData: {
+    title: string;
+    description: string | null;
+    subject: Subject;
+    test_type: TestType;
+    difficulty_level: DifficultyLevel;
+    duration_minutes: number | null;
+    passing_score?: number;
+    is_published: boolean;
+    questions: (Omit<Question, 'test_id' | 'id'> & { id?: string })[];
+  }
 ): Promise<boolean> {
- const supabase = createClient();
+  const supabase = createClient();
 
- // 1. Update Test Details
- const { error: testError } = await supabase
- .from('tests')
- .update({
+  // 1. Update Test Details
+  const { error: testError } = await supabase
+    .from('tests')
+    .update({
  title: testData.title,
  description: testData.description,
  subject: sanitizeSubject(testData.subject),
