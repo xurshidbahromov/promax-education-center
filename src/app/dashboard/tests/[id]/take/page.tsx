@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState, useCallback, useRef } from "react";
-import { useParams, useRouter } from "next/navigation";
+import { useParams, useRouter, useSearchParams } from "next/navigation";
 import { useLanguage } from "@/context/LanguageContext";
 import Link from "next/link";
 import {
@@ -12,7 +12,8 @@ import {
  AlertCircle,
  Flag,
  Save,
- Send
+ Send,
+ Trophy
 } from "lucide-react";
 import {
  getTestById,
@@ -24,6 +25,12 @@ import {
  type Test,
  type Question
 } from "@/lib/tests";
+import {
+ getTournamentById,
+ submitTournamentAttempt,
+ SAMPLE_MATH_QUESTIONS,
+ type TournamentQuestion
+} from "@/lib/tournaments";
 import MathRenderer from "@/components/MathRenderer";
 import { TakeTestSkeleton } from "@/components/ui/Skeleton";
 import { createClient } from "@/utils/supabase/client";
@@ -32,10 +39,14 @@ import toast from "react-hot-toast";
 export default function TakeTestPage() {
  const params = useParams();
  const router = useRouter();
+ const searchParams = useSearchParams();
  const { t } = useLanguage();
  const testId = params.id as string;
+ const isOlympiadParam = searchParams?.get("type") === "olympiad";
 
  const [test, setTest] = useState<any>(null);
+ const [isOlympiad, setIsOlympiad] = useState<boolean>(isOlympiadParam);
+ const [tournamentData, setTournamentData] = useState<any>(null);
  const [questions, setQuestions] = useState<Question[]>([]);
  const [attemptId, setAttemptId] = useState<string | null>(null);
  const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
@@ -54,71 +65,134 @@ export default function TakeTestPage() {
  useEffect(() => {
  async function loadTestAndStart() {
  try {
- // Get test details
- const testData = await getTestById(testId);
- if (!testData) {
- router.push('/dashboard/tests');
- return;
- }
- setTest(testData);
+   // Check if it's an Olympiad / Tournament
+   if (isOlympiadParam || testId.startsWith("tournament_") || testId.startsWith("olympiad_") || testId.startsWith("grand_") || testId.startsWith("t_")) {
+     setIsOlympiad(true);
+     const tData = await getTournamentById(testId);
+     if (tData) {
+       setTournamentData(tData);
+       setTest({
+         id: tData.id,
+         title: tData.title,
+         duration_minutes: tData.durationMinutes || 60,
+         subject: tData.subject
+       });
+       const rawQs = tData.questions && tData.questions.length > 0 ? tData.questions : SAMPLE_MATH_QUESTIONS;
+       const formattedQs: Question[] = rawQs.map((q: any, idx: number) => ({
+         id: q.id || `q_${idx}`,
+         test_id: testId,
+         question_text: q.question_text,
+         question_type: (q.question_type || "multiple_choice") as any,
+         options: q.options || { A: "", B: "", C: "", D: "" },
+         correct_answer: q.correct_answer || "A",
+         explanation: q.explanation || "",
+         points: q.points || 3.1,
+         image_url: q.image_url || null,
+         order_index: idx
+       }));
+       setQuestions(formattedQs);
+       setAttemptId(`attempt_olympiad_${testId}`);
+       setTimeRemaining((tData.durationMinutes || 60) * 60);
+       setLoading(false);
+       return;
+     }
+   }
 
- // Get questions
- const supabase = createClient();
- const { data: questionsData } = await supabase
- .from('questions')
- .select('*')
- .eq('test_id', testId)
- .order('order_index', { ascending: true });
+   // Standard test DB lookup
+   const testData = await getTestById(testId);
+   if (!testData) {
+     // Fallback check if testId is in tournaments
+     const tData = await getTournamentById(testId);
+     if (tData) {
+       setIsOlympiad(true);
+       setTournamentData(tData);
+       setTest({
+         id: tData.id,
+         title: tData.title,
+         duration_minutes: tData.durationMinutes || 60,
+         subject: tData.subject
+       });
+       const rawQs = tData.questions && tData.questions.length > 0 ? tData.questions : SAMPLE_MATH_QUESTIONS;
+       const formattedQs: Question[] = rawQs.map((q: any, idx: number) => ({
+         id: q.id || `q_${idx}`,
+         test_id: testId,
+         question_text: q.question_text,
+         question_type: (q.question_type || "multiple_choice") as any,
+         options: q.options || { A: "", B: "", C: "", D: "" },
+         correct_answer: q.correct_answer || "A",
+         explanation: q.explanation || "",
+         points: q.points || 3.1,
+         image_url: q.image_url || null,
+         order_index: idx
+       }));
+       setQuestions(formattedQs);
+       setAttemptId(`attempt_olympiad_${testId}`);
+       setTimeRemaining((tData.durationMinutes || 60) * 60);
+       setLoading(false);
+       return;
+     }
 
- setQuestions(questionsData || []);
+     router.push('/dashboard/tests');
+     return;
+   }
+   setTest(testData);
 
- // Check for active attempt or create new one
- const activeAttempt = await getActiveAttempt(testId);
- if (activeAttempt) {
- setAttemptId(activeAttempt.id);
- // Load saved responses
- const savedResponses = await getAttemptResponses(activeAttempt.id);
- const savedAnswers: Record<string, string> = {};
- savedResponses.forEach(r => {
- if (r.student_answer) {
- savedAnswers[r.question_id] = r.student_answer;
- }
- });
- setAnswers(savedAnswers);
+   // Get questions
+   const supabase = createClient();
+   const { data: questionsData } = await supabase
+   .from('questions')
+   .select('*')
+   .eq('test_id', testId)
+   .order('order_index', { ascending: true });
 
- // Calculate remaining time if timed test
- if (testData.duration_minutes) {
- const elapsed = Math.floor(
- (Date.now() - new Date(activeAttempt.started_at).getTime()) / 1000
- );
- const remaining = (testData.duration_minutes * 60) - elapsed;
- setTimeRemaining(Math.max(0, remaining));
- }
- } else {
- // Start new attempt
- const attemptData = await startTestAttempt(testId);
- if (!attemptData) {
- alert(t('tests.take.error.start'));
- router.push('/dashboard/tests');
- return;
- }
- setAttemptId(attemptData.id);
+   setQuestions(questionsData || []);
 
- // Set initial time
- if (testData.duration_minutes) {
- // For a brand new attempt, full duration is available
- setTimeRemaining(testData.duration_minutes * 60);
- }
- }
+   // Check for active attempt or create new one
+   const activeAttempt = await getActiveAttempt(testId);
+   if (activeAttempt) {
+   setAttemptId(activeAttempt.id);
+   // Load saved responses
+   const savedResponses = await getAttemptResponses(activeAttempt.id);
+   const savedAnswers: Record<string, string> = {};
+   savedResponses.forEach(r => {
+   if (r.student_answer) {
+   savedAnswers[r.question_id] = r.student_answer;
+   }
+   });
+   setAnswers(savedAnswers);
+
+   // Calculate remaining time if timed test
+   if (testData.duration_minutes) {
+   const elapsed = Math.floor(
+   (Date.now() - new Date(activeAttempt.started_at).getTime()) / 1000
+   );
+   const remaining = (testData.duration_minutes * 60) - elapsed;
+   setTimeRemaining(Math.max(0, remaining));
+   }
+   } else {
+   // Start new attempt
+   const attemptData = await startTestAttempt(testId);
+   if (!attemptData) {
+   alert(t('tests.take.error.start'));
+   router.push('/dashboard/tests');
+   return;
+   }
+   setAttemptId(attemptData.id);
+
+   // Set initial time
+   if (testData.duration_minutes) {
+   setTimeRemaining(testData.duration_minutes * 60);
+   }
+   }
  } catch (error) {
- console.error("Error loading test:", error);
+   console.error("Error loading test:", error);
  } finally {
- setLoading(false);
+   setLoading(false);
  }
  }
 
  loadTestAndStart();
- }, [testId, router]);
+ }, [testId, router, isOlympiadParam]);
 
  // Timer countdown
  useEffect(() => {
@@ -153,145 +227,200 @@ export default function TakeTestPage() {
  }, [attemptId, answers, submitting]);
 
  const saveAnswers = useCallback(async () => {
- if (!attemptId || Object.keys(answers).length === 0) return;
+  if (!attemptId || Object.keys(answers).length === 0) return;
 
- setAutoSaving(true);
- try {
- for (const [questionId, answer] of Object.entries(answers)) {
- await submitAnswer(attemptId, questionId, answer);
- }
- } catch (error) {
- console.error("Error auto-saving:", error);
- } finally {
- setAutoSaving(false);
- }
- }, [attemptId, answers]);
+  setAutoSaving(true);
+  try {
+    if (isOlympiad) {
+      if (typeof window !== 'undefined') {
+        localStorage.setItem(`promax_answers_${testId}`, JSON.stringify(answers));
+      }
+    } else {
+      for (const [questionId, answer] of Object.entries(answers)) {
+        await submitAnswer(attemptId, questionId, answer);
+      }
+    }
+  } catch (error) {
+    console.error("Error auto-saving:", error);
+  } finally {
+    setAutoSaving(false);
+  }
+  }, [attemptId, answers, isOlympiad, testId]);
 
- const handleAnswerChange = (questionId: string, answer: string) => {
- setAnswers(prev => ({
- ...prev,
- [questionId]: answer
- }));
- };
+  const handleAnswerChange = (questionId: string, answer: string) => {
+  setAnswers(prev => ({
+  ...prev,
+  [questionId]: answer
+  }));
+  };
 
- const handleMarkForReview = (questionId: string) => {
- setMarkedForReview(prev => {
- const newSet = new Set(prev);
- if (newSet.has(questionId)) {
- newSet.delete(questionId);
- } else {
- newSet.add(questionId);
- }
- return newSet;
- });
- };
+  const handleMarkForReview = (questionId: string) => {
+  setMarkedForReview(prev => {
+  const newSet = new Set(prev);
+  if (newSet.has(questionId)) {
+  newSet.delete(questionId);
+  } else {
+  newSet.add(questionId);
+  }
+  return newSet;
+  });
+  };
 
- const handleAutoSubmit = async () => {
- if (!attemptId || submitting) return;
+  const handleAutoSubmit = async () => {
+  if (!attemptId || submitting) return;
 
- setSubmitting(true);
- toast("Vaqt tugadi! Test avtomatik yakunlanmoqda...", { icon: "⚠️" });
+  setSubmitting(true);
+  toast("Vaqt tugadi! Test avtomatik yakunlanmoqda...", { icon: "⚠️" });
 
- try {
- await saveAnswers();
- const success = await completeTestAttempt(attemptId, test?.duration_minutes ? test.duration_minutes * 60 : 0);
- if (success) {
- router.push(`/dashboard/tests/${testId}/results/${attemptId}`);
- }
- } catch (error) {
- console.error("Error auto-submitting:", error);
- }
- };
+  try {
+    await saveAnswers();
 
- const handleSubmitClick = () => {
- setShowConfirmModal(true);
- };
+    if (isOlympiad) {
+      const timeSpent = test?.duration_minutes ? test.duration_minutes * 60 : 0;
+      const supabase = createClient();
+      const { data: userData } = await supabase.auth.getUser();
+      await submitTournamentAttempt({
+        tournamentId: testId,
+        userId: userData?.user?.id || `anon_${Date.now()}`,
+        studentName: userData?.user?.user_metadata?.full_name || "O'quvchi",
+        studentAvatar: `https://api.dicebear.com/7.x/avataaars/svg?seed=${userData?.user?.user_metadata?.full_name || 'Student'}`,
+        answers,
+        timeSpentSeconds: timeSpent
+      });
+      toast.success("Musobaqa yakunlandi!", { icon: "🏆" });
+      router.push(`/dashboard/olympiads?tab=leaderboard&id=${testId}`);
+      return;
+    }
 
- const handleConfirmSubmit = async () => {
- if (!attemptId) return;
+    const success = await completeTestAttempt(attemptId, test?.duration_minutes ? test.duration_minutes * 60 : 0);
+    if (success) {
+      router.push(`/dashboard/tests/${testId}/results/${attemptId}`);
+    }
+  } catch (error) {
+    console.error("Error auto-submitting:", error);
+  }
+  };
 
- setShowConfirmModal(false);
- setSubmitting(true);
+  const handleSubmitClick = () => {
+  setShowConfirmModal(true);
+  };
 
- try {
- // Save any pending answers
- await saveAnswers();
+  const handleConfirmSubmit = async () => {
+  if (!attemptId) return;
 
- // Calculate time spent
- const timeSpent = test?.duration_minutes ? (test.duration_minutes * 60 - (timeRemaining || 0)) : 0;
+  setShowConfirmModal(false);
+  setSubmitting(true);
 
- // Complete the attempt
- const success = await completeTestAttempt(attemptId, timeSpent);
+  try {
+    // Save any pending answers
+    await saveAnswers();
 
- if (success) {
- toast.success("Test muvaffaqiyatli yakunlandi!");
- // Redirect to results page
- router.push(`/dashboard/tests/${testId}/results/${attemptId}`);
- } else {
- toast.error("Testni yakunlashda xatolik yuz berdi");
- setSubmitting(false);
- }
- } catch (error) {
- console.error("Error submitting test:", error);
- toast.error("Kutilmagan xatolik yuz berdi");
- setSubmitting(false);
- }
- };
+    // Calculate time spent
+    const timeSpent = test?.duration_minutes ? (test.duration_minutes * 60 - (timeRemaining || 0)) : 0;
 
- const formatTime = (seconds: number) => {
- const mins = Math.floor(seconds / 60);
- const secs = seconds % 60;
- return `${mins}:${secs.toString().padStart(2, '0')}`;
- };
+    if (isOlympiad) {
+      const supabase = createClient();
+      const { data: userData } = await supabase.auth.getUser();
+      await submitTournamentAttempt({
+        tournamentId: testId,
+        userId: userData?.user?.id || `anon_${Date.now()}`,
+        studentName: userData?.user?.user_metadata?.full_name || "O'quvchi",
+        studentAvatar: `https://api.dicebear.com/7.x/avataaars/svg?seed=${userData?.user?.user_metadata?.full_name || 'Student'}`,
+        answers,
+        timeSpentSeconds: Math.max(1, timeSpent)
+      });
+      toast.success("Musobaqa muvaffaqiyatli yakunlandi! Natijangiz reytingga qo'shildi.", { icon: "🏆" });
+      router.push(`/dashboard/olympiads?tab=leaderboard&id=${testId}`);
+      return;
+    }
 
- const getTimerColor = () => {
- if (!timeRemaining || !test?.duration_minutes) return "text-gray-700 dark:text-gray-300";
- const totalSeconds = test.duration_minutes * 60;
- const percentage = (timeRemaining / totalSeconds) * 100;
+    // Complete standard attempt
+    const success = await completeTestAttempt(attemptId, timeSpent);
 
- if (percentage <= 10) return "text-red-600 dark:text-red-400 animate-pulse";
- if (percentage <= 25) return "text-orange-600 dark:text-orange-400";
- return "text-gray-700 dark:text-gray-300";
- };
+    if (success) {
+      toast.success("Test muvaffaqiyatli yakunlandi!");
+      // Redirect to results page
+      router.push(`/dashboard/tests/${testId}/results/${attemptId}`);
+    } else {
+      toast.error("Testni yakunlashda xatolik yuz berdi");
+      setSubmitting(false);
+    }
+  } catch (error) {
+    console.error("Error submitting test:", error);
+    toast.error("Kutilmagan xatolik yuz berdi");
+    setSubmitting(false);
+  }
+  };
 
- if (loading) {
- return <TakeTestSkeleton />;
- }
+  const formatTime = (seconds: number) => {
+  const mins = Math.floor(seconds / 60);
+  const secs = seconds % 60;
+  return `${mins}:${secs.toString().padStart(2, '0')}`;
+  };
 
- if (!test || questions.length === 0) {
- return (
- <div className="text-center py-12">
- <AlertCircle className="mx-auto text-red-500 mb-4" size={64} />
- <h2 className="text-2xl font-medium text-slate-800 dark:text-slate-100 mb-2">{t('tests.take.error.title')}</h2>
- <Link href="/dashboard/tests" className="text-brand-blue active:underline">
- {t('tests.take.back_to_list')}
- </Link>
- </div>
- );
- }
+  const getTimerColor = () => {
+  if (!timeRemaining || !test?.duration_minutes) return "text-gray-700 dark:text-gray-300";
+  const totalSeconds = test.duration_minutes * 60;
+  const percentage = (timeRemaining / totalSeconds) * 100;
 
- const currentQuestion = questions[currentQuestionIndex];
- const progress = ((currentQuestionIndex+ 1) / questions.length) * 100;
+  if (percentage <= 10) return "text-red-600 dark:text-red-400 animate-pulse";
+  if (percentage <= 25) return "text-orange-600 dark:text-orange-400";
+  return "text-gray-700 dark:text-gray-300";
+  };
 
- return (
- <div className="relative min-h-screen text-slate-800 dark:text-white font-sans bg-transparent pb-24 md:pb-0">
- <div className="fixed inset-0 z-0 overflow-hidden pointer-events-none">
- <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] rounded-full bg-blue-300/20 dark:bg-blue-500/10 blur-[130px]" />
- <div className="absolute bottom-[-15%] right-[-10%] w-[45%] h-[45%] rounded-full bg-violet-300/20 dark:bg-purple-500/10 blur-[130px]" />
- </div>
+  if (loading) {
+  return <TakeTestSkeleton />;
+  }
 
- {/* Floating Header Island */}
- <div className="fixed top-4 left-4 right-4 md:left-auto md:right-1/2 md:translate-x-1/2 md:w-full md:max-w-3xl z-50 pointer-events-none">
- <div className="bg-white/90 dark:bg-slate-900/90 backdrop-blur-3xl border border-white/70 dark:border-slate-700/60 rounded-[32px] p-3 shadow-[0_8px_30px_rgb(0,86,210,0.15)] dark:shadow-[0_8px_30px_rgb(0,0,0,0.3)] pointer-events-auto flex flex-col gap-2 transition-all">
- <div className="flex items-center justify-between px-2">
- <div className="flex items-center gap-3 truncate flex-1 pr-4">
- <span className="w-9 h-9 shrink-0 rounded-full bg-brand-blue text-white flex items-center justify-center text-sm font-bold shadow-sm">
- {currentQuestionIndex+ 1}/{questions.length}
- </span>
- <h1 className="text-[15px] font-bold text-slate-800 dark:text-slate-100 truncate hidden md:block">
- {test.title}
- </h1>
- </div>
+  if (!test || questions.length === 0) {
+  return (
+  <div className="text-center py-12">
+  <AlertCircle className="mx-auto text-red-500 mb-4" size={64} />
+  <h2 className="text-2xl font-medium text-slate-800 dark:text-slate-100 mb-2">{t('tests.take.error.title')}</h2>
+  <Link href={isOlympiad ? "/dashboard/olympiads" : "/dashboard/tests"} className="text-brand-blue active:underline font-bold">
+  {isOlympiad ? "Musobaqalarga qaytish" : t('tests.take.back_to_list')}
+  </Link>
+  </div>
+  );
+  }
+
+  const currentQuestion = questions[currentQuestionIndex];
+  const progress = ((currentQuestionIndex+ 1) / questions.length) * 100;
+
+  return (
+  <div className="relative min-h-screen text-slate-800 dark:text-white font-sans bg-transparent pb-24 md:pb-0">
+  <div className="fixed inset-0 z-0 overflow-hidden pointer-events-none">
+  <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] rounded-full bg-blue-300/20 dark:bg-blue-500/10 blur-[130px]" />
+  <div className="absolute bottom-[-15%] right-[-10%] w-[45%] h-[45%] rounded-full bg-violet-300/20 dark:bg-purple-500/10 blur-[130px]" />
+  </div>
+
+  {/* Floating Header Island */}
+  <div className="fixed top-4 left-4 right-4 md:left-auto md:right-1/2 md:translate-x-1/2 md:w-full md:max-w-3xl z-50 pointer-events-none">
+  <div className="bg-white/90 dark:bg-slate-900/90 backdrop-blur-3xl border border-white/70 dark:border-slate-700/60 rounded-[32px] p-3 shadow-[0_8px_30px_rgb(0,86,210,0.15)] dark:shadow-[0_8px_30px_rgb(0,0,0,0.3)] pointer-events-auto flex flex-col gap-2 transition-all">
+  <div className="flex items-center justify-between px-2">
+  <div className="flex items-center gap-2.5 sm:gap-3 truncate flex-1 pr-4">
+  <button
+    onClick={() => router.push(isOlympiad ? '/dashboard/olympiads' : '/dashboard/tests')}
+    className="w-9 h-9 shrink-0 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-500 hover:text-slate-900 dark:hover:text-white flex items-center justify-center active:scale-95 transition-all cursor-pointer"
+    title="Chiqish"
+  >
+    <ArrowLeft size={18} />
+  </button>
+  <span className="w-9 h-9 shrink-0 rounded-full bg-brand-blue text-white flex items-center justify-center text-sm font-bold shadow-sm">
+  {currentQuestionIndex+ 1}/{questions.length}
+  </span>
+  <div className="truncate hidden sm:flex items-center gap-2">
+    {isOlympiad && (
+      <span className="text-[10px] font-black uppercase tracking-wider text-amber-500 bg-amber-500/10 px-2 py-0.5 rounded-md flex items-center gap-1 shrink-0">
+        <Trophy size={11} />
+        {tournamentData?.subject || "Musobaqa"}
+      </span>
+    )}
+    <h1 className="text-[14px] font-bold text-slate-800 dark:text-slate-100 truncate">
+      {test.title}
+    </h1>
+  </div>
+  </div>
 
  <div className="flex items-center gap-2 md:gap-3 shrink-0">
  {autoSaving && (

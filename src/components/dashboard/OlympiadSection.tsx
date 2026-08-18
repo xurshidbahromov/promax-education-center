@@ -25,7 +25,8 @@ import {
   Info,
   ArrowUpRight,
   ArrowDownRight,
-  ArrowRight
+  ArrowRight,
+  Play
 } from "lucide-react";
 
 export interface OlympiadItem {
@@ -341,26 +342,23 @@ export function OlympiadSection() {
 
             {/* Action Buttons */}
             <div className="flex flex-wrap items-center gap-3 pt-2">
-              <button
-                onClick={() => handleRegister(heroItem)}
-                className={`px-6 py-3 rounded-2xl text-xs font-black uppercase tracking-wider flex items-center gap-2 cursor-pointer transition-all shadow-lg active:scale-95 ${
-                  registeredIds.includes(heroItem.id)
-                    ? "bg-emerald-500 text-white shadow-emerald-500/20"
-                    : "bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-slate-950 font-black shadow-amber-500/30"
-                }`}
-              >
-                {registeredIds.includes(heroItem.id) ? (
-                  <>
-                    <CheckCircle2 size={16} />
-                    <span>Ro'yxatdan O'tgansiz ✓</span>
-                  </>
-                ) : (
-                  <>
-                    <Flame size={16} />
-                    <span>Qatnashish (100 Tanga)</span>
-                  </>
-                )}
-              </button>
+              {registeredIds.includes(heroItem.id) ? (
+                <Link
+                  href={`/dashboard/tests/${heroItem.id}/take?type=olympiad`}
+                  className="px-6 py-3 rounded-2xl text-xs font-black uppercase tracking-wider flex items-center gap-2 cursor-pointer transition-all shadow-lg active:scale-95 bg-emerald-500 hover:bg-emerald-600 text-white shadow-emerald-500/20"
+                >
+                  <Play size={16} className="fill-white" />
+                  <span>Testni Boshlash 🚀</span>
+                </Link>
+              ) : (
+                <button
+                  onClick={() => handleRegister(heroItem)}
+                  className="px-6 py-3 rounded-2xl text-xs font-black uppercase tracking-wider flex items-center gap-2 cursor-pointer transition-all shadow-lg active:scale-95 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-slate-950 font-black shadow-amber-500/30"
+                >
+                  <Flame size={16} />
+                  <span>Qatnashish (100 Tanga)</span>
+                </button>
+              )}
 
               <button
                 onClick={() => setSelectedOlympiad(heroItem)}
@@ -489,16 +487,22 @@ export function OlympiadSection() {
                   Batafsil
                 </button>
 
-                <button
-                  onClick={() => handleRegister(item)}
-                  className={`px-4 py-2 rounded-xl text-xs font-extrabold transition-all cursor-pointer active:scale-95 ${
-                    isRegistered
-                      ? "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30"
-                      : "bg-brand-blue text-white hover:bg-blue-600 shadow-md shadow-brand-blue/20"
-                  }`}
-                >
-                  {isRegistered ? "Ro'yxatdasiz ✓" : "Qatnashish"}
-                </button>
+                {isRegistered ? (
+                  <Link
+                    href={`/dashboard/tests/${item.id}/take?type=olympiad`}
+                    className="px-4 py-2 rounded-xl text-xs font-extrabold transition-all cursor-pointer active:scale-95 bg-emerald-500 hover:bg-emerald-600 text-white shadow-md shadow-emerald-500/20 flex items-center gap-1.5"
+                  >
+                    <Play size={13} className="fill-white" />
+                    <span>Boshlash</span>
+                  </Link>
+                ) : (
+                  <button
+                    onClick={() => handleRegister(item)}
+                    className="px-4 py-2 rounded-xl text-xs font-extrabold transition-all cursor-pointer active:scale-95 bg-brand-blue text-white hover:bg-blue-600 shadow-md shadow-brand-blue/20"
+                  >
+                    Qatnashish
+                  </button>
+                )}
               </div>
             </motion.div>
           );
@@ -606,15 +610,26 @@ export function OlympiadSection() {
                 >
                   Yopish
                 </button>
-                <button
-                  onClick={() => {
-                    handleRegister(selectedOlympiad);
-                    setSelectedOlympiad(null);
-                  }}
-                  className="px-6 py-2.5 text-xs font-black text-white bg-brand-blue hover:bg-blue-600 rounded-xl shadow-lg shadow-brand-blue/20 cursor-pointer active:scale-95 transition-all"
-                >
-                  {registeredIds.includes(selectedOlympiad.id) ? "Ro'yxatdasiz ✓" : `Qatnashish (${selectedOlympiad.entryCoins} Tanga)`}
-                </button>
+                {registeredIds.includes(selectedOlympiad.id) ? (
+                  <Link
+                    href={`/dashboard/tests/${selectedOlympiad.id}/take?type=olympiad`}
+                    onClick={() => setSelectedOlympiad(null)}
+                    className="px-6 py-2.5 text-xs font-black text-white bg-emerald-600 hover:bg-emerald-700 rounded-xl shadow-lg shadow-emerald-500/20 cursor-pointer active:scale-95 transition-all flex items-center gap-1.5"
+                  >
+                    <Play size={14} className="fill-white" />
+                    <span>Testni Boshlash 🚀</span>
+                  </Link>
+                ) : (
+                  <button
+                    onClick={() => {
+                      handleRegister(selectedOlympiad);
+                      setSelectedOlympiad(null);
+                    }}
+                    className="px-6 py-2.5 text-xs font-black text-white bg-brand-blue hover:bg-blue-600 rounded-xl shadow-lg shadow-brand-blue/20 cursor-pointer active:scale-95 transition-all"
+                  >
+                    Qatnashish ({selectedOlympiad.entryCoins} Tanga)
+                  </button>
+                )}
               </div>
 
             </motion.div>

@@ -422,7 +422,7 @@ export default function OlympiadsPage() {
 
                     {isLive ? (
                       <Link
-                        href={`/dashboard/olympiads/${item.id}/take`}
+                        href={`/dashboard/tests/${item.id}/take?type=olympiad`}
                         className="flex-1 py-3 rounded-2xl bg-brand-blue hover:bg-blue-600 text-white font-bold text-xs sm:text-sm flex items-center justify-center gap-1.5 shadow-sm active:scale-95 transition-all text-center"
                       >
                         <span>Boshlash</span>
@@ -439,26 +439,21 @@ export default function OlympiadsPage() {
                         <Award size={16} />
                         <span>Reyting</span>
                       </button>
+                    ) : isRegistered ? (
+                      <Link
+                        href={`/dashboard/tests/${item.id}/take?type=olympiad`}
+                        className="flex-1 py-3 rounded-2xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs sm:text-sm flex items-center justify-center gap-1.5 shadow-sm active:scale-95 transition-all text-center"
+                      >
+                        <Play size={14} className="fill-white" />
+                        <span>Boshlash</span>
+                      </Link>
                     ) : (
                       <button
                         onClick={() => handleRegister(item)}
-                        className={`flex-1 py-3 rounded-2xl font-bold text-xs sm:text-sm active:scale-95 flex items-center justify-center gap-1.5 transition-all ${
-                          isRegistered
-                            ? "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20"
-                            : "bg-brand-blue hover:bg-blue-600 text-white shadow-sm"
-                        }`}
+                        className="flex-1 py-3 rounded-2xl font-bold text-xs sm:text-sm active:scale-95 flex items-center justify-center gap-1.5 transition-all bg-brand-blue hover:bg-blue-600 text-white shadow-sm"
                       >
-                        {isRegistered ? (
-                          <>
-            <CheckCircle2 size={16} />
-                            <span>Ro'yxatdasiz</span>
-                          </>
-                        ) : (
-                          <>
-                            <span>Qatnashish</span>
-                            <ArrowUpRight size={16} />
-                          </>
-                        )}
+                        <span>Qatnashish</span>
+                        <ArrowUpRight size={16} />
                       </button>
                     )}
                   </div>
@@ -1017,13 +1012,13 @@ export default function OlympiadsPage() {
                   Yopish
                 </button>
 
-                {selectedItem.status === "live" ? (
+                {selectedItem.status === "live" || registeredIds.includes(selectedItem.id) ? (
                   <Link
-                    href={`/dashboard/olympiads/${selectedItem.id}/take`}
-                    className="flex-1 py-3 rounded-2xl bg-brand-blue text-white font-bold text-xs sm:text-sm flex items-center justify-center gap-1 shadow-sm"
+                    href={`/dashboard/tests/${selectedItem.id}/take?type=olympiad`}
+                    className="flex-1 py-3 rounded-2xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs sm:text-sm flex items-center justify-center gap-1.5 shadow-sm active:scale-95 transition-all text-center"
                   >
+                    <Play size={14} className="fill-white" />
                     <span>Boshlash</span>
-                    <ArrowUpRight size={16} />
                   </Link>
                 ) : (
                   <button
@@ -1031,7 +1026,7 @@ export default function OlympiadsPage() {
                       handleRegister(selectedItem);
                       setSelectedItem(null);
                     }}
-                    className="flex-1 py-3 rounded-2xl bg-brand-blue text-white font-bold text-xs sm:text-sm flex items-center justify-center gap-1 shadow-sm"
+                    className="flex-1 py-3 rounded-2xl bg-brand-blue hover:bg-blue-600 text-white font-bold text-xs sm:text-sm flex items-center justify-center gap-1 shadow-sm active:scale-95 transition-all"
                   >
                     <span>Qatnashish</span>
                     <ArrowUpRight size={16} />
