@@ -396,7 +396,7 @@ export default function TakeTestPage() {
 
   {/* Floating Header Island */}
   <div className="fixed top-4 left-4 right-4 md:left-auto md:right-1/2 md:translate-x-1/2 md:w-full md:max-w-3xl z-50 pointer-events-none">
-  <div className="bg-white/90 dark:bg-slate-900/90 backdrop-blur-3xl border border-white/70 dark:border-slate-700/60 rounded-[32px] p-3 shadow-[0_8px_30px_rgb(0,86,210,0.15)] dark:shadow-[0_8px_30px_rgb(0,0,0,0.3)] pointer-events-auto flex flex-col gap-2 transition-all">
+  <div className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-2xl border border-white/80 dark:border-slate-800/80 rounded-[32px] p-3 shadow-[0_8px_24px_rgba(0,0,0,0.05)] dark:shadow-[0_8px_24px_rgba(0,0,0,0.3)] pointer-events-auto flex flex-col gap-2 transition-all">
   <div className="flex items-center justify-between px-2">
   <div className="flex items-center gap-2.5 sm:gap-3 truncate flex-1 pr-4">
   <button
@@ -465,7 +465,7 @@ export default function TakeTestPage() {
  
  {/* ── QUESTION DISPLAY ── */}
  <div className="lg:col-span-3 flex flex-col gap-6">
- <div className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl rounded-[28px] border border-gray-200/50 dark:border-slate-800/50 p-6 sm:p-8 shadow-sm">
+ <div className="bg-white/60 dark:bg-slate-900/60 backdrop-blur-xl rounded-[28px] border border-white/60 dark:border-slate-800/60 p-6 sm:p-8 shadow-none">
  {/* Question Header */}
  <div className="flex items-center gap-3 mb-6">
  <span className="w-10 h-10 flex items-center justify-center bg-brand-blue text-white rounded-full font-bold text-lg shadow-sm shrink-0">
@@ -517,7 +517,7 @@ export default function TakeTestPage() {
  className={`flex items-center gap-4 p-4 rounded-[20px] cursor-pointer transition-all border ${
  isSelected
  ? "border-brand-blue bg-brand-blue/5 shadow-sm"
- : "border-gray-200/60 dark:border-slate-700/60 active:border-brand-blue/30 active:bg-slate-50 dark:active:bg-slate-800/50"
+ : "border-white/60 dark:border-slate-800/60 bg-white/40 dark:bg-slate-800/30 hover:bg-white/70 dark:hover:bg-slate-800/60 active:border-brand-blue/30"
  }`}
  >
  <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center shrink-0 transition-colors ${
@@ -557,7 +557,7 @@ export default function TakeTestPage() {
  className={`flex items-center gap-4 p-4 rounded-[20px] cursor-pointer transition-all border ${
  isSelected
  ? "border-brand-blue bg-brand-blue/5 shadow-sm"
- : "border-gray-200/60 dark:border-slate-700/60 active:border-brand-blue/30 active:bg-slate-50 dark:active:bg-slate-800/50"
+ : "border-white/60 dark:border-slate-800/60 bg-white/40 dark:bg-slate-800/30 hover:bg-white/70 dark:hover:bg-slate-800/60 active:border-brand-blue/30"
  }`}
  >
  <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center shrink-0 transition-colors ${
@@ -588,7 +588,7 @@ export default function TakeTestPage() {
  onChange={(e) => handleAnswerChange(currentQuestion.id, e.target.value)}
  placeholder={t('tests.take.placeholder')}
  rows={4}
- className="w-full px-5 py-4 border border-gray-200/60 dark:border-slate-700/60 rounded-[20px] bg-white/50 dark:bg-slate-800/50 text-[15px] font-medium text-slate-800 dark:text-slate-100 focus:border-brand-blue focus:ring-4 focus:ring-brand-blue/10 outline-none transition-all placeholder:text-slate-400"
+ className="w-full px-5 py-4 border border-white/60 dark:border-slate-800/60 rounded-[20px] bg-white/40 dark:bg-slate-800/40 text-[15px] font-medium text-slate-800 dark:text-slate-100 focus:border-brand-blue focus:ring-4 focus:ring-brand-blue/10 outline-none transition-all placeholder:text-slate-400"
  />
  )}
  </div>
@@ -599,7 +599,7 @@ export default function TakeTestPage() {
  <button
  onClick={() => setCurrentQuestionIndex(prev => Math.max(0, prev - 1))}
  disabled={currentQuestionIndex === 0}
- className="px-6 py-3 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border border-gray-200/50 dark:border-slate-800/50 text-slate-600 dark:text-slate-300 rounded-[20px] font-bold flex items-center gap-2 active:bg-slate-100 dark:active:bg-slate-800 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-sm"
+ className="px-6 py-3 bg-white/60 dark:bg-slate-900/60 backdrop-blur-xl border border-white/60 dark:border-slate-800/60 text-slate-600 dark:text-slate-300 rounded-[20px] font-bold flex items-center gap-2 active:bg-slate-100 dark:active:bg-slate-800 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-none"
  >
  <ArrowLeft size={18} />
  {t('tests.take.prev')}
@@ -609,7 +609,7 @@ export default function TakeTestPage() {
  <button
  onClick={handleSubmitClick}
  disabled={submitting}
- className="px-8 py-3 bg-emerald-500 text-white rounded-[20px] font-bold flex items-center gap-2 active:scale-95 transition-all disabled:opacity-50"
+ className="px-8 py-3 bg-emerald-500 hover:bg-emerald-600 text-white rounded-[20px] font-bold flex items-center gap-2 active:scale-95 transition-all disabled:opacity-50 shadow-sm"
  >
  <Send size={18} />
  {submitting ? t('tests.take.submitting') : t('tests.take.finish')}
@@ -617,7 +617,7 @@ export default function TakeTestPage() {
  ) : (
  <button
  onClick={() => setCurrentQuestionIndex(prev => Math.min(questions.length - 1, prev+ 1))}
- className="px-8 py-3 bg-brand-blue text-white rounded-[20px] font-bold flex items-center gap-2 active:scale-95 transition-all"
+ className="px-8 py-3 bg-brand-blue hover:bg-blue-600 text-white rounded-[20px] font-bold flex items-center gap-2 active:scale-95 transition-all shadow-sm"
  >
  {t('tests.take.next')}
  <ArrowRight size={18} />
@@ -629,7 +629,7 @@ export default function TakeTestPage() {
  {/* ── QUESTION NAVIGATOR ── */}
  <div className="lg:col-span-1">
  {/* Desktop Sidebar */}
- <div className="hidden lg:flex flex-col bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl rounded-[28px] border border-gray-200/50 dark:border-slate-800/50 p-6 sticky top-28 shadow-sm">
+ <div className="hidden lg:flex flex-col bg-white/60 dark:bg-slate-900/60 backdrop-blur-xl rounded-[28px] border border-white/60 dark:border-slate-800/60 p-6 sticky top-28 shadow-none">
  <h3 className="font-bold text-slate-800 dark:text-slate-100 mb-4">{t('tests.take.questions_list')}</h3>
  <div className="grid grid-cols-4 gap-2">
  {questions.map((q, index) => {
@@ -650,7 +650,7 @@ export default function TakeTestPage() {
  <button
  key={q.id}
  onClick={() => setCurrentQuestionIndex(index)}
- className={`aspect-square rounded-xl font-bold text-[14px] flex items-center justify-center transition-all border ${btnClass}`}
+ className={`aspect-square rounded-xl font-bold text-[14px] flex items-center justify-center transition-all border cursor-pointer ${btnClass}`}
  >
  {index+ 1}
  </button>
@@ -659,7 +659,7 @@ export default function TakeTestPage() {
  </div>
 
  {/* Legend */}
- <div className="mt-6 pt-5 border-t border-gray-200/50 dark:border-slate-800/50 flex flex-col gap-3 text-[12px] font-semibold text-slate-500 dark:text-slate-400">
+ <div className="mt-6 pt-5 border-t border-slate-200/50 dark:border-slate-800/50 flex flex-col gap-3 text-[12px] font-semibold text-slate-500 dark:text-slate-400">
  <div className="flex items-center gap-2">
  <div className="w-3 h-3 bg-emerald-400 rounded-full shadow-[0_0_8px_rgba(52,211,153,0.5)]"></div>
  <span>{t('tests.take.status.answered')}</span>
@@ -676,7 +676,7 @@ export default function TakeTestPage() {
  </div>
 
  {/* Mobile Horizontal Question Navigator */}
- <div className="lg:hidden mt-2 bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl rounded-[24px] border border-gray-200/50 dark:border-slate-800/50 p-4 shadow-sm">
+ <div className="lg:hidden mt-2 bg-white/60 dark:bg-slate-900/60 backdrop-blur-xl rounded-[24px] border border-white/60 dark:border-slate-800/60 p-4 shadow-none">
  <div className="flex items-center gap-2 overflow-x-auto no-scrollbar pb-1">
  {questions.map((q, index) => {
  const isAnswered = !!answers[q.id];
@@ -692,7 +692,7 @@ export default function TakeTestPage() {
  <button
  key={q.id}
  onClick={() => setCurrentQuestionIndex(index)}
- className={`shrink-0 w-11 h-11 rounded-xl font-bold text-[14px] flex items-center justify-center transition-all ${btnClass}`}
+ className={`shrink-0 w-11 h-11 rounded-xl font-bold text-[14px] flex items-center justify-center transition-all cursor-pointer ${btnClass}`}
  >
  {index+ 1}
  </button>
@@ -706,8 +706,8 @@ export default function TakeTestPage() {
 
  {/* ── CONFIRMATION MODAL ── */}
  {showConfirmModal && (
- <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm flex items-center justify-center z-50 p-4">
- <div className="bg-white/90 dark:bg-slate-900/90 backdrop-blur-xl rounded-[32px] p-8 max-w-md w-full border border-gray-200/50 dark:border-slate-800/50 shadow-2xl">
+ <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-md flex items-center justify-center z-50 p-4">
+ <div className="bg-white/90 dark:bg-slate-900/90 backdrop-blur-2xl rounded-[32px] p-8 max-w-md w-full border border-white/80 dark:border-slate-800/80 shadow-2xl">
  <div className="flex items-center gap-4 mb-6">
  <div className="w-14 h-14 bg-amber-100 dark:bg-amber-500/20 rounded-full flex items-center justify-center shrink-0">
  <AlertCircle className="text-amber-500" size={28} />
@@ -755,7 +755,7 @@ export default function TakeTestPage() {
 
  {/* ── MOBILE FLOATING BOTTOM NAVIGATION ── */}
  <div className="md:hidden fixed bottom-6 left-4 right-4 z-50 pointer-events-none">
- <div className="bg-white/90 dark:bg-slate-900/90 backdrop-blur-3xl border border-white/70 dark:border-slate-700/60 rounded-full p-2 shadow-[0_8px_30px_rgb(0,86,210,0.15)] dark:shadow-[0_8px_30px_rgb(0,0,0,0.3)] pointer-events-auto flex items-center justify-between gap-2 max-w-sm mx-auto safe-area-pb">
+ <div className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-2xl border border-white/80 dark:border-slate-800/80 rounded-full p-2 shadow-[0_8px_24px_rgba(0,0,0,0.05)] dark:shadow-[0_8px_24px_rgba(0,0,0,0.3)] pointer-events-auto flex items-center justify-between gap-2 max-w-sm mx-auto safe-area-pb">
  <button
  onClick={() => setCurrentQuestionIndex(prev => Math.max(0, prev - 1))}
  disabled={currentQuestionIndex === 0}
