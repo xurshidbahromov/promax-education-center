@@ -860,49 +860,43 @@ export async function adminUpdateOrderStatus(
   const targetNotes = order?.notes || '';
   const isCoinPurchase = !order?.item_id && (targetNotes.includes('Coin xaridi') || targetNotes.includes('coin'));
 
-  // 2. Update order status
-  const { error } = await supabase
-    .from('shop_orders')
-    .update({ status })
-    .eq('id', orderId);
-
-  if (error) return { success: false };
-
-  // 3. If coin purchase order is delivered (approved), credit coins to student profile!
   let coinsAdded = 0;
   if (status === 'delivered' && targetStudentId && isCoinPurchase) {
     const match = targetNotes.match(/(\d+)\s*coin/i);
     if (match && match[1]) {
       coinsAdded = parseInt(match[1], 10);
     }
+  }
 
-    if (coinsAdded > 0) {
-      const { data: profile } = await supabase
-        .from('profiles')
-        .select('coins')
-        .eq('id', targetStudentId)
-        .single();
-
-      const currentCoins = profile?.coins || 0;
-      await supabase
-        .from('profiles')
-        .update({ coins: currentCoins + coinsAdded })
-        .eq('id', targetStudentId);
-
-      // Send notification to student
-      try {
-        await supabase.from('notifications').insert({
-          user_id: targetStudentId,
-          title: "Coin xaridingiz tasdiqlandi! 🎉",
-          message: `Hisobingizga ${coinsAdded} coin muvaffaqiyatli qo'shildi. Yangi balansingiz: ${currentCoins + coinsAdded} coin.`,
-          type: 'coin_credit',
-          is_read: false
-        });
-      } catch (e) {
-        // Notification fallback
+  // 2. If it's a coin purchase being marked delivered, call our server API for guaranteed update
+  if (status === 'delivered' && isCoinPurchase && targetStudentId && coinsAdded > 0) {
+    try {
+      const res = await fetch('/api/admin/credit-coins', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          studentId: targetStudentId,
+          coinsToAdd: coinsAdded,
+          orderId: orderId,
+          status: 'delivered'
+        })
+      });
+      const data = await res.json();
+      if (data.success) {
+        return { success: true, coinsAdded };
       }
+    } catch (apiErr) {
+      console.error("API route error, falling back to direct query:", apiErr);
     }
   }
+
+  // 3. Fallback / Normal gift order status update
+  const { error } = await supabase
+    .from('shop_orders')
+    .update({ status })
+    .eq('id', orderId);
+
+  if (error) return { success: false };
 
   // 4. Refund coins if regular gift order was cancelled
   if (status === 'cancelled' && targetStudentId && coinsSpent && coinsSpent > 0) {
@@ -927,42 +921,24 @@ export async function adminCreditCoinsDirectly(
   coinsToAdd: number,
   orderId?: string
 ): Promise<{ success: boolean; newBalance?: number; error?: string }> {
-  const supabase = createClient();
   try {
-    const { data: profile, error: pErr } = await supabase
-      .from('profiles')
-      .select('coins')
-      .eq('id', studentId)
-      .single();
-
-    if (pErr || !profile) {
-      return { success: false, error: "Foydalanuvchi topilmadi" };
+    const res = await fetch('/api/admin/credit-coins', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        studentId,
+        coinsToAdd,
+        orderId,
+        status: 'delivered'
+      })
+    });
+    const data = await res.json();
+    if (data.success) {
+      return { success: true, newBalance: data.newBalance };
     }
-
-    const newBalance = (profile.coins || 0) + coinsToAdd;
-    const { error: uErr } = await supabase
-      .from('profiles')
-      .update({ coins: newBalance })
-      .eq('id', studentId);
-
-    if (uErr) return { success: false, error: uErr.message };
-
-    if (orderId) {
-      await supabase.from('shop_orders').update({ status: 'delivered' }).eq('id', orderId);
-    }
-
-    try {
-      await supabase.from('notifications').insert({
-        user_id: studentId,
-        title: "Coin qo'shildi! 💎",
-        message: `Admin tomonidan hisobingizga ${coinsToAdd} coin qo'shildi. Joriy balans: ${newBalance} coin.`,
-        type: 'coin_credit',
-        is_read: false
-      });
-    } catch (e) {}
-
-    return { success: true, newBalance };
+    return { success: false, error: data.error || "Server xatosi" };
   } catch (err: any) {
+    console.error("Credit coins fetch error:", err);
     return { success: false, error: err.message };
   }
 }
