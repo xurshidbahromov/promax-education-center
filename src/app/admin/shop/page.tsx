@@ -513,19 +513,6 @@ export default function AdminShopPage() {
                           </button>
                         </div>
                       )}
-
-                      {order.status === 'delivered' && isCoinOrder && coinAmount > 0 && (
-                        <button
-                          type="button"
-                          onClick={() => handleDirectCredit(order.student_id, coinAmount, order.id)}
-                          disabled={isUpdating === order.id}
-                          className="px-3 py-1 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 rounded-xl text-xs font-semibold transition-all flex items-center gap-1 cursor-pointer disabled:opacity-50"
-                          title="Qayta coin o'tkazish"
-                        >
-                          <Coins size={12} className="text-amber-500" />
-                          <span>Qayta berish</span>
-                        </button>
-                      )}
                     </div>
                   </div>
                 );
