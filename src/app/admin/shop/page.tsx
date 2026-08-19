@@ -232,41 +232,69 @@ export default function AdminShopPage() {
   return (
     <div className="w-full max-w-[1400px] mx-auto space-y-6">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-2 border-b border-slate-200/50 dark:border-slate-800/50">
+      <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 pb-2 border-b border-slate-200/50 dark:border-slate-800/50">
         <div className="text-left">
           <h1 className="text-3xl font-black text-slate-800 dark:text-slate-100 tracking-tight font-sans-pro">
-            Do'kon va Buyurtmalar Boshqaruvi
+            Do'kon va Buyurtmalar
           </h1>
           <p className="text-xs sm:text-sm font-medium text-slate-400 dark:text-slate-500 mt-1">
-            Talabalarning sovg'a xaridlari hamda Promax Coin Shop inventarini boshqarish
+            Talabalarning sovg'a xaridlari hamda Promax Coin Shop inventarini boshqarish ({orders.length} ta buyurtma)
           </p>
         </div>
 
         <button
           type="button"
           onClick={openAddModal}
-          className="px-4 py-2.5 bg-amber-500 hover:bg-amber-600 active:scale-95 text-white rounded-xl text-xs font-bold transition-all flex items-center gap-2 shadow-sm shrink-0 cursor-pointer"
+          className="px-4 py-2.5 bg-amber-500 hover:bg-amber-600 active:scale-95 text-white rounded-xl text-xs font-bold transition-all flex items-center gap-2 shrink-0 cursor-pointer"
         >
           <Plus size={16} />
           <span>Yangi Sovg'a Qo'shish</span>
         </button>
       </div>
 
-      {/* Navigation Tabs */}
+      {/* Platform Standard Summary Stats Cards (Zero shadow, clean glassmorphic) */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+        {(() => {
+          const pendingCount = orders.filter(o => o.status === 'pending').length;
+          const deliveredCount = orders.filter(o => o.status === 'delivered').length;
+
+          return [
+            { label: "Jami Buyurtmalar", value: `${orders.length} ta`, icon: PackageCheck, color: "text-blue-500" },
+            { label: "Kutilayotganlar", value: `${pendingCount} ta`, icon: Clock, color: "text-amber-500" },
+            { label: "Topshirilganlar", value: `${deliveredCount} ta`, icon: CheckCircle2, color: "text-emerald-500" },
+            { label: "Do'kon Inventari", value: `${items.length} xil`, icon: Gift, color: "text-purple-500" }
+          ].map((s, i) => (
+            <div
+              key={i}
+              className="bg-white/70 dark:bg-slate-900/70 backdrop-blur-xl border border-slate-200/60 dark:border-slate-800/60 p-5 sm:p-6 rounded-3xl flex items-center justify-between min-w-0"
+            >
+              <div className="min-w-0 flex-1 pr-2 text-left">
+                <p className="text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider truncate mb-1">{s.label}</p>
+                <p className="text-2xl font-black text-slate-800 dark:text-slate-100 tracking-tight truncate">{s.value}</p>
+              </div>
+              
+              {/* Box-free Icon */}
+              <s.icon size={26} className={`${s.color} shrink-0 opacity-90`} />
+            </div>
+          ));
+        })()}
+      </div>
+
+      {/* Navigation Tabs (Harmonized) */}
       <div className="flex items-center gap-2 border-b border-slate-200/50 dark:border-slate-800/50 pb-2">
         <button
           type="button"
           onClick={() => setActiveTab('orders')}
-          className={`px-4 py-2 rounded-xl text-xs font-bold transition-colors flex items-center gap-2 cursor-pointer ${
+          className={`px-4 py-2.5 rounded-xl text-xs font-bold transition-all flex items-center gap-2 cursor-pointer ${
             activeTab === 'orders'
               ? 'bg-slate-900 text-white dark:bg-white dark:text-slate-900'
-              : 'text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-100'
+              : 'text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-100 hover:bg-slate-100 dark:hover:bg-slate-800/50'
           }`}
         >
-          <PackageCheck size={15} />
+          <PackageCheck size={16} />
           <span>Talabalar Buyurtmalari</span>
           {orders.length > 0 && (
-            <span className="px-1.5 py-0.5 rounded-full bg-amber-500 text-white font-extrabold text-[10px]">
+            <span className="px-2 py-0.5 rounded-full bg-amber-500 text-white font-extrabold text-[10px]">
               {orders.length}
             </span>
           )}
@@ -275,127 +303,188 @@ export default function AdminShopPage() {
         <button
           type="button"
           onClick={() => setActiveTab('items')}
-          className={`px-4 py-2 rounded-xl text-xs font-bold transition-colors flex items-center gap-2 cursor-pointer ${
+          className={`px-4 py-2.5 rounded-xl text-xs font-bold transition-all flex items-center gap-2 cursor-pointer ${
             activeTab === 'items'
               ? 'bg-slate-900 text-white dark:bg-white dark:text-slate-900'
-              : 'text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-100'
+              : 'text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-100 hover:bg-slate-100 dark:hover:bg-slate-800/50'
           }`}
         >
-          <Gift size={15} />
+          <Gift size={16} />
           <span>Do'kon Inventari ({items.length})</span>
         </button>
       </div>
 
       {/* ORDERS TAB */}
       {activeTab === 'orders' && (
-        <div className="space-y-4">
+        <div className="space-y-6">
           {/* Controls Bar */}
-          <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
-            <div className="flex items-center gap-2 overflow-x-auto w-full sm:w-auto">
+          <div className="bg-white/70 dark:bg-slate-900/70 backdrop-blur-xl border border-slate-200/60 dark:border-slate-800/60 p-2.5 rounded-2xl flex flex-col sm:flex-row items-center gap-3">
+            <div className="flex-1 relative w-full">
+              <Search size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
+              <input
+                type="text"
+                placeholder="Talaba ismi yoki tafsilot bo'yicha qidirish..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="w-full pl-11 pr-4 py-2 bg-transparent border-none text-xs sm:text-sm font-medium text-slate-800 dark:text-slate-100 placeholder:text-slate-400 outline-none"
+              />
+            </div>
+
+            <div className="flex items-center gap-2 overflow-x-auto w-full sm:w-auto pb-1 sm:pb-0">
               {[
-                { id: 'all', label: 'Barchasi' },
-                { id: 'pending', label: 'Kutilmoqda' },
-                { id: 'delivered', label: 'Topshirildi' },
-                { id: 'cancelled', label: 'Bekor qilingan' },
+                { id: 'all', label: 'Barchasi', count: orders.length },
+                { id: 'pending', label: 'Kutilmoqda', count: orders.filter(o => o.status === 'pending').length },
+                { id: 'delivered', label: 'Topshirildi', count: orders.filter(o => o.status === 'delivered').length },
+                { id: 'cancelled', label: 'Bekor qilingan', count: orders.filter(o => o.status === 'cancelled').length },
               ].map((f) => (
                 <button
                   key={f.id}
                   type="button"
                   onClick={() => setStatusFilter(f.id)}
-                  className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-colors whitespace-nowrap cursor-pointer ${
+                  className={`px-3.5 py-2 rounded-xl text-xs font-bold transition-all whitespace-nowrap cursor-pointer flex items-center gap-1.5 ${
                     statusFilter === f.id
-                      ? 'bg-amber-500 text-white shadow-sm'
-                      : 'bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-slate-800'
+                      ? 'bg-slate-900 text-white dark:bg-white dark:text-slate-900'
+                      : 'bg-slate-50 dark:bg-slate-800/60 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100'
                   }`}
                 >
-                  {f.label}
+                  <span>{f.label}</span>
+                  <span className={`px-1.5 py-0.5 rounded-full text-[10px] font-black ${
+                    statusFilter === f.id
+                      ? 'bg-white/20 text-white dark:bg-slate-900/20 dark:text-slate-900'
+                      : 'bg-slate-200 dark:bg-slate-700 text-slate-600 dark:text-slate-300'
+                  }`}>
+                    {f.count}
+                  </span>
                 </button>
               ))}
             </div>
-
-            <div className="relative w-full sm:w-72">
-              <Search size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
-              <input
-                type="text"
-                placeholder="Talaba ismi orqali qidirish..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full pl-9 pr-4 py-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl text-xs font-medium text-slate-800 dark:text-slate-100 outline-none"
-              />
-            </div>
           </div>
 
+          {/* Separate Order Cards List */}
           {ordersLoading ? (
-            <div className="py-12 text-center text-slate-400 text-xs">Yuklanmoqda...</div>
+            <div className="space-y-4 animate-pulse">
+              {[1, 2, 3, 4].map((i) => (
+                <div key={i} className="h-28 bg-white/50 dark:bg-slate-900/50 rounded-3xl border border-slate-200/40 dark:border-slate-800/40" />
+              ))}
+            </div>
           ) : filteredOrders.length === 0 ? (
-            <div className="py-16 text-center bg-white dark:bg-slate-900 rounded-3xl border border-dashed border-slate-200 dark:border-slate-800">
-              <PackageCheck size={36} className="mx-auto mb-2 text-slate-400 opacity-60" />
-              <p className="text-xs font-medium text-slate-500">Buyurtmalar topilmadi</p>
+            <div className="py-20 text-center text-slate-400 bg-white/70 dark:bg-slate-900/70 backdrop-blur-xl rounded-3xl border border-dashed border-slate-200/80 dark:border-slate-800/80">
+              <PackageCheck size={32} className="mx-auto mb-2 opacity-40" />
+              <p className="text-sm font-semibold">Buyurtmalar topilmadi</p>
             </div>
           ) : (
-            <div className="space-y-3">
+            <div className="space-y-4">
               {filteredOrders.map((order) => {
-                const statusConfig = {
-                  pending: { label: "Kutilmoqda", color: "bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/20" },
-                  delivered: { label: "Topshirildi", color: "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20" },
-                  cancelled: { label: "Bekor qilingan", color: "bg-rose-500/10 text-rose-600 dark:text-rose-400 border-rose-500/20" },
-                }[order.status] || { label: order.status, color: "bg-slate-100 text-slate-600" };
-
                 const isCoinOrder = !order.item_id && (order.notes?.includes('Coin xaridi') || order.notes?.includes('coin'));
                 const coinMatch = order.notes?.match(/(\d+)\s*coin/i);
                 const coinAmount = coinMatch ? parseInt(coinMatch[1], 10) : 0;
 
+                let displayTitle = order.item?.title || order.notes || "Noma'lum Buyurtma";
+                let packagePrice = "";
+                if (isCoinOrder && order.notes) {
+                  const cleanMatch = order.notes.match(/Coin xaridi:\s*([^(]+)\(([^)]+)\)/i);
+                  if (cleanMatch) {
+                    displayTitle = cleanMatch[1].trim();
+                    packagePrice = cleanMatch[2].trim();
+                  }
+                }
+
+                const studentName = order.student?.full_name || "Noma'lum Talaba";
+                const studentInitial = studentName.charAt(0).toUpperCase();
+
+                const statusBadge = {
+                  delivered: {
+                    label: "Topshirildi",
+                    className: "bg-emerald-50/80 dark:bg-emerald-950/40 text-emerald-600 dark:text-emerald-400 border border-emerald-200/50 dark:border-emerald-900/50",
+                    icon: CheckCircle2
+                  },
+                  pending: {
+                    label: "Kutilmoqda",
+                    className: "bg-amber-50/80 dark:bg-amber-950/40 text-amber-600 dark:text-amber-400 border border-amber-200/50 dark:border-amber-900/50",
+                    icon: Clock
+                  },
+                  cancelled: {
+                    label: "Bekor qilingan",
+                    className: "bg-red-50/80 dark:bg-red-950/40 text-red-500 border border-red-200/50 dark:border-red-900/50",
+                    icon: XCircle
+                  }
+                }[order.status] || {
+                  label: order.status,
+                  className: "bg-slate-100 dark:bg-slate-800 text-slate-500 border border-slate-200/50",
+                  icon: Clock
+                };
+
                 return (
                   <div
                     key={order.id}
-                    className="bg-white dark:bg-slate-900 rounded-2xl p-4 border border-slate-200/80 dark:border-slate-800 flex flex-col md:flex-row md:items-center justify-between gap-3 shadow-sm"
+                    className="group bg-white/70 dark:bg-slate-900/70 backdrop-blur-xl border border-slate-200/60 dark:border-slate-800/60 rounded-3xl p-5 sm:p-6 flex flex-col md:flex-row md:items-center justify-between gap-4 transition-colors hover:border-slate-300 dark:hover:border-slate-700 text-left"
                   >
-                    <div className="flex items-start gap-3 text-left">
-                      <div className={`w-10 h-10 rounded-xl flex items-center justify-center font-bold shrink-0 ${
-                        isCoinOrder
-                          ? 'bg-amber-500/10 text-amber-500'
-                          : 'bg-indigo-500/10 text-indigo-500'
-                      }`}>
-                        {isCoinOrder ? <Coins size={20} /> : <Gift size={20} />}
+                    {/* Left: Avatar + Details */}
+                    <div className="flex items-start sm:items-center gap-4 min-w-0">
+                      {/* Avatar */}
+                      <div className="w-12 h-12 rounded-2xl bg-slate-100 dark:bg-slate-800 flex items-center justify-center font-bold text-slate-700 dark:text-slate-200 shrink-0 text-sm">
+                        {isCoinOrder ? (
+                          <Coins size={22} className="text-amber-500" />
+                        ) : (
+                          <Gift size={22} className="text-blue-500" />
+                        )}
                       </div>
-                      <div>
-                        <div className="flex items-center gap-2">
-                          <h4 className="font-bold text-slate-800 dark:text-slate-100 text-sm">
-                            {order.student?.full_name || "Noma'lum Talaba"}
-                          </h4>
-                          {isCoinOrder && (
-                            <span className="px-2 py-0.5 rounded-md text-[10px] font-bold bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20">
-                              +{coinAmount} Coin Xaridi
+
+                      {/* Info */}
+                      <div className="min-w-0 space-y-1.5">
+                        <div className="flex items-center flex-wrap gap-2.5">
+                          <h3 className="font-bold text-slate-800 dark:text-slate-100 text-base">
+                            {studentName}
+                          </h3>
+                          {isCoinOrder ? (
+                            <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-xl bg-amber-50/80 dark:bg-amber-950/40 text-amber-700 dark:text-amber-300 border border-amber-200/50 dark:border-amber-900/50 text-[11px] font-extrabold">
+                              <Coins size={12} className="text-amber-500" />
+                              <span>+{coinAmount.toLocaleString()} Coin</span>
+                            </span>
+                          ) : (
+                            <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-xl bg-blue-50/80 dark:bg-blue-950/40 text-blue-600 dark:text-blue-400 border border-blue-200/50 dark:border-blue-900/50 text-[11px] font-extrabold">
+                              <Gift size={12} className="text-blue-500" />
+                              <span>Sovg'a Xaridi</span>
                             </span>
                           )}
                         </div>
-                        <div className="flex items-center gap-2 text-xs font-medium text-slate-500 mt-0.5">
-                          <span>
-                            {isCoinOrder ? "Tafsilot: " : "Sovg'a: "}
-                            <strong className="text-slate-700 dark:text-slate-200 font-bold">
-                              {order.item?.title || order.notes}
-                            </strong>
+
+                        <div className="flex items-center flex-wrap gap-2 text-xs font-medium text-slate-500 dark:text-slate-400">
+                          <span className="text-slate-700 dark:text-slate-200 font-semibold">
+                            {displayTitle}
                           </span>
-                          {!isCoinOrder && (
+                          {packagePrice && (
                             <>
-                              <span>•</span>
-                              <span className="flex items-center gap-1 text-amber-500 font-bold">
-                                <Coins size={13} />
+                              <span className="text-slate-300 dark:text-slate-700">•</span>
+                              <span className="text-slate-500 dark:text-slate-400">
+                                {packagePrice}
+                              </span>
+                            </>
+                          )}
+                          {!isCoinOrder && order.coins_spent > 0 && (
+                            <>
+                              <span className="text-slate-300 dark:text-slate-700">•</span>
+                              <span className="text-amber-600 dark:text-amber-400 font-bold flex items-center gap-1">
+                                <Coins size={12} />
                                 {order.coins_spent} Tanga
                               </span>
                             </>
                           )}
+                          <span className="text-slate-300 dark:text-slate-700">•</span>
+                          <span className="text-[11px] text-slate-400 flex items-center gap-1">
+                            <Clock size={11} />
+                            {new Date(order.created_at).toLocaleDateString('uz-UZ', { year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}
+                          </span>
                         </div>
-                        <span className="text-[10px] text-slate-400 block mt-0.5">
-                          {new Date(order.created_at).toLocaleDateString('uz-UZ', { year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}
-                        </span>
                       </div>
                     </div>
 
-                    <div className="flex items-center justify-between md:justify-end gap-3 pt-2 md:pt-0 border-t md:border-t-0 border-slate-100 dark:border-slate-800">
-                      <span className={`text-[10px] font-bold px-2.5 py-1 rounded-lg border ${statusConfig.color}`}>
-                        {statusConfig.label}
-                      </span>
+                    {/* Right: Status Pill & Actions */}
+                    <div className="flex items-center justify-between md:justify-end gap-3 pt-3 md:pt-0 border-t md:border-t-0 border-slate-100 dark:border-slate-800/60 shrink-0">
+                      <div className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-xl text-xs font-bold ${statusBadge.className}`}>
+                        <statusBadge.icon size={13} />
+                        <span>{statusBadge.label}</span>
+                      </div>
 
                       {order.status === 'pending' && (
                         <div className="flex items-center gap-2">
@@ -403,17 +492,21 @@ export default function AdminShopPage() {
                             type="button"
                             onClick={() => handleUpdateStatus(order.id, 'delivered', order.student_id, order.coins_spent)}
                             disabled={isUpdating === order.id}
-                            className="px-3 py-1.5 bg-emerald-500 hover:bg-emerald-600 text-white rounded-xl text-xs font-bold transition-all flex items-center gap-1 shadow-sm cursor-pointer disabled:opacity-50"
+                            className="px-3.5 py-1.5 bg-emerald-600 hover:bg-emerald-700 active:scale-95 text-white rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 shadow-sm disabled:opacity-50 cursor-pointer"
                           >
-                            <CheckCircle2 size={13} />
-                            <span>{isCoinOrder ? `Tasdiqlash (+${coinAmount} coin)` : "Topshirildi"}</span>
+                            {isUpdating === order.id ? (
+                              <Loader2 size={13} className="animate-spin" />
+                            ) : (
+                              <CheckCircle2 size={13} />
+                            )}
+                            <span>{isCoinOrder ? `Tasdiqlash (+${coinAmount})` : "Topshirildi"}</span>
                           </button>
 
                           <button
                             type="button"
                             onClick={() => handleUpdateStatus(order.id, 'cancelled', order.student_id, order.coins_spent)}
                             disabled={isUpdating === order.id}
-                            className="px-3 py-1.5 bg-rose-500/10 hover:bg-rose-500/20 text-rose-600 dark:text-rose-400 rounded-xl text-xs font-bold transition-all flex items-center gap-1 cursor-pointer disabled:opacity-50"
+                            className="px-3 py-1.5 bg-rose-50/80 dark:bg-rose-950/40 hover:bg-rose-100 text-rose-600 dark:text-rose-400 border border-rose-200/50 dark:border-rose-900/50 rounded-xl text-xs font-bold transition-all flex items-center gap-1 cursor-pointer disabled:opacity-50"
                           >
                             <XCircle size={13} />
                             <span>Bekor qilish</span>
@@ -426,11 +519,11 @@ export default function AdminShopPage() {
                           type="button"
                           onClick={() => handleDirectCredit(order.student_id, coinAmount, order.id)}
                           disabled={isUpdating === order.id}
-                          className="px-2.5 py-1 bg-amber-500/10 hover:bg-amber-500/20 text-amber-700 dark:text-amber-300 border border-amber-500/20 rounded-lg text-[11px] font-bold transition-all flex items-center gap-1 cursor-pointer disabled:opacity-50"
-                          title="Agar talabaga coin tushmagan bo'lsa, ushbu tugma orqali balansiga o'tkazish"
+                          className="px-3 py-1 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 rounded-xl text-xs font-semibold transition-all flex items-center gap-1 cursor-pointer disabled:opacity-50"
+                          title="Qayta coin o'tkazish"
                         >
-                          <Coins size={12} />
-                          <span>Coin o'tkazish</span>
+                          <Coins size={12} className="text-amber-500" />
+                          <span>Qayta berish</span>
                         </button>
                       )}
                     </div>
@@ -448,7 +541,7 @@ export default function AdminShopPage() {
           {items.map((item) => (
             <div
               key={item.id}
-              className="bg-white dark:bg-slate-900 rounded-3xl border border-slate-200/80 dark:border-slate-800 overflow-hidden flex flex-col justify-between shadow-sm group text-left"
+              className="bg-white/70 dark:bg-slate-900/70 backdrop-blur-xl rounded-3xl border border-slate-200/60 dark:border-slate-800/60 overflow-hidden flex flex-col justify-between shadow-sm group text-left transition-colors hover:border-slate-300 dark:hover:border-slate-700"
             >
               <div>
                 <div className="relative h-44 w-full bg-slate-100 dark:bg-slate-800">
@@ -482,8 +575,8 @@ export default function AdminShopPage() {
                 </div>
               </div>
 
-              {/* BOTTOM ACTIONS FOOTER (Stock info + Edit & Delete buttons at the bottom) */}
-              <div className="p-4 pt-3 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between gap-2 bg-slate-50/50 dark:bg-slate-950/40">
+              {/* BOTTOM ACTIONS FOOTER */}
+              <div className="p-4 pt-3 border-t border-slate-100/80 dark:border-slate-800/60 flex items-center justify-between gap-2 bg-slate-50/50 dark:bg-slate-950/40">
                 <span className="text-xs text-slate-500 font-medium">
                   Omborda: <strong className="text-slate-800 dark:text-slate-100 font-bold">{item.stock} ta</strong>
                 </span>
@@ -492,7 +585,7 @@ export default function AdminShopPage() {
                   <button
                     type="button"
                     onClick={() => openEditModal(item)}
-                    className="px-3 py-1.5 rounded-xl bg-slate-200/80 dark:bg-slate-800 hover:bg-slate-300 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 text-xs font-bold transition-all flex items-center gap-1 cursor-pointer"
+                    className="px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 text-xs font-bold transition-all flex items-center gap-1 cursor-pointer"
                   >
                     <Pencil size={13} />
                     <span>Tahrirlash</span>
