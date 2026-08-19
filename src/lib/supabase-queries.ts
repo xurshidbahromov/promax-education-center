@@ -904,3 +904,112 @@ export async function adminDeleteShopItem(itemId: string): Promise<{ success: bo
   if (error) return { success: false, error: error.message };
   return { success: true };
 }
+
+// ── COIN PURCHASE PACKAGES ──
+export interface CoinPackage {
+  id: string;
+  name: string;
+  coins: number;
+  originalPriceUzs: number;
+  priceUzs: number;
+  perCoinPrice: string;
+  discountBadge?: string;
+  tagBadge?: string;
+  theme: 'starter' | 'standard' | 'pro' | 'vip';
+  icon: 'sparkles' | 'star' | 'rocket' | 'crown';
+}
+
+export const COIN_PACKAGES: CoinPackage[] = [
+  {
+    id: "starter",
+    name: "Starter",
+    coins: 100,
+    originalPriceUzs: 15000,
+    priceUzs: 9000,
+    perCoinPrice: "90 so'm / coin",
+    discountBadge: "-40%",
+    tagBadge: "Boshlang'ich",
+    theme: "starter",
+    icon: "sparkles"
+  },
+  {
+    id: "standard",
+    name: "Standard",
+    coins: 300,
+    originalPriceUzs: 40000,
+    priceUzs: 24000,
+    perCoinPrice: "80 so'm / coin",
+    discountBadge: "-40%",
+    tagBadge: "Mashhur",
+    theme: "standard",
+    icon: "star"
+  },
+  {
+    id: "pro",
+    name: "Pro",
+    coins: 700,
+    originalPriceUzs: 85000,
+    priceUzs: 49000,
+    perCoinPrice: "70 so'm / coin",
+    discountBadge: "-42%",
+    tagBadge: "Eng foydali",
+    theme: "pro",
+    icon: "rocket"
+  },
+  {
+    id: "vip",
+    name: "VIP Chempion",
+    coins: 1500,
+    originalPriceUzs: 170000,
+    priceUzs: 89000,
+    perCoinPrice: "59 so'm / coin",
+    discountBadge: "-47%",
+    tagBadge: "VIP To'plam",
+    theme: "vip",
+    icon: "crown"
+  }
+];
+
+export async function buyCoinsPackage(
+  studentId: string,
+  totalCoins: number,
+  priceUzs: number,
+  paymentMethod: string,
+  packageName: string
+): Promise<{ success: boolean; newBalance?: number; error?: string }> {
+  const supabase = createClient();
+
+  try {
+    // 1. Record pending order in shop_orders so admin can see and verify
+    try {
+      await supabase.from('shop_orders').insert({
+        student_id: studentId,
+        item_id: null,
+        coins_spent: 0,
+        status: 'pending',
+        notes: `Coin xaridi: ${packageName} (${totalCoins} coin - ${priceUzs.toLocaleString()} so'm)`
+      });
+    } catch (orderErr) {
+      console.log("Order record fallback:", orderErr);
+    }
+
+    // 2. Optionally record notification
+    try {
+      await supabase.from('notifications').insert({
+        user_id: studentId,
+        title: "Coin xarid so'rovi yuborildi ⏳",
+        message: `${packageName} (${totalCoins} coin, ${priceUzs.toLocaleString()} so'm) bo'yicha to'lov cheki yuborildi. Admin tekshiruvidan so'ng hisobingizga qo'shiladi.`,
+        type: 'coin_purchase',
+        is_read: false
+      });
+    } catch (nErr) {
+      // Ignored if notifications table is not set up
+    }
+
+    return { success: true };
+  } catch (err: any) {
+    console.error("Coin purchase error:", err);
+    return { success: false, error: err.message || "Xatolik yuz berdi" };
+  }
+}
+
