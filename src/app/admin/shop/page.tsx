@@ -26,6 +26,7 @@ import {
   getShopItems,
   adminGetShopOrders,
   adminUpdateOrderStatus,
+  adminCreditCoinsDirectly,
   adminUpdateShopItem,
   adminDeleteShopItem,
   type ShopItem,
@@ -68,13 +69,38 @@ export default function AdminShopPage() {
     try {
       const res = await adminUpdateOrderStatus(orderId, newStatus, studentId, coinsSpent);
       if (res.success) {
-        toast.success(newStatus === 'delivered' ? "Buyurtma 'Topshirildi' holatiga o'tkazildi!" : "Buyurtma bekor qilindi hamda tangalar qaytarildi.");
+        if (res.coinsAdded && res.coinsAdded > 0) {
+          toast.success(`To'lov tasdiqlandi va talabaga ${res.coinsAdded} coin muvaffaqiyatli qo'shildi! 💎`);
+        } else if (newStatus === 'delivered') {
+          toast.success("Buyurtma 'Topshirildi' holatiga o'tkazildi!");
+        } else {
+          toast.success("Buyurtma bekor qilindi!");
+        }
         mutate('adminShopOrders');
       } else {
         toast.error("Holatni yangilashda xatolik");
       }
     } catch (err) {
       console.error("Status update error:", err);
+      toast.error("Xatolik yuz berdi");
+    } finally {
+      setIsUpdating(null);
+    }
+  };
+
+  const handleDirectCredit = async (studentId: string, amount: number, orderId?: string) => {
+    if (!studentId || !amount) return;
+    setIsUpdating(orderId || studentId);
+    try {
+      const res = await adminCreditCoinsDirectly(studentId, amount, orderId);
+      if (res.success) {
+        toast.success(`Talabaga ${amount} coin qo'shildi! Yangi balans: ${res.newBalance} coin 💎`);
+        mutate('adminShopOrders');
+      } else {
+        toast.error(res.error || "Xatolik yuz berdi");
+      }
+    } catch (err) {
+      console.error("Coin credit error:", err);
       toast.error("Xatolik yuz berdi");
     } finally {
       setIsUpdating(null);
@@ -315,26 +341,50 @@ export default function AdminShopPage() {
                   cancelled: { label: "Bekor qilingan", color: "bg-rose-500/10 text-rose-600 dark:text-rose-400 border-rose-500/20" },
                 }[order.status] || { label: order.status, color: "bg-slate-100 text-slate-600" };
 
+                const isCoinOrder = !order.item_id && (order.notes?.includes('Coin xaridi') || order.notes?.includes('coin'));
+                const coinMatch = order.notes?.match(/(\d+)\s*coin/i);
+                const coinAmount = coinMatch ? parseInt(coinMatch[1], 10) : 0;
+
                 return (
                   <div
                     key={order.id}
                     className="bg-white dark:bg-slate-900 rounded-2xl p-4 border border-slate-200/80 dark:border-slate-800 flex flex-col md:flex-row md:items-center justify-between gap-3 shadow-sm"
                   >
                     <div className="flex items-start gap-3 text-left">
-                      <div className="w-10 h-10 rounded-xl bg-amber-500/10 text-amber-500 flex items-center justify-center font-bold shrink-0">
-                        <Gift size={20} />
+                      <div className={`w-10 h-10 rounded-xl flex items-center justify-center font-bold shrink-0 ${
+                        isCoinOrder
+                          ? 'bg-amber-500/10 text-amber-500'
+                          : 'bg-indigo-500/10 text-indigo-500'
+                      }`}>
+                        {isCoinOrder ? <Coins size={20} /> : <Gift size={20} />}
                       </div>
                       <div>
-                        <h4 className="font-bold text-slate-800 dark:text-slate-100 text-sm">
-                          {order.student?.full_name || "Noma'lum Talaba"}
-                        </h4>
+                        <div className="flex items-center gap-2">
+                          <h4 className="font-bold text-slate-800 dark:text-slate-100 text-sm">
+                            {order.student?.full_name || "Noma'lum Talaba"}
+                          </h4>
+                          {isCoinOrder && (
+                            <span className="px-2 py-0.5 rounded-md text-[10px] font-bold bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20">
+                              +{coinAmount} Coin Xaridi
+                            </span>
+                          )}
+                        </div>
                         <div className="flex items-center gap-2 text-xs font-medium text-slate-500 mt-0.5">
-                          <span>Sovg'a: <strong className="text-slate-700 dark:text-slate-200 font-bold">{order.item?.title || order.notes}</strong></span>
-                          <span>•</span>
-                          <span className="flex items-center gap-1 text-amber-500 font-bold">
-                            <Coins size={13} />
-                            {order.coins_spent} Tanga
+                          <span>
+                            {isCoinOrder ? "Tafsilot: " : "Sovg'a: "}
+                            <strong className="text-slate-700 dark:text-slate-200 font-bold">
+                              {order.item?.title || order.notes}
+                            </strong>
                           </span>
+                          {!isCoinOrder && (
+                            <>
+                              <span>•</span>
+                              <span className="flex items-center gap-1 text-amber-500 font-bold">
+                                <Coins size={13} />
+                                {order.coins_spent} Tanga
+                              </span>
+                            </>
+                          )}
                         </div>
                         <span className="text-[10px] text-slate-400 block mt-0.5">
                           {new Date(order.created_at).toLocaleDateString('uz-UZ', { year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}
@@ -351,24 +401,37 @@ export default function AdminShopPage() {
                         <div className="flex items-center gap-2">
                           <button
                             type="button"
-                            onClick={() => handleUpdateStatus(order.id, 'delivered')}
+                            onClick={() => handleUpdateStatus(order.id, 'delivered', order.student_id, order.coins_spent)}
                             disabled={isUpdating === order.id}
-                            className="px-3 py-1.5 bg-emerald-500 hover:bg-emerald-600 text-white rounded-xl text-xs font-bold transition-all flex items-center gap-1 shadow-sm cursor-pointer"
+                            className="px-3 py-1.5 bg-emerald-500 hover:bg-emerald-600 text-white rounded-xl text-xs font-bold transition-all flex items-center gap-1 shadow-sm cursor-pointer disabled:opacity-50"
                           >
                             <CheckCircle2 size={13} />
-                            <span>Topshirildi</span>
+                            <span>{isCoinOrder ? `Tasdiqlash (+${coinAmount} coin)` : "Topshirildi"}</span>
                           </button>
 
                           <button
                             type="button"
                             onClick={() => handleUpdateStatus(order.id, 'cancelled', order.student_id, order.coins_spent)}
                             disabled={isUpdating === order.id}
-                            className="px-3 py-1.5 bg-rose-500/10 hover:bg-rose-500/20 text-rose-600 dark:text-rose-400 rounded-xl text-xs font-bold transition-all flex items-center gap-1 cursor-pointer"
+                            className="px-3 py-1.5 bg-rose-500/10 hover:bg-rose-500/20 text-rose-600 dark:text-rose-400 rounded-xl text-xs font-bold transition-all flex items-center gap-1 cursor-pointer disabled:opacity-50"
                           >
                             <XCircle size={13} />
                             <span>Bekor qilish</span>
                           </button>
                         </div>
+                      )}
+
+                      {order.status === 'delivered' && isCoinOrder && coinAmount > 0 && (
+                        <button
+                          type="button"
+                          onClick={() => handleDirectCredit(order.student_id, coinAmount, order.id)}
+                          disabled={isUpdating === order.id}
+                          className="px-2.5 py-1 bg-amber-500/10 hover:bg-amber-500/20 text-amber-700 dark:text-amber-300 border border-amber-500/20 rounded-lg text-[11px] font-bold transition-all flex items-center gap-1 cursor-pointer disabled:opacity-50"
+                          title="Agar talabaga coin tushmagan bo'lsa, ushbu tugma orqali balansiga o'tkazish"
+                        >
+                          <Coins size={12} />
+                          <span>Coin o'tkazish</span>
+                        </button>
                       )}
                     </div>
                   </div>

@@ -841,8 +841,26 @@ export async function adminGetShopOrders(): Promise<ShopOrder[]> {
   return data || [];
 }
 
-export async function adminUpdateOrderStatus(orderId: string, status: 'delivered' | 'cancelled', studentId?: string, coinsSpent?: number): Promise<{ success: boolean }> {
+export async function adminUpdateOrderStatus(
+  orderId: string,
+  status: 'delivered' | 'cancelled',
+  studentId?: string,
+  coinsSpent?: number
+): Promise<{ success: boolean; coinsAdded?: number }> {
   const supabase = createClient();
+
+  // 1. Fetch current order details
+  const { data: order } = await supabase
+    .from('shop_orders')
+    .select('*, item:shop_items(*)')
+    .eq('id', orderId)
+    .single();
+
+  const targetStudentId = studentId || order?.student_id;
+  const targetNotes = order?.notes || '';
+  const isCoinPurchase = !order?.item_id && (targetNotes.includes('Coin xaridi') || targetNotes.includes('coin'));
+
+  // 2. Update order status
   const { error } = await supabase
     .from('shop_orders')
     .update({ status })
@@ -850,15 +868,103 @@ export async function adminUpdateOrderStatus(orderId: string, status: 'delivered
 
   if (error) return { success: false };
 
-  // Refund coins if order was cancelled
-  if (status === 'cancelled' && studentId && coinsSpent) {
-    const { data: profile } = await supabase.from('profiles').select('coins').eq('id', studentId).single();
-    if (profile) {
-      await supabase.from('profiles').update({ coins: (profile.coins || 0) + coinsSpent }).eq('id', studentId);
+  // 3. If coin purchase order is delivered (approved), credit coins to student profile!
+  let coinsAdded = 0;
+  if (status === 'delivered' && targetStudentId && isCoinPurchase) {
+    const match = targetNotes.match(/(\d+)\s*coin/i);
+    if (match && match[1]) {
+      coinsAdded = parseInt(match[1], 10);
+    }
+
+    if (coinsAdded > 0) {
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('coins')
+        .eq('id', targetStudentId)
+        .single();
+
+      const currentCoins = profile?.coins || 0;
+      await supabase
+        .from('profiles')
+        .update({ coins: currentCoins + coinsAdded })
+        .eq('id', targetStudentId);
+
+      // Send notification to student
+      try {
+        await supabase.from('notifications').insert({
+          user_id: targetStudentId,
+          title: "Coin xaridingiz tasdiqlandi! 🎉",
+          message: `Hisobingizga ${coinsAdded} coin muvaffaqiyatli qo'shildi. Yangi balansingiz: ${currentCoins + coinsAdded} coin.`,
+          type: 'coin_credit',
+          is_read: false
+        });
+      } catch (e) {
+        // Notification fallback
+      }
     }
   }
 
-  return { success: true };
+  // 4. Refund coins if regular gift order was cancelled
+  if (status === 'cancelled' && targetStudentId && coinsSpent && coinsSpent > 0) {
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('coins')
+      .eq('id', targetStudentId)
+      .single();
+    if (profile) {
+      await supabase
+        .from('profiles')
+        .update({ coins: (profile.coins || 0) + coinsSpent })
+        .eq('id', targetStudentId);
+    }
+  }
+
+  return { success: true, coinsAdded };
+}
+
+export async function adminCreditCoinsDirectly(
+  studentId: string,
+  coinsToAdd: number,
+  orderId?: string
+): Promise<{ success: boolean; newBalance?: number; error?: string }> {
+  const supabase = createClient();
+  try {
+    const { data: profile, error: pErr } = await supabase
+      .from('profiles')
+      .select('coins')
+      .eq('id', studentId)
+      .single();
+
+    if (pErr || !profile) {
+      return { success: false, error: "Foydalanuvchi topilmadi" };
+    }
+
+    const newBalance = (profile.coins || 0) + coinsToAdd;
+    const { error: uErr } = await supabase
+      .from('profiles')
+      .update({ coins: newBalance })
+      .eq('id', studentId);
+
+    if (uErr) return { success: false, error: uErr.message };
+
+    if (orderId) {
+      await supabase.from('shop_orders').update({ status: 'delivered' }).eq('id', orderId);
+    }
+
+    try {
+      await supabase.from('notifications').insert({
+        user_id: studentId,
+        title: "Coin qo'shildi! 💎",
+        message: `Admin tomonidan hisobingizga ${coinsToAdd} coin qo'shildi. Joriy balans: ${newBalance} coin.`,
+        type: 'coin_credit',
+        is_read: false
+      });
+    } catch (e) {}
+
+    return { success: true, newBalance };
+  } catch (err: any) {
+    return { success: false, error: err.message };
+  }
 }
 
 export async function adminUpdateShopItem(itemId: string, updates: Partial<ShopItem>): Promise<{ success: boolean; error?: string }> {
