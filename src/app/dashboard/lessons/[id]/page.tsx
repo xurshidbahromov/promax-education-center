@@ -141,19 +141,16 @@ export default function LessonDetailPage() {
  <p className="text-gray-500 dark:text-gray-400 font-medium">Hozircha bu darsga materiallar yuklanmagan.</p>
  </div>
  ) : (
- materials.map((material, index) => (
- <motion.div
+ materials.map((material) => (
+ <div
  key={material.id}
- initial={{ opacity: 0, y: 20 }}
- animate={{ opacity: 1, y: 0 }}
- transition={{ delay: index * 0.1 }}
  className="space-y-3"
  >
  <h3 className="text-lg font-medium text-slate-800 dark:text-slate-100 px-1">
  {material.title}
  </h3>
  {renderMaterial(material)}
- </motion.div>
+ </div>
  ))
  )}
  </div>

@@ -146,12 +146,7 @@ export function OlympiadBannerTeaser() {
   const heroItem = SAMPLE_OLYMPIADS[0];
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 12 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.3 }}
-      className="relative w-full"
-    >
+    <div className="relative w-full">
       <div className="relative block w-full">
         
         {/* ── TOP ROW: DISTINCT 40% FULLY TRANSPARENT SHELF TAB + SEAMLESS RIGHT GLASS HEADER ── */}
@@ -215,7 +210,7 @@ export function OlympiadBannerTeaser() {
         </div>
 
       </div>
-    </motion.div>
+    </div>
   );
 }
 

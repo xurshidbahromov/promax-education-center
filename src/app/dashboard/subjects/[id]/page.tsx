@@ -104,13 +104,7 @@ export default function SubjectDetailPage() {
  <div className="space-y-4">
  {lessons.map((lesson, index) => (
  <Link href={`/dashboard/lessons/${lesson.id}`} key={lesson.id}>
- <motion.div
- initial={{ opacity: 0, x: -20 }}
- animate={{ opacity: 1, x: 0 }}
- whileTap={{ scale: 0.96 }}
- transition={{ delay: index * 0.05 }}
- className="bg-white/60 dark:bg-slate-900/60 backdrop-blur-xl rounded-2xl border border-white/60 dark:border-slate-700/50 p-4 sm:p-5 shadow-none active:scale-95 transition-all duration-300 flex items-center gap-3 sm:gap-5 group"
- >
+ <div className="bg-white/60 dark:bg-slate-900/60 backdrop-blur-xl rounded-2xl border border-white/60 dark:border-slate-700/50 p-4 sm:p-5 shadow-none active:scale-95 transition-all duration-300 flex items-center gap-3 sm:gap-5 group">
  <div className="w-10 h-10 sm:w-12 sm:h-12 shrink-0 rounded-full bg-brand-blue/10 dark:bg-brand-blue/20 flex items-center justify-center text-brand-blue font-medium font-fredoka text-base sm:text-lg group-active:bg-brand-blue group-active:text-white transition-colors">
  {index + 1}
  </div>
@@ -127,7 +121,7 @@ export default function SubjectDetailPage() {
  <div className="hidden sm:flex text-slate-400 group-active:text-brand-blue transition-colors">
  <PlayCircle size={24} />
  </div>
- </motion.div>
+ </div>
  </Link>
  ))}
  </div>
