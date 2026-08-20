@@ -215,13 +215,19 @@ export default function OlympiadsPage() {
 
   return (
     <div className="relative text-slate-800 dark:text-white font-sans pb-20">
+      {/* Standard Ambient background matching all dashboard subpages */}
+      <div className="fixed inset-0 z-0 overflow-hidden pointer-events-none">
+        <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] rounded-full bg-blue-300/20 dark:bg-blue-500/10 blur-[130px]" />
+        <div className="absolute bottom-[-15%] right-[-10%] w-[45%] h-[45%] rounded-full bg-violet-300/20 dark:bg-purple-500/10 blur-[130px]" />
+      </div>
+
       <div className="relative z-10 space-y-4 sm:space-y-5 w-full max-w-[1600px] mx-auto pt-1 sm:pt-2">
         
         {/* ── TOP BACK BUTTON ── */}
         <div>
           <Link
             href="/dashboard"
-            className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-slate-100 dark:bg-slate-800 text-xs sm:text-sm font-bold text-slate-700 dark:text-slate-200 active:scale-95 transition-all"
+            className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/60 dark:bg-slate-900/60 backdrop-blur-xl border border-white/60 dark:border-slate-800/60 text-xs sm:text-sm font-bold text-slate-700 dark:text-slate-200 active:scale-95 transition-all shadow-none"
           >
             <ArrowLeft size={16} />
             <span>Dashboardga qaytish</span>
@@ -232,7 +238,7 @@ export default function OlympiadsPage() {
         {loading ? (
           <OlympiadsBannerSkeleton />
         ) : (
-          <div className="bg-white/60 dark:bg-slate-900/60 backdrop-blur-xl rounded-3xl p-6 sm:p-7 border border-white/60 dark:border-slate-800/60 shadow-none space-y-3">
+          <div className="bg-white/60 dark:bg-slate-900/60 backdrop-blur-xl rounded-[2rem] p-6 sm:p-7 border border-white/60 dark:border-slate-800/60 shadow-none space-y-3">
             <h1 className="text-xl sm:text-2xl font-black font-fredoka text-slate-900 dark:text-white leading-tight">
               Milliy bilim musobaqalari
             </h1>
@@ -261,7 +267,7 @@ export default function OlympiadsPage() {
         )}
 
         {/* ── 3-TAB SWITCHER (ULTRA-ROUNDED PILL WITH EQUAL DISTRIBUTION) ── */}
-        <div className="relative w-full bg-white/60 dark:bg-slate-900/60 backdrop-blur-xl border border-white/60 dark:border-slate-800/60 p-1.5 sm:p-2 rounded-full grid grid-cols-3 gap-1 sm:gap-2 shadow-sm">
+        <div className="relative w-full bg-white/60 dark:bg-slate-900/60 backdrop-blur-xl border border-white/60 dark:border-slate-800/60 p-1.5 sm:p-2 rounded-full grid grid-cols-3 gap-1 sm:gap-2 shadow-none">
           
           {/* Tab 1: Musobaqalar */}
           <button
@@ -275,7 +281,7 @@ export default function OlympiadsPage() {
             {activeTab === "tournaments" && (
               <motion.div
                 layoutId="olympiad-tab-active-pill"
-                className="absolute inset-0 bg-brand-blue rounded-full shadow-md shadow-brand-blue/25 -z-10"
+                className="absolute inset-0 bg-brand-blue rounded-full shadow-none -z-10"
                 transition={{ type: "spring", stiffness: 450, damping: 35 }}
               />
             )}
@@ -295,7 +301,7 @@ export default function OlympiadsPage() {
             {activeTab === "leaderboard" && (
               <motion.div
                 layoutId="olympiad-tab-active-pill"
-                className="absolute inset-0 bg-brand-blue rounded-full shadow-md shadow-brand-blue/25 -z-10"
+                className="absolute inset-0 bg-brand-blue rounded-full shadow-none -z-10"
                 transition={{ type: "spring", stiffness: 450, damping: 35 }}
               />
             )}
@@ -315,7 +321,7 @@ export default function OlympiadsPage() {
             {activeTab === "comments" && (
               <motion.div
                 layoutId="olympiad-tab-active-pill"
-                className="absolute inset-0 bg-brand-blue rounded-full shadow-md shadow-brand-blue/25 -z-10"
+                className="absolute inset-0 bg-brand-blue rounded-full shadow-none -z-10"
                 transition={{ type: "spring", stiffness: 450, damping: 35 }}
               />
             )}
@@ -339,7 +345,7 @@ export default function OlympiadsPage() {
               return (
                 <div
                   key={item.id}
-                  className="bg-white/60 dark:bg-slate-900/60 backdrop-blur-xl rounded-3xl p-6 border border-white/60 dark:border-slate-800/60 shadow-none flex flex-col justify-between gap-5 transition-all"
+                  className="bg-white/60 dark:bg-slate-900/60 backdrop-blur-xl rounded-[2rem] p-6 border border-white/60 dark:border-slate-800/60 shadow-none flex flex-col justify-between gap-5 transition-all active:scale-[0.99]"
                 >
                   <div className="space-y-3.5">
                     {/* Top Row: Subject + Status Badge & Date */}
@@ -474,9 +480,9 @@ export default function OlympiadsPage() {
           <div className="space-y-4 sm:space-y-6">
             
             {/* Top Toolbar: Tournament Selector & Search */}
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white/60 dark:bg-slate-900/60 backdrop-blur-xl p-4 sm:p-5 rounded-3xl border border-white/60 dark:border-slate-800/60 shadow-none">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white/60 dark:bg-slate-900/60 backdrop-blur-xl p-4 sm:p-5 rounded-[2rem] border border-white/60 dark:border-slate-800/60 shadow-none">
               <div className="flex items-center gap-3.5">
-                <div className="w-11 h-11 rounded-2xl bg-amber-500/15 text-amber-600 dark:text-amber-400 flex items-center justify-center shrink-0 font-bold shadow-sm">
+                <div className="w-11 h-11 rounded-2xl bg-amber-500/15 text-amber-600 dark:text-amber-400 flex items-center justify-center shrink-0 font-bold shadow-none">
                   <Award size={22} />
                 </div>
                 <div>
@@ -534,7 +540,7 @@ export default function OlympiadsPage() {
                         <img
                           src={leaderboard[1].student_avatar}
                           alt={leaderboard[1].student_name}
-                          className="w-14 h-14 sm:w-16 sm:h-16 rounded-full bg-slate-100 dark:bg-slate-800 border-2 border-blue-300 dark:border-blue-500 shadow-md object-cover"
+                          className="w-14 h-14 sm:w-16 sm:h-16 rounded-full bg-slate-100 dark:bg-slate-800 border-2 border-blue-300 dark:border-blue-500 shadow-none object-cover"
                         />
 
                         <div className="flex items-center justify-center gap-1 max-w-[90px] sm:max-w-[120px]">
@@ -542,7 +548,7 @@ export default function OlympiadsPage() {
                             {leaderboard[1].student_name}
                           </h4>
                           {user?.id && leaderboard[1].user_id === user.id && (
-                            <span className="px-1 py-0.2 rounded bg-brand-blue text-white text-[8px] font-black uppercase shrink-0 shadow-sm">
+                            <span className="px-1 py-0.2 rounded bg-brand-blue text-white text-[8px] font-black uppercase shrink-0 shadow-none">
                               Siz
                             </span>
                           )}
@@ -562,9 +568,9 @@ export default function OlympiadsPage() {
                       {/* 3D Glassy Isometric Stand 2 */}
                       <div className="w-full">
                         {/* 3D Top Cap */}
-                        <div className="h-4 sm:h-5 w-full bg-gradient-to-r from-blue-200 via-indigo-200 to-sky-200 dark:from-blue-500 dark:via-indigo-400 dark:to-sky-400 rounded-t-2xl transform -skew-x-2 border-t border-x border-white/80 dark:border-white/30 shadow-inner" />
+                        <div className="h-4 sm:h-5 w-full bg-gradient-to-r from-blue-200 via-indigo-200 to-sky-200 dark:from-blue-500 dark:via-indigo-400 dark:to-sky-400 rounded-t-2xl transform -skew-x-2 border-t border-x border-white/80 dark:border-white/30 shadow-none" />
                         {/* 3D Front Face */}
-                        <div className="h-28 sm:h-36 w-full bg-gradient-to-b from-blue-400 via-indigo-500 to-indigo-600 dark:from-blue-600 dark:via-indigo-700 dark:to-indigo-800 backdrop-blur-xl rounded-b-2xl shadow-lg flex items-center justify-center text-white relative overflow-hidden">
+                        <div className="h-28 sm:h-36 w-full bg-gradient-to-b from-blue-400 via-indigo-500 to-indigo-600 dark:from-blue-600 dark:via-indigo-700 dark:to-indigo-800 backdrop-blur-xl rounded-b-2xl shadow-none flex items-center justify-center text-white relative overflow-hidden">
                           <span className="text-4xl sm:text-5xl font-black font-fredoka tracking-tighter drop-shadow-md">
                             2
                           </span>
@@ -580,10 +586,10 @@ export default function OlympiadsPage() {
                           <img
                             src={leaderboard[0].student_avatar}
                             alt={leaderboard[0].student_name}
-                            className="w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-slate-100 dark:bg-slate-800 border-4 border-amber-400 shadow-xl shadow-amber-500/20 object-cover ring-4 ring-amber-400/30"
+                            className="w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-slate-100 dark:bg-slate-800 border-4 border-amber-400 shadow-none object-cover ring-4 ring-amber-400/30"
                           />
                           {/* ONLY SINGLE CROWN ABOVE AVATAR */}
-                          <span className="absolute -top-3.5 left-1/2 -translate-x-1/2 p-1.5 bg-gradient-to-b from-amber-400 to-amber-600 text-white rounded-full shadow-lg shadow-amber-500/30 border border-amber-200">
+                          <span className="absolute -top-3.5 left-1/2 -translate-x-1/2 p-1.5 bg-gradient-to-b from-amber-400 to-amber-600 text-white rounded-full shadow-none border border-amber-200">
                             <Crown size={15} className="fill-white" />
                           </span>
                         </div>
@@ -593,7 +599,7 @@ export default function OlympiadsPage() {
                             {leaderboard[0].student_name}
                           </h4>
                           {user?.id && leaderboard[0].user_id === user.id && (
-                            <span className="px-1.5 py-0.2 rounded bg-brand-blue text-white text-[9px] font-black uppercase shrink-0 shadow-sm">
+                            <span className="px-1.5 py-0.2 rounded bg-brand-blue text-white text-[9px] font-black uppercase shrink-0 shadow-none">
                               Siz
                             </span>
                           )}
@@ -615,9 +621,9 @@ export default function OlympiadsPage() {
                       {/* 3D Glassy Isometric Stand 1 */}
                       <div className="w-full">
                         {/* 3D Top Cap */}
-                        <div className="h-5 sm:h-6 w-full bg-gradient-to-r from-amber-200 via-amber-300 to-yellow-200 dark:from-amber-400 dark:via-amber-300 dark:to-yellow-300 rounded-t-2xl transform -skew-x-2 border-t border-x border-white/90 dark:border-white/40 shadow-inner" />
+                        <div className="h-5 sm:h-6 w-full bg-gradient-to-r from-amber-200 via-amber-300 to-yellow-200 dark:from-amber-400 dark:via-amber-300 dark:to-yellow-300 rounded-t-2xl transform -skew-x-2 border-t border-x border-white/90 dark:border-white/40 shadow-none" />
                         {/* 3D Front Face */}
-                        <div className="h-38 sm:h-48 w-full bg-gradient-to-b from-amber-400 via-amber-500 to-amber-600 dark:from-amber-500 dark:via-amber-600 dark:to-amber-700 backdrop-blur-xl rounded-b-2xl shadow-2xl shadow-amber-500/30 flex items-center justify-center text-white relative overflow-hidden">
+                        <div className="h-38 sm:h-48 w-full bg-gradient-to-b from-amber-400 via-amber-500 to-amber-600 dark:from-amber-500 dark:via-amber-600 dark:to-amber-700 backdrop-blur-xl rounded-b-2xl shadow-none flex items-center justify-center text-white relative overflow-hidden">
                           <span className="text-5xl sm:text-6xl font-black font-fredoka tracking-tighter drop-shadow-lg">
                             1
                           </span>
@@ -632,7 +638,7 @@ export default function OlympiadsPage() {
                         <img
                           src={leaderboard[2].student_avatar}
                           alt={leaderboard[2].student_name}
-                          className="w-14 h-14 sm:w-16 sm:h-16 rounded-full bg-slate-100 dark:bg-slate-800 border-2 border-orange-400 dark:border-orange-500 shadow-md object-cover"
+                          className="w-14 h-14 sm:w-16 sm:h-16 rounded-full bg-slate-100 dark:bg-slate-800 border-2 border-orange-400 dark:border-orange-500 shadow-none object-cover"
                         />
 
                         <div className="flex items-center justify-center gap-1 max-w-[90px] sm:max-w-[120px]">
@@ -640,7 +646,7 @@ export default function OlympiadsPage() {
                             {leaderboard[2].student_name}
                           </h4>
                           {user?.id && leaderboard[2].user_id === user.id && (
-                            <span className="px-1 py-0.2 rounded bg-brand-blue text-white text-[8px] font-black uppercase shrink-0 shadow-sm">
+                            <span className="px-1 py-0.2 rounded bg-brand-blue text-white text-[8px] font-black uppercase shrink-0 shadow-none">
                               Siz
                             </span>
                           )}
@@ -660,9 +666,9 @@ export default function OlympiadsPage() {
                       {/* 3D Glassy Isometric Stand 3 */}
                       <div className="w-full">
                         {/* 3D Top Cap */}
-                        <div className="h-4 sm:h-5 w-full bg-gradient-to-r from-orange-200 via-amber-200 to-rose-200 dark:from-orange-500 dark:via-amber-400 dark:to-rose-400 rounded-t-2xl transform -skew-x-2 border-t border-x border-white/80 dark:border-white/30 shadow-inner" />
+                        <div className="h-4 sm:h-5 w-full bg-gradient-to-r from-orange-200 via-amber-200 to-rose-200 dark:from-orange-500 dark:via-amber-400 dark:to-rose-400 rounded-t-2xl transform -skew-x-2 border-t border-x border-white/80 dark:border-white/30 shadow-none" />
                         {/* 3D Front Face */}
-                        <div className="h-24 sm:h-30 w-full bg-gradient-to-b from-orange-400 via-orange-500 to-amber-600 dark:from-orange-600 dark:via-orange-700 dark:to-amber-800 backdrop-blur-xl rounded-b-2xl shadow-lg flex items-center justify-center text-white relative overflow-hidden">
+                        <div className="h-24 sm:h-30 w-full bg-gradient-to-b from-orange-400 via-orange-500 to-amber-600 dark:from-orange-600 dark:via-orange-700 dark:to-amber-800 backdrop-blur-xl rounded-b-2xl shadow-none flex items-center justify-center text-white relative overflow-hidden">
                           <span className="text-4xl sm:text-5xl font-black font-fredoka tracking-tighter drop-shadow-md">
                             3
                           </span>
@@ -685,7 +691,7 @@ export default function OlympiadsPage() {
             )}
 
             {/* ── RANKED LIST ── */}
-            <div className="bg-white/60 dark:bg-slate-900/60 backdrop-blur-xl rounded-3xl p-4 sm:p-6 border border-white/60 dark:border-slate-800/60 space-y-3">
+            <div className="bg-white/60 dark:bg-slate-900/60 backdrop-blur-xl rounded-[2rem] p-4 sm:p-6 border border-white/60 dark:border-slate-800/60 space-y-3 shadow-none">
               <div className="flex items-center justify-between pb-2 border-b border-slate-100 dark:border-slate-800">
                 <h4 className="font-black font-fredoka text-sm sm:text-base text-slate-900 dark:text-white">
                   Ishtirokchilar Natijalari
@@ -714,7 +720,7 @@ export default function OlympiadsPage() {
                           key={entry.id}
                           className={`p-3 sm:p-3.5 rounded-2xl border flex items-center justify-between gap-3 transition-all ${
                             isSelf
-                              ? "bg-blue-50/80 dark:bg-blue-950/30 border-brand-blue/40 shadow-sm"
+                              ? "bg-blue-50/80 dark:bg-blue-950/30 border-brand-blue/40 shadow-none"
                               : "bg-white/40 dark:bg-slate-800/30 hover:bg-white/70 dark:hover:bg-slate-800/60 border-slate-100/60 dark:border-slate-800/60"
                           }`}
                         >
@@ -781,7 +787,7 @@ export default function OlympiadsPage() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5 sm:gap-5 pt-1">
               
               {/* Card 1: Mukofotlar & Sovrinlar */}
-              <div className="bg-white/60 dark:bg-slate-900/60 backdrop-blur-xl rounded-3xl p-4 sm:p-6 border border-white/60 dark:border-slate-800/60 space-y-3.5 shadow-none">
+              <div className="bg-white/60 dark:bg-slate-900/60 backdrop-blur-xl rounded-[2rem] p-4 sm:p-6 border border-white/60 dark:border-slate-800/60 space-y-3.5 shadow-none">
                 <div className="flex items-center gap-3">
                   <div className="w-9 h-9 rounded-xl bg-amber-500/10 text-amber-600 dark:text-amber-400 flex items-center justify-center shrink-0 font-bold">
                     <Gift size={18} />
@@ -836,7 +842,7 @@ export default function OlympiadsPage() {
               </div>
 
               {/* Card 2: Baholash & Nizom Qoidalari */}
-              <div className="bg-white/60 dark:bg-slate-900/60 backdrop-blur-xl rounded-3xl p-4 sm:p-6 border border-white/60 dark:border-slate-800/60 space-y-3.5 shadow-none">
+              <div className="bg-white/60 dark:bg-slate-900/60 backdrop-blur-xl rounded-[2rem] p-4 sm:p-6 border border-white/60 dark:border-slate-800/60 space-y-3.5 shadow-none">
                 <div className="flex items-center gap-3">
                   <div className="w-9 h-9 rounded-xl bg-blue-500/10 text-brand-blue dark:text-blue-400 flex items-center justify-center shrink-0 font-bold">
                     <ShieldCheck size={18} />
@@ -888,7 +894,7 @@ export default function OlympiadsPage() {
           loading ? (
             <CommentsSkeleton />
           ) : (
-          <div className="w-full bg-white/60 dark:bg-slate-900/60 backdrop-blur-xl rounded-3xl p-6 border border-white/60 dark:border-slate-800/60 space-y-5 shadow-none">
+          <div className="w-full bg-white/60 dark:bg-slate-900/60 backdrop-blur-xl rounded-[2rem] p-6 border border-white/60 dark:border-slate-800/60 space-y-5 shadow-none">
             
             <form onSubmit={handleAddComment} className="flex flex-col sm:flex-row gap-3">
               <input
@@ -900,7 +906,7 @@ export default function OlympiadsPage() {
               />
               <button
                 type="submit"
-                className="px-5 py-3 rounded-2xl bg-brand-blue hover:bg-blue-600 text-white font-bold text-xs sm:text-sm flex items-center justify-center gap-2 active:scale-95 shrink-0 shadow-sm"
+                className="px-5 py-3 rounded-2xl bg-brand-blue hover:bg-blue-600 text-white font-bold text-xs sm:text-sm flex items-center justify-center gap-2 active:scale-95 shrink-0 shadow-none"
               >
                 <span>Yuborish</span>
                 <Send size={14} />

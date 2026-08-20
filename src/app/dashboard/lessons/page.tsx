@@ -137,8 +137,8 @@ export default function LessonsPage() {
           </div>
         )}
 
-        {/* ── SUBJECT CARDS (image box style) ── */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4">
+        {/* ── SUBJECT CARDS (Game Zone style) ── */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {subjects.map((subject) => {
             const meta = getSubjectMeta(subject.title);
             const SubjectIcon = meta.icon;
@@ -150,20 +150,20 @@ export default function LessonsPage() {
               >
                 <Link
                   href={`/dashboard/subjects/${subject.id}`}
-                  className="flex flex-col w-full h-full rounded-[1.5rem] overflow-hidden border border-white/60 dark:border-slate-700/50 shadow-sm transition-all duration-300 group bg-white/60 dark:bg-slate-900/60 backdrop-blur-xl active:scale-[0.99]"
+                  className="flex flex-col w-full h-full rounded-[2rem] overflow-hidden border border-white/60 dark:border-slate-800/60 shadow-none transition-all duration-300 group bg-white/60 dark:bg-slate-900/60 backdrop-blur-xl active:scale-[0.99]"
                 >
-                  {/* ── TOP: Image / Gradient — 40% height ── */}
-                  <div className="relative w-full h-36 overflow-hidden">
+                  {/* ── TOP: Image / Gradient — height ── */}
+                  <div className="relative w-full h-40 overflow-hidden">
                     {subject.cover_image ? (
                       <>
                         <Image
                           src={subject.cover_image}
                           alt={subject.title}
                           fill
-                          className="object-cover group-active:scale-95 transition-transform duration-500"
+                          className="object-cover group-hover:scale-105 transition-transform duration-500"
                         />
                         {/* Overlay gradient bottom */}
-                        <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-black/10 to-transparent" />
+                        <div className="absolute inset-0 bg-gradient-to-t from-slate-950/80 via-slate-950/30 to-transparent" />
                       </>
                     ) : (
                       /* Gradient fallback when no image */
@@ -179,31 +179,26 @@ export default function LessonsPage() {
                   </div>
 
                   {/* ── BOTTOM: Info row ── */}
-                  <div className="p-4 flex items-center gap-3 flex-1">
-                    {/* Free icon */}
-                    <div
-                      className="flex items-center justify-center shrink-0 group-active:scale-95 transition-transform duration-300"
-                    >
-                      <SubjectIcon size={28} className={meta.color} />
-                    </div>
+                  <div className="p-5 flex items-center justify-between gap-4 flex-1">
+                    <div className="flex items-center gap-3.5 min-w-0">
+                      <div className={`w-12 h-12 rounded-2xl bg-gradient-to-br ${meta.gradient} flex items-center justify-center text-white shadow-md shadow-slate-200/50 dark:shadow-none shrink-0 group-hover:scale-105 transition-transform duration-300`}>
+                        <SubjectIcon size={24} />
+                      </div>
 
-                    {/* Text */}
-                    <div className="flex-1 min-w-0">
-                      <h3 className="font-bold text-slate-800 dark:text-slate-100 text-[16px] leading-tight">
-                        {subject.title}
-                      </h3>
-                      {subject.description && (
-                        <p className="text-[13px] text-slate-500 dark:text-slate-400 mt-0.5 line-clamp-1">
-                          {subject.description}
+                      <div className="min-w-0 space-y-1">
+                        <h3 className="font-bold text-slate-900 dark:text-slate-100 text-base sm:text-lg font-fredoka leading-snug truncate">
+                          {subject.title}
+                        </h3>
+                        <p className="text-xs text-slate-500 dark:text-slate-400 font-medium line-clamp-1">
+                          {subject.description || "Fanning barcha dars va materiallari"}
                         </p>
-                      )}
+                      </div>
                     </div>
 
-                    {/* Arrow */}
-                    <ChevronRight
-                      size={20}
-                      className="text-slate-300 dark:text-slate-600 group-active:scale-95 transition-transform shrink-0"
-                    />
+                    {/* Arrow Pill */}
+                    <div className="w-8 h-8 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-400 group-hover:text-brand-blue group-hover:bg-brand-blue/10 transition-colors shrink-0">
+                      <ChevronRight size={16} />
+                    </div>
                   </div>
                 </Link>
               </div>

@@ -380,7 +380,7 @@ export function GamesPageSkeleton() {
 
 export function OlympiadsBannerSkeleton() {
   return (
-    <div className="bg-white/60 dark:bg-slate-900/60 backdrop-blur-xl rounded-3xl p-6 sm:p-7 border border-white/60 dark:border-slate-800/60 space-y-3">
+    <div className="bg-white/60 dark:bg-slate-900/60 backdrop-blur-xl rounded-[2rem] p-6 sm:p-7 border border-white/60 dark:border-slate-800/60 space-y-3">
       <Skeleton className="h-7 w-64 rounded-xl bg-slate-200/80 dark:bg-slate-700/50" />
       <Skeleton className="h-4 w-96 max-w-full rounded-lg bg-slate-200/80 dark:bg-slate-700/50" />
       <div className="flex items-center gap-3 pt-1">
@@ -398,7 +398,7 @@ export function TournamentsSkeleton() {
       {[1, 2, 3, 4, 5, 6].map((i) => (
         <div
           key={i}
-          className="bg-white/60 dark:bg-slate-900/60 backdrop-blur-xl rounded-3xl p-6 border border-white/60 dark:border-slate-800/60 shadow-none flex flex-col justify-between gap-5 h-[340px]"
+          className="bg-white/60 dark:bg-slate-900/60 backdrop-blur-xl rounded-[2rem] p-6 border border-white/60 dark:border-slate-800/60 shadow-none flex flex-col justify-between gap-5 h-[340px]"
         >
           <div className="space-y-4">
             <div className="flex items-center justify-between">
@@ -439,7 +439,7 @@ export function LeaderboardSkeleton() {
   return (
     <div className="space-y-4 sm:space-y-5">
       {/* Control Bar Skeleton */}
-      <div className="bg-white/60 dark:bg-slate-900/60 backdrop-blur-xl rounded-3xl p-5 border border-white/60 dark:border-slate-800/60">
+      <div className="bg-white/60 dark:bg-slate-900/60 backdrop-blur-xl rounded-[2rem] p-5 border border-white/60 dark:border-slate-800/60">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div className="space-y-2">
             <Skeleton className="h-5 w-48 rounded-lg bg-slate-200/80 dark:bg-slate-700/50" />
