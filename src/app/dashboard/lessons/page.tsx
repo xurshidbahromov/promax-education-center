@@ -126,7 +126,7 @@ export default function LessonsPage() {
         {subjects.length === 0 && (
           <div className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl rounded-[28px] p-10 border border-gray-200/50 dark:border-slate-800/50 shadow-sm flex flex-col items-center gap-4 text-center">
             <div className="w-16 h-16 rounded-full bg-brand-blue/10 flex items-center justify-center">
-              <BookOpenText size={28} className="text-brand-blue" />
+              <BookOpen size={28} className="text-brand-blue" />
             </div>
             <h2 className="text-lg font-bold text-slate-700 dark:text-slate-200">
               Hozircha fanlar yo'q
