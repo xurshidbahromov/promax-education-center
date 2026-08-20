@@ -29,6 +29,7 @@ import toast from "react-hot-toast";
 import { createClient } from "@/utils/supabase/client";
 import RealtimeSyncEnabler from "@/components/RealtimeSyncEnabler";
 import SidebarBetaWidget from "@/components/ui/SidebarBetaWidget";
+import AdminReveal from "@/components/ui/AdminReveal";
 
 export default function AdminLayout({
   children,
@@ -138,24 +139,8 @@ export default function AdminLayout({
   const handleLogout = async () => {
     await supabase.auth.signOut();
     router.push("/login");
-  };
-
-  // Show loading state
-  if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-slate-950 text-white">
-        <div className="text-center space-y-3">
-          <div className="w-12 h-12 rounded-2xl bg-brand-blue/20 border border-brand-blue/40 flex items-center justify-center mx-auto text-brand-blue">
-            <Loader2 className="w-6 h-6 animate-spin" />
-          </div>
-          <p className="text-xs font-bold text-slate-400">Admin panel yuklanmoqda...</p>
-        </div>
-      </div>
-    );
-  }
-
-  // Show unauthorized state fallback
-  if (!authorized) {
+  };  // Show unauthorized state fallback (only once checked and not authorized)
+  if (!loading && !authorized) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-slate-950 p-4">
         <div className="text-center max-w-md bg-slate-900 border border-slate-800 rounded-3xl p-8 space-y-4">
@@ -197,14 +182,19 @@ export default function AdminLayout({
   );
 
   return (
-    <div className="flex h-screen bg-slate-50 dark:bg-slate-950 font-sans text-slate-800 dark:text-slate-100 overflow-hidden">
-      {/* Mobile Sidebar Overlay */}
-      {sidebarOpen && (
-        <div
-          className="fixed inset-0 bg-slate-950/60 backdrop-blur-sm z-40 lg:hidden transition-opacity"
-          onClick={() => setSidebarOpen(false)}
-        />
-      )}
+    <>
+      {/* Admin Reveal Animation */}
+      <AdminReveal isLoading={loading} role={userInfo?.role} />
+
+      {!loading && (
+        <div className="flex h-screen bg-slate-50 dark:bg-slate-950 font-sans text-slate-800 dark:text-slate-100 overflow-hidden">
+          {/* Mobile Sidebar Overlay */}
+          {sidebarOpen && (
+            <div
+              className="fixed inset-0 bg-slate-950/60 backdrop-blur-sm z-40 lg:hidden transition-opacity"
+              onClick={() => setSidebarOpen(false)}
+            />
+          )}
 
       {/* Professional Sidebar */}
       <aside
@@ -385,5 +375,7 @@ export default function AdminLayout({
         </main>
       </div>
     </div>
+      )}
+    </>
   );
 }

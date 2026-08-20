@@ -23,6 +23,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
 import NotificationBell from "@/components/NotificationBell";
+import DashboardReveal from "@/components/ui/DashboardReveal";
 
 import { motion } from "framer-motion";
 import SidebarBetaWidget from "@/components/ui/SidebarBetaWidget";
@@ -97,23 +98,15 @@ export default function DashboardLayout({
 
   const isTakeTestPage = pathname.includes('/take');
 
-  if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-slate-50 dark:bg-slate-950">
-        <div className="text-center space-y-3">
-          <div className="w-12 h-12 rounded-2xl bg-brand-blue/20 border border-brand-blue/40 flex items-center justify-center mx-auto text-brand-blue">
-            <Loader2 className="w-6 h-6 animate-spin" />
-          </div>
-          <p className="text-xs font-bold text-slate-400">Yuklanmoqda...</p>
-        </div>
-      </div>
-    );
-  }
-
   return (
-    <div className="min-h-screen bg-transparent flex relative overflow-hidden">
-      {/* Landing Page Background */}
-      <Background />
+    <>
+      {/* Seamless Reveal & Loading Animation */}
+      <DashboardReveal isLoading={loading} />
+
+      {!loading && (
+        <div className="min-h-screen bg-transparent flex relative overflow-hidden">
+          {/* Landing Page Background */}
+          <Background />
 
  {/* Desktop Sidebar */}
  {!isTakeTestPage && (
@@ -259,6 +252,8 @@ export default function DashboardLayout({
  </nav>
  </div>
  )}
-</div>
-  );
+ </div>
+ )}
+ </>
+ );
 }
