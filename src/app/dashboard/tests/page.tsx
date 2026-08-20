@@ -69,147 +69,153 @@ export default function OnlineTestsPage() {
  return subjectConfig[subject] || subjectConfig.general;
  };
 
- return (
- <div className="relative text-slate-800 dark:text-white font-sans pb-4">
- <div className="relative z-10 flex flex-col gap-6 max-w-[1600px] mx-auto pt-1 sm:pt-2">
+  return (
+    <div className="relative text-slate-800 dark:text-white font-sans pb-12">
+      {/* Standard Ambient background matching all dashboard subpages */}
+      <div className="fixed inset-0 z-0 overflow-hidden pointer-events-none">
+        <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] rounded-full bg-blue-300/20 dark:bg-blue-500/10 blur-[130px]" />
+        <div className="absolute bottom-[-15%] right-[-10%] w-[45%] h-[45%] rounded-full bg-violet-300/20 dark:bg-purple-500/10 blur-[130px]" />
+      </div>
 
- {/* ── PAGE HEADER & SEARCH ── */}
- <div className="flex flex-col gap-4">
- <div className="flex flex-col gap-1">
- <p className="text-[12px] text-slate-500 dark:text-slate-400 font-medium uppercase tracking-widest">
- {t('tests.subtitle')}
- </p>
- <h1 className="text-2xl sm:text-3xl font-bold font-fredoka text-slate-900 dark:text-white leading-tight">
- {t('tests.title')}
- </h1>
- </div>
+      <div className="relative z-10 flex flex-col gap-6 max-w-[1600px] mx-auto pt-1 sm:pt-2">
 
-  {/* Minimalist Search */}
-  <div className="flex items-center gap-2.5 bg-white/60 dark:bg-slate-900/60 backdrop-blur-xl p-2 rounded-2xl border border-white/60 dark:border-slate-800/60 shadow-none focus-within:ring-2 focus-within:ring-brand-blue/20 transition-all w-full">
-    <div className="w-9 h-9 rounded-xl bg-slate-100/80 dark:bg-slate-800/80 flex items-center justify-center text-slate-400 shrink-0">
-      <Search size={16} />
+        {/* ── PAGE HEADER & SEARCH ── */}
+        <div className="flex flex-col gap-4">
+          <div className="flex flex-col gap-1">
+            <p className="text-[12px] text-slate-500 dark:text-slate-400 font-medium uppercase tracking-widest">
+              {t('tests.subtitle')}
+            </p>
+            <h1 className="text-2xl sm:text-3xl font-bold font-fredoka text-slate-900 dark:text-white leading-tight">
+              {t('tests.title')}
+            </h1>
+          </div>
+
+          {/* Minimalist Search */}
+          <div className="flex items-center gap-2.5 bg-white/60 dark:bg-slate-900/60 backdrop-blur-xl p-2 rounded-2xl border border-white/60 dark:border-slate-800/60 shadow-none focus-within:ring-2 focus-within:ring-brand-blue/20 transition-all w-full">
+            <div className="w-9 h-9 rounded-xl bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-400 shrink-0">
+              <Search size={16} />
+            </div>
+            <input
+              type="text"
+              placeholder={t('tests.search_placeholder')}
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="bg-transparent border-none focus:ring-0 text-[14px] w-full text-slate-700 dark:text-slate-200 placeholder-slate-400 py-1.5 px-1 outline-none"
+            />
+          </div>
+        </div>
+
+        {/* ── FILTERS ── */}
+        <div className="flex flex-col gap-3">
+          {/* Subjects */}
+          <div className="flex items-center gap-2 overflow-x-auto no-scrollbar pb-1">
+            {subjects.map((subject) => {
+              const isActive = selectedSubject === subject.id;
+              return (
+                <button
+                  key={subject.id}
+                  onClick={() => setSelectedSubject(subject.id as any)}
+                  className={`
+                    px-4 py-2 rounded-xl whitespace-nowrap text-[13px] font-bold transition-all duration-300 shadow-none
+                    ${isActive 
+                      ? "bg-brand-blue text-white" 
+                      : "bg-white/60 dark:bg-slate-900/60 text-slate-600 dark:text-slate-300 border border-white/60 dark:border-slate-800/60 hover:bg-white/80 dark:hover:bg-slate-800/80"
+                    }
+                  `}
+                >
+                  {subject.label}
+                </button>
+              );
+            })}
+          </div>
+
+          {/* Types */}
+          <div className="flex items-center gap-2 overflow-x-auto no-scrollbar pb-1">
+            {types.map((type) => {
+              const Icon = type.icon;
+              const isActive = selectedType === type.id;
+              return (
+                <button
+                  key={type.id}
+                  onClick={() => setSelectedType(type.id as any)}
+                  className={`
+                    px-3 py-1.5 rounded-full flex items-center gap-2 whitespace-nowrap text-[12px] font-medium transition-all duration-300
+                    ${isActive 
+                      ? "bg-brand-blue/10 dark:bg-brand-blue/20 text-brand-blue" 
+                      : "text-slate-500 dark:text-slate-400 active:bg-slate-100 dark:active:bg-slate-800"
+                    }
+                  `}
+                >
+                  <Icon size={14} className={isActive ? "text-brand-blue" : "text-slate-400"} />
+                  {type.label}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* ── TESTS LIST ── */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4 mt-2">
+          {loading ? (
+            // Inline minimalist skeleton for tests
+            [1, 2, 3, 4, 5, 6].map((i) => (
+              <div key={i} className="w-full h-full bg-white/60 dark:bg-slate-900/60 backdrop-blur-xl rounded-[2rem] p-4 flex items-center gap-4 border border-white/60 dark:border-slate-800/60 shadow-none animate-pulse">
+                <div className="w-12 h-12 rounded-2xl shrink-0 bg-slate-200/80 dark:bg-slate-700/50" />
+                <div className="flex-1 space-y-2">
+                  <div className="h-4 w-3/4 rounded-md bg-slate-200/80 dark:bg-slate-700/50" />
+                  <div className="h-3 w-1/2 rounded-full bg-slate-200/80 dark:bg-slate-700/50" />
+                </div>
+                <div className="w-5 h-5 rounded bg-slate-200/80 dark:bg-slate-700/50 shrink-0" />
+              </div>
+            ))
+          ) : tests.length === 0 ? (
+            <div className="col-span-1 md:col-span-2 bg-white/60 dark:bg-slate-900/60 backdrop-blur-xl rounded-[2rem] p-10 border border-white/60 dark:border-slate-800/60 shadow-none flex flex-col items-center gap-4 text-center mt-4">
+              <div className="w-16 h-16 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center">
+                <FileCheck size={28} className="text-slate-400" />
+              </div>
+              <h2 className="text-lg font-bold text-slate-700 dark:text-slate-200">
+                {t('tests.list.no_tests')}
+              </h2>
+            </div>
+          ) : (
+            tests.map((test) => {
+              const colors = getSubjectColor(test.subject);
+              
+              return (
+                <Link
+                  key={test.id}
+                  href={`/dashboard/tests/${test.id}`}
+                  className="w-full h-full bg-white/60 dark:bg-slate-900/60 backdrop-blur-xl rounded-[2rem] p-4.5 flex items-center gap-4 shadow-none border border-white/60 dark:border-slate-800/60 active:scale-[0.99] transition-all duration-300 group"
+                >
+                  {/* Icon Badge */}
+                  <div className="w-12 h-12 rounded-2xl bg-brand-blue/10 dark:bg-brand-blue/20 flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform duration-300">
+                    <FileCheck size={26} className="text-brand-blue" />
+                  </div>
+
+                  {/* Text */}
+                  <div className="flex-1 text-left min-w-0">
+                    <h3 className="font-bold text-slate-800 dark:text-slate-100 text-[15px] truncate leading-tight font-fredoka">
+                      {test.title}
+                    </h3>
+                    <div className="flex items-center gap-1.5 mt-1 text-[12px] font-medium text-slate-500 dark:text-slate-400 truncate">
+                      <span className="capitalize text-brand-blue font-bold shrink-0">{test.subject}</span>
+                      <span className="shrink-0">·</span>
+                      <span className="shrink-0">{test.total_questions} savol</span>
+                      <span className="shrink-0">·</span>
+                      <span className="shrink-0">{test.duration_minutes ? `${test.duration_minutes} daq` : "Cheksiz"}</span>
+                    </div>
+                  </div>
+
+                  {/* Chevron arrow / button */}
+                  <div className="flex items-center text-brand-blue bg-brand-blue/10 dark:bg-brand-blue/20 rounded-full px-3.5 py-1.5 text-[12px] font-bold group-hover:bg-brand-blue group-hover:text-white transition-colors shrink-0">
+                    Boshlash
+                  </div>
+                </Link>
+              );
+            })
+          )}
+        </div>
+      </div>
     </div>
-    <input
-      type="text"
-      placeholder={t('tests.search_placeholder')}
-      value={searchQuery}
-      onChange={(e) => setSearchQuery(e.target.value)}
-      className="bg-transparent border-none focus:ring-0 text-[14px] w-full text-slate-700 dark:text-slate-200 placeholder-slate-400 py-1.5 px-1 outline-none"
-    />
-  </div>
- </div>
-
- {/* ── FILTERS ── */}
- <div className="flex flex-col gap-3">
- {/* Subjects */}
- <div className="flex items-center gap-2 overflow-x-auto no-scrollbar pb-1">
- {subjects.map((subject) => {
- const isActive = selectedSubject === subject.id;
- return (
- <button
- key={subject.id}
- onClick={() => setSelectedSubject(subject.id as any)}
- className={`
- px-4 py-2 rounded-xl whitespace-nowrap text-[13px] font-bold transition-all duration-300
- ${isActive 
- ? "bg-brand-blue text-white shadow-sm" 
- : "bg-white/60 dark:bg-slate-900/60 text-slate-600 dark:text-slate-300 border border-white/60 dark:border-slate-800/60 hover:bg-white/80 dark:hover:bg-slate-800/80"
- }
- `}
- >
- {subject.label}
- </button>
- );
- })}
- </div>
-
- {/* Types */}
- <div className="flex items-center gap-2 overflow-x-auto no-scrollbar pb-1">
- {types.map((type) => {
- const Icon = type.icon;
- const isActive = selectedType === type.id;
- return (
- <button
- key={type.id}
- onClick={() => setSelectedType(type.id as any)}
- className={`
- px-3 py-1.5 rounded-full flex items-center gap-2 whitespace-nowrap text-[12px] font-medium transition-all duration-300
- ${isActive 
- ? "bg-brand-blue/10 dark:bg-brand-blue/20 text-brand-blue" 
- : "text-slate-500 dark:text-slate-400 active:bg-slate-100 dark:active:bg-slate-800"
- }
- `}
- >
- <Icon size={14} className={isActive ? "text-brand-blue" : "text-slate-400"} />
- {type.label}
- </button>
- );
- })}
- </div>
- </div>
-
- {/* ── TESTS LIST ── */}
- <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4 mt-2">
- {loading ? (
- // Inline minimalist skeleton for tests
- [1, 2, 3, 4, 5, 6].map((i) => (
- <div key={i} className="w-full h-full bg-white/60 dark:bg-slate-900/60 backdrop-blur-xl rounded-[1.5rem] p-4 flex items-center gap-4 border border-white/60 dark:border-slate-700/50 shadow-sm animate-pulse">
- <div className="w-12 h-12 rounded-2xl shrink-0 bg-slate-200/80 dark:bg-slate-700/50" />
- <div className="flex-1 space-y-2">
- <div className="h-4 w-3/4 rounded-md bg-slate-200/80 dark:bg-slate-700/50" />
- <div className="h-3 w-1/2 rounded-full bg-slate-200/80 dark:bg-slate-700/50" />
- </div>
- <div className="w-5 h-5 rounded bg-slate-200/80 dark:bg-slate-700/50 shrink-0" />
- </div>
- ))
- ) : tests.length === 0 ? (
- <div className="col-span-1 md:col-span-2 bg-white/60 dark:bg-slate-900/60 backdrop-blur-xl rounded-[1.5rem] p-10 border border-white/60 dark:border-slate-700/50 shadow-sm flex flex-col items-center gap-4 text-center mt-4">
- <div className="w-16 h-16 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center">
- <FileCheck size={28} className="text-slate-400" />
- </div>
- <h2 className="text-lg font-bold text-slate-700 dark:text-slate-200">
- {t('tests.list.no_tests')}
- </h2>
- </div>
- ) : (
- tests.map((test) => {
- const colors = getSubjectColor(test.subject);
- 
- return (
- <Link
- key={test.id}
- href={`/dashboard/tests/${test.id}`}
- className="w-full h-full bg-white/60 dark:bg-slate-900/60 backdrop-blur-xl rounded-[1.5rem] p-4 flex items-center gap-4 shadow-sm border border-white/60 dark:border-slate-700/50 active:scale-95 transition-all duration-300 group"
- >
- {/* Icon Badge */}
- <div className={`flex items-center justify-center shrink-0 group-active:scale-95 transition-transform duration-300`}>
- <FileCheck size={32} className="text-brand-blue" />
- </div>
-
- {/* Text */}
- <div className="flex-1 text-left min-w-0">
- <h3 className="font-bold text-slate-800 dark:text-slate-100 text-[15px] truncate leading-tight">
- {test.title}
- </h3>
- <div className="flex items-center gap-1.5 mt-1 text-[12px] font-medium text-slate-500 dark:text-slate-400 truncate">
- <span className="capitalize text-brand-blue shrink-0">{test.subject}</span>
- <span className="shrink-0">·</span>
- <span className="shrink-0">{test.total_questions} savol</span>
- <span className="shrink-0">·</span>
- <span className="shrink-0">{test.duration_minutes ? `${test.duration_minutes} daq` : "Cheksiz"}</span>
- </div>
- </div>
-
- {/* Chevron arrow */}
- <div className="flex items-center text-brand-blue bg-brand-blue/10 rounded-full px-3 py-1.5 text-[12px] font-bold group-active:bg-brand-blue group-active:text-white transition-colors shrink-0">
- Boshlash
- </div>
- </Link>
- );
- })
- )}
- </div>
- </div>
- </div>
- );
+  );
 }
