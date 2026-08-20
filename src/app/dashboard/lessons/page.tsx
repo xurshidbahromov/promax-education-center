@@ -5,57 +5,57 @@ import { getSubjects, type Subject } from "@/lib/supabase-queries";
 import Link from "next/link";
 import Image from "next/image";
 import {
- BookOpenText,
- FlaskConical,
- Globe,
- Calculator,
- Atom,
- Leaf,
- ChevronRight,
+  BookOpen,
+  FlaskConical,
+  Languages,
+  Calculator,
+  Atom,
+  Dna,
+  ChevronRight,
 } from "lucide-react";
 import { Skeleton } from "@/components/ui/Skeleton";
 
 // ── Subject icon/color/gradient mapping ──────────────────────────────────────
 const subjectMeta: Record<
- string,
- { color: string; bg: string; gradient: string; icon: any }
+  string,
+  { iconColor: string; iconBg: string; gradient: string; icon: any }
 > = {
- matematika: {
- color: "text-blue-600",
- bg: "bg-blue-50 dark:bg-blue-900/30",
- gradient: "from-blue-500 via-blue-600 to-indigo-600",
- icon: Calculator,
- },
- ingliz: {
- color: "text-emerald-600",
- bg: "bg-emerald-50 dark:bg-emerald-900/30",
- gradient: "from-emerald-400 via-teal-500 to-cyan-600",
- icon: Globe,
- },
- fizika: {
- color: "text-purple-600",
- bg: "bg-purple-50 dark:bg-purple-900/30",
- gradient: "from-purple-500 via-violet-500 to-indigo-500",
- icon: Atom,
- },
- kimyo: {
- color: "text-orange-600",
- bg: "bg-orange-50 dark:bg-orange-900/30",
- gradient: "from-orange-400 via-amber-500 to-yellow-500",
- icon: FlaskConical,
- },
- biologiya: {
- color: "text-green-600",
- bg: "bg-green-50 dark:bg-green-900/30",
- gradient: "from-green-400 via-emerald-500 to-teal-500",
- icon: Leaf,
- },
- default: {
- color: "text-brand-blue",
- bg: "bg-brand-blue/5",
- gradient: "from-brand-blue via-blue-500 to-indigo-500",
- icon: BookOpenText,
- },
+  matematika: {
+    iconColor: "text-blue-600 dark:text-blue-400",
+    iconBg: "bg-blue-500/10 dark:bg-blue-500/20 border-blue-500/20",
+    gradient: "from-blue-500 via-blue-600 to-indigo-600",
+    icon: Calculator,
+  },
+  ingliz: {
+    iconColor: "text-emerald-600 dark:text-emerald-400",
+    iconBg: "bg-emerald-500/10 dark:bg-emerald-500/20 border-emerald-500/20",
+    gradient: "from-emerald-400 via-teal-500 to-cyan-600",
+    icon: Languages,
+  },
+  fizika: {
+    iconColor: "text-purple-600 dark:text-purple-400",
+    iconBg: "bg-purple-500/10 dark:bg-purple-500/20 border-purple-500/20",
+    gradient: "from-purple-500 via-violet-500 to-indigo-500",
+    icon: Atom,
+  },
+  kimyo: {
+    iconColor: "text-amber-600 dark:text-amber-400",
+    iconBg: "bg-amber-500/10 dark:bg-amber-500/20 border-amber-500/20",
+    gradient: "from-orange-400 via-amber-500 to-yellow-500",
+    icon: FlaskConical,
+  },
+  biologiya: {
+    iconColor: "text-teal-600 dark:text-teal-400",
+    iconBg: "bg-teal-500/10 dark:bg-teal-500/20 border-teal-500/20",
+    gradient: "from-green-400 via-emerald-500 to-teal-500",
+    icon: Dna,
+  },
+  default: {
+    iconColor: "text-brand-blue dark:text-blue-400",
+    iconBg: "bg-brand-blue/10 dark:bg-brand-blue/20 border-brand-blue/20",
+    gradient: "from-brand-blue via-blue-500 to-indigo-500",
+    icon: BookOpen,
+  },
 };
 
 function getSubjectMeta(title: string) {
@@ -181,8 +181,8 @@ export default function LessonsPage() {
                   {/* ── BOTTOM: Info row ── */}
                   <div className="p-5 flex items-center justify-between gap-4 flex-1">
                     <div className="flex items-center gap-3.5 min-w-0">
-                      <div className={`w-12 h-12 rounded-2xl bg-gradient-to-br ${meta.gradient} flex items-center justify-center text-white shadow-md shadow-slate-200/50 dark:shadow-none shrink-0 group-hover:scale-105 transition-transform duration-300`}>
-                        <SubjectIcon size={24} />
+                      <div className={`w-11 h-11 rounded-2xl ${meta.iconBg} border flex items-center justify-center ${meta.iconColor} shrink-0 group-hover:scale-105 transition-transform duration-300`}>
+                        <SubjectIcon size={22} strokeWidth={2.2} />
                       </div>
 
                       <div className="min-w-0 space-y-1">

@@ -7,7 +7,7 @@ import { getUserProfile } from "@/lib/profile";
 import {
   Gamepad2,
   BrainCircuit,
-  Calculator,
+  Zap,
   Languages,
   Trophy,
   Coins,
@@ -23,7 +23,8 @@ interface GameCard {
   description: string;
   rewardText: string;
   icon: any;
-  gradient: string;
+  iconColor: string;
+  iconBg: string;
 }
 
 export default function GameZonePage() {
@@ -44,8 +45,9 @@ export default function GameZonePage() {
       category: "Matematika Blits",
       description: "Chaqmoqdek tezlikdagi aritmetik tenglamalarni yechish va mantiqiy tezlikni oshirish rejimi.",
       rewardText: "+10 Tanga / Savol",
-      icon: Calculator,
-      gradient: "from-blue-500 via-indigo-600 to-blue-700",
+      icon: Zap,
+      iconColor: "text-amber-500 dark:text-amber-400",
+      iconBg: "bg-amber-500/10 dark:bg-amber-500/20 border-amber-500/25",
     },
     {
       id: 'word',
@@ -54,7 +56,8 @@ export default function GameZonePage() {
       description: "Aralashib ketgan inglizcha so'z harflarini tartiblab, lug'at boyligini oshirish rejimi.",
       rewardText: "+10 Tanga / Savol",
       icon: Languages,
-      gradient: "from-emerald-500 via-teal-600 to-emerald-700",
+      iconColor: "text-emerald-500 dark:text-emerald-400",
+      iconBg: "bg-emerald-500/10 dark:bg-emerald-500/20 border-emerald-500/25",
     },
     {
       id: 'logic',
@@ -63,7 +66,8 @@ export default function GameZonePage() {
       description: "Sonlar va mantiqiy ketma-ketliklardagi yashiringan qonuniyatni topish intellekt rejimi.",
       rewardText: "+15 Tanga / Savol",
       icon: BrainCircuit,
-      gradient: "from-purple-500 via-violet-600 to-purple-700",
+      iconColor: "text-purple-500 dark:text-purple-400",
+      iconBg: "bg-purple-500/10 dark:bg-purple-500/20 border-purple-500/25",
     },
     {
       id: '1v1',
@@ -72,7 +76,8 @@ export default function GameZonePage() {
       description: "Boshqa o'quvchilar bilan real-vaqtda jonli efirda intellektual duelda bellashuv.",
       rewardText: "Duel Sovrini: 500 Tanga",
       icon: Swords,
-      gradient: "from-amber-500 via-orange-600 to-red-600",
+      iconColor: "text-rose-500 dark:text-rose-400",
+      iconBg: "bg-rose-500/10 dark:bg-rose-500/20 border-rose-500/25",
     },
     {
       id: 'team',
@@ -80,8 +85,9 @@ export default function GameZonePage() {
       category: "Guruhlar Jangi",
       description: "Guruhdoshlar bilan birlashib, haftalik turnirlarda boshqa guruhlarga qarshi jang.",
       rewardText: "Liga Sovrini: 2000 Tanga",
-      icon: Gamepad2,
-      gradient: "from-rose-500 via-pink-600 to-purple-700",
+      icon: Trophy,
+      iconColor: "text-blue-500 dark:text-blue-400",
+      iconBg: "bg-blue-500/10 dark:bg-blue-500/20 border-blue-500/25",
     }
   ];
 
@@ -135,8 +141,8 @@ export default function GameZonePage() {
                 >
                   <div className="space-y-4">
                     <div className="flex items-center justify-between gap-3">
-                      <div className={`w-14 h-14 rounded-2xl bg-gradient-to-br ${game.gradient} flex items-center justify-center text-white shadow-md shadow-slate-200/50 dark:shadow-none shrink-0`}>
-                        <Icon size={26} />
+                      <div className={`w-12 h-12 rounded-2xl ${game.iconBg} border flex items-center justify-center ${game.iconColor} shrink-0 group-hover:scale-105 transition-transform duration-300`}>
+                        <Icon size={24} strokeWidth={2.2} />
                       </div>
 
                       <span className="px-2.5 py-1 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 font-extrabold text-[10px] uppercase tracking-wider">
