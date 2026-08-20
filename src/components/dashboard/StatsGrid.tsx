@@ -51,9 +51,9 @@ export default function StatsGrid({ userId }: { userId?: string }) {
  return (
  <div className="grid grid-cols-2 gap-3 sm:gap-6">
  {[...Array(4)].map((_, i) => (
- <motion.div key={i} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.1 }} className="relative group h-full">
+ <div key={i} className="relative group h-full">
  <StatsSkeleton />
- </motion.div>
+ </div>
  ))}
  </div>
  );
@@ -62,11 +62,8 @@ export default function StatsGrid({ userId }: { userId?: string }) {
  return (
  <div className="grid grid-cols-2 gap-4 sm:gap-6">
  {stats.map((stat, index) => (
- <motion.div
+ <div
  key={index}
- initial={{ opacity: 0, y: 20 }}
- animate={{ opacity: 1, y: 0 }}
- transition={{ delay: index * 0.1 }}
  className="relative group h-full"
  >
  <div className="absolute inset-0 bg-brand-blue/0 group-active:bg-brand-blue/5 blur-xl transition-all duration-500 rounded-[1.5rem]" />
@@ -90,7 +87,7 @@ export default function StatsGrid({ userId }: { userId?: string }) {
  <stat.icon size={120} strokeWidth={1} />
  </div>
  </div>
- </motion.div>
+ </div>
  ))}
  </div>
  );

@@ -268,10 +268,7 @@ export function OlympiadSection() {
       </div>
 
       {/* ── 1. HERO BANNER (MATCHING USER SKETCH) ── */}
-      <motion.div
-        initial={{ opacity: 0, y: 16 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5 }}
+      <div
         className="relative rounded-[2.5rem] overflow-hidden border border-amber-500/30 shadow-xl shadow-amber-500/5 bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-900 text-white"
       >
         {/* Ambient background glows */}
@@ -428,7 +425,7 @@ export function OlympiadSection() {
           </div>
 
         </div>
-      </motion.div>
+      </div>
 
       {/* ── 2. UPCOMING OLYMPIADS LIST (3 CARDS) ── */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">

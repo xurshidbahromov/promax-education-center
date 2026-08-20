@@ -60,15 +60,11 @@ export default function SubjectsList() {
  {subjects.map((subject, index) => {
  const rating = (4.8+ Math.random() * 0.2).toFixed(1); // Premium rating
 
- return (
- <Link href={`/dashboard/subjects/${subject.id}`} key={subject.id} className="block w-full group">
- <motion.div
- initial={{ opacity: 0, y: 15 }}
- animate={{ opacity: 1, y: 0 }}
- whileTap={{ scale: 0.98 }}
- transition={{ delay: index * 0.05 }}
- className="bg-white/60 dark:bg-slate-900/60 backdrop-blur-xl rounded-[1.5rem] overflow-hidden shadow-none border border-white/60 dark:border-slate-800/60 transition-all duration-300 flex flex-col h-[280px] cursor-pointer relative group/card w-full"
- >
+          return (
+            <Link href={`/dashboard/subjects/${subject.id}`} key={subject.id} className="block w-full group">
+              <div
+                className="bg-white/60 dark:bg-slate-900/60 backdrop-blur-xl rounded-[1.5rem] overflow-hidden shadow-none border border-white/60 dark:border-slate-800/60 transition-all duration-300 flex flex-col h-[280px] cursor-pointer relative group/card w-full active:scale-[0.99]"
+              >
  {/* Top 40% Image */}
  <div className="relative h-[40%] w-full bg-slate-100 dark:bg-slate-800 shrink-0">
  <Image 
@@ -107,10 +103,10 @@ export default function SubjectsList() {
  </div>
  </div>
  </div>
- </motion.div>
+ </div>
  </Link>
- );
- })}
+        );
+      })}
  </div>
  </div>
  );
