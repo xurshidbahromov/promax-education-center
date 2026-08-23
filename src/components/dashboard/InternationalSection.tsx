@@ -59,12 +59,6 @@ export function InternationalBannerTeaser() {
           
           {/* Left Text Content Area */}
           <div className="relative z-10 space-y-1 min-w-0 flex-1 w-full xs:w-auto">
-            <div className="flex items-center gap-2">
-              <span className="px-2 py-0.5 rounded-md bg-indigo-500/10 dark:bg-indigo-500/20 text-indigo-600 dark:text-indigo-400 font-bold text-[10px] uppercase tracking-wider border border-indigo-500/20">
-                SAT • AMC • IELTS
-              </span>
-            </div>
-
             <h4 className="text-base sm:text-xl font-black font-fredoka text-slate-900 dark:text-white leading-tight truncate">
               Xalqaro musobaqalar
             </h4>
