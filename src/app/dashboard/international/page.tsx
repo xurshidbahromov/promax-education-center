@@ -7,7 +7,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import toast from "react-hot-toast";
 import { useLanguage } from "@/context/LanguageContext";
 import {
-  Trophy,
+  Globe,
   ArrowLeft,
   Clock,
   Users,
@@ -30,13 +30,14 @@ import {
   FileText
 } from "lucide-react";
 import {
-  AdminTournament,
-  TournamentLeaderboardEntry,
-  getAdminTournaments,
-  getTournamentLeaderboard,
-  registerForTournament,
-  getTournamentRegistrations
-} from "@/lib/tournaments";
+  InternationalTournament,
+  InternationalLeaderboardEntry,
+  getInternationalTournaments,
+  getInternationalLeaderboard,
+  registerForInternationalTournament,
+  getInternationalRegistrations,
+  INITIAL_INTERNATIONAL_TOURNAMENTS
+} from "@/lib/international-tournaments";
 import { useCurrentUser } from "@/hooks/useDashboardData";
 import {
   OlympiadsBannerSkeleton,
@@ -57,35 +58,35 @@ interface CommentItem {
 
 const INITIAL_COMMENTS: CommentItem[] = [
   {
-    id: "c1",
-    author: "Jasurbek Aliyev",
-    avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=Jasurbek",
+    id: "ic1",
+    author: "Shaxzod Tursunov",
+    avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=Shaxzod",
     role: "O'quvchi",
-    time: "10 daqiqa avval",
-    text: "Matematika musobaqasi savollari darajasi qanday bo'ladi? Tayyorgarlik uchun tayyor testlar bormi?",
-    likes: 8,
+    time: "15 daqiqa avval",
+    text: "Digital SAT Math dagi yopiq (grid-in) savollar qanchalik qiyin bo'ladi? Tayyorgarlik uchun testlar bormi?",
+    likes: 12,
   },
   {
-    id: "c2",
-    author: "Promax Admin",
-    avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=PromaxAdmin",
+    id: "ic2",
+    author: "Promax International",
+    avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=PromaxIntl",
     role: "Tashkilotchi",
     time: "5 daqiqa avval",
-    text: "Assalomu alaykum! Musobaqa savollari standart va mantiqiy darajada tuzilgan. Testlar bo'limida tayyorgarlik testlarini yechishingiz mumkin.",
-    likes: 15,
+    text: "Assalomu alaykum! Test interfeysida formula spravochnigi mavjud. Yopiq savollarda javob son yoki kasr ko'rinishida kiritiladi.",
+    likes: 24,
   },
   {
-    id: "c3",
-    author: "Sevinch Usmonova",
-    avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=Sevinch",
+    id: "ic3",
+    author: "Kamila Karimova",
+    avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=Kamila",
     role: "O'quvchi",
     time: "Kecha",
-    text: "Top o'rin egalari uchun sertifikatlar va sovg'alar qachon taqdim etiladi?",
-    likes: 4,
+    text: "AMC va SAT musobaqasi sertifikatlari va sovg'alari qachon topshiriladi?",
+    likes: 9,
   },
 ];
 
-export default function OlympiadsPage() {
+export default function InternationalCompetitionsPage() {
   const { t } = useLanguage();
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -96,15 +97,15 @@ export default function OlympiadsPage() {
   const [activeTab, setActiveTab] = useState<"tournaments" | "leaderboard" | "comments">(initialTab);
 
   // Tournaments State
-  const [tournaments, setTournaments] = useState<AdminTournament[]>([]);
+  const [tournaments, setTournaments] = useState<InternationalTournament[]>([]);
   const [loading, setLoading] = useState(true);
   const [leaderboardLoading, setLeaderboardLoading] = useState(false);
-  const [selectedItem, setSelectedItem] = useState<AdminTournament | null>(null);
+  const [selectedItem, setSelectedItem] = useState<InternationalTournament | null>(null);
   const [registeredIds, setRegisteredIds] = useState<string[]>([]);
 
   // Leaderboard State
   const [selectedTournamentId, setSelectedTournamentId] = useState<string>("");
-  const [leaderboard, setLeaderboard] = useState<TournamentLeaderboardEntry[]>([]);
+  const [leaderboard, setLeaderboard] = useState<InternationalLeaderboardEntry[]>([]);
   const [leaderboardSearch, setLeaderboardSearch] = useState("");
 
   // Comments State
@@ -119,20 +120,20 @@ export default function OlympiadsPage() {
   const loadData = async () => {
     setLoading(true);
     try {
-      const data = await getAdminTournaments();
+      const data = await getInternationalTournaments();
       setTournaments(data);
       if (data.length > 0) {
         const queryId = searchParams.get("id");
         const defaultId = queryId && data.some(t => t.id === queryId) ? queryId : data[0].id;
         setSelectedTournamentId(defaultId);
-        const lb = await getTournamentLeaderboard(defaultId);
+        const lb = await getInternationalLeaderboard(defaultId);
         setLeaderboard(lb);
       }
 
-      const regList = getTournamentRegistrations(user?.id);
+      const regList = getInternationalRegistrations(user?.id);
       setRegisteredIds(regList);
     } catch (e) {
-      console.error("Error loading tournaments:", e);
+      console.error("Error loading international tournaments:", e);
     } finally {
       setLoading(false);
     }
@@ -142,36 +143,30 @@ export default function OlympiadsPage() {
     setSelectedTournamentId(id);
     setLeaderboardLoading(true);
     try {
-      const lb = await getTournamentLeaderboard(id);
+      const lb = await getInternationalLeaderboard(id);
       setLeaderboard(lb);
     } catch (e) {
-      console.error("Error loading tournament leaderboard:", e);
+      console.error("Error loading international leaderboard:", e);
     } finally {
       setLeaderboardLoading(false);
     }
   };
 
-  const handleRegister = async (item: AdminTournament) => {
+  const handleRegister = async (item: InternationalTournament) => {
     if (registeredIds.includes(item.id)) {
-      toast.success("Siz ro'yxatdan o'tgansiz!", {
-        icon: "✅"
-      });
+      toast.success("Siz ro'yxatdan o'tgansiz!", { icon: "✅" });
       return;
     }
 
-    const res = await registerForTournament(item.id, {
-      id: user?.id || `user_${Date.now()}`,
-      name: user?.user_metadata?.full_name || "O'quvchi"
-    });
-
-    if (res.success) {
-      setRegisteredIds((prev) => [...prev, item.id]);
-      setTournaments((prev) =>
-        prev.map((t) => (t.id === item.id ? { ...t, participantsCount: (t.participantsCount || 0) + 1 } : t))
-      );
-      toast.success(`"${item.title}" - Ro'yxatdan o'tildi!`, {
-        icon: "🎉"
+    try {
+      registerForInternationalTournament(item.id, user?.id);
+      setRegisteredIds(prev => [...prev, item.id]);
+      toast.success(`"${item.title}" musobaqasiga muvaffaqiyatli ro'yxatdan o'tdingiz!`, {
+        icon: "🎓"
       });
+      setSelectedItem(null);
+    } catch (e) {
+      toast.error("Ro'yxatdan o'tishda xatolik yuz berdi");
     }
   };
 
@@ -180,31 +175,27 @@ export default function OlympiadsPage() {
     if (!newCommentText.trim()) return;
 
     const newComment: CommentItem = {
-      id: `c_${Date.now()}`,
+      id: `ic_${Date.now()}`,
       author: user?.user_metadata?.full_name || "O'quvchi",
-      avatar: `https://api.dicebear.com/7.x/avataaars/svg?seed=${user?.user_metadata?.full_name || 'Student'}`,
-      role: "O'quvchi",
-      time: "Hozir",
+      avatar: `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(user?.email || 'User')}`,
+      role: "Ishtirokchi",
+      time: "Hozirgina",
       text: newCommentText.trim(),
       likes: 0,
     };
 
-    setComments((prev) => [newComment, ...prev]);
+    setComments([newComment, ...comments]);
     setNewCommentText("");
-    toast.success("Izoh yuborildi!", { icon: "💬" });
+    toast.success("Izohingiz qo'shildi!");
   };
 
   const handleToggleLike = (id: string) => {
     if (likedCommentIds.includes(id)) {
-      setLikedCommentIds((prev) => prev.filter((item) => item !== id));
-      setComments((prev) =>
-        prev.map((c) => (c.id === id ? { ...c, likes: c.likes - 1 } : c))
-      );
+      setLikedCommentIds(likedCommentIds.filter(i => i !== id));
+      setComments(comments.map(c => c.id === id ? { ...c, likes: c.likes - 1 } : c));
     } else {
-      setLikedCommentIds((prev) => [...prev, id]);
-      setComments((prev) =>
-        prev.map((c) => (c.id === id ? { ...c, likes: c.likes + 1 } : c))
-      );
+      setLikedCommentIds([...likedCommentIds, id]);
+      setComments(comments.map(c => c.id === id ? { ...c, likes: c.likes + 1 } : c));
     }
   };
 
@@ -240,33 +231,33 @@ export default function OlympiadsPage() {
         ) : (
           <div className="bg-white/60 dark:bg-slate-900/60 backdrop-blur-xl rounded-[2rem] p-6 sm:p-7 border border-white/60 dark:border-slate-800/60 shadow-none space-y-3">
             <h1 className="text-xl sm:text-2xl font-black font-fredoka text-slate-900 dark:text-white leading-tight">
-              Milliy bilim musobaqalari
+              Xalqaro bilim musobaqalari
             </h1>
             <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 font-medium">
-              Bilimingizni sinang va mukofotlarni qo'lga kiriting
+              SAT, AMC, IELTS va xalqaro olimpiadalarda bilimingizni sinang
             </p>
 
             {/* Stats Row */}
             <div className="flex items-center gap-4 text-xs sm:text-sm font-bold text-slate-700 dark:text-slate-300 flex-wrap pt-1">
               <span className="flex items-center gap-1.5 text-amber-600 dark:text-amber-400">
-                <Trophy size={16} className="text-amber-500" />
-                <span>Bilim musobaqalari</span>
+                <Globe size={16} className="text-amber-500" />
+                <span>Xalqaro musobaqalar</span>
               </span>
               <span className="text-slate-300 dark:text-slate-700">•</span>
               <span className="flex items-center gap-1.5 text-slate-700 dark:text-slate-300">
                 <Users size={16} className="text-brand-blue" />
-                <span>{tournaments.reduce((acc, t) => acc + (t.participantsCount || 0), 0) || 1240}+ qatnashuvchi</span>
+                <span>{tournaments.reduce((acc, t) => acc + (t.participantsCount || 0), 0) || 1920}+ qatnashuvchi</span>
               </span>
               <span className="text-slate-300 dark:text-slate-700">•</span>
               <span className="flex items-center gap-1.5 text-[#EB7C0E] dark:text-orange-400 font-bold">
                 <Gift size={16} className="text-[#EB7C0E]" />
-                <span>Top mukofotlar</span>
+                <span>Xalqaro sertifikat & grantlar</span>
               </span>
             </div>
           </div>
         )}
 
-        {/* ── 3-TAB SWITCHER (ULTRA-ROUNDED PILL WITH EQUAL DISTRIBUTION) ── */}
+        {/* ── 3-TAB SWITCHER (ULTRA-ROUNDED PILL) ── */}
         <div className="relative w-full bg-white/60 dark:bg-slate-900/60 backdrop-blur-xl border border-white/60 dark:border-slate-800/60 p-1.5 sm:p-2 rounded-full grid grid-cols-3 gap-1 sm:gap-2 shadow-none">
           
           {/* Tab 1: Musobaqalar */}
@@ -280,12 +271,12 @@ export default function OlympiadsPage() {
           >
             {activeTab === "tournaments" && (
               <motion.div
-                layoutId="olympiad-tab-active-pill"
+                layoutId="international-tab-active-pill"
                 className="absolute inset-0 bg-brand-blue rounded-full shadow-none -z-10"
                 transition={{ type: "spring", stiffness: 450, damping: 35 }}
               />
             )}
-            <Trophy size={16} className={activeTab === "tournaments" ? "stroke-[2.5]" : "stroke-[2]"} />
+            <Globe size={16} className={activeTab === "tournaments" ? "stroke-[2.5]" : "stroke-[2]"} />
             <span>Musobaqalar</span>
           </button>
 
@@ -300,7 +291,7 @@ export default function OlympiadsPage() {
           >
             {activeTab === "leaderboard" && (
               <motion.div
-                layoutId="olympiad-tab-active-pill"
+                layoutId="international-tab-active-pill"
                 className="absolute inset-0 bg-brand-blue rounded-full shadow-none -z-10"
                 transition={{ type: "spring", stiffness: 450, damping: 35 }}
               />
@@ -320,7 +311,7 @@ export default function OlympiadsPage() {
           >
             {activeTab === "comments" && (
               <motion.div
-                layoutId="olympiad-tab-active-pill"
+                layoutId="international-tab-active-pill"
                 className="absolute inset-0 bg-brand-blue rounded-full shadow-none -z-10"
                 transition={{ type: "spring", stiffness: 450, damping: 35 }}
               />
@@ -331,7 +322,7 @@ export default function OlympiadsPage() {
         </div>
 
         {/* ══════════════════════════════════════════════════════════════ */}
-        {/* ── TAB 1: MUSOBAQALAR (TOURNAMENTS GRID MATCHING SCREENSHOT) ── */}
+        {/* ── TAB 1: MUSOBAQALAR (TOURNAMENTS GRID MATCHING OLYMPIADS) ── */}
         {/* ══════════════════════════════════════════════════════════════ */}
         {activeTab === "tournaments" && (
           loading ? (
@@ -380,7 +371,7 @@ export default function OlympiadsPage() {
 
                     {/* Description */}
                     <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 font-medium leading-relaxed line-clamp-2">
-                      {item.description || "Matematika bo'yicha eng kuchli o'quvchilar bellashuvi! Murakkab va mantiqiy masalalarni yechib, qimmatbaho mukofotlarga ega bo'ling."}
+                      {item.description}
                     </p>
 
                     {/* Specs Rows (Icons, Labels, Values) */}
@@ -401,7 +392,7 @@ export default function OlympiadsPage() {
                           <span>Qatnashuvchilar:</span>
                         </span>
                         <span className="font-bold text-slate-900 dark:text-white">
-                          {item.participantsCount || 428} nafar qatnashuvchi
+                          {item.participantsCount || 650} nafar qatnashuvchi
                         </span>
                       </div>
 
@@ -421,14 +412,14 @@ export default function OlympiadsPage() {
                   <div className="flex items-center gap-3 pt-2">
                     <button
                       onClick={() => setSelectedItem(item)}
-                      className="flex-1 py-3 rounded-2xl bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-white font-bold text-xs sm:text-sm active:scale-95 transition-all text-center"
+                      className="flex-1 py-3 rounded-2xl bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-white font-bold text-xs sm:text-sm active:scale-95 transition-all text-center cursor-pointer"
                     >
                       Nizamnoma
                     </button>
 
                     {isLive ? (
                       <Link
-                        href={`/dashboard/tests/${item.id}/take?type=olympiad`}
+                        href={`/dashboard/tests/${item.id}/take?type=international`}
                         className="flex-1 py-3 rounded-2xl bg-brand-blue hover:bg-blue-600 text-white font-bold text-xs sm:text-sm flex items-center justify-center gap-1.5 shadow-sm active:scale-95 transition-all text-center"
                       >
                         <span>Boshlash</span>
@@ -440,14 +431,14 @@ export default function OlympiadsPage() {
                           handleTournamentSelectForLeaderboard(item.id);
                           setActiveTab("leaderboard");
                         }}
-                        className="flex-1 py-3 rounded-2xl bg-brand-blue hover:bg-blue-600 text-white font-bold text-xs sm:text-sm flex items-center justify-center gap-1.5 shadow-sm active:scale-95 transition-all"
+                        className="flex-1 py-3 rounded-2xl bg-brand-blue hover:bg-blue-600 text-white font-bold text-xs sm:text-sm flex items-center justify-center gap-1.5 shadow-sm active:scale-95 transition-all cursor-pointer"
                       >
                         <Award size={16} />
                         <span>Reyting</span>
                       </button>
                     ) : isRegistered ? (
                       <Link
-                        href={`/dashboard/tests/${item.id}/take?type=olympiad`}
+                        href={`/dashboard/tests/${item.id}/take?type=international`}
                         className="flex-1 py-3 rounded-2xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs sm:text-sm flex items-center justify-center gap-1.5 shadow-sm active:scale-95 transition-all text-center"
                       >
                         <Play size={14} className="fill-white" />
@@ -456,7 +447,7 @@ export default function OlympiadsPage() {
                     ) : (
                       <button
                         onClick={() => handleRegister(item)}
-                        className="flex-1 py-3 rounded-2xl font-bold text-xs sm:text-sm active:scale-95 flex items-center justify-center gap-1.5 transition-all bg-brand-blue hover:bg-blue-600 text-white shadow-sm"
+                        className="flex-1 py-3 rounded-2xl font-bold text-xs sm:text-sm active:scale-95 flex items-center justify-center gap-1.5 transition-all bg-brand-blue hover:bg-blue-600 text-white shadow-sm cursor-pointer"
                       >
                         <span>Qatnashish</span>
                         <ArrowUpRight size={16} />
@@ -490,7 +481,7 @@ export default function OlympiadsPage() {
                     G'oliblar & Natijalar Reytingi
                   </h3>
                   <p className="text-xs text-slate-500 font-medium">
-                    Barcha fanlar bo'yicha eng yuqori natija ko'rsatgan o'quvchilar
+                    SAT, AMC va xalqaro musobaqalar bo'yicha eng yuqori natijalar
                   </p>
                 </div>
               </div>
@@ -522,20 +513,19 @@ export default function OlympiadsPage() {
               </div>
             </div>
 
-            {/* ── 3D ISOMETRIC OLYMPIC PODIUM (TOP 3 - PREMIUM GLASSY 3D) ── */}
+            {/* ── 3D ISOMETRIC OLYMPIC PODIUM (TOP 3) ── */}
             {leaderboard.length >= 3 && (
               <div className="relative w-full bg-gradient-to-b from-white/70 via-slate-50/50 to-white/70 dark:from-slate-900/70 dark:via-slate-850/50 dark:to-slate-900/70 backdrop-blur-xl rounded-[2.5rem] p-5 sm:p-8 border border-white/60 dark:border-slate-800/60 shadow-none overflow-hidden">
                 
-                {/* Luminous Gold Halo & Ray Glow behind Champion */}
+                {/* Luminous Gold Halo behind Champion */}
                 <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[28rem] h-[28rem] bg-gradient-to-b from-amber-400/20 via-amber-300/10 to-transparent dark:from-amber-500/15 dark:via-amber-500/5 dark:to-transparent rounded-full blur-3xl pointer-events-none" />
 
                 {/* ── 3D STANDS CONTAINER ── */}
                 <div className="relative z-10 max-w-lg mx-auto pt-6 pb-2">
                   <div className="grid grid-cols-3 items-end gap-2.5 sm:gap-4">
                     
-                    {/* 🥈 2ND PLACE (LEFT - BLUE/INDIGO GLASSY 3D STAND) */}
+                    {/* 🥈 2ND PLACE */}
                     <div className="flex flex-col items-center text-center">
-                      {/* Floating Profile Info */}
                       <div className="flex flex-col items-center space-y-1 mb-2.5">
                         <img
                           src={leaderboard[1].student_avatar}
@@ -554,9 +544,8 @@ export default function OlympiadsPage() {
                           )}
                         </div>
 
-                        {/* Additional Metrics */}
                         <div className="text-xs font-bold text-brand-blue dark:text-blue-400">
-                          <span>{leaderboard[1].score} ball</span>
+                          <span>{leaderboard[1].scaled_score || `${leaderboard[1].score} ball`}</span>
                           <span className="text-[10px] font-semibold opacity-75 ml-1">({leaderboard[1].percentage}%)</span>
                         </div>
                         <div className="flex items-center justify-center gap-1 text-[10px] text-slate-400 font-medium">
@@ -565,11 +554,8 @@ export default function OlympiadsPage() {
                         </div>
                       </div>
 
-                      {/* 3D Glassy Isometric Stand 2 */}
                       <div className="w-full">
-                        {/* 3D Top Cap */}
                         <div className="h-4 sm:h-5 w-full bg-gradient-to-r from-blue-200 via-indigo-200 to-sky-200 dark:from-blue-500 dark:via-indigo-400 dark:to-sky-400 rounded-t-2xl transform -skew-x-2 border-t border-x border-white/80 dark:border-white/30 shadow-none" />
-                        {/* 3D Front Face */}
                         <div className="h-28 sm:h-36 w-full bg-gradient-to-b from-blue-400 via-indigo-500 to-indigo-600 dark:from-blue-600 dark:via-indigo-700 dark:to-indigo-800 backdrop-blur-xl rounded-b-2xl shadow-none flex items-center justify-center text-white relative overflow-hidden">
                           <span className="text-4xl sm:text-5xl font-black font-fredoka tracking-tighter drop-shadow-md">
                             2
@@ -578,9 +564,8 @@ export default function OlympiadsPage() {
                       </div>
                     </div>
 
-                    {/* 🥇 1ST PLACE (CENTER - TALL GOLD GLASSY 3D STAND) */}
+                    {/* 🥇 1ST PLACE */}
                     <div className="flex flex-col items-center text-center -mt-6 sm:-mt-8 z-20">
-                      {/* Floating Profile Info */}
                       <div className="flex flex-col items-center space-y-1 mb-2.5">
                         <div className="relative">
                           <img
@@ -588,7 +573,6 @@ export default function OlympiadsPage() {
                             alt={leaderboard[0].student_name}
                             className="w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-slate-100 dark:bg-slate-800 border-4 border-amber-400 shadow-none object-cover ring-4 ring-amber-400/30"
                           />
-                          {/* ONLY SINGLE CROWN ABOVE AVATAR */}
                           <span className="absolute -top-3.5 left-1/2 -translate-x-1/2 p-1.5 bg-gradient-to-b from-amber-400 to-amber-600 text-white rounded-full shadow-none border border-amber-200">
                             <Crown size={15} className="fill-white" />
                           </span>
@@ -605,9 +589,8 @@ export default function OlympiadsPage() {
                           )}
                         </div>
 
-                        {/* Additional Metrics */}
                         <div className="text-xs sm:text-sm font-black text-amber-600 dark:text-amber-400">
-                          <span>{leaderboard[0].score} ball</span>
+                          <span>{leaderboard[0].scaled_score || `${leaderboard[0].score} ball`}</span>
                           <span className="text-[10px] font-bold bg-amber-500/15 text-amber-700 dark:text-amber-300 px-1 py-0.2 rounded ml-1">
                             {leaderboard[0].percentage}%
                           </span>
@@ -618,11 +601,8 @@ export default function OlympiadsPage() {
                         </div>
                       </div>
 
-                      {/* 3D Glassy Isometric Stand 1 */}
                       <div className="w-full">
-                        {/* 3D Top Cap */}
                         <div className="h-5 sm:h-6 w-full bg-gradient-to-r from-amber-200 via-amber-300 to-yellow-200 dark:from-amber-400 dark:via-amber-300 dark:to-yellow-300 rounded-t-2xl transform -skew-x-2 border-t border-x border-white/90 dark:border-white/40 shadow-none" />
-                        {/* 3D Front Face */}
                         <div className="h-38 sm:h-48 w-full bg-gradient-to-b from-amber-400 via-amber-500 to-amber-600 dark:from-amber-500 dark:via-amber-600 dark:to-amber-700 backdrop-blur-xl rounded-b-2xl shadow-none flex items-center justify-center text-white relative overflow-hidden">
                           <span className="text-5xl sm:text-6xl font-black font-fredoka tracking-tighter drop-shadow-lg">
                             1
@@ -631,9 +611,8 @@ export default function OlympiadsPage() {
                       </div>
                     </div>
 
-                    {/* 🥉 3RD PLACE (RIGHT - ORANGE/BRONZE GLASSY 3D STAND) */}
+                    {/* 🥉 3RD PLACE */}
                     <div className="flex flex-col items-center text-center">
-                      {/* Floating Profile Info */}
                       <div className="flex flex-col items-center space-y-1 mb-2.5">
                         <img
                           src={leaderboard[2].student_avatar}
@@ -652,9 +631,8 @@ export default function OlympiadsPage() {
                           )}
                         </div>
 
-                        {/* Additional Metrics */}
                         <div className="text-xs font-bold text-orange-600 dark:text-orange-400">
-                          <span>{leaderboard[2].score} ball</span>
+                          <span>{leaderboard[2].scaled_score || `${leaderboard[2].score} ball`}</span>
                           <span className="text-[10px] font-semibold opacity-75 ml-1">({leaderboard[2].percentage}%)</span>
                         </div>
                         <div className="flex items-center justify-center gap-1 text-[10px] text-slate-400 font-medium">
@@ -663,11 +641,8 @@ export default function OlympiadsPage() {
                         </div>
                       </div>
 
-                      {/* 3D Glassy Isometric Stand 3 */}
                       <div className="w-full">
-                        {/* 3D Top Cap */}
                         <div className="h-4 sm:h-5 w-full bg-gradient-to-r from-orange-200 via-amber-200 to-rose-200 dark:from-orange-500 dark:via-amber-400 dark:to-rose-400 rounded-t-2xl transform -skew-x-2 border-t border-x border-white/80 dark:border-white/30 shadow-none" />
-                        {/* 3D Front Face */}
                         <div className="h-24 sm:h-30 w-full bg-gradient-to-b from-orange-400 via-orange-500 to-amber-600 dark:from-orange-600 dark:via-orange-700 dark:to-amber-800 backdrop-blur-xl rounded-b-2xl shadow-none flex items-center justify-center text-white relative overflow-hidden">
                           <span className="text-4xl sm:text-5xl font-black font-fredoka tracking-tighter drop-shadow-md">
                             3
@@ -679,7 +654,6 @@ export default function OlympiadsPage() {
                   </div>
                 </div>
 
-                {/* Sub-Podium Update Pill */}
                 <div className="text-center pt-3">
                   <p className="inline-flex items-center gap-1.5 text-[11px] text-slate-400 font-medium">
                     <Clock size={12} />
@@ -724,7 +698,6 @@ export default function OlympiadsPage() {
                               : "bg-white/40 dark:bg-slate-800/30 hover:bg-white/70 dark:hover:bg-slate-800/60 border-slate-100/60 dark:border-slate-800/60"
                           }`}
                         >
-                          {/* Left: Rank + Avatar + Name + Submission Date */}
                           <div className="flex items-center gap-3 min-w-0">
                             <span className="w-8 h-8 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 font-black text-xs inline-flex items-center justify-center shrink-0">
                               #{entry.rank}
@@ -753,7 +726,6 @@ export default function OlympiadsPage() {
                             </div>
                           </div>
 
-                          {/* Right: Score + Accuracy + Time + Prize */}
                           <div className="flex items-center gap-2 sm:gap-4 shrink-0">
                             {entry.prize && (
                               <span className="hidden sm:inline-flex items-center gap-1 px-2.5 py-0.5 rounded-lg bg-amber-500/15 text-amber-700 dark:text-amber-300 font-bold text-[11px]">
@@ -764,8 +736,9 @@ export default function OlympiadsPage() {
 
                             <div className="text-right">
                               <div className="inline-flex items-center gap-1 text-xs sm:text-sm font-black text-slate-900 dark:text-white">
-                                <span className="text-brand-blue dark:text-blue-400 font-black">{entry.score}</span>
-                                <span className="text-[11px] text-slate-400 font-medium">/ {entry.max_score} ball</span>
+                                <span className="text-brand-blue dark:text-blue-400 font-black">
+                                  {entry.scaled_score || `${entry.score} ball`}
+                                </span>
                                 <span className="ml-1 text-[10px] font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/40 px-1 py-0.2 rounded">
                                   {entry.percentage}%
                                 </span>
@@ -806,7 +779,7 @@ export default function OlympiadsPage() {
               />
               <button
                 type="submit"
-                className="px-5 py-3 rounded-2xl bg-brand-blue hover:bg-blue-600 text-white font-bold text-xs sm:text-sm flex items-center justify-center gap-2 active:scale-95 shrink-0 shadow-none"
+                className="px-5 py-3 rounded-2xl bg-brand-blue hover:bg-blue-600 text-white font-bold text-xs sm:text-sm flex items-center justify-center gap-2 active:scale-95 shrink-0 shadow-none cursor-pointer"
               >
                 <span>Yuborish</span>
                 <Send size={14} />
@@ -852,7 +825,7 @@ export default function OlympiadsPage() {
                       <div className="pt-1">
                         <button
                           onClick={() => handleToggleLike(comment.id)}
-                          className={`inline-flex items-center gap-1.5 text-xs font-bold transition-colors ${
+                          className={`inline-flex items-center gap-1.5 text-xs font-bold transition-colors cursor-pointer ${
                             isLiked
                               ? "text-brand-blue"
                               : "text-slate-400 hover:text-slate-600 dark:hover:text-slate-300"
@@ -874,14 +847,14 @@ export default function OlympiadsPage() {
 
       </div>
 
-      {/* ── CLEAN RULES MODAL ── */}
+      {/* ── CLEAN NIZOMNOMA / RULES MODAL ── */}
       <AnimatePresence>
         {selectedItem && (
           <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm">
             <div className="relative w-full max-w-md bg-white/95 dark:bg-slate-900/95 backdrop-blur-2xl rounded-3xl p-6 border border-white/80 dark:border-slate-800 shadow-2xl space-y-4">
               <button
                 onClick={() => setSelectedItem(null)}
-                className="absolute top-4 right-4 p-1.5 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-500 hover:text-slate-900 dark:hover:text-white"
+                className="absolute top-4 right-4 p-1.5 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-500 hover:text-slate-900 dark:hover:text-white cursor-pointer"
               >
                 <X size={16} />
               </button>
@@ -913,14 +886,14 @@ export default function OlympiadsPage() {
               <div className="flex items-center gap-2 pt-2">
                 <button
                   onClick={() => setSelectedItem(null)}
-                  className="flex-1 py-3 rounded-2xl bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-bold text-xs sm:text-sm"
+                  className="flex-1 py-3 rounded-2xl bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-bold text-xs sm:text-sm cursor-pointer"
                 >
                   Yopish
                 </button>
 
                 {selectedItem.status === "live" || registeredIds.includes(selectedItem.id) ? (
                   <Link
-                    href={`/dashboard/tests/${selectedItem.id}/take?type=olympiad`}
+                    href={`/dashboard/tests/${selectedItem.id}/take?type=international`}
                     className="flex-1 py-3 rounded-2xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs sm:text-sm flex items-center justify-center gap-1.5 shadow-sm active:scale-95 transition-all text-center"
                   >
                     <Play size={14} className="fill-white" />
@@ -932,7 +905,7 @@ export default function OlympiadsPage() {
                       handleRegister(selectedItem);
                       setSelectedItem(null);
                     }}
-                    className="flex-1 py-3 rounded-2xl bg-brand-blue hover:bg-blue-600 text-white font-bold text-xs sm:text-sm flex items-center justify-center gap-1 shadow-sm active:scale-95 transition-all"
+                    className="flex-1 py-3 rounded-2xl bg-brand-blue hover:bg-blue-600 text-white font-bold text-xs sm:text-sm flex items-center justify-center gap-1 shadow-sm active:scale-95 transition-all cursor-pointer"
                   >
                     <span>Qatnashish</span>
                     <ArrowUpRight size={16} />

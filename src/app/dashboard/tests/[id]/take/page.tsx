@@ -13,7 +13,10 @@ import {
  Flag,
  Save,
  Send,
- Trophy
+ Trophy,
+ Globe,
+ BookOpen,
+ X
 } from "lucide-react";
 import {
  getTestById,
@@ -26,11 +29,17 @@ import {
  type Question
 } from "@/lib/tests";
 import {
- getTournamentById,
- submitTournamentAttempt,
- SAMPLE_MATH_QUESTIONS,
- type TournamentQuestion
+  getTournamentById,
+  submitTournamentAttempt,
+  SAMPLE_MATH_QUESTIONS,
+  type TournamentQuestion
 } from "@/lib/tournaments";
+import {
+  getInternationalTournamentById,
+  submitInternationalAttempt,
+  SAMPLE_INTERNATIONAL_QUESTIONS,
+  type InternationalQuestion
+} from "@/lib/international-tournaments";
 import MathRenderer from "@/components/MathRenderer";
 import { TakeTestSkeleton } from "@/components/ui/Skeleton";
 import { createClient } from "@/utils/supabase/client";
@@ -43,9 +52,11 @@ export default function TakeTestPage() {
  const { t } = useLanguage();
  const testId = params.id as string;
  const isOlympiadParam = searchParams?.get("type") === "olympiad";
+ const isInternationalParam = searchParams?.get("type") === "international";
 
  const [test, setTest] = useState<any>(null);
  const [isOlympiad, setIsOlympiad] = useState<boolean>(isOlympiadParam);
+ const [isInternational, setIsInternational] = useState<boolean>(isInternationalParam);
  const [tournamentData, setTournamentData] = useState<any>(null);
  const [questions, setQuestions] = useState<Question[]>([]);
  const [attemptId, setAttemptId] = useState<string | null>(null);
@@ -57,46 +68,80 @@ export default function TakeTestPage() {
  const [submitting, setSubmitting] = useState(false);
  const [autoSaving, setAutoSaving] = useState(false);
  const [showConfirmModal, setShowConfirmModal] = useState(false);
+ const [showFormulaModal, setShowFormulaModal] = useState(false);
 
  const autoSaveInterval = useRef<NodeJS.Timeout | null>(null);
  const questionStartTime = useRef<number>(Date.now());
 
  // Load test and start attempt
  useEffect(() => {
- async function loadTestAndStart() {
- try {
-   // Check if it's an Olympiad / Tournament
-   if (isOlympiadParam || testId.startsWith("tournament_") || testId.startsWith("olympiad_") || testId.startsWith("grand_") || testId.startsWith("t_")) {
-     setIsOlympiad(true);
-     const tData = await getTournamentById(testId);
-     if (tData) {
-       setTournamentData(tData);
-       setTest({
-         id: tData.id,
-         title: tData.title,
-         duration_minutes: tData.durationMinutes || 60,
-         subject: tData.subject
-       });
-       const rawQs = tData.questions && tData.questions.length > 0 ? tData.questions : SAMPLE_MATH_QUESTIONS;
-       const formattedQs: Question[] = rawQs.map((q: any, idx: number) => ({
-         id: q.id || `q_${idx}`,
-         test_id: testId,
-         question_text: q.question_text,
-         question_type: (q.question_type || "multiple_choice") as any,
-         options: q.options || { A: "", B: "", C: "", D: "" },
-         correct_answer: q.correct_answer || "A",
-         explanation: q.explanation || "",
-         points: q.points || 3.1,
-         image_url: q.image_url || null,
-         order_index: idx
-       }));
-       setQuestions(formattedQs);
-       setAttemptId(`attempt_olympiad_${testId}`);
-       setTimeRemaining((tData.durationMinutes || 60) * 60);
-       setLoading(false);
-       return;
-     }
-   }
+   async function loadTestAndStart() {
+     try {
+       // 1. Check if it's an International Competition (SAT, AMC, IELTS, etc.)
+       if (isInternationalParam || testId.startsWith("sat-") || testId.startsWith("amc-") || testId.startsWith("ielts-") || testId.startsWith("intl-")) {
+         setIsInternational(true);
+         const intlData = await getInternationalTournamentById(testId);
+         if (intlData) {
+           setTournamentData(intlData);
+           setTest({
+             id: intlData.id,
+             title: intlData.title,
+             duration_minutes: intlData.durationMinutes || 70,
+             subject: intlData.subject
+           });
+           const rawQs = intlData.questions && intlData.questions.length > 0 ? intlData.questions : SAMPLE_INTERNATIONAL_QUESTIONS;
+           const formattedQs: Question[] = rawQs.map((q: any, idx: number) => ({
+             id: q.id || `intl_q_${idx}`,
+             test_id: testId,
+             question_text: q.question_text,
+             question_type: (q.question_type || "multiple_choice") as any,
+             options: q.options || { A: "", B: "", C: "", D: "" },
+             correct_answer: q.correct_answer || "",
+             explanation: q.explanation || "",
+             points: q.points || 10,
+             image_url: q.image_url || null,
+             order_index: idx
+           }));
+           setQuestions(formattedQs);
+           setAttemptId(`attempt_intl_${testId}`);
+           setTimeRemaining((intlData.durationMinutes || 70) * 60);
+           setLoading(false);
+           return;
+         }
+       }
+
+       // 2. Check if it's an Olympiad / Tournament
+       if (isOlympiadParam || testId.startsWith("tournament_") || testId.startsWith("olympiad_") || testId.startsWith("grand_") || testId.startsWith("t_")) {
+         setIsOlympiad(true);
+         const tData = await getTournamentById(testId);
+         if (tData) {
+           setTournamentData(tData);
+           setTest({
+             id: tData.id,
+             title: tData.title,
+             duration_minutes: tData.durationMinutes || 60,
+             subject: tData.subject
+           });
+           const rawQs = tData.questions && tData.questions.length > 0 ? tData.questions : SAMPLE_MATH_QUESTIONS;
+           const formattedQs: Question[] = rawQs.map((q: any, idx: number) => ({
+             id: q.id || `q_${idx}`,
+             test_id: testId,
+             question_text: q.question_text,
+             question_type: (q.question_type || "multiple_choice") as any,
+             options: q.options || { A: "", B: "", C: "", D: "" },
+             correct_answer: q.correct_answer || "A",
+             explanation: q.explanation || "",
+             points: q.points || 3.1,
+             image_url: q.image_url || null,
+             order_index: idx
+           }));
+           setQuestions(formattedQs);
+           setAttemptId(`attempt_olympiad_${testId}`);
+           setTimeRemaining((tData.durationMinutes || 60) * 60);
+           setLoading(false);
+           return;
+         }
+       }
 
    // Standard test DB lookup
    const testData = await getTestById(testId);
@@ -275,6 +320,36 @@ export default function TakeTestPage() {
   try {
     await saveAnswers();
 
+    if (isInternational) {
+      const timeSpent = test?.duration_minutes ? test.duration_minutes * 60 : 0;
+      const supabase = createClient();
+      const { data: userData } = await supabase.auth.getUser();
+
+      let totalScore = 0;
+      let maxScore = 0;
+      questions.forEach(q => {
+        maxScore += (q.points || 10);
+        const studentAns = (answers[q.id] || "").trim().toLowerCase();
+        const correctAns = (q.correct_answer || "").trim().toLowerCase();
+        if (studentAns && (studentAns === correctAns || (q as any).accepted_answers?.some((a: string) => a.toLowerCase() === studentAns))) {
+          totalScore += (q.points || 10);
+        }
+      });
+
+      await submitInternationalAttempt(
+        testId,
+        userData?.user?.id || `anon_${Date.now()}`,
+        userData?.user?.user_metadata?.full_name || "O'quvchi",
+        `https://api.dicebear.com/7.x/avataaars/svg?seed=${userData?.user?.user_metadata?.full_name || 'Student'}`,
+        totalScore,
+        maxScore || (questions.length * 10),
+        timeSpent
+      );
+      toast.success("Xalqaro musobaqa yakunlandi!", { icon: "🎓" });
+      router.push(`/dashboard/international?tab=leaderboard&id=${testId}`);
+      return;
+    }
+
     if (isOlympiad) {
       const timeSpent = test?.duration_minutes ? test.duration_minutes * 60 : 0;
       const supabase = createClient();
@@ -317,6 +392,35 @@ export default function TakeTestPage() {
 
     // Calculate time spent
     const timeSpent = test?.duration_minutes ? (test.duration_minutes * 60 - (timeRemaining || 0)) : 0;
+
+    if (isInternational) {
+      const supabase = createClient();
+      const { data: userData } = await supabase.auth.getUser();
+
+      let totalScore = 0;
+      let maxScore = 0;
+      questions.forEach(q => {
+        maxScore += (q.points || 10);
+        const studentAns = (answers[q.id] || "").trim().toLowerCase();
+        const correctAns = (q.correct_answer || "").trim().toLowerCase();
+        if (studentAns && (studentAns === correctAns || (q as any).accepted_answers?.some((a: string) => a.toLowerCase() === studentAns))) {
+          totalScore += (q.points || 10);
+        }
+      });
+
+      await submitInternationalAttempt(
+        testId,
+        userData?.user?.id || `anon_${Date.now()}`,
+        userData?.user?.user_metadata?.full_name || "O'quvchi",
+        `https://api.dicebear.com/7.x/avataaars/svg?seed=${userData?.user?.user_metadata?.full_name || 'Student'}`,
+        totalScore,
+        maxScore || (questions.length * 10),
+        Math.max(1, timeSpent)
+      );
+      toast.success("Xalqaro musobaqa muvaffaqiyatli yakunlandi! Natijangiz reytingga qo'shildi.", { icon: "🎓" });
+      router.push(`/dashboard/international?tab=leaderboard&id=${testId}`);
+      return;
+    }
 
     if (isOlympiad) {
       const supabase = createClient();
@@ -373,56 +477,73 @@ export default function TakeTestPage() {
   }
 
   if (!test || questions.length === 0) {
-  return (
-  <div className="text-center py-12">
-  <AlertCircle className="mx-auto text-red-500 mb-4" size={64} />
-  <h2 className="text-2xl font-medium text-slate-800 dark:text-slate-100 mb-2">{t('tests.take.error.title')}</h2>
-  <Link href={isOlympiad ? "/dashboard/olympiads" : "/dashboard/tests"} className="text-brand-blue active:underline font-bold">
-  {isOlympiad ? "Musobaqalarga qaytish" : t('tests.take.back_to_list')}
-  </Link>
-  </div>
-  );
+    return (
+      <div className="text-center py-12">
+        <AlertCircle className="mx-auto text-red-500 mb-4" size={64} />
+        <h2 className="text-2xl font-medium text-slate-800 dark:text-slate-100 mb-2">{t('tests.take.error.title')}</h2>
+        <Link href={isInternational ? "/dashboard/international" : isOlympiad ? "/dashboard/olympiads" : "/dashboard/tests"} className="text-brand-blue active:underline font-bold">
+          {isInternational ? "Xalqaro musobaqalarga qaytish" : isOlympiad ? "Musobaqalarga qaytish" : t('tests.take.back_to_list')}
+        </Link>
+      </div>
+    );
   }
 
   const currentQuestion = questions[currentQuestionIndex];
   const progress = ((currentQuestionIndex+ 1) / questions.length) * 100;
 
   return (
-  <div className="relative min-h-screen text-slate-800 dark:text-white font-sans bg-transparent pb-24 md:pb-0">
-  <div className="fixed inset-0 z-0 overflow-hidden pointer-events-none">
-  <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] rounded-full bg-blue-300/20 dark:bg-blue-500/10 blur-[130px]" />
-  <div className="absolute bottom-[-15%] right-[-10%] w-[45%] h-[45%] rounded-full bg-violet-300/20 dark:bg-purple-500/10 blur-[130px]" />
-  </div>
+    <div className="relative min-h-screen text-slate-800 dark:text-white font-sans bg-transparent pb-24 md:pb-0">
+      <div className="fixed inset-0 z-0 overflow-hidden pointer-events-none">
+        <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] rounded-full bg-blue-300/20 dark:bg-blue-500/10 blur-[130px]" />
+        <div className="absolute bottom-[-15%] right-[-10%] w-[45%] h-[45%] rounded-full bg-violet-300/20 dark:bg-purple-500/10 blur-[130px]" />
+      </div>
 
-  {/* Floating Header Island */}
-  <div className="fixed top-4 left-4 right-4 md:left-auto md:right-1/2 md:translate-x-1/2 md:w-full md:max-w-3xl z-50 pointer-events-none">
-  <div className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-2xl border border-white/80 dark:border-slate-800/80 rounded-[32px] p-3 shadow-[0_8px_24px_rgba(0,0,0,0.05)] dark:shadow-[0_8px_24px_rgba(0,0,0,0.3)] pointer-events-auto flex flex-col gap-2 transition-all">
-  <div className="flex items-center justify-between px-2">
-  <div className="flex items-center gap-2.5 sm:gap-3 truncate flex-1 pr-4">
-  <button
-    onClick={() => router.push(isOlympiad ? '/dashboard/olympiads' : '/dashboard/tests')}
-    className="w-9 h-9 shrink-0 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-500 hover:text-slate-900 dark:hover:text-white flex items-center justify-center active:scale-95 transition-all cursor-pointer"
-    title="Chiqish"
-  >
-    <ArrowLeft size={18} />
-  </button>
-  <span className="w-9 h-9 shrink-0 rounded-full bg-brand-blue text-white flex items-center justify-center text-sm font-bold shadow-sm">
-  {currentQuestionIndex+ 1}/{questions.length}
-  </span>
-  <div className="truncate hidden sm:flex items-center gap-2">
-    {isOlympiad && (
-      <span className="text-[10px] font-black uppercase tracking-wider text-amber-500 bg-amber-500/10 px-2 py-0.5 rounded-md flex items-center gap-1 shrink-0">
-        <Trophy size={11} />
-        {tournamentData?.subject || "Musobaqa"}
-      </span>
-    )}
-    <h1 className="text-[14px] font-bold text-slate-800 dark:text-slate-100 truncate">
-      {test.title}
-    </h1>
-  </div>
-  </div>
+      {/* Floating Header Island */}
+      <div className="fixed top-4 left-4 right-4 md:left-auto md:right-1/2 md:translate-x-1/2 md:w-full md:max-w-3xl z-50 pointer-events-none">
+        <div className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-2xl border border-white/80 dark:border-slate-800/80 rounded-[32px] p-3 shadow-[0_8px_24px_rgba(0,0,0,0.05)] dark:shadow-[0_8px_24px_rgba(0,0,0,0.3)] pointer-events-auto flex flex-col gap-2 transition-all">
+          <div className="flex items-center justify-between px-2">
+            <div className="flex items-center gap-2.5 sm:gap-3 truncate flex-1 pr-4">
+              <button
+                onClick={() => router.push(isInternational ? '/dashboard/international' : isOlympiad ? '/dashboard/olympiads' : '/dashboard/tests')}
+                className="w-9 h-9 shrink-0 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-500 hover:text-slate-900 dark:hover:text-white flex items-center justify-center active:scale-95 transition-all cursor-pointer"
+                title="Chiqish"
+              >
+                <ArrowLeft size={18} />
+              </button>
+              <span className="w-9 h-9 shrink-0 rounded-full bg-brand-blue text-white flex items-center justify-center text-sm font-bold shadow-sm">
+                {currentQuestionIndex+ 1}/{questions.length}
+              </span>
+              <div className="truncate hidden sm:flex items-center gap-2">
+                {isInternational && (
+                  <span className="text-[10px] font-black uppercase tracking-wider text-indigo-600 dark:text-indigo-400 bg-indigo-500/10 px-2 py-0.5 rounded-md flex items-center gap-1 shrink-0 border border-indigo-500/20">
+                    <Globe size={11} />
+                    {tournamentData?.categoryLabel || "Xalqaro"}
+                  </span>
+                )}
+                {isOlympiad && !isInternational && (
+                  <span className="text-[10px] font-black uppercase tracking-wider text-amber-500 bg-amber-500/10 px-2 py-0.5 rounded-md flex items-center gap-1 shrink-0">
+                    <Trophy size={11} />
+                    {tournamentData?.subject || "Musobaqa"}
+                  </span>
+                )}
+                <h1 className="text-[14px] font-bold text-slate-800 dark:text-slate-100 truncate">
+                  {test.title}
+                </h1>
+              </div>
+            </div>
 
- <div className="flex items-center gap-2 md:gap-3 shrink-0">
+            <div className="flex items-center gap-2 md:gap-3 shrink-0">
+              {/* SAT / Math Reference Sheet Trigger Button */}
+              {(isInternational || test.subject?.toLowerCase().includes("matematika") || test.subject?.toLowerCase().includes("math") || test.subject?.toLowerCase().includes("sat")) && (
+                <button
+                  type="button"
+                  onClick={() => setShowFormulaModal(true)}
+                  className="px-2.5 py-1.5 rounded-full bg-indigo-500/10 hover:bg-indigo-500 hover:text-white text-indigo-600 dark:text-indigo-400 border border-indigo-500/20 text-[11px] font-bold flex items-center gap-1 transition-all cursor-pointer shadow-sm"
+                  title="SAT Formula Spravochnigi"
+                >
+                  📐 <span className="hidden sm:inline">Formula</span>
+                </button>
+              )}
  {autoSaving && (
  <div className="hidden md:flex items-center gap-2 text-[13px] font-medium text-slate-500">
  <Save size={16} className="animate-pulse text-brand-blue" />
@@ -582,6 +703,58 @@ export default function TakeTestPage() {
  </>
  )}
 
+  {((currentQuestion.question_type as string) === "grid_in" || (currentQuestion.question_type as string) === "closed") && (
+    <div className="space-y-4 p-5 rounded-[22px] bg-white/40 dark:bg-slate-800/40 border border-white/60 dark:border-slate-800/60">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+        <span className="text-xs font-bold text-indigo-600 dark:text-indigo-400 bg-indigo-500/10 px-2.5 py-1 rounded-lg border border-indigo-500/20 uppercase tracking-wider">
+          🔢 Yopiq Test (Grid-In / Student-Produced Response)
+        </span>
+        <span className="text-xs text-slate-500 dark:text-slate-400">
+          Javobingizni son yoki kasr ko'rinishida kiriting
+        </span>
+      </div>
+
+      <div className="relative">
+        <input
+          type="text"
+          value={answers[currentQuestion.id] || ""}
+          onChange={(e) => handleAnswerChange(currentQuestion.id, e.target.value)}
+          placeholder="Masalan: 24 yoki 3/4 yoki 0.75"
+          className="w-full text-lg sm:text-2xl font-bold font-mono px-5 py-4 border-2 border-indigo-500/30 focus:border-indigo-600 rounded-2xl bg-white/70 dark:bg-slate-900/70 text-slate-900 dark:text-white outline-none transition-all placeholder:font-sans placeholder:text-sm placeholder:font-normal placeholder:text-slate-400 shadow-inner"
+        />
+        {answers[currentQuestion.id] && (
+          <div className="absolute right-4 top-1/2 -translate-y-1/2 flex items-center gap-2">
+            <span className="text-xs font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 px-2.5 py-1 rounded-lg border border-emerald-500/20">
+              Kiritildi: {answers[currentQuestion.id]}
+            </span>
+          </div>
+        )}
+      </div>
+
+      {/* Quick numeric & symbol keypad buttons */}
+      <div className="flex flex-wrap items-center gap-1.5 pt-1 text-xs">
+        <span className="text-slate-400 text-[11px] font-medium mr-1">Tezkor tugmalar:</span>
+        {["/", ".", "-", "0", "1", "2", "3", "4", "5", "6", "7", "8", "9"].map((char) => (
+          <button
+            key={char}
+            type="button"
+            onClick={() => handleAnswerChange(currentQuestion.id, (answers[currentQuestion.id] || "") + char)}
+            className="w-8 h-8 rounded-xl bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 font-mono font-bold text-slate-700 dark:text-slate-200 hover:bg-indigo-600 hover:text-white hover:border-indigo-600 active:scale-95 transition-all"
+          >
+            {char}
+          </button>
+        ))}
+        <button
+          type="button"
+          onClick={() => handleAnswerChange(currentQuestion.id, "")}
+          className="px-3 h-8 rounded-xl bg-rose-500/10 text-rose-500 border border-rose-500/20 text-[11px] font-bold hover:bg-rose-500 hover:text-white active:scale-95 transition-all ml-auto"
+        >
+          Tozalash
+        </button>
+      </div>
+    </div>
+  )}
+
  {currentQuestion.question_type === "short_answer" && (
  <textarea
  value={answers[currentQuestion.id] || ""}
@@ -703,6 +876,74 @@ export default function TakeTestPage() {
  </div>
  </div>
  </div>
+
+  {/* ── SAT / MATH FORMULA REFERENCE SHEET MODAL ── */}
+  {showFormulaModal && (
+    <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-md flex items-center justify-center z-50 p-4">
+      <div className="bg-white dark:bg-slate-900 rounded-[28px] p-6 sm:p-7 max-w-lg w-full border border-white/80 dark:border-slate-800/80 shadow-2xl space-y-4 max-h-[85vh] overflow-y-auto">
+        <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-3">
+          <div className="flex items-center gap-2">
+            <span className="text-xl">📐</span>
+            <div>
+              <h3 className="text-base font-bold font-fredoka text-slate-900 dark:text-white leading-tight">
+                Digital SAT & Math Spravochnik
+              </h3>
+              <p className="text-[11px] text-slate-400">Rasmiy formulalar to'plami</p>
+            </div>
+          </div>
+          <button
+            onClick={() => setShowFormulaModal(false)}
+            className="w-8 h-8 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-400 hover:text-slate-700 dark:hover:text-white"
+          >
+            <X size={16} />
+          </button>
+        </div>
+
+        {/* Formulas Content Grid */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
+          <div className="p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200/60 dark:border-slate-700/60 space-y-1">
+            <span className="font-bold text-indigo-600 dark:text-indigo-400 block">Aylana (Circle):</span>
+            <p className="font-mono text-[11px] text-slate-700 dark:text-slate-300">{"A = πr²"}</p>
+            <p className="font-mono text-[11px] text-slate-700 dark:text-slate-300">{"C = 2πr = πd"}</p>
+          </div>
+
+          <div className="p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200/60 dark:border-slate-700/60 space-y-1">
+            <span className="font-bold text-indigo-600 dark:text-indigo-400 block">To'g'ri to'rtburchak:</span>
+            <p className="font-mono text-[11px] text-slate-700 dark:text-slate-300">{"A = l × w"}</p>
+            <p className="font-mono text-[11px] text-slate-700 dark:text-slate-300">{"P = 2(l + w)"}</p>
+          </div>
+
+          <div className="p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200/60 dark:border-slate-700/60 space-y-1">
+            <span className="font-bold text-indigo-600 dark:text-indigo-400 block">Uchburchak (Triangle):</span>
+            <p className="font-mono text-[11px] text-slate-700 dark:text-slate-300">{"A = ½ b × h"}</p>
+            <p className="font-mono text-[11px] text-slate-700 dark:text-slate-300">{"a² + b² = c² (Pifagor)"}</p>
+          </div>
+
+          <div className="p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200/60 dark:border-slate-700/60 space-y-1">
+            <span className="font-bold text-indigo-600 dark:text-indigo-400 block">Maxsus Uchburchaklar:</span>
+            <p className="font-mono text-[11px] text-slate-700 dark:text-slate-300">{"30°-60°-90°: x, x√3, 2x"}</p>
+            <p className="font-mono text-[11px] text-slate-700 dark:text-slate-300">{"45°-45°-90°: x, x, x√2"}</p>
+          </div>
+
+          <div className="p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200/60 dark:border-slate-700/60 space-y-1 sm:col-span-2">
+            <span className="font-bold text-indigo-600 dark:text-indigo-400 block">Hajm Formulalari (Volumes):</span>
+            <div className="grid grid-cols-3 gap-2 font-mono text-[11px] text-slate-700 dark:text-slate-300">
+              <div>{"V = lwh"}</div>
+              <div>{"V = πr²h"}</div>
+              <div>{"V = 4/3 πr³"}</div>
+            </div>
+          </div>
+        </div>
+
+        <button
+          onClick={() => setShowFormulaModal(false)}
+          className="w-full py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs transition-all"
+        >
+          Tushunarli (Yopish)
+        </button>
+      </div>
+    </div>
+  )}
 
  {/* ── CONFIRMATION MODAL ── */}
  {showConfirmModal && (

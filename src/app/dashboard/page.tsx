@@ -25,6 +25,7 @@ import useSWR from "swr";
 import { getSubjects, type Subject } from "@/lib/supabase-queries";
 import { DashboardHomeSkeleton } from "@/components/ui/Skeleton";
 import { OlympiadBannerTeaser } from "@/components/dashboard/OlympiadSection";
+import { InternationalBannerTeaser } from "@/components/dashboard/InternationalSection";
 
 // Subject colors & icons
 const subjectMeta: Record<string, { color: string; bg: string; icon: any }> = {
@@ -179,8 +180,9 @@ export default function DashboardPage() {
           </div>
 
           {/* ── 2. ONLAYN OLIMPIADALAR BANNER (Tepada - Fanlardan avval) ── */}
-          <div>
+          <div className="flex flex-col gap-4">
             <OlympiadBannerTeaser />
+            <InternationalBannerTeaser />
           </div>
 
           {/* ── 3. SUBJECT PROGRESS CARDS (Fanlarim) — 2 Columns ── */}
