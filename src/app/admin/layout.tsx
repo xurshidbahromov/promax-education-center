@@ -22,7 +22,8 @@ import {
   ChevronRight,
   CalendarCheck,
   ShoppingBag,
-  Trophy
+  Trophy,
+  Globe
 } from "lucide-react";
 import Image from "next/image";
 import toast from "react-hot-toast";
@@ -168,7 +169,8 @@ export default function AdminLayout({
     { icon: Library, label: "Fanlar & Darslar", href: "/admin/courses", roles: ['admin', 'teacher', 'staff'] },
     { icon: CalendarCheck, label: "Davomat & Vazifalar", href: "/admin/attendance", roles: ['admin', 'teacher', 'staff'] },
     { icon: BookOpen, label: "Testlar", href: "/admin/tests", roles: ['admin', 'teacher', 'staff'] },
-    { icon: Trophy, label: t("sidebar.tournaments") || "Musobaqalar", href: "/admin/tournaments", roles: ['admin', 'staff'] },
+    { icon: Trophy, label: "Milliy Musobaqalar", href: "/admin/tournaments", roles: ['admin', 'staff'] },
+    { icon: Globe, label: "Xalqaro Musobaqalar", href: "/admin/international", roles: ['admin', 'staff'] },
     { icon: FileText, label: "Natijalar", href: "/admin/results", roles: ['admin', 'teacher', 'staff'] },
     { icon: DollarSign, label: "To'lovlar", href: "/admin/payments", roles: ['admin', 'staff'] },
     { icon: ShoppingBag, label: "Do'kon & Buyurtmalar", href: "/admin/shop", roles: ['admin', 'staff'] },

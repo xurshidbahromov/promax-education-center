@@ -428,3 +428,126 @@ export async function submitInternationalAttempt(
   const myRank = currentList.find(e => e.id === newEntry.id)?.rank || 1;
   return { success: true, rank: myRank, scaledScore };
 }
+
+// ── Admin Tournament Management ──
+export async function saveInternationalTournament(
+  tournament: Partial<InternationalTournament>
+): Promise<InternationalTournament> {
+  const currentList = await getInternationalTournaments();
+  let updatedTournament: InternationalTournament;
+
+  if (tournament.id && currentList.some(t => t.id === tournament.id)) {
+    // Update existing
+    const existing = currentList.find(t => t.id === tournament.id)!;
+    updatedTournament = {
+      ...existing,
+      ...tournament,
+      totalQuestions: tournament.questions ? tournament.questions.length : (tournament.totalQuestions ?? existing.totalQuestions)
+    };
+    const newList = currentList.map(t => t.id === tournament.id ? updatedTournament : t);
+    if (typeof window !== 'undefined') {
+      localStorage.setItem(STORAGE_INTERNATIONAL_TOURNAMENTS, JSON.stringify(newList));
+    }
+  } else {
+    // Create new
+    const id = tournament.id || `intl_${Date.now()}`;
+    const category = tournament.category || 'sat';
+    const categoryLabel = category === 'sat' ? 'SAT Digital' : category === 'amc' ? 'AMC Math' : category === 'ielts' ? 'IELTS Arena' : 'Xalqaro';
+    
+    updatedTournament = {
+      id,
+      title: tournament.title || "Yangi Xalqaro Musobaqa",
+      category,
+      categoryLabel,
+      subject: tournament.subject || "SAT Math & Reading",
+      description: tournament.description || "",
+      badge: tournament.badge || "🔥 XALQARO ARENA",
+      badgeBg: tournament.badgeBg || "bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 text-white",
+      status: tournament.status || "upcoming",
+      startDate: tournament.startDate || new Date().toISOString().split("T")[0],
+      startTime: tournament.startTime || "15:00",
+      endDate: tournament.endDate,
+      endTime: tournament.endTime,
+      durationMinutes: tournament.durationMinutes ?? 60,
+      totalQuestions: tournament.questions?.length ?? tournament.totalQuestions ?? 0,
+      entryCoins: tournament.entryCoins ?? 0,
+      prizePool: tournament.prizePool || "Top o'rinlar uchun mukofotlar",
+      topPrizes: tournament.topPrizes || [
+        "🥇 1-O'rin: Xalqaro Grant & Sertifikat",
+        "🥈 2-O'rin: 500,000 So'm Vafcher",
+        "🥉 3-O'rin: 300,000 So'm Vafcher"
+      ],
+      rules: tournament.rules || [
+        "Test davomiyligi belgilangan vaqtda yakunlanadi.",
+        "Yopiq savollarda faqat son yoki kasr kiritilishi lozim.",
+        "Natijalar xalqaro shkala bo'yicha hisoblanadi."
+      ],
+      participantsCount: tournament.participantsCount ?? 0,
+      questions: tournament.questions || SAMPLE_INTERNATIONAL_QUESTIONS,
+      scoringScale: tournament.scoringScale || (category === 'sat' ? '1600 Ballik SAT Shkalasi' : '100 Ballik Shkala'),
+      created_at: new Date().toISOString()
+    };
+
+    const newList = [updatedTournament, ...currentList];
+    if (typeof window !== 'undefined') {
+      localStorage.setItem(STORAGE_INTERNATIONAL_TOURNAMENTS, JSON.stringify(newList));
+    }
+  }
+
+  return updatedTournament;
+}
+
+export async function deleteInternationalTournament(id: string): Promise<boolean> {
+  const currentList = await getInternationalTournaments();
+  const newList = currentList.filter(t => t.id !== id);
+  if (typeof window !== 'undefined') {
+    localStorage.setItem(STORAGE_INTERNATIONAL_TOURNAMENTS, JSON.stringify(newList));
+  }
+  return true;
+}
+
+export async function duplicateInternationalTournament(id: string): Promise<InternationalTournament | null> {
+  const tournament = await getInternationalTournamentById(id);
+  if (!tournament) return null;
+
+  const duplicated: Partial<InternationalTournament> = {
+    ...tournament,
+    id: `intl_copy_${Date.now()}`,
+    title: `${tournament.title} (Nusxa)`,
+    status: 'upcoming',
+    participantsCount: 0,
+    created_at: new Date().toISOString()
+  };
+
+  return await saveInternationalTournament(duplicated);
+}
+
+export async function getAdminInternationalComments(): Promise<InternationalComment[]> {
+  return [
+    {
+      id: "ic1",
+      author: "Shaxzod Tursunov",
+      avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=Shaxzod",
+      role: "O'quvchi",
+      time: "15 daqiqa avval",
+      text: "Digital SAT Math dagi yopiq (grid-in) savollar qanchalik qiyin bo'ladi? Tayyorgarlik uchun testlar bormi?",
+      likes: 12,
+      created_at: "2026-08-23 10:00"
+    },
+    {
+      id: "ic2",
+      author: "Kamila Karimova",
+      avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=Kamila",
+      role: "O'quvchi",
+      time: "Kecha",
+      text: "AMC va SAT musobaqasi sertifikatlari va sovg'alari qachon topshiriladi?",
+      likes: 9,
+      created_at: "2026-08-22 18:30"
+    }
+  ];
+}
+
+export async function deleteAdminInternationalComment(id: string): Promise<boolean> {
+  return true;
+}
+
