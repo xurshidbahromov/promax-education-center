@@ -40,10 +40,10 @@ export default function AdminReveal({
             ease: [0.22, 1, 0.36, 1],
             delay: isLoading ? 0 : 0.8
           }}
-          className="w-1/2 h-full bg-slate-950/90 dark:bg-slate-950/95 backdrop-blur-2xl border-r border-slate-800/80 relative"
+          className="w-[calc(50%+1px)] h-full bg-slate-950/95 dark:bg-slate-950/98 backdrop-blur-2xl relative"
         >
           {/* Subtle Grid Pattern */}
-          <div className="absolute inset-0 bg-[radial-gradient(#1e293b_1px,transparent_1px)] [background-size:24px_24px] opacity-30 pointer-events-none" />
+          <div className="absolute inset-0 bg-[radial-gradient(#1e293b_1px,transparent_1px)] [background-size:24px_24px] opacity-25 pointer-events-none" />
         </motion.div>
 
         {/* Right Dark Glass Panel */}
@@ -55,10 +55,10 @@ export default function AdminReveal({
             ease: [0.22, 1, 0.36, 1],
             delay: isLoading ? 0 : 0.8
           }}
-          className="w-1/2 h-full bg-slate-950/90 dark:bg-slate-950/95 backdrop-blur-2xl border-l border-slate-800/80 relative"
+          className="w-[calc(50%+1px)] -ml-[1px] h-full bg-slate-950/95 dark:bg-slate-950/98 backdrop-blur-2xl relative"
         >
           {/* Subtle Grid Pattern */}
-          <div className="absolute inset-0 bg-[radial-gradient(#1e293b_1px,transparent_1px)] [background-size:24px_24px] opacity-30 pointer-events-none" />
+          <div className="absolute inset-0 bg-[radial-gradient(#1e293b_1px,transparent_1px)] [background-size:24px_24px] opacity-25 pointer-events-none" />
         </motion.div>
 
         {/* Center Content (Admin Branding & Logo) */}
