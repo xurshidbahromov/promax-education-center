@@ -106,7 +106,7 @@ export default function GameZonePage() {
             <p className="text-[12px] text-slate-500 dark:text-slate-400 font-medium uppercase tracking-widest">
               Promax Interactive Arcade Arena
             </p>
-            <h1 className="text-2xl sm:text-3xl font-bold font-fredoka text-slate-900 dark:text-white leading-tight">
+            <h1 className="text-2xl sm:text-3xl font-bold font-fredoka text-slate-800 dark:text-slate-100 leading-tight">
               {t('games.title') || "O'yin maydoni"}
             </h1>
           </div>

@@ -174,7 +174,7 @@ export default function DashboardPage() {
             <p className="text-sm text-slate-500 dark:text-slate-400 font-medium">
               {greeting}, <span className="font-semibold text-slate-700 dark:text-slate-200">{firstName}!</span>
             </p>
-            <h1 className="text-2xl sm:text-3xl font-bold font-fredoka text-slate-900 dark:text-white leading-tight">
+            <h1 className="text-2xl sm:text-3xl font-bold font-fredoka text-slate-800 dark:text-slate-100 leading-tight">
               Bugun nima o'rganamiz?
             </h1>
           </div>
@@ -189,7 +189,7 @@ export default function DashboardPage() {
           {subjects.length > 0 && (
             <section>
               <div className="flex items-center justify-between mb-4">
-                <h2 className="text-[15px] font-bold text-slate-700 dark:text-slate-300 uppercase tracking-widest">
+                <h2 className="text-[13px] sm:text-[14px] font-bold text-slate-600 dark:text-slate-400 uppercase tracking-widest">
                   Fanlarim
                 </h2>
                 <Link href="/dashboard/lessons" className="text-[13px] text-brand-blue font-semibold flex items-center gap-1 transition-all">
@@ -243,7 +243,7 @@ export default function DashboardPage() {
 
           {/* ── 4. QUICK ACCESS (O'QISH BO'LIMI) — 2 Columns ── */}
           <section>
-            <h2 className="text-[15px] font-bold text-slate-700 dark:text-slate-300 uppercase tracking-widest mb-4">
+            <h2 className="text-[13px] sm:text-[14px] font-bold text-slate-600 dark:text-slate-400 uppercase tracking-widest mb-4">
               O'qish
             </h2>
 
@@ -260,7 +260,7 @@ export default function DashboardPage() {
                         <Icon size={28} className={card.color} />
                       </div>
                       <div className="flex-1 min-w-0">
-                        <p className="text-[15px] font-bold text-slate-800 dark:text-slate-100 leading-tight">{card.label}</p>
+                        <p className="text-[14px] sm:text-[15px] font-semibold text-slate-800 dark:text-slate-100 leading-tight">{card.label}</p>
                         <p className="text-[12px] text-slate-500 dark:text-slate-400 mt-0.5 line-clamp-1">{card.sublabel}</p>
                       </div>
                       <ChevronRight size={18} className="text-slate-300 dark:text-slate-600 group-active:text-brand-blue group-active:scale-95 transition-all shrink-0" />
@@ -287,7 +287,7 @@ export default function DashboardPage() {
                   <div className="flex items-center justify-center mb-1 transition-transform group-active:scale-95">
                     <Icon size={28} className={s.color} />
                   </div>
-                  <p className="text-xl font-bold font-fredoka text-slate-800 dark:text-white">{s.value}</p>
+                  <p className="text-xl font-bold font-fredoka text-slate-800 dark:text-slate-100">{s.value}</p>
                   <p className="text-[11px] text-slate-500 dark:text-slate-400 font-medium">{s.label}</p>
                 </div>
               );
@@ -298,7 +298,7 @@ export default function DashboardPage() {
           {(upcomingTests?.length ?? 0) > 0 && (
             <section>
               <div className="flex items-center justify-between mb-4">
-                <h2 className="text-[15px] font-bold text-slate-700 dark:text-slate-300 uppercase tracking-widest flex items-center gap-2">
+                <h2 className="text-[13px] sm:text-[14px] font-bold text-slate-600 dark:text-slate-400 uppercase tracking-widest flex items-center gap-2">
                   <Zap size={16} className="text-brand-blue" />
                   Testlar
                 </h2>
@@ -318,7 +318,7 @@ export default function DashboardPage() {
                       <FileCheck size={28} className="text-violet-600 dark:text-violet-400" />
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="text-[14px] font-bold text-slate-800 dark:text-slate-100 line-clamp-1">{test.title}</p>
+                      <p className="text-[14px] font-semibold text-slate-800 dark:text-slate-100 line-clamp-1">{test.title}</p>
                       <p className="text-[12px] text-slate-500 dark:text-slate-400 mt-0.5 flex items-center gap-1">
                         <Clock size={11} />
                         {test.duration_minutes ? `${test.duration_minutes} daqiqa` : "Cheksiz"} · {test.total_questions} savol
@@ -334,7 +334,7 @@ export default function DashboardPage() {
           {/* ── 7. YANGILIKLAR (FEATURED ANNOUNCEMENTS) ── */}
           <section className="relative overflow-hidden w-full">
             <div className="flex items-center justify-between mb-4">
-              <h2 className="text-[15px] font-bold text-slate-700 dark:text-slate-300 uppercase tracking-widest flex items-center gap-2">
+              <h2 className="text-[13px] sm:text-[14px] font-bold text-slate-600 dark:text-slate-400 uppercase tracking-widest flex items-center gap-2">
                 <Megaphone size={16} className="text-brand-blue" />
                 Yangiliklar & E'lonlar
               </h2>

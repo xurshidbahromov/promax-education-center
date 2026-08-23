@@ -59,7 +59,7 @@ export function InternationalBannerTeaser() {
           
           {/* Left Text Content Area */}
           <div className="relative z-10 space-y-1 min-w-0 flex-1 w-full xs:w-auto">
-            <h4 className="text-base sm:text-xl font-black font-fredoka text-slate-900 dark:text-white leading-tight truncate">
+            <h4 className="text-base sm:text-xl font-bold font-fredoka text-slate-800 dark:text-slate-100 leading-tight truncate tracking-tight">
               Xalqaro musobaqalar
             </h4>
 

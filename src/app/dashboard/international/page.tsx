@@ -232,7 +232,7 @@ export default function InternationalCompetitionsPage() {
           <OlympiadsBannerSkeleton />
         ) : (
           <div className="bg-white/60 dark:bg-slate-900/60 backdrop-blur-xl rounded-[2rem] p-6 sm:p-7 border border-white/60 dark:border-slate-800/60 shadow-none space-y-3">
-            <h1 className="text-xl sm:text-2xl font-black font-fredoka text-slate-900 dark:text-white leading-tight">
+            <h1 className="text-xl sm:text-2xl font-bold font-fredoka text-slate-800 dark:text-slate-100 leading-tight">
               Xalqaro musobaqalar
             </h1>
             <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 font-medium">

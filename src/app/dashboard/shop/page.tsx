@@ -207,7 +207,7 @@ export default function StudentShopPage() {
             <p className="text-[12px] text-slate-500 dark:text-slate-400 font-medium uppercase tracking-widest">
               Promax Rewards Collection & Store
             </p>
-            <h1 className="text-2xl sm:text-3xl font-bold font-fredoka text-slate-900 dark:text-white leading-tight">
+            <h1 className="text-2xl sm:text-3xl font-bold font-fredoka text-slate-800 dark:text-slate-100 leading-tight">
               {t('sidebar.shop') || "Do'kon"}
             </h1>
           </div>
