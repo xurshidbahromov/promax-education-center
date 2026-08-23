@@ -672,12 +672,12 @@ export const uz = {
  "admin.announcements.toast.status_error": "Status o'zgartirishda xatolik",
 
  // Olympiads & Tournaments
- "olympiad.banner_title": "Milliy bilim musobaqalari",
+ "olympiad.banner_title": "Milliy fan musobaqalari",
  "olympiad.banner_subtitle": "Bilimingizni sinang va mukofotlarni qo'lga kiriting",
  "olympiad.shelf_title": "Bilimni Sinash",
  "olympiad.participants_count": "{count} nafar qatnashuvchi",
  "olympiad.top_prizes": "Top o'rinlar uchun mukofotlar",
- "olympiad.btn_details": "Batafsil",
+ "olympiad.btn_details": "Qatnashish",
  "olympiad.btn_rules": "Nizamnoma",
  "olympiad.btn_enter": "Musobaqaga kirish",
  "olympiad.btn_start": "Musobaqani Boshlash",
@@ -686,7 +686,7 @@ export const uz = {
  "olympiad.tab_tournaments": "Musobaqalar",
  "olympiad.tab_leaderboard": "Reyting & Natijalar",
  "olympiad.tab_comments": "Izohlar",
- "olympiad.stat_tournaments": "Bilim musobaqalari",
+ "olympiad.stat_tournaments": "Fan musobaqalari",
  "olympiad.stat_participants": "1,240+ qatnashuvchi",
  "olympiad.stat_prizes": "Top mukofotlar",
  "olympiad.comments_title": "Izohlar va Muhokamalar",

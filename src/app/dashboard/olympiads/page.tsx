@@ -240,7 +240,7 @@ export default function OlympiadsPage() {
         ) : (
           <div className="bg-white/60 dark:bg-slate-900/60 backdrop-blur-xl rounded-[2rem] p-6 sm:p-7 border border-white/60 dark:border-slate-800/60 shadow-none space-y-3">
             <h1 className="text-xl sm:text-2xl font-black font-fredoka text-slate-900 dark:text-white leading-tight">
-              Milliy bilim musobaqalari
+              Milliy fan musobaqalari
             </h1>
             <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 font-medium">
               Bilimingizni sinang va mukofotlarni qo'lga kiriting
@@ -250,7 +250,7 @@ export default function OlympiadsPage() {
             <div className="flex items-center gap-4 text-xs sm:text-sm font-bold text-slate-700 dark:text-slate-300 flex-wrap pt-1">
               <span className="flex items-center gap-1.5 text-amber-600 dark:text-amber-400">
                 <Trophy size={16} className="text-amber-500" />
-                <span>Bilim musobaqalari</span>
+                <span>Fan musobaqalari</span>
               </span>
               <span className="text-slate-300 dark:text-slate-700">•</span>
               <span className="flex items-center gap-1.5 text-slate-700 dark:text-slate-300">

@@ -585,12 +585,12 @@ export const ru = {
  "admin.announcements.toast.status_error": "Ошибка при изменении статуса",
 
   // Olympiads & Tournaments
-  "olympiad.banner_title": "Национальные олимпиады знаний",
+  "olympiad.banner_title": "Национальные предметные олимпиады",
   "olympiad.banner_subtitle": "Проверьте свои знания и выиграйте ценные призы",
   "olympiad.shelf_title": "Проверить Знания",
   "olympiad.participants_count": "{count} участников",
   "olympiad.top_prizes": "Призы для призеров",
-  "olympiad.btn_details": "Подробнее",
+  "olympiad.btn_details": "Участвовать",
   "olympiad.btn_rules": "Регламент",
   "olympiad.btn_enter": "Войти в олимпиаду",
   "olympiad.btn_start": "Начать Соревнование",

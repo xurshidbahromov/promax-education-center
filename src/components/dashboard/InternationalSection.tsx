@@ -66,7 +66,7 @@ export function InternationalBannerTeaser() {
             </div>
 
             <h4 className="text-base sm:text-xl font-black font-fredoka text-slate-900 dark:text-white leading-tight truncate">
-              Xalqaro bilim musobaqalari
+              Xalqaro musobaqalar
             </h4>
 
             <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-300 font-medium flex items-center gap-1.5 truncate">
@@ -81,7 +81,7 @@ export function InternationalBannerTeaser() {
               href="/dashboard/international"
               className="group/btn w-full xs:w-auto px-5 sm:px-6 py-2 sm:py-2.5 rounded-full bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 border border-slate-200/60 dark:border-slate-700/60 text-slate-800 dark:text-slate-200 font-bold text-xs sm:text-sm uppercase tracking-wider flex items-center justify-center gap-1.5 shadow-none active:scale-95 transition-all cursor-pointer"
             >
-              <span>{t("olympiad.btn_details") || "Batafsil"}</span>
+              <span>{t("olympiad.btn_details") || "Qatnashish"}</span>
               <ArrowUpRight size={15} className="group-hover/btn:translate-x-0.5 group-hover/btn:-translate-y-0.5 transition-transform duration-200" />
             </Link>
           </div>

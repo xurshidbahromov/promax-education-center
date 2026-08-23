@@ -585,12 +585,12 @@ export const en = {
  "admin.announcements.toast.status_error": "Error changing status",
 
  // Olympiads & Tournaments
- "olympiad.banner_title": "National Knowledge Competitions",
+ "olympiad.banner_title": "National Subject Competitions",
  "olympiad.banner_subtitle": "Test your knowledge and win valuable prizes",
  "olympiad.shelf_title": "Test Knowledge",
  "olympiad.participants_count": "{count} participants",
  "olympiad.top_prizes": "Prizes for top ranks",
- "olympiad.btn_details": "Details",
+ "olympiad.btn_details": "Join",
  "olympiad.btn_rules": "Rules",
  "olympiad.btn_enter": "Enter Competition",
  "olympiad.btn_start": "Start Competition",
