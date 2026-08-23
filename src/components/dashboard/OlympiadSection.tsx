@@ -155,16 +155,16 @@ export function OlympiadBannerTeaser() {
           {/* Top-Left Shelf Tab (100% Fully Transparent, no background fill, no blur) */}
           <Link
             href="/dashboard/olympiads"
-            className="w-[45%] sm:w-[40%] bg-transparent backdrop-blur-none px-3 sm:px-6 py-2.5 sm:py-3.5 border-none flex items-center shrink-0 z-10 cursor-pointer group/step"
+            className="w-[48%] sm:w-[42%] bg-transparent backdrop-blur-none px-3 sm:px-6 py-2.5 sm:py-3.5 border-none flex items-center shrink-0 z-10 cursor-pointer group/step"
           >
-            <h3 className="text-base sm:text-2xl font-medium font-fredoka text-slate-800 dark:text-slate-100 leading-tight truncate flex items-center gap-1.5 sm:gap-2">
-              <span>{t("olympiad.shelf_title")}</span>
+            <h3 className="text-base sm:text-2xl font-medium font-fredoka text-slate-800 dark:text-slate-100 leading-tight flex items-center gap-1.5 sm:gap-2 min-w-0">
+              <span className="truncate">{t("olympiad.shelf_title")}</span>
               <motion.span
                 animate={{ x: [0, 3, 0], y: [0, 3, 0] }}
                 transition={{ duration: 1.4, repeat: Infinity, ease: "easeInOut" }}
                 className="inline-flex text-brand-blue dark:text-blue-400 shrink-0"
               >
-                <ArrowDownRight size={22} className="stroke-[2.5]" />
+                <ArrowDownRight size={20} className="stroke-[2.5]" />
               </motion.span>
             </h3>
           </Link>
@@ -182,7 +182,7 @@ export function OlympiadBannerTeaser() {
         <div className="relative z-10 w-full rounded-b-3xl rounded-tl-3xl rounded-tr-none bg-white/60 dark:bg-slate-900/60 backdrop-blur-xl text-slate-800 dark:text-white p-4.5 sm:p-6 flex flex-col xs:flex-row items-start xs:items-center justify-between gap-3 sm:gap-4 border-b border-l border-r border-t-0 border-white/60 dark:border-slate-800/60 shadow-none">
           
           {/* Smooth Top-Left Corner Curved Border */}
-          <div className="absolute top-0 left-0 w-[45%] sm:w-[40%] h-6 rounded-tl-3xl border-t border-l border-white/60 dark:border-slate-800/60 pointer-events-none z-10" />
+          <div className="absolute top-0 left-0 w-[48%] sm:w-[42%] h-6 rounded-tl-3xl border-t border-l border-white/60 dark:border-slate-800/60 pointer-events-none z-10" />
           
           {/* Left Text Content Area */}
           <div className="relative z-10 space-y-1 min-w-0 flex-1 w-full xs:w-auto">
