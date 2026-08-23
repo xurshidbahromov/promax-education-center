@@ -31,7 +31,7 @@ export function InternationalBannerTeaser() {
             className="w-[48%] sm:w-[42%] bg-transparent backdrop-blur-none px-3 sm:px-6 py-2.5 sm:py-3.5 border-none flex items-center shrink-0 z-10 cursor-pointer group/step"
           >
             <h3 className="text-base sm:text-2xl font-medium font-fredoka text-slate-800 dark:text-slate-100 leading-tight flex items-center gap-1.5 sm:gap-2 min-w-0">
-              <span className="truncate">Xalqaro maydon</span>
+              <span className="truncate">{t("international.shelf_title") || "Jahon sinovi"}</span>
               <motion.span
                 animate={{ x: [0, 3, 0], y: [0, 3, 0] }}
                 transition={{ duration: 1.4, repeat: Infinity, ease: "easeInOut" }}

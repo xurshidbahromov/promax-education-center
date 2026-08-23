@@ -587,7 +587,8 @@ export const ru = {
   // Olympiads & Tournaments
   "olympiad.banner_title": "Национальные предметные олимпиады",
   "olympiad.banner_subtitle": "Проверьте свои знания и выиграйте ценные призы",
-  "olympiad.shelf_title": "Проверить Знания",
+  "olympiad.shelf_title": "Тест знаний",
+  "international.shelf_title": "Мировой тест",
   "olympiad.participants_count": "{count} участников",
   "olympiad.top_prizes": "Призы для призеров",
   "olympiad.btn_details": "Участвовать",

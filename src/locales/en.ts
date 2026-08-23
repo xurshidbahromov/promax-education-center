@@ -587,7 +587,8 @@ export const en = {
  // Olympiads & Tournaments
  "olympiad.banner_title": "National Subject Competitions",
  "olympiad.banner_subtitle": "Test your knowledge and win valuable prizes",
- "olympiad.shelf_title": "Test Knowledge",
+ "olympiad.shelf_title": "Knowledge test",
+ "international.shelf_title": "Global test",
  "olympiad.participants_count": "{count} participants",
  "olympiad.top_prizes": "Prizes for top ranks",
  "olympiad.btn_details": "Join",
