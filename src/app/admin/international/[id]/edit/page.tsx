@@ -78,8 +78,9 @@ export default function EditInternationalTournamentPage({ params }: PageProps) {
   // ── STEP 2: QUESTIONS BUILDER ──
   const [questions, setQuestions] = useState<InternationalQuestion[]>([]);
   const [editingQuestion, setEditingQuestion] = useState<InternationalQuestion | null>(null);
-  const [activeMathField, setActiveMathField] = useState<'question' | 'A' | 'B' | 'C' | 'D' | null>(null);
+  const [activeMathField, setActiveMathField] = useState<'question' | 'A' | 'B' | 'C' | 'D' | 'grid_in' | null>(null);
   const [uploadingImg, setUploadingImg] = useState(false);
+  const [acceptedAnswersInput, setAcceptedAnswersInput] = useState("");
 
   useEffect(() => {
     loadData();
@@ -151,7 +152,7 @@ export default function EditInternationalTournamentPage({ params }: PageProps) {
 
   const addQuestion = (type: InternationalQuestion["question_type"] = "multiple_choice") => {
     const newQuestion: InternationalQuestion = {
-      id: `iq_${Date.now()}_${Math.random().toString(36).substring(2, 6)}`,
+      id: crypto.randomUUID(),
       question_text: "",
       question_type: type,
       options: type === "multiple_choice" ? { A: "", B: "", C: "", D: "" } : undefined,
@@ -163,6 +164,8 @@ export default function EditInternationalTournamentPage({ params }: PageProps) {
       category: category === "sat" ? "sat_math" : category === "amc" ? "amc_math" : "general"
     };
     setEditingQuestion(newQuestion);
+    setAcceptedAnswersInput("");
+    setActiveMathField(null);
   };
 
   const saveQuestion = () => {
@@ -170,12 +173,29 @@ export default function EditInternationalTournamentPage({ params }: PageProps) {
     if (!editingQuestion.question_text.trim()) return toast.error("Savol matnini kiriting!");
     if (!editingQuestion.correct_answer.trim()) return toast.error("To'g'ri javobni kiriting!");
 
-    if (questions.find((q) => q.id === editingQuestion.id)) {
-      setQuestions(questions.map((q) => (q.id === editingQuestion.id ? editingQuestion : q)));
+    let finalAccepted = editingQuestion.accepted_answers || [];
+    if (editingQuestion.question_type === "grid_in") {
+      finalAccepted = acceptedAnswersInput
+        .split(/[,;\n]/)
+        .map(s => s.trim())
+        .filter(Boolean);
+      if (!finalAccepted.includes(editingQuestion.correct_answer.trim())) {
+        finalAccepted = [editingQuestion.correct_answer.trim(), ...finalAccepted];
+      }
+    }
+
+    const readyQuestion: InternationalQuestion = {
+      ...editingQuestion,
+      accepted_answers: finalAccepted
+    };
+
+    if (questions.find((q) => q.id === readyQuestion.id)) {
+      setQuestions(questions.map((q) => (q.id === readyQuestion.id ? readyQuestion : q)));
     } else {
-      setQuestions([...questions, editingQuestion]);
+      setQuestions([...questions, readyQuestion]);
     }
     setEditingQuestion(null);
+    setActiveMathField(null);
   };
 
   const deleteQuestion = (id: string) => {
@@ -217,15 +237,15 @@ export default function EditInternationalTournamentPage({ params }: PageProps) {
       description: description.trim(),
       startDate: startDate.trim() || new Date().toISOString().split("T")[0],
       startTime: startTime.trim(),
-      endDate: endDate.trim() || startDate.trim(),
+      endDate: endDate.trim() || startDate.trim() || new Date().toISOString().split("T")[0],
       endTime: endTime.trim(),
       durationMinutes: Number(durationMinutes) || 60,
       totalQuestions: questions.length,
       entryCoins: Number(entryCoins) || 0,
-      prizePool: prizePool.trim() || "Xalqaro Mukofotlar",
+      prizePool: prizePool.trim() || "Foydali Sovg'alar",
       scoringScale: scoringScale.trim(),
-      topPrizes: topPrizes.length > 0 ? topPrizes : ["Top o'rinlar uchun grantlar"],
-      rules: rules.length > 0 ? rules : ["Xalqaro musobaqa qoidalariga rioya qiling."],
+      topPrizes: topPrizes.length > 0 ? topPrizes : ["Top o'rinlar uchun sovg'alar"],
+      rules: rules.length > 0 ? rules : ["Musobaqa qoidalariga rioya qiling."],
       status: finalStatus,
       questions
     };
@@ -274,8 +294,9 @@ export default function EditInternationalTournamentPage({ params }: PageProps) {
           </div>
         </div>
 
-        {/* Sequential Step Navigation Bar */}
+        {/* Sequential Step Navigation Bar (1:1 with /admin/tournaments/[id]/edit) */}
         <div className="flex items-center gap-2 bg-slate-100 dark:bg-slate-800/60 p-1.5 rounded-2xl self-start md:self-auto">
+          {/* Step 1 */}
           <button
             onClick={() => handleStepClick("basic")}
             className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all ${
@@ -290,6 +311,7 @@ export default function EditInternationalTournamentPage({ params }: PageProps) {
             <span>1. Asosiy</span>
           </button>
 
+          {/* Step 2 */}
           <button
             onClick={() => handleStepClick("questions")}
             className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all ${
@@ -310,6 +332,7 @@ export default function EditInternationalTournamentPage({ params }: PageProps) {
             <span>2. Savollar ({questions.length})</span>
           </button>
 
+          {/* Step 3 */}
           <button
             onClick={() => handleStepClick("preview")}
             className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all ${
@@ -533,7 +556,7 @@ export default function EditInternationalTournamentPage({ params }: PageProps) {
                     2-Bosqich: Savollar Ro'yxati ({questions.length} ta)
                   </h2>
                   <p className="text-xs text-slate-400 font-medium mt-0.5">
-                    Multiple Choice yoki SAT Grid-In (yopiq javobli) savollar qo'shing
+                    Musobaqa savollari va javob variantlarini qo'shing
                   </p>
                 </div>
               </div>
@@ -541,17 +564,10 @@ export default function EditInternationalTournamentPage({ params }: PageProps) {
               <div className="flex items-center gap-2">
                 <button
                   onClick={() => addQuestion("multiple_choice")}
-                  className="inline-flex items-center gap-1.5 px-3.5 py-2 bg-brand-blue text-white rounded-xl text-xs font-bold hover:bg-blue-600 transition-colors shadow-sm cursor-pointer"
+                  className="inline-flex items-center gap-1.5 px-4 py-2.5 bg-brand-blue text-white rounded-xl text-xs sm:text-sm font-bold hover:bg-blue-600 transition-colors shadow-sm cursor-pointer"
                 >
-                  <Plus size={14} />
-                  <span>+ Variantli Savol</span>
-                </button>
-                <button
-                  onClick={() => addQuestion("grid_in")}
-                  className="inline-flex items-center gap-1.5 px-3.5 py-2 bg-emerald-600 text-white rounded-xl text-xs font-bold hover:bg-emerald-700 transition-colors shadow-sm cursor-pointer"
-                >
-                  <Plus size={14} />
-                  <span>+ Yopiq (Grid-In)</span>
+                  <Plus size={16} />
+                  <span>Yangi Savol Qo'shish</span>
                 </button>
               </div>
             </div>
@@ -590,9 +606,11 @@ export default function EditInternationalTournamentPage({ params }: PageProps) {
                         </div>
                       )}
                       <div className="flex items-center gap-3 mt-1.5 text-xs font-bold">
-                        <span className="px-2 py-0.5 rounded-md bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300 text-[10px]">
-                          {q.question_type === "grid_in" ? "🔢 Grid-In (Yopiq)" : "🔘 4-Variantli"}
-                        </span>
+                        {q.question_type === "grid_in" && (
+                          <span className="px-2 py-0.5 rounded-md bg-indigo-50 dark:bg-indigo-950/40 text-indigo-600 dark:text-indigo-400 text-[10px]">
+                            🔢 Grid-In (Yopiq)
+                          </span>
+                        )}
                         <span className="text-emerald-600 dark:text-emerald-400">
                           To'g'ri javob: {q.correct_answer || "Belgilanmagan"}
                         </span>
@@ -603,7 +621,11 @@ export default function EditInternationalTournamentPage({ params }: PageProps) {
 
                     <div className="flex items-center gap-2 shrink-0">
                       <button
-                        onClick={() => setEditingQuestion(q)}
+                        onClick={() => {
+                          setEditingQuestion(q);
+                          setAcceptedAnswersInput((q.accepted_answers || []).join(", "));
+                          setActiveMathField(null);
+                        }}
                         className="px-3 py-1.5 text-xs font-bold text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl hover:bg-slate-100 transition-colors cursor-pointer"
                       >
                         Tahrirlash
@@ -648,13 +670,52 @@ export default function EditInternationalTournamentPage({ params }: PageProps) {
                 <div className="bg-white dark:bg-slate-900 rounded-3xl shadow-xl w-full max-w-lg overflow-hidden border border-slate-200/80 dark:border-slate-800 p-6 space-y-4">
                   <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-3">
                     <h3 className="font-bold text-base text-slate-800 dark:text-slate-100">
-                      {editingQuestion.question_type === "grid_in" ? "Yopiq (Grid-In) Savolni Tahrirlash" : "Variantli Savolni Tahrirlash"}
+                      Savolni Tahrirlash
                     </h3>
                     <button
                       onClick={() => setEditingQuestion(null)}
                       className="text-slate-400 hover:text-slate-700 cursor-pointer"
                     >
                       <X size={18} />
+                    </button>
+                  </div>
+
+                  {/* Savol Turi Tanlash */}
+                  <div className="flex items-center gap-2 p-1 bg-slate-100 dark:bg-slate-800 rounded-xl">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setEditingQuestion({
+                          ...editingQuestion,
+                          question_type: "multiple_choice",
+                          options: editingQuestion.options || { A: "", B: "", C: "", D: "" },
+                          correct_answer: (["A", "B", "C", "D"].includes(editingQuestion.correct_answer) ? editingQuestion.correct_answer : "A")
+                        });
+                      }}
+                      className={`flex-1 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                        editingQuestion.question_type === "multiple_choice"
+                          ? "bg-white dark:bg-slate-900 text-brand-blue shadow-sm"
+                          : "text-slate-500 hover:text-slate-800 dark:hover:text-slate-200"
+                      }`}
+                    >
+                      🔘 4-Variantli Savol
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setEditingQuestion({
+                          ...editingQuestion,
+                          question_type: "grid_in",
+                          correct_answer: editingQuestion.correct_answer === "A" ? "" : editingQuestion.correct_answer
+                        });
+                      }}
+                      className={`flex-1 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                        editingQuestion.question_type === "grid_in"
+                          ? "bg-white dark:bg-slate-900 text-brand-blue shadow-sm"
+                          : "text-slate-500 hover:text-slate-800 dark:hover:text-slate-200"
+                      }`}
+                    >
+                      🔢 SAT Yopiq (Grid-In)
                     </button>
                   </div>
 
@@ -785,7 +846,7 @@ export default function EditInternationalTournamentPage({ params }: PageProps) {
                       )}
                     </div>
 
-                    {/* Options A, B, C, D (if Multiple Choice) */}
+                    {/* Options A, B, C, D */}
                     {editingQuestion.question_type === "multiple_choice" && (
                       <div className="space-y-2.5">
                         <label className="block text-xs font-bold text-slate-600 dark:text-slate-300 uppercase tracking-wider">
@@ -811,23 +872,40 @@ export default function EditInternationalTournamentPage({ params }: PageProps) {
                                       }
                                     })
                                   }
-                                  placeholder={`Variant ${optKey}...`}
-                                  className="flex-1 px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs sm:text-sm font-medium outline-none focus:border-brand-blue"
+                                  className="flex-1 px-3.5 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs sm:text-sm font-medium outline-none"
+                                  placeholder={`Variant ${optKey}`}
                                 />
                                 <button
                                   type="button"
                                   onClick={() =>
-                                    setActiveMathField(activeMathField === optKey ? null : optKey)
+                                    setActiveMathField(
+                                      activeMathField === optKey ? null : optKey
+                                    )
                                   }
-                                  className={`px-2 py-1.5 rounded-lg text-xs font-bold border transition-colors shrink-0 cursor-pointer ${
+                                  className={`px-2.5 py-1.5 rounded-lg font-black text-[11px] transition-all flex items-center gap-1 border cursor-pointer shrink-0 ${
                                     activeMathField === optKey
-                                      ? "bg-brand-blue text-white border-brand-blue"
-                                      : "bg-slate-100 dark:bg-slate-800 text-slate-500 border-slate-200 dark:border-slate-700"
+                                      ? "bg-brand-blue text-white border-brand-blue shadow-sm"
+                                      : "bg-brand-blue/10 hover:bg-brand-blue hover:text-white text-brand-blue dark:text-blue-300 border-brand-blue/20"
                                   }`}
-                                  title={`Variant ${optKey} uchun formula`}
                                 >
-                                  ∑
+                                  <Calculator size={13} />
+                                  <span>∑</span>
                                 </button>
+                                <label className="flex items-center gap-1 cursor-pointer shrink-0">
+                                  <input
+                                    type="radio"
+                                    name="correct_opt"
+                                    checked={editingQuestion.correct_answer === optKey}
+                                    onChange={() =>
+                                      setEditingQuestion({
+                                        ...editingQuestion,
+                                        correct_answer: optKey as "A" | "B" | "C" | "D"
+                                      })
+                                    }
+                                    className="w-4 h-4 text-emerald-500 focus:ring-emerald-500"
+                                  />
+                                  <span className="text-[11px] font-bold text-slate-500">To'g'ri</span>
+                                </label>
                               </div>
 
                               <InlineMathPanel
@@ -835,50 +913,52 @@ export default function EditInternationalTournamentPage({ params }: PageProps) {
                                 onClose={() => setActiveMathField(null)}
                                 title={`Variant ${optKey} uchun formulalar`}
                                 onInsert={(formulaText) => {
-                                  const cur = editingQuestion.options?.[optKey] || "";
+                                  const prevVal = editingQuestion.options?.[optKey] || "";
                                   setEditingQuestion({
                                     ...editingQuestion,
                                     options: {
                                       ...(editingQuestion.options || { A: "", B: "", C: "", D: "" }),
-                                      [optKey]: cur ? `${cur} ${formulaText}` : formulaText
+                                      [optKey]: prevVal ? `${prevVal} ${formulaText}` : formulaText
                                     }
                                   });
                                 }}
                               />
+
+                              {optVal &&
+                                (optVal.includes("$") ||
+                                  optVal.includes("\\") ||
+                                  optVal.includes("^") ||
+                                  optVal.includes("_")) && (
+                                  <div className="ml-7 text-xs font-semibold text-slate-500 flex items-center gap-2 bg-slate-50 dark:bg-slate-800/40 px-3 py-1 rounded-lg border border-slate-200/50 dark:border-slate-700/50">
+                                    <span className="text-[10px] text-brand-blue uppercase font-bold">
+                                      Ko'rinishi:
+                                    </span>
+                                    <MathRenderer content={optVal} inline />
+                                  </div>
+                                )}
                             </div>
                           );
                         })}
-
-                        <div>
-                          <label className="block text-xs font-bold text-slate-600 dark:text-slate-300 uppercase tracking-wider mb-1 mt-2">
-                            To'g'ri Javob *
-                          </label>
-                          <select
-                            value={editingQuestion.correct_answer}
-                            onChange={(e) =>
-                              setEditingQuestion({
-                                ...editingQuestion,
-                                correct_answer: e.target.value
-                              })
-                            }
-                            className="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs sm:text-sm font-bold text-emerald-600 outline-none"
-                          >
-                            <option value="A">A varianti</option>
-                            <option value="B">B varianti</option>
-                            <option value="C">C varianti</option>
-                            <option value="D">D varianti</option>
-                          </select>
-                        </div>
                       </div>
                     )}
 
-                    {/* Grid-In Closed Answer Fields (if Grid-In) */}
+                    {/* Grid-In Closed Answer Fields */}
                     {editingQuestion.question_type === "grid_in" && (
-                      <div className="space-y-3 p-3.5 bg-emerald-50/50 dark:bg-emerald-950/20 border border-emerald-500/20 rounded-2xl">
+                      <div className="space-y-3 p-3.5 bg-indigo-50/50 dark:bg-indigo-950/20 border border-indigo-500/20 rounded-2xl">
                         <div>
-                          <label className="block text-xs font-bold text-emerald-800 dark:text-emerald-300 uppercase tracking-wider mb-1">
-                            To'g'ri Javob (Aniq son yoki kasr) *
-                          </label>
+                          <div className="flex items-center justify-between mb-1">
+                            <label className="text-xs font-bold text-indigo-800 dark:text-indigo-300 uppercase tracking-wider">
+                              To'g'ri Javob (Aniq son yoki kasr) *
+                            </label>
+                            <button
+                              type="button"
+                              onClick={() => setActiveMathField(activeMathField === "grid_in" ? null : "grid_in")}
+                              className="text-[11px] font-bold text-indigo-600 dark:text-indigo-400 flex items-center gap-1"
+                            >
+                              <Calculator size={12} />
+                              <span>Formula</span>
+                            </button>
+                          </div>
                           <input
                             type="text"
                             value={editingQuestion.correct_answer}
@@ -889,7 +969,19 @@ export default function EditInternationalTournamentPage({ params }: PageProps) {
                               })
                             }
                             placeholder="Masalan: 24 yoki 3/4"
-                            className="w-full px-4 py-2.5 bg-white dark:bg-slate-900 border border-emerald-500/40 rounded-xl text-sm font-bold font-mono text-emerald-700 dark:text-emerald-300 outline-none"
+                            className="w-full px-3.5 py-2 bg-white dark:bg-slate-900 border border-indigo-500/30 rounded-xl text-sm font-bold font-mono text-indigo-700 dark:text-indigo-300 outline-none"
+                          />
+
+                          <InlineMathPanel
+                            isOpen={activeMathField === "grid_in"}
+                            onClose={() => setActiveMathField(null)}
+                            title="Javob uchun formulalar"
+                            onInsert={(formulaText) => {
+                              setEditingQuestion({
+                                ...editingQuestion,
+                                correct_answer: formulaText
+                              });
+                            }}
                           />
                         </div>
 
@@ -899,40 +991,56 @@ export default function EditInternationalTournamentPage({ params }: PageProps) {
                           </label>
                           <input
                             type="text"
-                            value={(editingQuestion.accepted_answers || []).join(", ")}
-                            onChange={(e) =>
-                              setEditingQuestion({
-                                ...editingQuestion,
-                                accepted_answers: e.target.value.split(/[,;\n]/).map(s => s.trim()).filter(Boolean)
-                              })
-                            }
+                            value={acceptedAnswersInput}
+                            onChange={(e) => setAcceptedAnswersInput(e.target.value)}
                             placeholder="Masalan: 3/4, 0.75, .75"
-                            className="w-full px-4 py-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-mono text-slate-800 dark:text-slate-200 outline-none"
+                            className="w-full px-3.5 py-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-mono text-slate-800 dark:text-slate-200 outline-none"
                           />
                         </div>
                       </div>
                     )}
 
-                    {/* Explanation */}
-                    <div>
-                      <label className="block text-xs font-bold text-slate-600 dark:text-slate-300 uppercase tracking-wider mb-1">
-                        Yechim / Tushuntirish
-                      </label>
-                      <textarea
-                        value={editingQuestion.explanation || ""}
-                        onChange={(e) =>
-                          setEditingQuestion({
-                            ...editingQuestion,
-                            explanation: e.target.value
-                          })
-                        }
-                        className="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs sm:text-sm font-medium outline-none resize-none h-16"
-                        placeholder="Savol qoidasi yoki to'liq yechimi..."
-                      />
+                    {/* Points & Explanation */}
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                      <div className="space-y-1.5">
+                        <label className="text-xs font-bold text-slate-600 dark:text-slate-300 uppercase tracking-wider">
+                          Savol Bali
+                        </label>
+                        <input
+                          type="number"
+                          step="0.1"
+                          value={editingQuestion.points}
+                          onChange={(e) =>
+                            setEditingQuestion({
+                              ...editingQuestion,
+                              points: Number(e.target.value)
+                            })
+                          }
+                          className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-medium outline-none"
+                        />
+                      </div>
+
+                      <div className="sm:col-span-2 space-y-1.5">
+                        <label className="text-xs font-bold text-slate-600 dark:text-slate-300 uppercase tracking-wider">
+                          Tushuntirish / Izoh (Ixtiyoriy)
+                        </label>
+                        <input
+                          type="text"
+                          value={editingQuestion.explanation || ""}
+                          onChange={(e) =>
+                            setEditingQuestion({
+                              ...editingQuestion,
+                              explanation: e.target.value
+                            })
+                          }
+                          placeholder="Nima uchun bu javob to'g'ri?"
+                          className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-medium outline-none"
+                        />
+                      </div>
                     </div>
                   </div>
 
-                  <div className="flex items-center justify-end gap-2 pt-3 border-t border-slate-100 dark:border-slate-800">
+                  <div className="flex items-center justify-end gap-3 pt-3 border-t border-slate-100 dark:border-slate-800">
                     <button
                       type="button"
                       onClick={() => setEditingQuestion(null)}
@@ -943,9 +1051,9 @@ export default function EditInternationalTournamentPage({ params }: PageProps) {
                     <button
                       type="button"
                       onClick={saveQuestion}
-                      className="px-5 py-2 bg-brand-blue text-white rounded-xl text-xs font-bold hover:bg-blue-600 transition-colors shadow-sm cursor-pointer"
+                      className="px-4 py-2.5 text-xs font-bold text-white bg-brand-blue hover:bg-blue-600 rounded-xl cursor-pointer"
                     >
-                      Savolni Saqlash
+                      Saqlash
                     </button>
                   </div>
                 </div>
@@ -954,7 +1062,7 @@ export default function EditInternationalTournamentPage({ params }: PageProps) {
           </div>
         )}
 
-        {/* STEP 3: Preview & Confirm */}
+        {/* STEP 3: Preview & Save */}
         {currentStep === "preview" && (
           <div className="bg-white/70 dark:bg-slate-900/70 backdrop-blur-xl border border-slate-200/60 dark:border-slate-800/60 rounded-3xl p-6 sm:p-8 space-y-6">
             <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-4">
@@ -962,77 +1070,37 @@ export default function EditInternationalTournamentPage({ params }: PageProps) {
                 <CheckCircle2 size={22} className="text-emerald-500" />
                 <div>
                   <h2 className="text-lg font-extrabold text-slate-800 dark:text-slate-100">
-                    3-Bosqich: Ko'rib Chiqish & Tasdiqlash
+                    3-Bosqich: Musobaqani Yakunlash & Nashr Qilish
                   </h2>
                   <p className="text-xs text-slate-400 font-medium mt-0.5">
-                    Musobaqa ma'lumotlarini tekshiring va yangilang
+                    Ma'lumotlarni ko'rib chiqing va saqlang
                   </p>
                 </div>
               </div>
-              <span className="text-xs font-bold px-3 py-1 rounded-full bg-emerald-50 dark:bg-emerald-900/30 text-emerald-600">
-                3 / 3 Bosqich
+              <span className="text-xs font-bold px-3 py-1 rounded-full bg-emerald-50 dark:bg-emerald-950/30 text-emerald-600">
+                Tayyor
               </span>
             </div>
 
-            <div className="space-y-4">
-              <div className="p-5 rounded-2xl bg-slate-50/50 dark:bg-slate-800/30 border border-slate-100 dark:border-slate-800 space-y-3">
-                <div className="flex items-start justify-between gap-4">
-                  <div>
-                    <span className="px-2.5 py-0.5 rounded-full bg-brand-blue/10 text-brand-blue text-xs font-bold">
-                      {categoryLabel} • {scoringScale}
-                    </span>
-                    <h3 className="text-xl font-black text-slate-800 dark:text-slate-100 mt-1">
-                      {title}
-                    </h3>
-                  </div>
-                  {prizePool && (
-                    <span className="text-xs font-black text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-950/40 px-3 py-1.5 rounded-xl border border-amber-200/60 shrink-0">
-                      {prizePool}
-                    </span>
-                  )}
-                </div>
-
-                {description && (
-                  <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-300 font-medium">
-                    {description}
-                  </p>
-                )}
-
-                <div className="flex flex-wrap items-center gap-3 text-xs font-bold text-slate-500 pt-1">
-                  <span>Fan: {subject}</span>
-                  <span>•</span>
-                  <span>Vaqt: {durationMinutes ? `${durationMinutes} daqiqa` : "Cheklanmagan"}</span>
-                  <span>•</span>
-                  <span>Savollar: {questions.length} ta</span>
-                </div>
-              </div>
-
-              {/* Questions Quick List */}
-              <div className="space-y-2">
-                <h4 className="text-xs font-bold text-slate-600 dark:text-slate-300 uppercase tracking-wider">
-                  Kiritilgan Savollar ({questions.length} ta):
-                </h4>
-                <div className="space-y-2 max-h-64 overflow-y-auto custom-scrollbar">
-                  {questions.map((q, idx) => (
-                    <div
-                      key={q.id}
-                      className="p-3 rounded-xl bg-slate-50/50 dark:bg-slate-800/20 border border-slate-100 dark:border-slate-800 text-xs flex items-center justify-between"
-                    >
-                      <div className="flex items-center gap-2 truncate max-w-md">
-                        <span className="font-bold text-slate-400">{idx + 1}.</span>
-                        <span className="truncate">{q.question_text}</span>
-                      </div>
-                      <span className="font-bold text-emerald-600 shrink-0 ml-2">
-                        To'g'ri javob: {q.correct_answer}
-                      </span>
-                    </div>
-                  ))}
-                </div>
+            <div className="p-5 rounded-2xl bg-slate-50/50 dark:bg-slate-800/30 border border-slate-100 dark:border-slate-800 space-y-3">
+              <p className="text-base font-extrabold text-slate-800 dark:text-slate-100">
+                {title || "Sarlavhasiz Musobaqa"}
+              </p>
+              <p className="text-xs text-slate-500 font-medium">{description || "Tavsif berilmagan"}</p>
+              <div className="flex flex-wrap items-center gap-4 text-xs font-bold text-slate-500 pt-2 border-t border-slate-200/50 dark:border-slate-700/50">
+                <span>Format: {categoryLabel}</span>
+                <span>•</span>
+                <span>Fan: {subject}</span>
+                <span>•</span>
+                <span>Savollar: {questions.length} ta</span>
+                <span>•</span>
+                <span>Vaqt: {durationMinutes ? `${durationMinutes} daqiqa` : "Cheksiz"}</span>
+                {startDate && <span>• Sana: {startDate}, {startTime}</span>}
+                {prizePool && <span className="text-amber-600 dark:text-amber-400">• Sovrin: {prizePool}</span>}
               </div>
             </div>
 
-            {/* Actions */}
-            <div className="pt-4 border-t border-slate-100 dark:border-slate-800/50 flex items-center justify-between">
+            <div className="flex items-center justify-between pt-4 border-t border-slate-100 dark:border-slate-800/50">
               <button
                 onClick={() => setCurrentStep("questions")}
                 className="px-4 py-2.5 text-xs sm:text-sm font-bold text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-200 cursor-pointer"
@@ -1043,15 +1111,13 @@ export default function EditInternationalTournamentPage({ params }: PageProps) {
               <button
                 onClick={() => handleSaveTournament(status === "live")}
                 disabled={saving}
-                className="inline-flex items-center gap-2 px-6 py-2.5 bg-brand-blue hover:bg-blue-600 text-white rounded-xl text-xs sm:text-sm font-bold transition-all shadow-md shadow-brand-blue/10 cursor-pointer"
+                className="px-5 py-2.5 text-xs sm:text-sm font-bold text-white bg-brand-blue hover:bg-blue-600 rounded-xl disabled:opacity-50 shadow-md shadow-brand-blue/10 cursor-pointer"
               >
-                <Save size={16} />
-                <span>{saving ? "Saqlanmoqda..." : "O'zgarishlarni Saqlash"}</span>
+                {saving ? "Saqlanmoqda..." : "O'zgarishlarni Saqlash"}
               </button>
             </div>
           </div>
         )}
-
       </div>
     </div>
   );
