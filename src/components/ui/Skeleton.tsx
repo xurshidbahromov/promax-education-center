@@ -211,17 +211,54 @@ export function ProfileSkeleton() {
  </div>
  );
 }
-/** Matches dashboard home page: greeting+ subjects+ quick access+ stats+ tests+ announcements */
-export function DashboardHomeSkeleton() {
- return (
- <div className="flex flex-col gap-8 pb-24 animate-pulse">
- {/* 1. Hero Greeting */}
- <div className="flex flex-col gap-2">
- <Skeleton className="h-4 w-40 bg-slate-200/80 dark:bg-slate-700/50 rounded-full" />
- <Skeleton className="h-8 w-64 bg-slate-200/80 dark:bg-slate-700/50 rounded-xl" />
- </div>
 
- {/* 2. Subject Progress Cards (2x2 grid) */}
+/** Matches the competition banner teaser (Shelf tab + Glassy card) */
+export function CompetitionBannerTeaserSkeleton() {
+  return (
+    <div className="relative w-full">
+      {/* Top shelf tab row */}
+      <div className="flex items-stretch relative z-20">
+        <div className="w-[45%] sm:w-[40%] px-3 sm:px-6 py-2.5 sm:py-3.5 flex items-center shrink-0">
+          <Skeleton className="h-5 sm:h-6 w-28 sm:w-36 rounded-lg bg-slate-200/80 dark:bg-slate-700/50" />
+        </div>
+        <div className="flex-1 bg-white/60 dark:bg-slate-900/60 px-3 sm:px-6 py-2.5 sm:py-3.5 rounded-t-3xl border-t border-r border-white/60 dark:border-slate-800/60 border-b-0 border-l-0 flex items-center justify-center gap-2 backdrop-blur-xl">
+          <Skeleton className="w-3.5 h-3.5 rounded-full bg-slate-200/80 dark:bg-slate-700/50 shrink-0" />
+          <Skeleton className="h-3.5 w-28 sm:w-36 bg-slate-200/80 dark:bg-slate-700/50 rounded-md" />
+        </div>
+      </div>
+
+      {/* Main card body */}
+      <div className="relative z-10 w-full rounded-b-3xl rounded-tl-3xl rounded-tr-none bg-white/60 dark:bg-slate-900/60 backdrop-blur-xl p-4.5 sm:p-6 flex flex-col xs:flex-row items-start xs:items-center justify-between gap-3 sm:gap-4 border border-white/60 dark:border-slate-800/60 shadow-none">
+        <div className="space-y-2 flex-1 w-full xs:w-auto">
+          <Skeleton className="h-5 sm:h-6 w-48 sm:w-64 rounded-lg bg-slate-200/80 dark:bg-slate-700/50" />
+          <div className="flex items-center gap-1.5">
+            <Skeleton className="w-3.5 h-3.5 rounded-full bg-slate-200/80 dark:bg-slate-700/50 shrink-0" />
+            <Skeleton className="h-3.5 w-44 sm:w-56 rounded-md bg-slate-200/80 dark:bg-slate-700/50" />
+          </div>
+        </div>
+        <Skeleton className="h-9 sm:h-10 w-full xs:w-32 rounded-full bg-slate-200/80 dark:bg-slate-700/50 shrink-0" />
+      </div>
+    </div>
+  );
+}
+
+/** Matches dashboard home page: greeting + 2 competition banners + subjects + quick access + stats + tests + announcements */
+export function DashboardHomeSkeleton() {
+  return (
+    <div className="flex flex-col gap-6 max-w-[1600px] mx-auto pt-1 sm:pt-2 pb-24 animate-pulse">
+      {/* 1. Hero Greeting */}
+      <div className="flex flex-col gap-1">
+        <Skeleton className="h-4 w-40 bg-slate-200/80 dark:bg-slate-700/50 rounded-full" />
+        <Skeleton className="h-8 w-64 bg-slate-200/80 dark:bg-slate-700/50 rounded-xl" />
+      </div>
+
+      {/* 2. Onlayn Musobaqalar Bannerlari (Milliy va Xalqaro Musobaqalar) */}
+      <div className="flex flex-col gap-4">
+        <CompetitionBannerTeaserSkeleton />
+        <CompetitionBannerTeaserSkeleton />
+      </div>
+
+      {/* 3. Subject Progress Cards (2x2 grid) */}
  <div className="flex flex-col gap-4">
  <div className="flex items-center justify-between">
  <Skeleton className="h-4 w-24 bg-slate-200/80 dark:bg-slate-700/50 rounded-full" />
@@ -504,39 +541,6 @@ export function LeaderboardSkeleton() {
             </div>
           </div>
         ))}
-      </div>
-
-      {/* Additional Info Cards Skeleton */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-5 pt-1">
-        <div className="bg-white/60 dark:bg-slate-900/60 backdrop-blur-xl rounded-3xl p-5 border border-white/60 dark:border-slate-800/60 space-y-3">
-          <div className="flex items-center gap-3">
-            <Skeleton className="w-9 h-9 rounded-xl bg-slate-200/80 dark:bg-slate-700/50" />
-            <div className="space-y-1.5">
-              <Skeleton className="h-4 w-32 rounded bg-slate-200/80 dark:bg-slate-700/50" />
-              <Skeleton className="h-3 w-40 rounded bg-slate-200/80 dark:bg-slate-700/50" />
-            </div>
-          </div>
-          <div className="space-y-2 pt-1">
-            <Skeleton className="h-10 w-full rounded-2xl bg-slate-100/70 dark:bg-slate-800/40" />
-            <Skeleton className="h-10 w-full rounded-2xl bg-slate-100/70 dark:bg-slate-800/40" />
-            <Skeleton className="h-10 w-full rounded-2xl bg-slate-100/70 dark:bg-slate-800/40" />
-          </div>
-        </div>
-
-        <div className="bg-white/60 dark:bg-slate-900/60 backdrop-blur-xl rounded-3xl p-5 border border-white/60 dark:border-slate-800/60 space-y-3">
-          <div className="flex items-center gap-3">
-            <Skeleton className="w-9 h-9 rounded-xl bg-slate-200/80 dark:bg-slate-700/50" />
-            <div className="space-y-1.5">
-              <Skeleton className="h-4 w-36 rounded bg-slate-200/80 dark:bg-slate-700/50" />
-              <Skeleton className="h-3 w-44 rounded bg-slate-200/80 dark:bg-slate-700/50" />
-            </div>
-          </div>
-          <div className="space-y-2 pt-1">
-            <Skeleton className="h-10 w-full rounded-2xl bg-slate-100/70 dark:bg-slate-800/40" />
-            <Skeleton className="h-10 w-full rounded-2xl bg-slate-100/70 dark:bg-slate-800/40" />
-            <Skeleton className="h-10 w-full rounded-2xl bg-slate-100/70 dark:bg-slate-800/40" />
-          </div>
-        </div>
       </div>
     </div>
   );
