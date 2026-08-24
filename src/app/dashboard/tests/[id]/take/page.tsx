@@ -324,6 +324,14 @@ export default function TakeTestPage() {
       const timeSpent = test?.duration_minutes ? test.duration_minutes * 60 : 0;
       const supabase = createClient();
       const { data: userData } = await supabase.auth.getUser();
+      const { data: profileData } = await supabase
+        .from('profiles')
+        .select('full_name, avatar_url')
+        .eq('id', userData?.user?.id)
+        .maybeSingle();
+
+      const studentName = profileData?.full_name || userData?.user?.user_metadata?.full_name || "O'quvchi";
+      const studentAvatar = profileData?.avatar_url || userData?.user?.user_metadata?.avatar_url || null;
 
       let totalScore = 0;
       let maxScore = 0;
@@ -339,8 +347,8 @@ export default function TakeTestPage() {
       await submitInternationalAttempt(
         testId,
         userData?.user?.id || `anon_${Date.now()}`,
-        userData?.user?.user_metadata?.full_name || "O'quvchi",
-        `https://api.dicebear.com/7.x/avataaars/svg?seed=${userData?.user?.user_metadata?.full_name || 'Student'}`,
+        studentName,
+        studentAvatar,
         totalScore,
         maxScore || (questions.length * 10),
         timeSpent
@@ -354,11 +362,20 @@ export default function TakeTestPage() {
       const timeSpent = test?.duration_minutes ? test.duration_minutes * 60 : 0;
       const supabase = createClient();
       const { data: userData } = await supabase.auth.getUser();
+      const { data: profileData } = await supabase
+        .from('profiles')
+        .select('full_name, avatar_url')
+        .eq('id', userData?.user?.id)
+        .maybeSingle();
+
+      const studentName = profileData?.full_name || userData?.user?.user_metadata?.full_name || "O'quvchi";
+      const studentAvatar = profileData?.avatar_url || userData?.user?.user_metadata?.avatar_url || null;
+
       await submitTournamentAttempt({
         tournamentId: testId,
         userId: userData?.user?.id || `anon_${Date.now()}`,
-        studentName: userData?.user?.user_metadata?.full_name || "O'quvchi",
-        studentAvatar: `https://api.dicebear.com/7.x/avataaars/svg?seed=${userData?.user?.user_metadata?.full_name || 'Student'}`,
+        studentName,
+        studentAvatar,
         answers,
         timeSpentSeconds: timeSpent
       });
@@ -396,6 +413,14 @@ export default function TakeTestPage() {
     if (isInternational) {
       const supabase = createClient();
       const { data: userData } = await supabase.auth.getUser();
+      const { data: profileData } = await supabase
+        .from('profiles')
+        .select('full_name, avatar_url')
+        .eq('id', userData?.user?.id)
+        .maybeSingle();
+
+      const studentName = profileData?.full_name || userData?.user?.user_metadata?.full_name || "O'quvchi";
+      const studentAvatar = profileData?.avatar_url || userData?.user?.user_metadata?.avatar_url || null;
 
       let totalScore = 0;
       let maxScore = 0;
@@ -411,8 +436,8 @@ export default function TakeTestPage() {
       await submitInternationalAttempt(
         testId,
         userData?.user?.id || `anon_${Date.now()}`,
-        userData?.user?.user_metadata?.full_name || "O'quvchi",
-        `https://api.dicebear.com/7.x/avataaars/svg?seed=${userData?.user?.user_metadata?.full_name || 'Student'}`,
+        studentName,
+        studentAvatar,
         totalScore,
         maxScore || (questions.length * 10),
         Math.max(1, timeSpent)
@@ -425,11 +450,20 @@ export default function TakeTestPage() {
     if (isOlympiad) {
       const supabase = createClient();
       const { data: userData } = await supabase.auth.getUser();
+      const { data: profileData } = await supabase
+        .from('profiles')
+        .select('full_name, avatar_url')
+        .eq('id', userData?.user?.id)
+        .maybeSingle();
+
+      const studentName = profileData?.full_name || userData?.user?.user_metadata?.full_name || "O'quvchi";
+      const studentAvatar = profileData?.avatar_url || userData?.user?.user_metadata?.avatar_url || null;
+
       await submitTournamentAttempt({
         tournamentId: testId,
         userId: userData?.user?.id || `anon_${Date.now()}`,
-        studentName: userData?.user?.user_metadata?.full_name || "O'quvchi",
-        studentAvatar: `https://api.dicebear.com/7.x/avataaars/svg?seed=${userData?.user?.user_metadata?.full_name || 'Student'}`,
+        studentName,
+        studentAvatar,
         answers,
         timeSpentSeconds: Math.max(1, timeSpent)
       });

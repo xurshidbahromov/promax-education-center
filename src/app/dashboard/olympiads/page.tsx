@@ -579,147 +579,192 @@ export default function OlympiadsPage() {
                   <div className="grid grid-cols-3 items-end gap-2.5 sm:gap-4">
                     
                     {/* 🥈 2ND PLACE (LEFT - BLUE/INDIGO GLASSY 3D STAND) */}
-                    <div className="flex flex-col items-center text-center">
-                      {/* Floating Profile Info */}
-                      <div className="flex flex-col items-center space-y-1 mb-2.5">
-                        <img
-                          src={leaderboard[1].student_avatar}
-                          alt={leaderboard[1].student_name}
-                          className="w-14 h-14 sm:w-16 sm:h-16 rounded-full bg-slate-100 dark:bg-slate-800 border-2 border-blue-300 dark:border-blue-500 shadow-none object-cover"
-                        />
+                    {(() => {
+                      const item = leaderboard[1];
+                      const isSelf = user?.id && item.user_id === user.id;
+                      const avatar = isSelf ? (profile?.avatar_url || item.student_avatar) : item.student_avatar;
+                      const hasAvatar = avatar && !avatar.includes('dicebear');
 
-                        <div className="flex items-center justify-center gap-1 max-w-[90px] sm:max-w-[120px]">
-                          <h4 className="font-bold text-xs sm:text-sm text-slate-900 dark:text-white truncate">
-                            {leaderboard[1].student_name}
-                          </h4>
-                          {user?.id && leaderboard[1].user_id === user.id && (
-                            <span className="px-1 py-0.2 rounded bg-brand-blue text-white text-[8px] font-black uppercase shrink-0 shadow-none">
-                              Siz
-                            </span>
-                          )}
-                        </div>
+                      return (
+                        <div className="flex flex-col items-center text-center">
+                          {/* Floating Profile Info */}
+                          <div className="flex flex-col items-center space-y-1 mb-2.5">
+                            {hasAvatar ? (
+                              <img
+                                src={avatar}
+                                alt={item.student_name}
+                                className="w-14 h-14 sm:w-16 sm:h-16 rounded-full bg-slate-100 dark:bg-slate-800 border-2 border-blue-300 dark:border-blue-500 shadow-none object-cover"
+                              />
+                            ) : (
+                              <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-full bg-blue-100 dark:bg-blue-900/40 text-brand-blue dark:text-blue-300 font-bold text-lg sm:text-xl flex items-center justify-center border-2 border-blue-300 dark:border-blue-500 shadow-none uppercase select-none">
+                                {(item.student_name || "O")[0]}
+                              </div>
+                            )}
 
-                        {/* Additional Metrics */}
-                        <div className="text-xs font-bold text-brand-blue dark:text-blue-400">
-                          <span>{leaderboard[1].score} ball</span>
-                          <span className="text-[10px] font-semibold opacity-75 ml-1">({leaderboard[1].percentage}%)</span>
-                        </div>
-                        <div className="flex items-center justify-center gap-1 text-[10px] text-slate-400 font-medium">
-                          <Clock size={10} />
-                          <span>{Math.floor(leaderboard[1].time_spent_seconds / 60)} daq</span>
-                        </div>
-                      </div>
+                            <div className="flex items-center justify-center gap-1 max-w-[90px] sm:max-w-[120px]">
+                              <h4 className="font-bold text-xs sm:text-sm text-slate-900 dark:text-white truncate">
+                                {item.student_name}
+                              </h4>
+                              {isSelf && (
+                                <span className="px-1 py-0.2 rounded bg-brand-blue text-white text-[8px] font-black uppercase shrink-0 shadow-none">
+                                  Siz
+                                </span>
+                              )}
+                            </div>
 
-                      {/* 3D Glassy Isometric Stand 2 */}
-                      <div className="w-full">
-                        {/* 3D Top Cap */}
-                        <div className="h-4 sm:h-5 w-full bg-gradient-to-r from-blue-200 via-indigo-200 to-sky-200 dark:from-blue-500 dark:via-indigo-400 dark:to-sky-400 rounded-t-2xl transform -skew-x-2 border-t border-x border-white/80 dark:border-white/30 shadow-none" />
-                        {/* 3D Front Face */}
-                        <div className="h-28 sm:h-36 w-full bg-gradient-to-b from-blue-400 via-indigo-500 to-indigo-600 dark:from-blue-600 dark:via-indigo-700 dark:to-indigo-800 backdrop-blur-xl rounded-b-2xl shadow-none flex items-center justify-center text-white relative overflow-hidden">
-                          <span className="text-4xl sm:text-5xl font-black font-fredoka tracking-tighter drop-shadow-md">
-                            2
-                          </span>
+                            {/* Additional Metrics */}
+                            <div className="text-xs font-bold text-brand-blue dark:text-blue-400">
+                              <span>{item.score} ball</span>
+                              <span className="text-[10px] font-semibold opacity-75 ml-1">({item.percentage}%)</span>
+                            </div>
+                            <div className="flex items-center justify-center gap-1 text-[10px] text-slate-400 font-medium">
+                              <Clock size={10} />
+                              <span>{Math.floor(item.time_spent_seconds / 60)} daq</span>
+                            </div>
+                          </div>
+
+                          {/* 3D Glassy Isometric Stand 2 */}
+                          <div className="w-full">
+                            {/* 3D Top Cap */}
+                            <div className="h-4 sm:h-5 w-full bg-gradient-to-r from-blue-200 via-indigo-200 to-sky-200 dark:from-blue-500 dark:via-indigo-400 dark:to-sky-400 rounded-t-2xl transform -skew-x-2 border-t border-x border-white/80 dark:border-white/30 shadow-none" />
+                            {/* 3D Front Face */}
+                            <div className="h-28 sm:h-36 w-full bg-gradient-to-b from-blue-400 via-indigo-500 to-indigo-600 dark:from-blue-600 dark:via-indigo-700 dark:to-indigo-800 backdrop-blur-xl rounded-b-2xl shadow-none flex items-center justify-center text-white relative overflow-hidden">
+                              <span className="text-4xl sm:text-5xl font-black font-fredoka tracking-tighter drop-shadow-md">
+                                2
+                              </span>
+                            </div>
+                          </div>
                         </div>
-                      </div>
-                    </div>
+                      );
+                    })()}
 
                     {/* 🥇 1ST PLACE (CENTER - TALL GOLD GLASSY 3D STAND) */}
-                    <div className="flex flex-col items-center text-center -mt-6 sm:-mt-8 z-20">
-                      {/* Floating Profile Info */}
-                      <div className="flex flex-col items-center space-y-1 mb-2.5">
-                        <div className="relative">
-                          <img
-                            src={leaderboard[0].student_avatar}
-                            alt={leaderboard[0].student_name}
-                            className="w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-slate-100 dark:bg-slate-800 border-4 border-amber-400 shadow-none object-cover ring-4 ring-amber-400/30"
-                          />
-                          {/* ONLY SINGLE CROWN ABOVE AVATAR */}
-                          <span className="absolute -top-3.5 left-1/2 -translate-x-1/2 p-1.5 bg-gradient-to-b from-amber-400 to-amber-600 text-white rounded-full shadow-none border border-amber-200">
-                            <Crown size={15} className="fill-white" />
-                          </span>
-                        </div>
+                    {(() => {
+                      const item = leaderboard[0];
+                      const isSelf = user?.id && item.user_id === user.id;
+                      const avatar = isSelf ? (profile?.avatar_url || item.student_avatar) : item.student_avatar;
+                      const hasAvatar = avatar && !avatar.includes('dicebear');
 
-                        <div className="flex items-center justify-center gap-1 max-w-[100px] sm:max-w-[140px]">
-                          <h4 className="font-black text-sm sm:text-base text-slate-900 dark:text-white truncate">
-                            {leaderboard[0].student_name}
-                          </h4>
-                          {user?.id && leaderboard[0].user_id === user.id && (
-                            <span className="px-1.5 py-0.2 rounded bg-brand-blue text-white text-[9px] font-black uppercase shrink-0 shadow-none">
-                              Siz
-                            </span>
-                          )}
-                        </div>
+                      return (
+                        <div className="flex flex-col items-center text-center -mt-6 sm:-mt-8 z-20">
+                          {/* Floating Profile Info */}
+                          <div className="flex flex-col items-center space-y-1 mb-2.5">
+                            <div className="relative">
+                              {hasAvatar ? (
+                                <img
+                                  src={avatar}
+                                  alt={item.student_name}
+                                  className="w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-slate-100 dark:bg-slate-800 border-4 border-amber-400 shadow-none object-cover ring-4 ring-amber-400/30"
+                                />
+                              ) : (
+                                <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-amber-100 dark:bg-amber-900/40 text-amber-600 dark:text-amber-300 font-black text-xl sm:text-2xl flex items-center justify-center border-4 border-amber-400 ring-4 ring-amber-400/30 uppercase select-none">
+                                  {(item.student_name || "O")[0]}
+                                </div>
+                              )}
+                              {/* ONLY SINGLE CROWN ABOVE AVATAR */}
+                              <span className="absolute -top-3.5 left-1/2 -translate-x-1/2 p-1.5 bg-gradient-to-b from-amber-400 to-amber-600 text-white rounded-full shadow-none border border-amber-200">
+                                <Crown size={15} className="fill-white" />
+                              </span>
+                            </div>
 
-                        {/* Additional Metrics */}
-                        <div className="text-xs sm:text-sm font-black text-amber-600 dark:text-amber-400">
-                          <span>{leaderboard[0].score} ball</span>
-                          <span className="text-[10px] font-bold bg-amber-500/15 text-amber-700 dark:text-amber-300 px-1 py-0.2 rounded ml-1">
-                            {leaderboard[0].percentage}%
-                          </span>
-                        </div>
-                        <div className="flex items-center justify-center gap-1 text-[10px] sm:text-[11px] text-slate-400 font-medium">
-                          <Clock size={10} />
-                          <span>{Math.floor(leaderboard[0].time_spent_seconds / 60)} daq {leaderboard[0].time_spent_seconds % 60} son</span>
-                        </div>
-                      </div>
+                            <div className="flex items-center justify-center gap-1 max-w-[100px] sm:max-w-[140px]">
+                              <h4 className="font-black text-sm sm:text-base text-slate-900 dark:text-white truncate">
+                                {item.student_name}
+                              </h4>
+                              {isSelf && (
+                                <span className="px-1.5 py-0.2 rounded bg-brand-blue text-white text-[9px] font-black uppercase shrink-0 shadow-none">
+                                  Siz
+                                </span>
+                              )}
+                            </div>
 
-                      {/* 3D Glassy Isometric Stand 1 */}
-                      <div className="w-full">
-                        {/* 3D Top Cap */}
-                        <div className="h-5 sm:h-6 w-full bg-gradient-to-r from-amber-200 via-amber-300 to-yellow-200 dark:from-amber-400 dark:via-amber-300 dark:to-yellow-300 rounded-t-2xl transform -skew-x-2 border-t border-x border-white/90 dark:border-white/40 shadow-none" />
-                        {/* 3D Front Face */}
-                        <div className="h-38 sm:h-48 w-full bg-gradient-to-b from-amber-400 via-amber-500 to-amber-600 dark:from-amber-500 dark:via-amber-600 dark:to-amber-700 backdrop-blur-xl rounded-b-2xl shadow-none flex items-center justify-center text-white relative overflow-hidden">
-                          <span className="text-5xl sm:text-6xl font-black font-fredoka tracking-tighter drop-shadow-lg">
-                            1
-                          </span>
+                            {/* Additional Metrics */}
+                            <div className="text-xs sm:text-sm font-black text-amber-600 dark:text-amber-400">
+                              <span>{item.score} ball</span>
+                              <span className="text-[10px] font-bold bg-amber-500/15 text-amber-700 dark:text-amber-300 px-1 py-0.2 rounded ml-1">
+                                {item.percentage}%
+                              </span>
+                            </div>
+                            <div className="flex items-center justify-center gap-1 text-[10px] sm:text-[11px] text-slate-400 font-medium">
+                              <Clock size={10} />
+                              <span>{Math.floor(item.time_spent_seconds / 60)} daq {item.time_spent_seconds % 60} son</span>
+                            </div>
+                          </div>
+
+                          {/* 3D Glassy Isometric Stand 1 */}
+                          <div className="w-full">
+                            {/* 3D Top Cap */}
+                            <div className="h-5 sm:h-6 w-full bg-gradient-to-r from-amber-200 via-amber-300 to-yellow-200 dark:from-amber-400 dark:via-amber-300 dark:to-yellow-300 rounded-t-2xl transform -skew-x-2 border-t border-x border-white/90 dark:border-white/40 shadow-none" />
+                            {/* 3D Front Face */}
+                            <div className="h-38 sm:h-48 w-full bg-gradient-to-b from-amber-400 via-amber-500 to-amber-600 dark:from-amber-500 dark:via-amber-600 dark:to-amber-700 backdrop-blur-xl rounded-b-2xl shadow-none flex items-center justify-center text-white relative overflow-hidden">
+                              <span className="text-5xl sm:text-6xl font-black font-fredoka tracking-tighter drop-shadow-lg">
+                                1
+                              </span>
+                            </div>
+                          </div>
                         </div>
-                      </div>
-                    </div>
+                      );
+                    })()}
 
                     {/* 🥉 3RD PLACE (RIGHT - ORANGE/BRONZE GLASSY 3D STAND) */}
-                    <div className="flex flex-col items-center text-center">
-                      {/* Floating Profile Info */}
-                      <div className="flex flex-col items-center space-y-1 mb-2.5">
-                        <img
-                          src={leaderboard[2].student_avatar}
-                          alt={leaderboard[2].student_name}
-                          className="w-14 h-14 sm:w-16 sm:h-16 rounded-full bg-slate-100 dark:bg-slate-800 border-2 border-orange-400 dark:border-orange-500 shadow-none object-cover"
-                        />
+                    {(() => {
+                      const item = leaderboard[2];
+                      const isSelf = user?.id && item.user_id === user.id;
+                      const avatar = isSelf ? (profile?.avatar_url || item.student_avatar) : item.student_avatar;
+                      const hasAvatar = avatar && !avatar.includes('dicebear');
 
-                        <div className="flex items-center justify-center gap-1 max-w-[90px] sm:max-w-[120px]">
-                          <h4 className="font-bold text-xs sm:text-sm text-slate-900 dark:text-white truncate">
-                            {leaderboard[2].student_name}
-                          </h4>
-                          {user?.id && leaderboard[2].user_id === user.id && (
-                            <span className="px-1 py-0.2 rounded bg-brand-blue text-white text-[8px] font-black uppercase shrink-0 shadow-none">
-                              Siz
-                            </span>
-                          )}
-                        </div>
+                      return (
+                        <div className="flex flex-col items-center text-center">
+                          {/* Floating Profile Info */}
+                          <div className="flex flex-col items-center space-y-1 mb-2.5">
+                            {hasAvatar ? (
+                              <img
+                                src={avatar}
+                                alt={item.student_name}
+                                className="w-14 h-14 sm:w-16 sm:h-16 rounded-full bg-slate-100 dark:bg-slate-800 border-2 border-orange-400 dark:border-orange-500 shadow-none object-cover"
+                              />
+                            ) : (
+                              <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-full bg-orange-100 dark:bg-orange-900/40 text-orange-600 dark:text-orange-300 font-bold text-lg sm:text-xl flex items-center justify-center border-2 border-orange-400 dark:border-orange-500 shadow-none uppercase select-none">
+                                {(item.student_name || "O")[0]}
+                              </div>
+                            )}
 
-                        {/* Additional Metrics */}
-                        <div className="text-xs font-bold text-orange-600 dark:text-orange-400">
-                          <span>{leaderboard[2].score} ball</span>
-                          <span className="text-[10px] font-semibold opacity-75 ml-1">({leaderboard[2].percentage}%)</span>
-                        </div>
-                        <div className="flex items-center justify-center gap-1 text-[10px] text-slate-400 font-medium">
-                          <Clock size={10} />
-                          <span>{Math.floor(leaderboard[2].time_spent_seconds / 60)} daq</span>
-                        </div>
-                      </div>
+                            <div className="flex items-center justify-center gap-1 max-w-[90px] sm:max-w-[120px]">
+                              <h4 className="font-bold text-xs sm:text-sm text-slate-900 dark:text-white truncate">
+                                {item.student_name}
+                              </h4>
+                              {isSelf && (
+                                <span className="px-1 py-0.2 rounded bg-brand-blue text-white text-[8px] font-black uppercase shrink-0 shadow-none">
+                                  Siz
+                                </span>
+                              )}
+                            </div>
 
-                      {/* 3D Glassy Isometric Stand 3 */}
-                      <div className="w-full">
-                        {/* 3D Top Cap */}
-                        <div className="h-4 sm:h-5 w-full bg-gradient-to-r from-orange-200 via-amber-200 to-rose-200 dark:from-orange-500 dark:via-amber-400 dark:to-rose-400 rounded-t-2xl transform -skew-x-2 border-t border-x border-white/80 dark:border-white/30 shadow-none" />
-                        {/* 3D Front Face */}
-                        <div className="h-24 sm:h-30 w-full bg-gradient-to-b from-orange-400 via-orange-500 to-amber-600 dark:from-orange-600 dark:via-orange-700 dark:to-amber-800 backdrop-blur-xl rounded-b-2xl shadow-none flex items-center justify-center text-white relative overflow-hidden">
-                          <span className="text-4xl sm:text-5xl font-black font-fredoka tracking-tighter drop-shadow-md">
-                            3
-                          </span>
+                            {/* Additional Metrics */}
+                            <div className="text-xs font-bold text-orange-600 dark:text-orange-400">
+                              <span>{item.score} ball</span>
+                              <span className="text-[10px] font-semibold opacity-75 ml-1">({item.percentage}%)</span>
+                            </div>
+                            <div className="flex items-center justify-center gap-1 text-[10px] text-slate-400 font-medium">
+                              <Clock size={10} />
+                              <span>{Math.floor(item.time_spent_seconds / 60)} daq</span>
+                            </div>
+                          </div>
+
+                          {/* 3D Glassy Isometric Stand 3 */}
+                          <div className="w-full">
+                            {/* 3D Top Cap */}
+                            <div className="h-4 sm:h-5 w-full bg-gradient-to-r from-orange-200 via-amber-200 to-rose-200 dark:from-orange-500 dark:via-amber-400 dark:to-rose-400 rounded-t-2xl transform -skew-x-2 border-t border-x border-white/80 dark:border-white/30 shadow-none" />
+                            {/* 3D Front Face */}
+                            <div className="h-24 sm:h-30 w-full bg-gradient-to-b from-orange-400 via-orange-500 to-amber-600 dark:from-orange-600 dark:via-orange-700 dark:to-amber-800 backdrop-blur-xl rounded-b-2xl shadow-none flex items-center justify-center text-white relative overflow-hidden">
+                              <span className="text-4xl sm:text-5xl font-black font-fredoka tracking-tighter drop-shadow-md">
+                                3
+                              </span>
+                            </div>
+                          </div>
                         </div>
-                      </div>
-                    </div>
+                      );
+                    })()}
 
                   </div>
                 </div>
@@ -759,6 +804,8 @@ export default function OlympiadsPage() {
                     .filter((entry) => entry.rank > 3)
                     .map((entry) => {
                       const isSelf = user?.id && entry.user_id === user.id;
+                      const avatar = isSelf ? (profile?.avatar_url || entry.student_avatar) : entry.student_avatar;
+                      const hasAvatar = avatar && !avatar.includes('dicebear');
 
                       return (
                         <div
@@ -775,11 +822,17 @@ export default function OlympiadsPage() {
                               #{entry.rank}
                             </span>
 
-                            <img
-                              src={entry.student_avatar}
-                              alt={entry.student_name}
-                              className="w-10 h-10 rounded-full bg-slate-200 dark:bg-slate-700 shrink-0 object-cover border border-slate-200/60 dark:border-slate-700"
-                            />
+                            {hasAvatar ? (
+                              <img
+                                src={avatar}
+                                alt={entry.student_name}
+                                className="w-10 h-10 rounded-full bg-slate-200 dark:bg-slate-700 shrink-0 object-cover border border-slate-200/60 dark:border-slate-700"
+                              />
+                            ) : (
+                              <div className="w-10 h-10 rounded-full bg-brand-blue/10 dark:bg-brand-blue/20 text-brand-blue dark:text-blue-400 font-bold text-xs flex items-center justify-center border border-brand-blue/20 shrink-0 select-none uppercase">
+                                {(entry.student_name || "O")[0]}
+                              </div>
+                            )}
 
                             <div className="min-w-0">
                               <div className="flex items-center gap-1.5">

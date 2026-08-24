@@ -581,7 +581,7 @@ export async function submitTournamentAttempt(params: {
     tournament_id: params.tournamentId,
     user_id: params.userId,
     student_name: params.studentName || "O'quvchi",
-    student_avatar: params.studentAvatar || `https://api.dicebear.com/7.x/avataaars/svg?seed=${params.studentName || 'Student'}`,
+    student_avatar: params.studentAvatar || "",
     score: Number(totalScore.toFixed(1)),
     max_score: Number(maxScore.toFixed(1)),
     percentage,

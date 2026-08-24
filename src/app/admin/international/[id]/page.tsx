@@ -439,7 +439,13 @@ export default function InternationalTournamentDetailPage({ params }: PageProps)
                       #{entry.rank}
                     </td>
                     <td className="py-3 px-4 flex items-center gap-2 font-bold text-slate-800 dark:text-slate-100">
-                      <img src={entry.student_avatar} alt="" className="w-6 h-6 rounded-full bg-slate-200" />
+                      {entry.student_avatar && !entry.student_avatar.includes('dicebear') ? (
+                        <img src={entry.student_avatar} alt="" className="w-6 h-6 rounded-full bg-slate-200 object-cover" />
+                      ) : (
+                        <div className="w-6 h-6 rounded-full bg-brand-blue/10 text-brand-blue font-bold text-[10px] flex items-center justify-center uppercase">
+                          {(entry.student_name || 'O')[0]}
+                        </div>
+                      )}
                       <span>{entry.student_name}</span>
                     </td>
                     <td className="py-3 px-4 font-bold text-indigo-600 dark:text-indigo-400">

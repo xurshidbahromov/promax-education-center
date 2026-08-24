@@ -387,7 +387,7 @@ export async function submitInternationalAttempt(
     tournament_id: tournamentId,
     user_id: userId,
     student_name: userName || "Student",
-    student_avatar: userAvatar || `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(userName || 'User')}`,
+    student_avatar: userAvatar || "",
     score,
     max_score: maxScore,
     scaled_score: scaledScore,
