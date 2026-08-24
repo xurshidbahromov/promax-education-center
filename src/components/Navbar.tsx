@@ -70,177 +70,176 @@ const Navbar = () => {
  return (
  <div className="fixed top-0 left-0 w-full z-50 flex justify-center pt-4 sm:pt-6 px-4 sm:px-6 lg:px-8 pointer-events-none">
  <nav className="w-full max-w-7xl flex flex-col gap-4 pointer-events-none relative" aria-label="Main Navigation">
- {/* Desktop and Mobile Islands Row */}
- <div className="w-full flex justify-between items-center pointer-events-none">
- 
- {/* Left: Logo Island */}
- <div className="flex justify-start pointer-events-auto">
- <div className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl border border-gray-200/50 dark:border-white/10 shadow-sm rounded-full h-16 px-5 flex items-center transition-all duration-300">
- <Link href="/" className="flex items-center group">
- <div className="w-20 h-10 relative flex items-center">
- <Image
- src="/logo.png"
- alt="Promax Education Center Logo"
- width={256}
- height={256}
- className="w-full h-full object-contain dark:filter-none invert hue-rotate-180 opacity-85 hover:opacity-100 active:opacity-100 transition-opacity duration-300"
- />
- </div>
- </Link>
- </div>
- </div>
-
- {/* Center: Nav Links Island */}
- <div className="hidden lg:flex justify-center pointer-events-auto">
- <div className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl border border-gray-200/50 dark:border-white/10 shadow-sm rounded-full h-16 px-8 flex items-center gap-6 xl:gap-8 transition-all duration-300">
- {['home', 'courses', 'methodology', 'results', 'about'].map((item) => (
- <Link
- key={item}
- href={item === 'home' ? '/' : `/${item}`}
- className={cn(
- "text-sm font-semibold transition-colors relative group py-2",
- isActive(item)
- ? "text-brand-blue dark:text-blue-400"
- : "text-gray-700 dark:text-gray-300 hover:text-brand-blue active:text-brand-blue dark:hover:text-blue-400 active:text-blue-400"
- )}
- >
- {t(`nav.${item}`)}
- <span className={cn(
- "absolute -bottom-1 left-1/2 -translate-x-1/2 h-1 rounded-full bg-brand-blue transition-all duration-300",
- isActive(item) ? "w-1.5" : "w-0 group-hover:w-1.5"
- )}></span>
- </Link>
- ))}
- </div>
- </div>
-
- {/* Right: Controls Island / Mobile Toggle Island */}
- <div className="flex justify-end items-center gap-3">
- {/* Desktop Controls Island */}
- <div className="hidden lg:flex pointer-events-auto">
- <div className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl border border-gray-200/50 dark:border-white/10 shadow-sm rounded-full h-16 px-6 flex items-center gap-3 transition-all duration-300">
- {/* Theme Dropdown */}
- <div className="relative" ref={themeRef}>
- <button
- onClick={() => setThemeOpen(!themeOpen)}
- className="flex items-center justify-center w-10 h-10 rounded-full text-gray-700 dark:text-gray-300 hover:bg-black/5 active:bg-black/5 dark:hover:bg-white/10 active:bg-white/10 transition-colors"
- aria-label="Theme Menu"
- >
- <ThemeIcon />
- </button>
-
- <AnimatePresence>
- {themeOpen && (
- <motion.div
- initial="hidden"
- animate="visible"
- exit="exit"
- variants={dropdownVariants}
- className="absolute top-full right-0 mt-4 w-36 bg-white/90 dark:bg-slate-900/90 backdrop-blur-xl border border-gray-100 dark:border-slate-800 rounded-2xl shadow-xl z-20 overflow-hidden"
- >
- {[
- { value: 'light', label: 'Light', icon: Sun },
- { value: 'dark', label: 'Dark', icon: Moon },
- { value: 'system', label: 'System', icon: Monitor }
- ].map((option) => (
- <button
- key={option.value}
- onClick={() => { setTheme(option.value); setThemeOpen(false); }}
- className={cn(
- "w-full flex items-center gap-3 px-4 py-3 text-sm font-medium transition-colors hover:bg-black/5 active:bg-black/5 dark:hover:bg-white/5 active:bg-white/5",
- theme === option.value ? "text-brand-blue" : "text-gray-700 dark:text-gray-300"
- )}
- >
- <option.icon className="w-4 h-4" />
- <span>{option.label}</span>
- {theme === option.value && <Check className="w-3.5 h-3.5 ml-auto" />}
- </button>
- ))}
- </motion.div>
- )}
- </AnimatePresence>
- </div>
-
- {/* Language Dropdown */}
- <div className="relative" ref={langRef}>
- <button
- onClick={() => setLangOpen(!langOpen)}
- className="flex items-center gap-1.5 px-3 h-10 rounded-full text-gray-700 dark:text-gray-300 hover:bg-black/5 active:bg-black/5 dark:hover:bg-white/10 active:bg-white/10 transition-colors font-semibold text-sm"
- aria-label="Language Menu"
- >
- <Globe className="w-4 h-4" />
- <span>{language}</span>
- </button>
-
- <AnimatePresence>
- {langOpen && (
- <motion.div
- initial="hidden"
- animate="visible"
- exit="exit"
- variants={dropdownVariants}
- className="absolute top-full right-0 mt-4 w-24 bg-white/90 dark:bg-slate-900/90 backdrop-blur-xl border border-gray-100 dark:border-slate-800 rounded-2xl shadow-xl z-20 overflow-hidden"
- >
- {(['UZ', 'EN', 'RU'] as const).map((lang) => (
- <button
- key={lang}
- onClick={() => { setLanguage(lang); setLangOpen(false); }}
- className={cn(
- "w-full flex items-center justify-between px-4 py-3 text-sm font-medium transition-colors hover:bg-black/5 active:bg-black/5 dark:hover:bg-white/5 active:bg-white/5",
- language === lang ? "text-brand-blue" : "text-gray-700 dark:text-gray-300"
- )}
- >
- <span>{lang}</span>
- {language === lang && <Check className="w-3.5 h-3.5" />}
- </button>
- ))}
- </motion.div>
- )}
- </AnimatePresence>
- </div>
-
- <div className="h-6 w-px bg-gray-300 dark:bg-slate-700 mx-1"></div>
-
- {user ? (
-  <Link
-    href="/dashboard"
-    className="bg-brand-blue text-white px-6 h-10 flex items-center justify-center rounded-full text-sm font-medium hover:bg-brand-blue/90 active:bg-brand-blue/90 transition-colors active:scale-[0.98] ml-1 shadow-sm"
-  >
-    Dashboard
+  {/* Desktop and Mobile Islands Row */}
+  <div className="w-full flex justify-between items-center pointer-events-none">
+  
+  {/* Left: Logo Island */}
+  <div className="flex justify-start pointer-events-auto">
+  <div className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-2xl border border-white/70 dark:border-white/10 shadow-sm rounded-full h-16 px-5 flex items-center transition-all duration-300">
+  <Link href="/" className="flex items-center group">
+  <div className="w-20 h-10 relative flex items-center">
+  <Image
+  src="/logo.png"
+  alt="Promax Education Center Logo"
+  width={256}
+  height={256}
+  className="w-full h-full object-contain dark:filter-none invert hue-rotate-180 opacity-90 hover:opacity-100 transition-opacity duration-300"
+  />
+  </div>
   </Link>
+  </div>
+  </div>
+
+  {/* Center: Nav Links Island */}
+  <div className="hidden lg:flex justify-center pointer-events-auto">
+  <div className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-2xl border border-white/70 dark:border-white/10 shadow-sm rounded-full h-16 px-8 flex items-center gap-7 xl:gap-9 transition-all duration-300">
+  {['home', 'courses', 'methodology', 'results', 'about'].map((item) => (
+  <Link
+  key={item}
+  href={item === 'home' ? '/' : `/${item}`}
+  className={cn(
+  "text-sm font-medium transition-colors relative py-2",
+  isActive(item)
+  ? "text-brand-blue dark:text-blue-400 font-semibold"
+  : "text-slate-600 dark:text-slate-300 hover:text-brand-blue dark:hover:text-blue-400"
+  )}
+  >
+  {t(`nav.${item}`)}
+  <span className={cn(
+  "absolute -bottom-1 left-1/2 -translate-x-1/2 h-0.5 rounded-full bg-brand-blue transition-all duration-300",
+  isActive(item) ? "w-3 bg-brand-blue" : "w-0"
+  )}></span>
+  </Link>
+  ))}
+  </div>
+  </div>
+
+  {/* Right: Controls Island / Mobile Toggle Island */}
+  <div className="flex justify-end items-center gap-3">
+  {/* Desktop Controls Island */}
+  <div className="hidden lg:flex pointer-events-auto">
+  <div className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-2xl border border-white/70 dark:border-white/10 shadow-sm rounded-full h-16 px-6 flex items-center gap-3.5 transition-all duration-300">
+  {/* Theme Dropdown */}
+  <div className="relative" ref={themeRef}>
+  <button
+  onClick={() => setThemeOpen(!themeOpen)}
+  className="flex items-center justify-center w-10 h-10 rounded-full text-slate-600 dark:text-slate-300 hover:bg-black/5 dark:hover:bg-white/10 transition-colors"
+  aria-label="Theme Menu"
+  >
+  <ThemeIcon />
+  </button>
+
+  <AnimatePresence>
+  {themeOpen && (
+  <motion.div
+  initial="hidden"
+  animate="visible"
+  exit="exit"
+  variants={dropdownVariants}
+  className="absolute top-full right-0 mt-4 w-36 bg-white/95 dark:bg-slate-900/95 backdrop-blur-2xl border border-gray-100 dark:border-slate-800 rounded-2xl shadow-xl z-20 overflow-hidden"
+  >
+  {[
+  { value: 'light', label: 'Light', icon: Sun },
+  { value: 'dark', label: 'Dark', icon: Moon },
+  { value: 'system', label: 'System', icon: Monitor }
+  ].map((option) => (
+  <button
+  key={option.value}
+  onClick={() => { setTheme(option.value); setThemeOpen(false); }}
+  className={cn(
+  "w-full flex items-center gap-3 px-4 py-3 text-sm font-medium transition-colors hover:bg-black/5 dark:hover:bg-white/5",
+  theme === option.value ? "text-brand-blue font-semibold" : "text-slate-700 dark:text-slate-300"
+  )}
+  >
+  <option.icon className="w-4 h-4" />
+  <span>{option.label}</span>
+  {theme === option.value && <Check className="w-3.5 h-3.5 ml-auto" />}
+  </button>
+  ))}
+  </motion.div>
+  )}
+  </AnimatePresence>
+  </div>
+
+  {/* Language Dropdown */}
+  <div className="relative" ref={langRef}>
+  <button
+  onClick={() => setLangOpen(!langOpen)}
+  className="flex items-center gap-1.5 px-3 h-10 rounded-full text-slate-700 dark:text-slate-300 hover:bg-black/5 dark:hover:bg-white/10 transition-colors font-medium text-sm"
+  aria-label="Language Menu"
+  >
+  <Globe className="w-4 h-4 text-brand-orange" />
+  <span>{language}</span>
+  </button>
+
+  <AnimatePresence>
+  {langOpen && (
+  <motion.div
+  initial="hidden"
+  animate="visible"
+  exit="exit"
+  variants={dropdownVariants}
+  className="absolute top-full right-0 mt-4 w-24 bg-white/95 dark:bg-slate-900/95 backdrop-blur-2xl border border-gray-100 dark:border-slate-800 rounded-2xl shadow-xl z-20 overflow-hidden"
+  >
+  {(['UZ', 'EN', 'RU'] as const).map((lang) => (
+  <button
+  key={lang}
+  onClick={() => { setLanguage(lang); setLangOpen(false); }}
+  className={cn(
+  "w-full flex items-center justify-between px-4 py-3 text-sm font-medium transition-colors hover:bg-black/5 dark:hover:bg-white/5",
+  language === lang ? "text-brand-blue font-semibold" : "text-slate-700 dark:text-slate-300"
+  )}
+  >
+  <span>{lang}</span>
+  {language === lang && <Check className="w-3.5 h-3.5" />}
+  </button>
+  ))}
+  </motion.div>
+  )}
+  </AnimatePresence>
+  </div>
+
+  <div className="h-6 w-px bg-slate-200 dark:bg-slate-700 mx-1"></div>
+
+  {user ? (
+   <Link
+     href="/dashboard"
+     className="bg-brand-blue text-white px-5 h-10 flex items-center justify-center rounded-full text-sm font-medium hover:bg-brand-blue/90 active:scale-95 transition-all shadow-sm"
+   >
+     Dashboard
+   </Link>
 ) : (
   <>
     <Link
       href="/login"
-      className="text-sm font-semibold text-gray-800 dark:text-gray-200 hover:text-brand-blue active:text-brand-blue dark:hover:text-blue-400 active:text-blue-400 transition-colors px-2"
+      className="text-sm font-medium text-slate-700 dark:text-slate-200 hover:text-brand-blue dark:hover:text-blue-400 transition-colors px-2"
     >
       {t('nav.login')}
     </Link>
 
     <Link
       href="/register"
-      className="bg-brand-blue text-white px-6 h-10 flex items-center justify-center rounded-full text-sm font-medium hover:bg-brand-blue/90 active:bg-brand-blue/90 transition-colors active:scale-[0.98] ml-1 shadow-sm"
+      className="bg-brand-orange text-white px-5 h-10 flex items-center justify-center rounded-full text-sm font-medium hover:bg-brand-orange/90 active:scale-95 transition-all shadow-sm ml-1"
     >
       {t('hero.cta.primary')}
     </Link>
   </>
 )}
- </div>
- </div>
+  </div>
+  </div>
 
- {/* Mobile: Hamburger Menu Toggle Island */}
- <div className="lg:hidden flex justify-end pointer-events-auto">
- <button
- className="flex items-center justify-center w-16 h-16 rounded-full text-gray-800 dark:text-gray-200 bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl border border-gray-200/50 dark:border-white/10 shadow-sm active:scale-[0.98] transition-transform duration-300"
- onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
- aria-label="Toggle Menu"
- >
- {mobileMenuOpen ? <X size={20} /> : <Menu size={20} />}
- </button>
- </div>
- </div>
-
- </div>
+    {/* Mobile: Hamburger Menu Toggle Island */}
+    <div className="lg:hidden flex justify-end pointer-events-auto">
+      <button
+        className="flex items-center justify-center w-16 h-16 rounded-full text-slate-800 dark:text-slate-200 bg-white/80 dark:bg-slate-900/80 backdrop-blur-2xl border border-white/70 dark:border-white/10 shadow-sm active:scale-95 transition-all duration-300"
+        onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+        aria-label="Toggle Menu"
+      >
+        {mobileMenuOpen ? <X size={20} /> : <Menu size={20} />}
+      </button>
+    </div>
+  </div>
+</div>
 
  {/* Mobile Menu Island */}
  <AnimatePresence>

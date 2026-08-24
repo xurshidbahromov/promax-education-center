@@ -25,7 +25,7 @@ const Hero = () => {
  transition={{ duration: 0.5, ease: "easeOut" }}
  className="mb-6 sm:mb-8 mt-4 sm:mt-0"
  >
- <span className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-black/5 dark:bg-white/10 backdrop-blur-md border border-black/10 dark:border-white/20 text-slate-600 dark:text-slate-300 text-xs sm:text-sm font-semibold tracking-wide uppercase">
+ <span className="inline-flex items-center gap-2.5 px-4 py-2 rounded-full bg-white/70 dark:bg-slate-900/70 backdrop-blur-xl border border-slate-200/80 dark:border-white/15 text-slate-700 dark:text-slate-200 text-xs sm:text-sm font-bold tracking-wide uppercase shadow-sm">
  <span className="relative flex h-2 w-2">
  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-brand-orange opacity-75"></span>
  <span className="relative inline-flex rounded-full h-2 w-2 bg-brand-orange"></span>
@@ -36,14 +36,14 @@ const Hero = () => {
 
  {/* Headline - Massive */}
  <motion.h1
- className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-semibold tracking-tighter text-slate-800 dark:text-slate-100 leading-[1.05] mb-6 max-w-2xl uppercase font-fredoka"
+ className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-semibold tracking-tighter text-slate-800 dark:text-slate-100 leading-[1.05] mb-6 max-w-2xl uppercase font-fredoka drop-shadow-sm"
  initial={{ opacity: 0, y: 30 }}
  animate={{ opacity: 1, y: 0 }}
  transition={{ duration: 0.7, delay: 0.1, ease: [0.21, 0.47, 0.32, 0.98] }}
  >
  {t('hero.headline').split(',').map((part, i) => (
  part.trim() && (
- <span key={i} className={`block ${i === 1 ? 'text-brand-orange' : ''}`}>
+ <span key={i} className={`block ${i === 1 ? 'text-brand-orange bg-gradient-to-r from-orange-500 to-amber-500 bg-clip-text text-transparent' : ''}`}>
  {part.trim()}
  </span>
  )
@@ -69,45 +69,45 @@ const Hero = () => {
  >
  <Link
  href="/register"
- className="group bg-brand-orange text-white px-8 py-4 rounded-full font-semibold text-lg hover:bg-brand-orange/90 active:bg-brand-orange/90 transition-colors active:scale-[0.98] flex items-center justify-center gap-3 uppercase tracking-wider"
+ className="bg-brand-orange text-white px-8 py-4 rounded-full font-medium text-base shadow-lg shadow-orange-500/20 hover:bg-brand-orange/90 active:scale-95 transition-all flex items-center justify-center gap-2.5 uppercase tracking-wider"
  >
- {t('hero.cta.primary')}
- <ArrowRight className="w-5 h-5 group-hover:translate-x-1 active:scale-95 transition-transform duration-300 ease-out" />
+ <span>{t('hero.cta.primary')}</span>
+ <ArrowRight className="w-5 h-5" />
  </Link>
  
  <Link
  href="/courses"
- className="group bg-black/5 dark:bg-white/10 backdrop-blur-md border border-black/10 dark:border-white/20 text-slate-800 dark:text-slate-100 px-8 py-4 rounded-full font-medium text-lg hover:bg-black/10 active:bg-black/10 dark:hover:bg-white/20 active:bg-white/20 transition-colors active:scale-[0.98] flex items-center justify-center gap-3 uppercase tracking-wider"
+ className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl border border-white/70 dark:border-white/10 text-slate-800 dark:text-slate-100 hover:bg-white/95 dark:hover:bg-slate-800/95 px-8 py-4 rounded-full font-medium text-base shadow-sm transition-all active:scale-95 flex items-center justify-center gap-2.5 uppercase tracking-wider"
  >
- <PlayCircle className="w-5 h-5 transition-transform" />
- {t('hero.cta.tests')}
+ <PlayCircle className="w-5 h-5 text-brand-orange" />
+ <span>{t('hero.cta.tests')}</span>
  </Link>
  </motion.div>
 
  {/* Trust Indicators */}
  <motion.div
- className="mt-12 pt-8 border-t border-black/10 dark:border-white/10 flex flex-wrap items-center justify-center lg:justify-start gap-x-8 gap-y-4 text-sm font-medium text-slate-500 dark:text-slate-300/80 uppercase tracking-widest w-full"
+ className="mt-12 pt-8 border-t border-slate-200/60 dark:border-white/10 flex flex-wrap items-center justify-center lg:justify-start gap-x-8 gap-y-4 text-xs sm:text-sm font-medium text-slate-600 dark:text-slate-400 uppercase tracking-wider w-full"
  initial={{ opacity: 0 }}
  animate={{ opacity: 1 }}
  transition={{ duration: 1, delay: 0.6 }}
  >
- <div className="flex items-center gap-3 group">
- <div className="w-8 h-8 rounded-full bg-black/5 dark:bg-white/10 flex items-center justify-center border border-black/10 dark:border-white/20 group-hover:border-brand-orange group-active:border-brand-orange active:border-brand-orange group-hover:text-brand-orange group-active:text-brand-orange active:text-brand-orange transition-colors">
+ <div className="flex items-center gap-2.5 cursor-default">
+ <div className="w-7 h-7 rounded-full bg-orange-500/10 text-orange-500 flex items-center justify-center border border-orange-500/20">
  <CheckCircle2 className="w-4 h-4" />
  </div>
- <span className="group-hover:text-slate-800 group-active:text-slate-800 active:text-slate-800 dark:group-hover:text-slate-100 group-active:text-slate-100 active:text-slate-100 transition-colors">{t('hero.trust.cert')}</span>
+ <span>{t('hero.trust.cert')}</span>
  </div>
- <div className="flex items-center gap-3 group">
- <div className="w-8 h-8 rounded-full bg-black/5 dark:bg-white/10 flex items-center justify-center border border-black/10 dark:border-white/20 group-hover:border-brand-orange group-active:border-brand-orange active:border-brand-orange group-hover:text-brand-orange group-active:text-brand-orange active:text-brand-orange transition-colors">
+ <div className="flex items-center gap-2.5 cursor-default">
+ <div className="w-7 h-7 rounded-full bg-blue-500/10 text-blue-500 flex items-center justify-center border border-blue-500/20">
  <CheckCircle2 className="w-4 h-4" />
  </div>
- <span className="group-hover:text-slate-800 group-active:text-slate-800 active:text-slate-800 dark:group-hover:text-slate-100 group-active:text-slate-100 active:text-slate-100 transition-colors">{t('hero.trust.exam')}</span>
+ <span>{t('hero.trust.exam')}</span>
  </div>
- <div className="flex items-center gap-3 group">
- <div className="w-8 h-8 rounded-full bg-black/5 dark:bg-white/10 flex items-center justify-center border border-black/10 dark:border-white/20 group-hover:border-brand-orange group-active:border-brand-orange active:border-brand-orange group-hover:text-brand-orange group-active:text-brand-orange active:text-brand-orange transition-colors">
+ <div className="flex items-center gap-2.5 cursor-default">
+ <div className="w-7 h-7 rounded-full bg-emerald-500/10 text-emerald-500 flex items-center justify-center border border-emerald-500/20">
  <CheckCircle2 className="w-4 h-4" />
  </div>
- <span className="group-hover:text-slate-800 group-active:text-slate-800 active:text-slate-800 dark:group-hover:text-slate-100 group-active:text-slate-100 active:text-slate-100 transition-colors">{t('hero.trust.mock')}</span>
+ <span>{t('hero.trust.mock')}</span>
  </div>
  </motion.div>
  </div>

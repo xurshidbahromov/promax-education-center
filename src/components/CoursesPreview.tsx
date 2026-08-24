@@ -109,30 +109,29 @@ const CoursesPreview = () => {
  <motion.div
  key={cat.id}
  variants={itemVariants}
- className={`group relative rounded-3xl overflow-hidden shadow-lg ${cat.span} cursor-pointer [-webkit-mask-image:-webkit-radial-gradient(white,black)]`}
+ className={`group relative rounded-[2rem] overflow-hidden shadow-sm hover:shadow-xl border border-white/70 dark:border-white/10 ${cat.span} cursor-pointer transition-all duration-300 [-webkit-mask-image:-webkit-radial-gradient(white,black)]`}
  >
  {/* Background Image */}
  <Image
  src={cat.image}
  alt={cat.id}
  fill
- className="object-cover transition-transform duration-700 group-hover:scale-[1.03] group-active:scale-95"
+ className="object-cover"
  />
  
  {/* Gradient Overlay */}
- <div className="absolute inset-0 bg-gradient-to-t from-slate-900 via-slate-900/40 to-transparent transition-opacity duration-300 group-hover:opacity-90 group-active:opacity-90 active:opacity-90" />
- <div className="absolute inset-0 bg-brand-blue/20 opacity-0 group-hover:opacity-100 group-active:opacity-100 active:opacity-100 transition-opacity duration-500 mix-blend-multiply" />
+ <div className="absolute inset-0 bg-gradient-to-t from-slate-950/90 via-slate-900/40 to-transparent opacity-85 group-hover:opacity-90 transition-opacity duration-300" />
 
  {/* Content */}
  <div className="absolute inset-0 p-6 sm:p-8 flex flex-col justify-end">
- <div className="w-14 h-14 rounded-2xl bg-brand-orange/90 backdrop-blur-sm flex items-center justify-center mb-4 transform translate-y-4 opacity-0 group-hover:translate-y-0 active:scale-95 group-hover:opacity-100 group-active:opacity-100 active:opacity-100 transition-all duration-300">
- <cat.icon className="w-7 h-7 text-white" />
+ <div className="w-12 h-12 rounded-2xl bg-brand-orange text-white flex items-center justify-center mb-3.5 shadow-sm">
+ <cat.icon className="w-6 h-6" />
  </div>
 
- <h3 className="text-2xl sm:text-3xl font-semibold text-white mb-2 uppercase tracking-wide transform translate-y-4 group-hover:translate-y-0 active:scale-95 transition-transform duration-300">
+ <h3 className="text-2xl sm:text-3xl font-semibold text-white mb-2 uppercase tracking-wide font-fredoka">
  {t(`courses.cat.${cat.id}`)}
  </h3>
- <p className="text-white/90 font-medium line-clamp-2 transform translate-y-8 opacity-0 group-hover:translate-y-0 active:scale-95 group-hover:opacity-100 group-active:opacity-100 active:opacity-100 transition-all duration-300 delay-75">
+ <p className="text-white/80 text-sm font-medium line-clamp-2">
  {t(`courses.cat.${cat.id}.desc`)}
  </p>
  </div>
@@ -144,10 +143,10 @@ const CoursesPreview = () => {
  <div className="mt-8 text-center md:hidden">
  <Link
  href="/courses"
- className="w-full py-4 rounded-full border-2 border-brand-blue text-brand-blue font-medium text-center flex items-center justify-center gap-2 hover:bg-brand-blue active:bg-brand-blue hover:text-white active:text-white transition-all active:scale-95 group"
+ className="w-full py-4 rounded-full bg-white/70 dark:bg-slate-900/70 border-2 border-brand-blue dark:border-blue-400 text-brand-blue dark:text-blue-400 font-medium text-center flex items-center justify-center gap-2 hover:bg-brand-blue hover:text-white transition-all active:scale-95 shadow-sm uppercase tracking-wider"
  >
- {t('courses.view_all')}
- <ArrowRight className="w-5 h-5 group-hover:translate-x-1 active:scale-95 transition-transform duration-300 ease-out" />
+ <span>{t('courses.view_all')}</span>
+ <ArrowRight className="w-4 h-4" />
  </Link>
  </div>
 

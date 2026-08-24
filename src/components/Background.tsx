@@ -19,6 +19,15 @@ export const Background = () => {
         }}
       />
 
+      {/* ── 2.5 Subtle Geometric Grid Matrix Overlay ── */}
+      <div 
+        className="absolute inset-0 opacity-[0.035] dark:opacity-[0.05] pointer-events-none"
+        style={{
+          backgroundImage: "radial-gradient(currentColor 1px, transparent 1px)",
+          backgroundSize: "28px 28px",
+        }}
+      />
+
       {/* ── 3. High-Performance Responsive Floating Orbs (vw/vh based for perfect mobile scale) ── */}
       <div className="absolute inset-0">
         
