@@ -2,10 +2,92 @@
 
 import { useLanguage } from '@/context/LanguageContext';
 import { motion } from 'framer-motion';
-import { ArrowRight } from 'lucide-react';
+import { ArrowDownRight } from 'lucide-react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { courses } from '@/data/courses';
+import { courses, Course } from '@/data/courses';
+
+const CourseCard = ({ course, index }: { course: Course; index: number }) => {
+  const { t } = useLanguage();
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 30 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true }}
+      transition={{ delay: index * 0.05, duration: 0.5 }}
+      className="h-full"
+    >
+      <Link
+        href={`/courses/${course.id}`}
+        className="group flex flex-col rounded-[2rem] overflow-hidden shadow-sm hover:shadow-xl border border-slate-200/80 dark:border-slate-800 transition-all duration-300 h-full bg-white dark:bg-slate-900"
+      >
+        {/* ── 1. TOP BANNER IMAGE (Chuqurroq tushirilgan rasm) ── */}
+        <div className="relative w-full h-52 sm:h-56 overflow-hidden shrink-0 bg-slate-900">
+          <Image
+            src={course.image}
+            alt={t(`courses.${course.id}`)}
+            fill
+            className="object-cover object-center transition-transform duration-500 group-hover:scale-105"
+          />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-black/20 pointer-events-none" />
+          
+          {/* Top Left Floating Pill Badge on Image */}
+          <div className="absolute top-3.5 left-3.5 z-10">
+            <div className={`px-3 py-1 rounded-full ${course.bg} backdrop-blur-md border border-white/60 dark:border-white/20 text-xs font-semibold flex items-center gap-1.5 shadow-sm`}>
+              <course.icon className={`w-3.5 h-3.5 ${course.color}`} />
+              <span className="text-slate-800 dark:text-slate-100 font-fredoka">{t(`courses.${course.id}`)}</span>
+            </div>
+          </div>
+        </div>
+
+        {/* ── 2. SEAMLESS SOLID NOTCHED CARD SHAPE ── */}
+        <div className="relative -mt-8 z-20 flex flex-col flex-grow">
+          
+          {/* Top Row: Left "Batafsil ↘" + Right Solid Raised Tab */}
+          <div className="flex items-end justify-between relative z-10">
+            {/* Left Shelf: Batafsil Link */}
+            <div className="pl-5 pb-2.5 flex items-center shrink-0">
+              <span className="text-xs sm:text-sm font-semibold text-white drop-shadow-[0_2px_4px_rgba(0,0,0,0.9)] flex items-center gap-1 group-hover:text-brand-orange transition-colors">
+                <span>Batafsil</span>
+                <ArrowDownRight size={14} className="text-brand-orange shrink-0" />
+              </span>
+            </div>
+
+            {/* Right Solid Tab with Inverted Curve connector */}
+            <div className="bg-white dark:bg-slate-900 text-slate-800 dark:text-white px-5 py-2.5 rounded-t-2xl flex items-center gap-2 relative shadow-none">
+              {/* Inverted concave curve connecting shelf to tab */}
+              <svg className="absolute bottom-0 -left-4 w-4 h-4 fill-white dark:fill-slate-900 pointer-events-none" viewBox="0 0 16 16">
+                <path d="M16,0 C16,8.836556 8.836556,16 0,16 L16,16 L16,0 Z" />
+              </svg>
+              <span className="w-2 h-2 rounded-full bg-brand-orange shrink-0 animate-pulse" />
+              <span className="text-xs font-bold text-slate-700 dark:text-slate-300 truncate">
+                {course.type === 'general' ? 'Offline Darslar' : course.type === 'certificate' ? 'Xalqaro Sertifikat' : 'OTM Tayyorlov'}
+              </span>
+            </div>
+          </div>
+
+          {/* Main Solid Body (100% Solid white/slate-900) */}
+          <div className="bg-white dark:bg-slate-900 rounded-b-[2rem] rounded-tl-[1.8rem] p-5 sm:p-6 text-slate-800 dark:text-white flex flex-col justify-between flex-grow">
+            
+            {/* Title and Description */}
+            <div className="space-y-2">
+              <h3 className="text-lg sm:text-xl font-bold font-fredoka text-slate-800 dark:text-slate-100 leading-tight">
+                {t(`courses.${course.id}`)}
+              </h3>
+
+              <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 font-medium leading-relaxed line-clamp-3">
+                {t(`courses.${course.id}.desc`)}
+              </p>
+            </div>
+
+          </div>
+
+        </div>
+      </Link>
+    </motion.div>
+  );
+};
 
 export default function CoursesPage() {
   const { t } = useLanguage();
@@ -54,59 +136,7 @@ export default function CoursesPage() {
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {generalCourses.map((course, index) => (
-              <motion.div
-                key={course.id}
-                initial={{ opacity: 0, y: 30 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: index * 0.05, duration: 0.5 }}
-                className="h-full"
-              >
-                <Link
-                  href={`/courses/${course.id}`}
-                  className="group flex flex-col bg-white/45 dark:bg-slate-900/45 backdrop-blur-2xl rounded-[2rem] shadow-sm hover:shadow-xl border border-white/70 dark:border-white/10 transition-shadow duration-300 h-full overflow-hidden"
-                >
-                  {/* Banner Image */}
-                  <div className="relative w-full h-36 sm:h-40 md:h-44 overflow-hidden shrink-0 bg-slate-900">
-                    <Image
-                      src={course.image}
-                      alt={t(`courses.${course.id}`)}
-                      fill
-                      className="object-cover"
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-t from-slate-950/70 via-black/20 to-transparent" />
-                  </div>
-                  
-                  {/* Card Content */}
-                  <div className="p-5 sm:p-6 flex-grow flex flex-col relative z-10 bg-white/20 dark:bg-slate-900/20 backdrop-blur-sm border-t border-white/60 dark:border-white/10">
-                    
-                    {/* Icon & Title Row (Side-by-side with perfect vertical baseline alignment) */}
-                    <div className="flex items-end gap-3.5 mb-3.5 -mt-10 relative z-20">
-                      <div className={`w-12 h-12 rounded-2xl ${course.bg} shadow-md border-2 border-white dark:border-slate-800 bg-white dark:bg-slate-800 flex items-center justify-center shrink-0`}>
-                        <course.icon className={`w-6 h-6 ${course.color}`} />
-                      </div>
-                      <h3 className="text-lg sm:text-xl font-semibold text-slate-800 dark:text-slate-100 font-fredoka pb-1 leading-snug">
-                        {t(`courses.${course.id}`)}
-                      </h3>
-                    </div>
-                    
-                    {/* Course Description */}
-                    <p className="text-slate-600 dark:text-slate-400 mb-5 text-sm leading-relaxed flex-grow font-medium">
-                      {t(`courses.${course.id}.desc`)}
-                    </p>
-                    
-                    {/* Bottom CTA Row */}
-                    <div className="flex items-center justify-between mt-auto pt-3.5 border-t border-slate-100 dark:border-slate-800/80">
-                      <div className="bg-blue-500/10 dark:bg-blue-500/20 border border-blue-500/20 px-3 py-0.5 rounded-full text-xs font-semibold text-brand-blue dark:text-blue-400 uppercase tracking-wider">
-                        Offline
-                      </div>
-                      <div className="flex items-center text-brand-blue dark:text-blue-400 font-semibold text-sm">
-                        <span>{t('courses.more')}</span>
-                        <ArrowRight className="w-4 h-4 ml-1.5" />
-                      </div>
-                    </div>
-                  </div>
-                </Link>
-              </motion.div>
+              <CourseCard key={course.id} course={course} index={index} />
             ))}
           </div>
         </div>
@@ -121,53 +151,7 @@ export default function CoursesPage() {
           </div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {certCourses.map((course, index) => (
-              <motion.div
-                key={course.id}
-                initial={{ opacity: 0, y: 30 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.2 + index * 0.05, duration: 0.5 }}
-                className="h-full"
-              >
-                <Link
-                  href={`/courses/${course.id}`}
-                  className="group flex flex-col bg-white/45 dark:bg-slate-900/45 backdrop-blur-2xl rounded-[2rem] shadow-sm hover:shadow-xl border border-white/70 dark:border-white/10 transition-shadow duration-300 h-full overflow-hidden"
-                >
-                  <div className="relative w-full h-36 sm:h-40 md:h-44 overflow-hidden shrink-0 bg-slate-900">
-                    <Image
-                      src={course.image}
-                      alt={t(`courses.${course.id}`)}
-                      fill
-                      className="object-cover"
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-t from-slate-950/70 via-black/20 to-transparent" />
-                  </div>
-                  
-                  <div className="p-5 sm:p-6 flex-grow flex flex-col relative z-10 bg-white/20 dark:bg-slate-900/20 backdrop-blur-sm border-t border-white/60 dark:border-white/10">
-                    <div className="flex items-end gap-3.5 mb-3.5 -mt-10 relative z-20">
-                      <div className={`w-12 h-12 rounded-2xl ${course.bg} shadow-md border-2 border-white dark:border-slate-800 bg-white dark:bg-slate-800 flex items-center justify-center shrink-0`}>
-                        <course.icon className={`w-6 h-6 ${course.color}`} />
-                      </div>
-                      <h3 className="text-lg sm:text-xl font-semibold text-slate-800 dark:text-slate-100 font-fredoka pb-1 leading-snug">
-                        {t(`courses.${course.id}`)}
-                      </h3>
-                    </div>
-                    
-                    <p className="text-slate-600 dark:text-slate-400 mb-5 text-sm leading-relaxed flex-grow font-medium">
-                      {t(`courses.${course.id}.desc`)}
-                    </p>
-                    
-                    <div className="flex items-center justify-between mt-auto pt-3.5 border-t border-slate-100 dark:border-slate-800/80">
-                      <div className="bg-purple-500/10 dark:bg-purple-500/20 border border-purple-500/20 px-3 py-0.5 rounded-full text-xs font-semibold text-purple-600 dark:text-purple-400 uppercase tracking-wider">
-                        Certificate
-                      </div>
-                      <div className="flex items-center text-purple-600 dark:text-purple-400 font-semibold text-sm">
-                        <span>{t('courses.more')}</span>
-                        <ArrowRight className="w-4 h-4 ml-1.5" />
-                      </div>
-                    </div>
-                  </div>
-                </Link>
-              </motion.div>
+              <CourseCard key={course.id} course={course} index={index} />
             ))}
           </div>
         </div>
@@ -182,53 +166,7 @@ export default function CoursesPage() {
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
             {prepCourses.map((course, index) => (
-              <motion.div
-                key={course.id}
-                initial={{ opacity: 0, y: 30 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.4 + index * 0.05, duration: 0.5 }}
-                className="h-full"
-              >
-                <Link
-                  href={`/courses/${course.id}`}
-                  className="group flex flex-col bg-white/45 dark:bg-slate-900/45 backdrop-blur-2xl rounded-[2rem] shadow-sm hover:shadow-xl border border-white/70 dark:border-white/10 transition-shadow duration-300 h-full overflow-hidden"
-                >
-                  <div className="relative w-full h-40 sm:h-44 md:h-48 overflow-hidden shrink-0 bg-slate-900">
-                    <Image
-                      src={course.image}
-                      alt={t(`courses.${course.id}`)}
-                      fill
-                      className="object-cover"
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-t from-slate-950/70 via-black/20 to-transparent" />
-                  </div>
-                  
-                  <div className="p-6 sm:p-7 flex-grow flex flex-col relative z-10 bg-white/20 dark:bg-slate-900/20 backdrop-blur-sm border-t border-white/60 dark:border-white/10">
-                    <div className="flex items-end gap-3.5 mb-3.5 -mt-10 relative z-20">
-                      <div className={`w-12 h-12 sm:w-13 sm:h-13 rounded-2xl ${course.bg} shadow-md border-2 border-white dark:border-slate-800 bg-white dark:bg-slate-800 flex items-center justify-center shrink-0`}>
-                        <course.icon className={`w-6 h-6 sm:w-7 sm:h-7 ${course.color}`} />
-                      </div>
-                      <h3 className="text-xl sm:text-2xl font-semibold text-slate-800 dark:text-slate-100 font-fredoka pb-1 leading-snug">
-                        {t(`courses.${course.id}`)}
-                      </h3>
-                    </div>
-                    
-                    <p className="text-slate-600 dark:text-slate-400 mb-6 text-sm sm:text-base leading-relaxed flex-grow font-medium">
-                      {t(`courses.${course.id}.desc`)}
-                    </p>
-                    
-                    <div className="flex items-center justify-between mt-auto pt-3.5 border-t border-slate-100 dark:border-slate-800/80">
-                      <div className="bg-orange-500/10 dark:bg-orange-500/20 border border-orange-500/20 px-3.5 py-1 rounded-full text-xs font-semibold text-brand-orange dark:text-orange-400 uppercase tracking-wider">
-                        Intensive
-                      </div>
-                      <div className="flex items-center text-brand-orange dark:text-orange-400 font-semibold text-sm sm:text-base">
-                        <span>{t('courses.more')}</span>
-                        <ArrowRight className="w-4 h-4 ml-1.5" />
-                      </div>
-                    </div>
-                  </div>
-                </Link>
-              </motion.div>
+              <CourseCard key={course.id} course={course} index={index} />
             ))}
           </div>
         </div>

@@ -10,6 +10,8 @@ import QueryProvider from "@/providers/QueryProvider";
 import { Toaster } from "react-hot-toast";
 import NextTopLoader from "nextjs-toploader";
 import Script from "next/script";
+import { Analytics } from "@vercel/analytics/next";
+import { SpeedInsights } from "@vercel/speed-insights/next";
 
 const atkinson = Atkinson_Hyperlegible({
   variable: "--font-atkinson",
@@ -100,6 +102,8 @@ export default function RootLayout({
  </LanguageProvider>
  </QueryProvider>
  </ThemeProvider>
+ <Analytics />
+ <SpeedInsights />
  </body>
  </html>
  );
