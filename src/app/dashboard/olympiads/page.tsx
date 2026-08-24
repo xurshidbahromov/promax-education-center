@@ -97,12 +97,25 @@ export default function OlympiadsPage() {
     }
   }, []);
 
+  // Real-time sync interval when comments tab is open
+  useEffect(() => {
+    if (activeTab === "comments") {
+      loadComments();
+      const interval = setInterval(() => {
+        loadComments();
+      }, 3500);
+      return () => clearInterval(interval);
+    }
+  }, [activeTab]);
+
   const loadComments = async () => {
     try {
-      const res = await fetch('/api/tournament-comments?category=olympiad');
+      const res = await fetch(`/api/tournament-comments?category=olympiad&_t=${Date.now()}`, {
+        cache: 'no-store'
+      });
       if (res.ok) {
         const json = await res.json();
-        if (json?.comments) {
+        if (json?.comments && Array.isArray(json.comments)) {
           setComments(json.comments);
         }
       }

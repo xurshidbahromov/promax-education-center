@@ -3,6 +3,9 @@ import { createClient } from '@/utils/supabase/server';
 import fs from 'fs';
 import path from 'path';
 
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
 export interface TournamentComment {
   id: string;
   category: 'olympiad' | 'international';
@@ -17,21 +20,37 @@ export interface TournamentComment {
   created_at: string;
 }
 
+// Global in-memory cache for instant cross-device and cross-request sync
+declare global {
+  var __tournament_comments_cache: TournamentComment[] | undefined;
+}
+
 const COMMENTS_FILE = path.join(process.cwd(), 'src/data/tournament_comments.json');
 
-function getFallbackComments(): TournamentComment[] {
+function loadAllComments(): TournamentComment[] {
+  if (globalThis.__tournament_comments_cache && globalThis.__tournament_comments_cache.length > 0) {
+    return globalThis.__tournament_comments_cache;
+  }
+
   try {
     if (fs.existsSync(COMMENTS_FILE)) {
       const data = fs.readFileSync(COMMENTS_FILE, 'utf8');
-      return JSON.parse(data);
+      const parsed = JSON.parse(data);
+      if (Array.isArray(parsed)) {
+        globalThis.__tournament_comments_cache = parsed;
+        return parsed;
+      }
     }
   } catch (err) {
     console.error('Error reading comments file:', err);
   }
+
+  globalThis.__tournament_comments_cache = [];
   return [];
 }
 
-function saveFallbackComments(comments: TournamentComment[]) {
+function persistComments(comments: TournamentComment[]) {
+  globalThis.__tournament_comments_cache = comments;
   try {
     const dir = path.dirname(COMMENTS_FILE);
     if (!fs.existsSync(dir)) {
@@ -49,6 +68,7 @@ export async function GET(request: NextRequest) {
   const category = searchParams.get('category') || 'olympiad';
   const tournamentId = searchParams.get('tournament_id');
 
+  // 1. Try Supabase first
   try {
     const supabase = await createClient();
     let query = supabase
@@ -62,20 +82,40 @@ export async function GET(request: NextRequest) {
     }
 
     const { data, error } = await query;
-    if (!error && data && data.length > 0) {
-      return NextResponse.json({ comments: data });
+    if (!error && data) {
+      // If supabase table exists and responded
+      return NextResponse.json(
+        { comments: data },
+        {
+          headers: {
+            'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate',
+            'Pragma': 'no-cache',
+            'Expires': '0',
+          },
+        }
+      );
     }
   } catch (err) {
     // Supabase query fallback
   }
 
-  // Fallback to local server json sync
-  let list = getFallbackComments();
+  // 2. Global Server Store fallback
+  let list = loadAllComments();
   list = list.filter((c) => c.category === category);
   if (tournamentId) {
     list = list.filter((c) => !c.tournament_id || c.tournament_id === tournamentId);
   }
-  return NextResponse.json({ comments: list });
+
+  return NextResponse.json(
+    { comments: list },
+    {
+      headers: {
+        'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate',
+        'Pragma': 'no-cache',
+        'Expires': '0',
+      },
+    }
+  );
 }
 
 // POST /api/tournament-comments
@@ -102,7 +142,7 @@ export async function POST(request: NextRequest) {
       created_at: new Date().toISOString()
     };
 
-    // 1. Try Supabase
+    // 1. Try inserting to Supabase
     try {
       const supabase = await createClient();
       const { data, error } = await supabase
@@ -123,18 +163,19 @@ export async function POST(request: NextRequest) {
         .single();
 
       if (!error && data) {
-        // Also mirror to file fallback
-        const all = getFallbackComments();
+        // Also keep local cache in sync
+        const all = loadAllComments();
         all.unshift(data);
-        saveFallbackComments(all);
+        persistComments(all);
+
         return NextResponse.json({ comment: data });
       }
     } catch (e) {}
 
-    // 2. Fallback to server sync
-    const all = getFallbackComments();
+    // 2. Global Server Store fallback
+    const all = loadAllComments();
     all.unshift(newComment);
-    saveFallbackComments(all);
+    persistComments(all);
 
     return NextResponse.json({ comment: newComment });
   } catch (err: any) {
@@ -152,7 +193,7 @@ export async function PATCH(request: NextRequest) {
       return NextResponse.json({ error: 'commentId is required' }, { status: 400 });
     }
 
-    // Try Supabase update
+    // 1. Try Supabase update
     try {
       const supabase = await createClient();
       const { data: existing } = await supabase
@@ -168,24 +209,23 @@ export async function PATCH(request: NextRequest) {
           .update({ likes: newLikes })
           .eq('id', commentId);
 
-        // Also update in file fallback
-        const all = getFallbackComments();
+        const all = loadAllComments();
         const target = all.find((c) => c.id === commentId);
         if (target) {
           target.likes = newLikes;
-          saveFallbackComments(all);
+          persistComments(all);
         }
 
         return NextResponse.json({ success: true, likes: newLikes });
       }
     } catch (e) {}
 
-    // Fallback sync
-    const all = getFallbackComments();
+    // 2. Global Server Store fallback
+    const all = loadAllComments();
     const target = all.find((c) => c.id === commentId);
     if (target) {
       target.likes = Math.max(0, (target.likes || 0) + delta);
-      saveFallbackComments(all);
+      persistComments(all);
       return NextResponse.json({ success: true, likes: target.likes });
     }
 
@@ -209,9 +249,9 @@ export async function DELETE(request: NextRequest) {
     await supabase.from('tournament_comments').delete().eq('id', id);
   } catch (e) {}
 
-  const all = getFallbackComments();
+  const all = loadAllComments();
   const filtered = all.filter((c) => c.id !== id);
-  saveFallbackComments(filtered);
+  persistComments(filtered);
 
   return NextResponse.json({ success: true });
 }
