@@ -87,18 +87,8 @@ export default function InternationalCompetitionsPage() {
   const [likedCommentIds, setLikedCommentIds] = useState<string[]>([]);
 
   useEffect(() => {
+    loadComments();
     if (typeof window !== 'undefined') {
-      const saved = localStorage.getItem('promax_international_comments');
-      if (saved) {
-        try {
-          const parsed = JSON.parse(saved);
-          // Filter out legacy mock comments if any
-          const realComments = Array.isArray(parsed) ? parsed.filter((c: any) => !['ic1', 'ic2', 'ic3'].includes(c.id)) : [];
-          setComments(realComments);
-        } catch (e) {
-          console.error("Error parsing saved comments:", e);
-        }
-      }
       const savedLikes = localStorage.getItem('promax_international_liked_comments');
       if (savedLikes) {
         try {
@@ -107,6 +97,20 @@ export default function InternationalCompetitionsPage() {
       }
     }
   }, []);
+
+  const loadComments = async () => {
+    try {
+      const res = await fetch('/api/tournament-comments?category=international');
+      if (res.ok) {
+        const json = await res.json();
+        if (json?.comments) {
+          setComments(json.comments);
+        }
+      }
+    } catch (e) {
+      console.error("Error loading international comments:", e);
+    }
+  };
 
   useEffect(() => {
     loadData();
@@ -169,45 +173,66 @@ export default function InternationalCompetitionsPage() {
   const currentUserAvatar = profile?.avatar_url || user?.user_metadata?.avatar_url || null;
   const currentUserRole = profile?.role === 'admin' ? "Tashkilotchi" : profile?.role === 'teacher' ? "Ustoz" : "Ishtirokchi";
 
-  const handleAddComment = (e: React.FormEvent) => {
+  const handleAddComment = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!newCommentText.trim()) return;
 
-    const newComment: CommentItem = {
-      id: `ic_${Date.now()}`,
+    const commentText = newCommentText.trim();
+    setNewCommentText("");
+
+    const payload = {
+      category: 'international',
       author: currentUserName,
       avatar: currentUserAvatar,
       role: currentUserRole,
-      time: "Hozirgina",
-      text: newCommentText.trim(),
-      likes: 0,
+      text: commentText,
+      user_id: user?.id
     };
 
-    const updated = [newComment, ...comments];
-    setComments(updated);
-    if (typeof window !== 'undefined') {
-      localStorage.setItem('promax_international_comments', JSON.stringify(updated));
+    try {
+      const res = await fetch('/api/tournament-comments', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+      if (res.ok) {
+        const json = await res.json();
+        if (json?.comment) {
+          setComments((prev) => [json.comment, ...prev.filter(c => c.id !== json.comment.id)]);
+          toast.success("Izohingiz muvaffaqiyatli qo'shildi!", { icon: "💬" });
+          return;
+        }
+      }
+      toast.error("Izoh yuborishda xatolik yuz berdi");
+    } catch (err) {
+      console.error("Error adding international comment:", err);
+      toast.error("Izoh yuborishda xatolik yuz berdi");
     }
-    setNewCommentText("");
-    toast.success("Izohingiz muvaffaqiyatli qo'shildi!", { icon: "💬" });
   };
 
-  const handleToggleLike = (id: string) => {
-    let updatedLikes: string[];
-    let updatedComments: CommentItem[];
-    if (likedCommentIds.includes(id)) {
-      updatedLikes = likedCommentIds.filter((item) => item !== id);
-      updatedComments = comments.map((c) => (c.id === id ? { ...c, likes: Math.max(0, c.likes - 1) } : c));
-    } else {
-      updatedLikes = [...likedCommentIds, id];
-      updatedComments = comments.map((c) => (c.id === id ? { ...c, likes: c.likes + 1 } : c));
-    }
+  const handleToggleLike = async (id: string) => {
+    const isLiked = likedCommentIds.includes(id);
+    const delta = isLiked ? -1 : 1;
+    const updatedLikes = isLiked
+      ? likedCommentIds.filter((item) => item !== id)
+      : [...likedCommentIds, id];
+
     setLikedCommentIds(updatedLikes);
-    setComments(updatedComments);
     if (typeof window !== 'undefined') {
       localStorage.setItem('promax_international_liked_comments', JSON.stringify(updatedLikes));
-      localStorage.setItem('promax_international_comments', JSON.stringify(updatedComments));
     }
+
+    setComments((prev) =>
+      prev.map((c) => (c.id === id ? { ...c, likes: Math.max(0, (c.likes || 0) + delta) } : c))
+    );
+
+    try {
+      await fetch('/api/tournament-comments', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ commentId: id, delta })
+      });
+    } catch (e) {}
   };
 
   const selectedTournament = tournaments.find((t) => t.id === selectedTournamentId) || tournaments[0];
