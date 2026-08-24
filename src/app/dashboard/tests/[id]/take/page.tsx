@@ -538,10 +538,13 @@ export default function TakeTestPage() {
                 <button
                   type="button"
                   onClick={() => setShowFormulaModal(true)}
-                  className="px-2.5 py-1.5 rounded-full bg-indigo-500/10 hover:bg-indigo-500 hover:text-white text-indigo-600 dark:text-indigo-400 border border-indigo-500/20 text-[11px] font-bold flex items-center gap-1 transition-all cursor-pointer shadow-sm"
-                  title="SAT Formula Spravochnigi"
+                  className="h-9 px-3 rounded-full bg-indigo-50 dark:bg-indigo-950/60 hover:bg-indigo-600 hover:text-white dark:hover:bg-indigo-600 text-indigo-600 dark:text-indigo-300 border border-indigo-200/80 dark:border-indigo-800/80 text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer shadow-sm active:scale-95 group"
+                  title="Formulalar to'plami"
                 >
-                  📐 <span className="hidden sm:inline">Formula</span>
+                  <span className="font-serif italic font-bold text-xs bg-indigo-100 dark:bg-indigo-900/60 group-hover:bg-white/20 text-indigo-700 dark:text-indigo-300 group-hover:text-white w-5 h-5 rounded-md flex items-center justify-center transition-colors">
+                    fx
+                  </span>
+                  <span className="font-semibold text-xs hidden xs:inline">Formulalar</span>
                 </button>
               )}
  {autoSaving && (
@@ -705,11 +708,8 @@ export default function TakeTestPage() {
 
   {((currentQuestion.question_type as string) === "grid_in" || (currentQuestion.question_type as string) === "closed") && (
     <div className="space-y-4 p-5 rounded-[22px] bg-white/40 dark:bg-slate-800/40 border border-white/60 dark:border-slate-800/60">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-        <span className="text-xs font-bold text-indigo-600 dark:text-indigo-400 bg-indigo-500/10 px-2.5 py-1 rounded-lg border border-indigo-500/20 uppercase tracking-wider">
-          🔢 Yopiq Test (Grid-In / Student-Produced Response)
-        </span>
-        <span className="text-xs text-slate-500 dark:text-slate-400">
+      <div className="flex items-center justify-between gap-2">
+        <span className="text-xs sm:text-sm font-semibold text-slate-600 dark:text-slate-300">
           Javobingizni son yoki kasr ko'rinishida kiriting
         </span>
       </div>
@@ -882,13 +882,15 @@ export default function TakeTestPage() {
     <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-md flex items-center justify-center z-50 p-4">
       <div className="bg-white dark:bg-slate-900 rounded-[28px] p-6 sm:p-7 max-w-lg w-full border border-white/80 dark:border-slate-800/80 shadow-2xl space-y-4 max-h-[85vh] overflow-y-auto">
         <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-3">
-          <div className="flex items-center gap-2">
-            <span className="text-xl">📐</span>
+          <div className="flex items-center gap-2.5">
+            <span className="font-serif italic font-black text-sm bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400 w-8 h-8 rounded-xl border border-indigo-200/60 dark:border-indigo-800/60 flex items-center justify-center">
+              fx
+            </span>
             <div>
-              <h3 className="text-base font-bold font-fredoka text-slate-900 dark:text-white leading-tight">
-                Digital SAT & Math Spravochnik
+              <h3 className="text-base font-bold font-fredoka text-slate-800 dark:text-slate-100 leading-tight">
+                Digital SAT & Math Formulalar
               </h3>
-              <p className="text-[11px] text-slate-400">Rasmiy formulalar to'plami</p>
+              <p className="text-[11px] text-slate-400">Rasmiy formulalar spravochnigi</p>
             </div>
           </div>
           <button

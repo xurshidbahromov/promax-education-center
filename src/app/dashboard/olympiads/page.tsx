@@ -257,7 +257,7 @@ export default function OlympiadsPage() {
               <span className="text-slate-300 dark:text-slate-700">•</span>
               <span className="flex items-center gap-1.5 text-slate-700 dark:text-slate-300">
                 <Users size={16} className="text-brand-blue" />
-                <span>{tournaments.reduce((acc, t) => acc + (t.participantsCount || 0), 0) || 1240}+ qatnashuvchi</span>
+                <span>{tournaments.reduce((acc, t) => acc + (t.participantsCount || 0), 0) || 1240} nafar qatnashuvchi</span>
               </span>
               <span className="text-slate-300 dark:text-slate-700">•</span>
               <span className="flex items-center gap-1.5 text-[#EB7C0E] dark:text-orange-400 font-bold">

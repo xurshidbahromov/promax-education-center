@@ -552,7 +552,7 @@ export function OlympiadSection() {
 
                   <div className="p-3 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200/60 dark:border-slate-800">
                     <span className="text-[10px] text-slate-400 font-bold block uppercase">Qatnashchilar</span>
-                    <span className="text-xs font-black text-slate-800 dark:text-white">{selectedOlympiad.participantsCount}+</span>
+                    <span className="text-xs font-black text-slate-800 dark:text-white">{selectedOlympiad.participantsCount}</span>
                   </div>
                 </div>
 
