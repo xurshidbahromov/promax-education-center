@@ -3,14 +3,31 @@ import { createClient } from '@/utils/supabase/server';
 
 export async function POST(request: NextRequest) {
   try {
+    const supabase = await createClient();
+
+    // Verify authenticated user
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) {
+      return NextResponse.json({ error: "Avtorizatsiyadan o'tilmagan" }, { status: 401 });
+    }
+
+    // Verify caller has admin/staff role
+    const { data: callerProfile } = await supabase
+      .from('profiles')
+      .select('role')
+      .eq('id', user.id)
+      .single();
+
+    if (!callerProfile || !['admin', 'staff', 'superadmin'].includes(callerProfile.role)) {
+      return NextResponse.json({ error: "Ruxsat berilmagan (Faqat adminlar uchun)" }, { status: 403 });
+    }
+
     const body = await request.json();
     const { studentId, coinsToAdd, orderId, status } = body;
 
-    if (!studentId || typeof coinsToAdd !== 'number') {
-      return NextResponse.json({ error: 'studentId and coinsToAdd (number) required' }, { status: 400 });
+    if (!studentId || typeof coinsToAdd !== 'number' || coinsToAdd <= 0) {
+      return NextResponse.json({ error: 'studentId and positive coinsToAdd required' }, { status: 400 });
     }
-
-    const supabase = await createClient();
 
     // 1. Fetch student current profile
     const { data: profile, error: pErr } = await supabase
