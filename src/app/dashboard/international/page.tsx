@@ -39,7 +39,7 @@ import {
   getInternationalRegistrations,
   INITIAL_INTERNATIONAL_TOURNAMENTS
 } from "@/lib/international-tournaments";
-import { useCurrentUser } from "@/hooks/useDashboardData";
+import { useCurrentUser, useUserProfile } from "@/hooks/useDashboardData";
 import {
   OlympiadsBannerSkeleton,
   TournamentsSkeleton,
@@ -50,48 +50,19 @@ import {
 interface CommentItem {
   id: string;
   author: string;
-  avatar: string;
+  avatar?: string | null;
   role: string;
   time: string;
   text: string;
   likes: number;
 }
 
-const INITIAL_COMMENTS: CommentItem[] = [
-  {
-    id: "ic1",
-    author: "Shaxzod Tursunov",
-    avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=Shaxzod",
-    role: "O'quvchi",
-    time: "15 daqiqa avval",
-    text: "Digital SAT Math dagi yopiq (grid-in) savollar qanchalik qiyin bo'ladi? Tayyorgarlik uchun testlar bormi?",
-    likes: 12,
-  },
-  {
-    id: "ic2",
-    author: "Promax International",
-    avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=PromaxIntl",
-    role: "Tashkilotchi",
-    time: "5 daqiqa avval",
-    text: "Assalomu alaykum! Test interfeysida formula spravochnigi mavjud. Yopiq savollarda javob son yoki kasr ko'rinishida kiritiladi.",
-    likes: 24,
-  },
-  {
-    id: "ic3",
-    author: "Kamila Karimova",
-    avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=Kamila",
-    role: "O'quvchi",
-    time: "Kecha",
-    text: "AMC va SAT musobaqasi sertifikatlari va sovg'alari qachon topshiriladi?",
-    likes: 9,
-  },
-];
-
 export default function InternationalCompetitionsPage() {
   const { t } = useLanguage();
   const router = useRouter();
   const searchParams = useSearchParams();
   const { data: user } = useCurrentUser();
+  const { data: profile } = useUserProfile(user?.id);
 
   // Tab State: "tournaments" | "leaderboard" | "comments"
   const initialTab = (searchParams.get("tab") as "tournaments" | "leaderboard" | "comments") || "tournaments";
@@ -110,10 +81,32 @@ export default function InternationalCompetitionsPage() {
   const [leaderboard, setLeaderboard] = useState<InternationalLeaderboardEntry[]>([]);
   const [leaderboardSearch, setLeaderboardSearch] = useState("");
 
-  // Comments State
-  const [comments, setComments] = useState<CommentItem[]>(INITIAL_COMMENTS);
+  // Comments State (Starts empty, loads real user comments)
+  const [comments, setComments] = useState<CommentItem[]>([]);
   const [newCommentText, setNewCommentText] = useState("");
   const [likedCommentIds, setLikedCommentIds] = useState<string[]>([]);
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem('promax_international_comments');
+      if (saved) {
+        try {
+          const parsed = JSON.parse(saved);
+          // Filter out legacy mock comments if any
+          const realComments = Array.isArray(parsed) ? parsed.filter((c: any) => !['ic1', 'ic2', 'ic3'].includes(c.id)) : [];
+          setComments(realComments);
+        } catch (e) {
+          console.error("Error parsing saved comments:", e);
+        }
+      }
+      const savedLikes = localStorage.getItem('promax_international_liked_comments');
+      if (savedLikes) {
+        try {
+          setLikedCommentIds(JSON.parse(savedLikes));
+        } catch (e) {}
+      }
+    }
+  }, []);
 
   useEffect(() => {
     loadData();
@@ -172,32 +165,48 @@ export default function InternationalCompetitionsPage() {
     }
   };
 
+  const currentUserName = profile?.full_name || user?.user_metadata?.full_name || user?.email?.split('@')[0] || "O'quvchi";
+  const currentUserAvatar = profile?.avatar_url || user?.user_metadata?.avatar_url || null;
+  const currentUserRole = profile?.role === 'admin' ? "Tashkilotchi" : profile?.role === 'teacher' ? "Ustoz" : "Ishtirokchi";
+
   const handleAddComment = (e: React.FormEvent) => {
     e.preventDefault();
     if (!newCommentText.trim()) return;
 
     const newComment: CommentItem = {
       id: `ic_${Date.now()}`,
-      author: user?.user_metadata?.full_name || "O'quvchi",
-      avatar: `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(user?.email || 'User')}`,
-      role: "Ishtirokchi",
+      author: currentUserName,
+      avatar: currentUserAvatar,
+      role: currentUserRole,
       time: "Hozirgina",
       text: newCommentText.trim(),
       likes: 0,
     };
 
-    setComments([newComment, ...comments]);
+    const updated = [newComment, ...comments];
+    setComments(updated);
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('promax_international_comments', JSON.stringify(updated));
+    }
     setNewCommentText("");
-    toast.success("Izohingiz qo'shildi!");
+    toast.success("Izohingiz muvaffaqiyatli qo'shildi!", { icon: "💬" });
   };
 
   const handleToggleLike = (id: string) => {
+    let updatedLikes: string[];
+    let updatedComments: CommentItem[];
     if (likedCommentIds.includes(id)) {
-      setLikedCommentIds(likedCommentIds.filter(i => i !== id));
-      setComments(comments.map(c => c.id === id ? { ...c, likes: c.likes - 1 } : c));
+      updatedLikes = likedCommentIds.filter((item) => item !== id);
+      updatedComments = comments.map((c) => (c.id === id ? { ...c, likes: Math.max(0, c.likes - 1) } : c));
     } else {
-      setLikedCommentIds([...likedCommentIds, id]);
-      setComments(comments.map(c => c.id === id ? { ...c, likes: c.likes + 1 } : c));
+      updatedLikes = [...likedCommentIds, id];
+      updatedComments = comments.map((c) => (c.id === id ? { ...c, likes: c.likes + 1 } : c));
+    }
+    setLikedCommentIds(updatedLikes);
+    setComments(updatedComments);
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('promax_international_liked_comments', JSON.stringify(updatedLikes));
+      localStorage.setItem('promax_international_comments', JSON.stringify(updatedComments));
     }
   };
 
@@ -770,78 +779,111 @@ export default function InternationalCompetitionsPage() {
             <CommentsSkeleton />
           ) : (
           <div className="w-full bg-white/60 dark:bg-slate-900/60 backdrop-blur-xl rounded-[2rem] p-6 border border-white/60 dark:border-slate-800/60 space-y-5 shadow-none">
-            
-            <form onSubmit={handleAddComment} className="flex flex-col sm:flex-row gap-3">
-              <input
-                type="text"
-                value={newCommentText}
-                onChange={(e) => setNewCommentText(e.target.value)}
-                placeholder="Fikringiz yoki savolingizni yozing..."
-                className="flex-1 px-4 py-3 rounded-2xl bg-slate-50 dark:bg-slate-800/70 border border-slate-200 dark:border-slate-700 text-xs sm:text-sm text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:border-brand-blue"
-              />
-              <button
-                type="submit"
-                className="px-5 py-3 rounded-2xl bg-brand-blue hover:bg-blue-600 text-white font-bold text-xs sm:text-sm flex items-center justify-center gap-2 active:scale-95 shrink-0 shadow-none cursor-pointer"
-              >
-                <span>Yuborish</span>
-                <Send size={14} />
-              </button>
+            <form onSubmit={handleAddComment} className="flex items-center gap-3">
+              {currentUserAvatar ? (
+                <img
+                  src={currentUserAvatar}
+                  alt={currentUserName}
+                  className="w-10 h-10 rounded-full bg-slate-200 dark:bg-slate-700 shrink-0 object-cover border border-slate-200 dark:border-slate-700 shadow-sm"
+                />
+              ) : (
+                <div className="w-10 h-10 rounded-full bg-brand-blue/10 dark:bg-brand-blue/20 text-brand-blue dark:text-blue-400 font-bold text-sm flex items-center justify-center border border-brand-blue/20 shrink-0 select-none uppercase shadow-sm">
+                  {(currentUserName || "O")[0]}
+                </div>
+              )}
+              <div className="flex-1 flex flex-col sm:flex-row gap-2">
+                <input
+                  type="text"
+                  value={newCommentText}
+                  onChange={(e) => setNewCommentText(e.target.value)}
+                  placeholder="Fikringiz yoki savolingizni yozing..."
+                  className="flex-1 px-4 py-3 rounded-2xl bg-slate-50 dark:bg-slate-800/70 border border-slate-200 dark:border-slate-700 text-xs sm:text-sm text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:border-brand-blue"
+                />
+                <button
+                  type="submit"
+                  disabled={!newCommentText.trim()}
+                  className="px-5 py-3 rounded-2xl bg-brand-blue hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed text-white font-bold text-xs sm:text-sm flex items-center justify-center gap-2 active:scale-95 shrink-0 shadow-none transition-all cursor-pointer"
+                >
+                  <span>Yuborish</span>
+                  <Send size={14} />
+                </button>
+              </div>
             </form>
 
             {/* Comments List */}
-            <div className="space-y-3 pt-1">
-              {comments.map((comment) => {
-                const isLiked = likedCommentIds.includes(comment.id);
+            {comments.length === 0 ? (
+              <div className="text-center py-10 space-y-2">
+                <div className="w-12 h-12 rounded-2xl bg-slate-100 dark:bg-slate-800 text-slate-400 flex items-center justify-center mx-auto">
+                  <MessageSquare size={22} />
+                </div>
+                <p className="font-bold text-slate-700 dark:text-slate-200 text-sm">
+                  Hozircha hech qanday izoh yo'q
+                </p>
+                <p className="text-xs text-slate-400">
+                  Birinchi bo'lib fikringiz yoki savolingizni qoldiring!
+                </p>
+              </div>
+            ) : (
+              <div className="space-y-3 pt-1">
+                {comments.map((comment) => {
+                  const isLiked = likedCommentIds.includes(comment.id);
 
-                return (
-                  <div
-                    key={comment.id}
-                    className="p-4 rounded-2xl bg-white/40 dark:bg-slate-800/30 border border-slate-100/50 dark:border-slate-800/40 flex items-start gap-3.5"
-                  >
-                    <img
-                      src={comment.avatar}
-                      alt={comment.author}
-                      className="w-9 h-9 rounded-full bg-slate-200 dark:bg-slate-700 shrink-0"
-                    />
+                  return (
+                    <div
+                      key={comment.id}
+                      className="p-4 rounded-2xl bg-white/40 dark:bg-slate-800/30 border border-slate-100/50 dark:border-slate-800/40 flex items-start gap-3.5"
+                    >
+                      {comment.avatar ? (
+                        <img
+                          src={comment.avatar}
+                          alt={comment.author}
+                          className="w-9 h-9 rounded-full bg-slate-200 dark:bg-slate-700 shrink-0 object-cover border border-slate-200 dark:border-slate-700"
+                        />
+                      ) : (
+                        <div className="w-9 h-9 rounded-full bg-brand-blue/10 dark:bg-brand-blue/20 text-brand-blue dark:text-blue-400 font-bold text-xs flex items-center justify-center border border-brand-blue/20 shrink-0 select-none uppercase">
+                          {(comment.author || "O")[0]}
+                        </div>
+                      )}
 
-                    <div className="flex-1 min-w-0 space-y-1">
-                      <div className="flex items-center justify-between gap-2">
-                        <div className="flex items-center gap-2 flex-wrap">
-                          <span className="text-xs font-bold text-slate-900 dark:text-white">
-                            {comment.author}
-                          </span>
-                          <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-slate-200 dark:bg-slate-700 text-slate-600 dark:text-slate-300">
-                            {comment.role}
+                      <div className="flex-1 min-w-0 space-y-1">
+                        <div className="flex items-center justify-between gap-2">
+                          <div className="flex items-center gap-2 flex-wrap">
+                            <span className="text-xs font-bold text-slate-900 dark:text-white">
+                              {comment.author}
+                            </span>
+                            <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-slate-200 dark:bg-slate-700 text-slate-600 dark:text-slate-300">
+                              {comment.role}
+                            </span>
+                          </div>
+
+                          <span className="text-[11px] text-slate-400 font-medium shrink-0">
+                            {comment.time}
                           </span>
                         </div>
 
-                        <span className="text-[11px] text-slate-400 font-medium shrink-0">
-                          {comment.time}
-                        </span>
-                      </div>
+                        <p className="text-xs sm:text-sm text-slate-700 dark:text-slate-300 leading-relaxed font-medium">
+                          {comment.text}
+                        </p>
 
-                      <p className="text-xs sm:text-sm text-slate-700 dark:text-slate-300 leading-relaxed font-medium">
-                        {comment.text}
-                      </p>
-
-                      <div className="pt-1">
-                        <button
-                          onClick={() => handleToggleLike(comment.id)}
-                          className={`inline-flex items-center gap-1.5 text-xs font-bold transition-colors cursor-pointer ${
-                            isLiked
-                              ? "text-brand-blue"
-                              : "text-slate-400 hover:text-slate-600 dark:hover:text-slate-300"
-                          }`}
-                        >
-                          <ThumbsUp size={13} className={isLiked ? "fill-brand-blue" : ""} />
-                          <span>{comment.likes}</span>
-                        </button>
+                        <div className="pt-1">
+                          <button
+                            onClick={() => handleToggleLike(comment.id)}
+                            className={`inline-flex items-center gap-1.5 text-xs font-bold transition-colors cursor-pointer ${
+                              isLiked
+                                ? "text-brand-blue"
+                                : "text-slate-400 hover:text-slate-600 dark:hover:text-slate-300"
+                            }`}
+                          >
+                            <ThumbsUp size={13} className={isLiked ? "fill-brand-blue" : ""} />
+                            <span>{comment.likes}</span>
+                          </button>
+                        </div>
                       </div>
                     </div>
-                  </div>
-                );
-              })}
-            </div>
+                  );
+                })}
+              </div>
+            )}
 
           </div>
           )
