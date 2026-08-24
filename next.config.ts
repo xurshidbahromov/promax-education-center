@@ -6,10 +6,17 @@ const withBundleAnalyzer = require('@next/bundle-analyzer')({
 });
 
 const nextConfig: NextConfig = {
+  // Compress all responses using Gzip/Brotli
+  compress: true,
+
   // Security: Disable X-Powered-By header to prevent fingerprinting
   poweredByHeader: false,
 
   images: {
+    formats: ['image/avif', 'image/webp'],
+    minimumCacheTTL: 2592000, // 30 days image caching
+    deviceSizes: [640, 750, 828, 1080, 1200, 1920],
+    imageSizes: [16, 32, 48, 64, 96, 128, 256, 384],
     remotePatterns: [
       {
         protocol: 'https',
@@ -18,12 +25,19 @@ const nextConfig: NextConfig = {
     ],
   },
 
-  // Performance optimizations
+  // Performance optimizations & tree-shaking
   experimental: {
-    optimizePackageImports: ['lucide-react', 'framer-motion'],
+    optimizePackageImports: [
+      'lucide-react',
+      'framer-motion',
+      '@tanstack/react-query',
+      'date-fns',
+      'canvas-confetti',
+      'react-hot-toast',
+    ],
   },
 
-  // World-class standard HTTP Security Headers
+  // World-class standard HTTP Security & Performance Headers
   async headers() {
     return [
       {
@@ -48,6 +62,33 @@ const nextConfig: NextConfig = {
           {
             key: 'Permissions-Policy',
             value: 'camera=(), microphone=(), geolocation=()',
+          },
+        ],
+      },
+      {
+        source: '/_next/static/:path*',
+        headers: [
+          {
+            key: 'Cache-Control',
+            value: 'public, max-age=31536000, immutable',
+          },
+        ],
+      },
+      {
+        source: '/course_images/:path*',
+        headers: [
+          {
+            key: 'Cache-Control',
+            value: 'public, max-age=2592000, stale-while-revalidate=86400',
+          },
+        ],
+      },
+      {
+        source: '/hero_images/:path*',
+        headers: [
+          {
+            key: 'Cache-Control',
+            value: 'public, max-age=2592000, stale-while-revalidate=86400',
           },
         ],
       },

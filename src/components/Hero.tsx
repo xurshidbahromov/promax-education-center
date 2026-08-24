@@ -126,7 +126,7 @@ const Hero = () => {
  <Image src="/hero_images/hero1.jpeg" alt="Student" fill priority sizes="(max-width: 768px) 30vw, 240px" className="object-cover object-top hover:scale-[1.02] active:scale-95 transition-transform duration-500" />
  </motion.div>
  <motion.div initial={{ opacity: 0, y: 50 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7, delay: 0.3 }} className="absolute top-[51.5%] bottom-0 w-full rounded-t-full overflow-hidden shadow-2xl">
- <Image src="/hero_images/hero2.jpeg" alt="Students with books" fill priority sizes="(max-width: 768px) 30vw, 240px" className="object-cover hover:scale-[1.02] active:scale-95 transition-transform duration-500" />
+ <Image src="/hero_images/hero2.jpeg" alt="Students with books" fill sizes="(max-width: 768px) 30vw, 240px" className="object-cover hover:scale-[1.02] active:scale-95 transition-transform duration-500" />
  </motion.div>
  </div>
 
@@ -136,17 +136,17 @@ const Hero = () => {
  <Image src="/hero_images/hero3.jpeg" alt="Student" fill priority sizes="(max-width: 768px) 30vw, 240px" className="object-cover object-top hover:scale-[1.02] active:scale-95 transition-transform duration-500" />
  </motion.div>
  <motion.div initial={{ opacity: 0, y: 50 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7, delay: 0.5 }} className="absolute top-[51.5%] bottom-[6%] w-full rounded-full overflow-hidden shadow-2xl">
- <Image src="/hero_images/hero4.jpeg" alt="Student studying" fill priority sizes="(max-width: 768px) 30vw, 240px" className="object-cover object-top hover:scale-[1.02] active:scale-95 transition-transform duration-500" />
+ <Image src="/hero_images/hero4.jpeg" alt="Student studying" fill sizes="(max-width: 768px) 30vw, 240px" className="object-cover object-top hover:scale-[1.02] active:scale-95 transition-transform duration-500" />
  </motion.div>
  </div>
 
  {/* Column 3 */}
  <div className="absolute left-[68%] lg:left-[71%] top-0 bottom-0 w-[30%] lg:w-[180px] xl:w-[240px] pointer-events-auto">
  <motion.div initial={{ opacity: 0, y: -50 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7, delay: 0.6 }} className="absolute top-0 bottom-[51.5%] w-full rounded-b-full overflow-hidden shadow-2xl">
- <Image src="/hero_images/hero5.jpeg" alt="Student" fill priority sizes="(max-width: 768px) 30vw, 240px" className="object-cover object-top scale-[1.2] translate-y-[10%] hover:scale-[1.22] active:scale-95 transition-transform duration-500" />
+ <Image src="/hero_images/hero5.jpeg" alt="Student" fill sizes="(max-width: 768px) 30vw, 240px" className="object-cover object-top scale-[1.2] translate-y-[10%] hover:scale-[1.22] active:scale-95 transition-transform duration-500" />
  </motion.div>
  <motion.div initial={{ opacity: 0, y: 50 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7, delay: 0.7 }} className="absolute top-[51.5%] bottom-0 w-full rounded-t-full overflow-hidden shadow-2xl">
- <Image src="/hero_images/hero6.jpeg" alt="Students learning" fill priority sizes="(max-width: 768px) 30vw, 240px" className="object-cover object-top hover:scale-[1.02] active:scale-95 transition-transform duration-500" />
+ <Image src="/hero_images/hero6.jpeg" alt="Students learning" fill sizes="(max-width: 768px) 30vw, 240px" className="object-cover object-top hover:scale-[1.02] active:scale-95 transition-transform duration-500" />
  </motion.div>
  </div>
  </div>
