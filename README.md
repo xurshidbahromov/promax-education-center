@@ -11,7 +11,7 @@
 
 **A high-performance, enterprise-grade Learning Management System (LMS) and CRM built for modern education centers.**
 
-[🌐 Live Production Website](https://promax-education-center.vercel.app) • [📱 Telegram Bot (@ProMaxEduBot)](https://t.me/promaxedu_bot) • [📖 Full Specification & Invoice](./promax_invoice.md)
+[🌐 Live Production Website](https://promax-education-center.vercel.app) • [📱 Telegram Bot ](https://t.me/promaxedu_bot) • [📖 Full Specification & Invoice](./promax_invoice.md)
 
 </div>
 
