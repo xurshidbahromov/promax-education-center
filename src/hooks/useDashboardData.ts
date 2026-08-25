@@ -30,9 +30,9 @@ export const useUserProfile = (userId: string | undefined) => {
  return profile;
  },
  enabled: !!userId,
- staleTime: 2000,
- refetchOnWindowFocus: true,
- refetchInterval: 5000, // Sync balance every 5 seconds
+    staleTime: 30 * 1000,
+    refetchOnWindowFocus: true,
+    refetchInterval: 30 * 1000, // Sync balance smoothly every 30 seconds
  });
 };
 
