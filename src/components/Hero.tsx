@@ -34,31 +34,21 @@ const Hero = () => {
  </span>
  </motion.div>
 
- {/* Headline - Massive */}
- <motion.h1
- className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-semibold tracking-tighter text-slate-800 dark:text-slate-100 leading-[1.05] mb-6 max-w-2xl uppercase font-fredoka drop-shadow-sm"
- initial={{ opacity: 0, y: 30 }}
- animate={{ opacity: 1, y: 0 }}
- transition={{ duration: 0.7, delay: 0.1, ease: [0.21, 0.47, 0.32, 0.98] }}
- >
- {t('hero.headline').split(',').map((part, i) => (
- part.trim() && (
- <span key={i} className={`block ${i === 1 ? 'text-brand-orange bg-gradient-to-r from-orange-500 to-amber-500 bg-clip-text text-transparent' : ''}`}>
- {part.trim()}
- </span>
- )
- ))}
- </motion.h1>
+        {/* Headline - Massive (Immediate paint for perfect Core Web Vitals) */}
+        <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-semibold tracking-tighter text-slate-800 dark:text-slate-100 leading-[1.05] mb-6 max-w-2xl uppercase font-fredoka drop-shadow-sm">
+          {t('hero.headline').split(',').map((part, i) => (
+            part.trim() && (
+              <span key={i} className={`block ${i === 1 ? 'text-brand-orange bg-gradient-to-r from-orange-500 to-amber-500 bg-clip-text text-transparent' : ''}`}>
+                {part.trim()}
+              </span>
+            )
+          ))}
+        </h1>
 
- {/* Slogan */}
- <motion.p
- className="text-lg sm:text-xl md:text-2xl font-medium text-slate-600 dark:text-slate-300 mb-8 max-w-prose leading-relaxed mx-auto lg:mx-0"
- initial={{ opacity: 0, y: 20 }}
- animate={{ opacity: 1, y: 0 }}
- transition={{ duration: 0.5, delay: 0.2 }}
- >
- {t('hero.slogan')}
- </motion.p>
+        {/* Slogan */}
+        <p className="text-lg sm:text-xl md:text-2xl font-medium text-slate-600 dark:text-slate-300 mb-8 max-w-prose leading-relaxed mx-auto lg:mx-0">
+          {t('hero.slogan')}
+        </p>
 
  {/* CTAs */}
  <motion.div
@@ -113,8 +103,8 @@ const Hero = () => {
  </div>
  </div>
 
- {/* Absolute Photo Collage Background (Moved outside max-w-7xl container to span full section height) */}
- <div className="absolute top-0 bottom-0 right-[-10%] sm:right-0 w-[120%] sm:w-full lg:w-[55%] xl:w-[50%] z-0 pointer-events-none overflow-hidden lg:overflow-visible opacity-[0.12] dark:opacity-20 lg:opacity-100 dark:lg:opacity-100">
+      {/* Absolute Photo Collage Background (Desktop: Full glorious display, Mobile: 0ms lightning fast) */}
+      <div className="hidden lg:block absolute top-0 bottom-0 right-0 w-[55%] xl:w-[50%] z-0 pointer-events-none overflow-visible">
  {/* Decorative Dots */}
  <motion.div animate={{ y: [0, -10, 0] }} transition={{ repeat: Infinity, duration: 4, ease: "easeInOut" }} className="absolute top-[15%] left-[5%] w-3 h-3 lg:w-5 lg:h-5 rounded-full bg-[#facc15] shadow-[0_0_15px_rgba(250,204,21,0.3)] z-10" />
  <motion.div animate={{ y: [0, 15, 0] }} transition={{ repeat: Infinity, duration: 5, ease: "easeInOut", delay: 1 }} className="absolute bottom-[20%] left-[2%] w-4 h-4 lg:w-7 lg:h-7 rounded-full bg-[#f43f5e] shadow-[0_0_15px_rgba(244,63,94,0.3)] z-10" />

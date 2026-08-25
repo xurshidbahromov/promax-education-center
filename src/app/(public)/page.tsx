@@ -1,11 +1,14 @@
+import dynamic from "next/dynamic";
 import Hero from "@/components/Hero";
-import NewsSection from "@/components/NewsSection";
-import CoursesPreview from "@/components/CoursesPreview";
-import YouTubeSection from "@/components/YouTubeSection";
-import ResultsStats from "@/components/ResultsStats";
-import Methodology from '@/components/Methodology';
-import CallToAction from "@/components/CallToAction";
-import AdmissionAnnouncement from "@/components/ui/AdmissionAnnouncement";
+
+// Dynamic Code-Splitting for Below-the-Fold components
+const NewsSection = dynamic(() => import("@/components/NewsSection"));
+const CoursesPreview = dynamic(() => import("@/components/CoursesPreview"));
+const Methodology = dynamic(() => import("@/components/Methodology"));
+const ResultsStats = dynamic(() => import("@/components/ResultsStats"));
+const YouTubeSection = dynamic(() => import("@/components/YouTubeSection"));
+const CallToAction = dynamic(() => import("@/components/CallToAction"));
+const AdmissionAnnouncement = dynamic(() => import("@/components/ui/AdmissionAnnouncement"));
 
 export default function Home() {
   const jsonLd = {
