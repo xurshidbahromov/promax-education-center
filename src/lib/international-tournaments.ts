@@ -285,6 +285,22 @@ const STORAGE_INTERNATIONAL_REGISTRATIONS = 'promax_intl_registrations_v1';
 
 export async function getInternationalTournaments(): Promise<InternationalTournament[]> {
   try {
+    const res = await fetch('/api/tournaments?type=international', {
+      cache: 'no-store',
+      headers: { 'Cache-Control': 'no-cache' }
+    });
+    if (res.ok) {
+      const data = await res.json();
+      if (Array.isArray(data.tournaments) && data.tournaments.length > 0) {
+        if (typeof window !== 'undefined') {
+          localStorage.setItem(STORAGE_INTERNATIONAL_TOURNAMENTS, JSON.stringify(data.tournaments));
+        }
+        return data.tournaments;
+      }
+    }
+  } catch (apiErr) {}
+
+  try {
     const supabase = createClient();
     const { data, error } = await supabase
       .from('tournaments')
@@ -319,6 +335,17 @@ export async function getInternationalTournaments(): Promise<InternationalTourna
 }
 
 export async function getInternationalTournamentById(id: string): Promise<InternationalTournament | null> {
+  try {
+    const res = await fetch(`/api/tournaments?type=international&id=${id}`, {
+      cache: 'no-store',
+      headers: { 'Cache-Control': 'no-cache' }
+    });
+    if (res.ok) {
+      const data = await res.json();
+      if (data.tournament) return data.tournament;
+    }
+  } catch (e) {}
+
   const tournaments = await getInternationalTournaments();
   return tournaments.find(t => t.id === id) || null;
 }
@@ -433,6 +460,28 @@ export async function submitInternationalAttempt(
 export async function saveInternationalTournament(
   tournament: Partial<InternationalTournament>
 ): Promise<InternationalTournament> {
+  try {
+    const res = await fetch('/api/tournaments', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ type: 'international', tournament })
+    });
+    if (res.ok) {
+      const result = await res.json();
+      if (result.data) {
+        if (typeof window !== 'undefined') {
+          const stored = localStorage.getItem(STORAGE_INTERNATIONAL_TOURNAMENTS);
+          let list: InternationalTournament[] = stored ? JSON.parse(stored) : [...INITIAL_INTERNATIONAL_TOURNAMENTS];
+          const idx = list.findIndex(t => t.id === result.data.id);
+          if (idx >= 0) list[idx] = result.data;
+          else list = [result.data, ...list];
+          localStorage.setItem(STORAGE_INTERNATIONAL_TOURNAMENTS, JSON.stringify(list));
+        }
+        return result.data;
+      }
+    }
+  } catch (apiErr) {}
+
   const currentList = await getInternationalTournaments();
   let updatedTournament: InternationalTournament;
 
@@ -498,6 +547,22 @@ export async function saveInternationalTournament(
 }
 
 export async function deleteInternationalTournament(id: string): Promise<boolean> {
+  try {
+    const res = await fetch(`/api/tournaments?type=international&id=${id}`, {
+      method: 'DELETE'
+    });
+    if (res.ok) {
+      if (typeof window !== 'undefined') {
+        const stored = localStorage.getItem(STORAGE_INTERNATIONAL_TOURNAMENTS);
+        if (stored) {
+          const list: InternationalTournament[] = JSON.parse(stored);
+          localStorage.setItem(STORAGE_INTERNATIONAL_TOURNAMENTS, JSON.stringify(list.filter(t => t.id !== id)));
+        }
+      }
+      return true;
+    }
+  } catch (apiErr) {}
+
   const currentList = await getInternationalTournaments();
   const newList = currentList.filter(t => t.id !== id);
   if (typeof window !== 'undefined') {

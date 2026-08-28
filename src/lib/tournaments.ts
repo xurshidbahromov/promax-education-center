@@ -286,6 +286,22 @@ export const INITIAL_LEADERBOARDS: Record<string, TournamentLeaderboardEntry[]> 
 
 // ── GET TOURNAMENTS ──
 export async function getAdminTournaments(): Promise<AdminTournament[]> {
+  try {
+    const res = await fetch('/api/tournaments?type=national', {
+      cache: 'no-store',
+      headers: { 'Cache-Control': 'no-cache' }
+    });
+    if (res.ok) {
+      const data = await res.json();
+      if (Array.isArray(data.tournaments) && data.tournaments.length > 0) {
+        if (typeof window !== 'undefined') {
+          localStorage.setItem('promax_tournaments', JSON.stringify(data.tournaments));
+        }
+        return data.tournaments;
+      }
+    }
+  } catch (apiErr) {}
+
   const supabase = createClient();
   try {
     const { data, error } = await supabase
@@ -316,38 +332,40 @@ export async function getAdminTournaments(): Promise<AdminTournament[]> {
 
 // ── GET SINGLE TOURNAMENT ──
 export async function getTournamentById(id: string): Promise<AdminTournament | null> {
-  const supabase = createClient();
   try {
-    const { data, error } = await supabase
-      .from('tournaments')
-      .select('*')
-      .eq('id', id)
-      .single();
-    
-    if (data) return data;
-  } catch (err) {
-    // fallback
-  }
-
-  if (typeof window !== 'undefined') {
-    const local = localStorage.getItem('promax_tournaments');
-    if (local) {
-      try {
-        const list: AdminTournament[] = JSON.parse(local);
-        const found = list.find((t) => t.id === id);
-        if (found) return found;
-      } catch (e) {}
+    const res = await fetch(`/api/tournaments?type=national&id=${id}`, {
+      cache: 'no-store',
+      headers: { 'Cache-Control': 'no-cache' }
+    });
+    if (res.ok) {
+      const data = await res.json();
+      if (data.tournament) return data.tournament;
     }
-  }
+  } catch (e) {}
 
-  const found = INITIAL_TOURNAMENTS.find((t) => t.id === id);
-  return found || null;
+  const tournaments = await getAdminTournaments();
+  return tournaments.find((t) => t.id === id) || null;
 }
 
 // ── SAVE TOURNAMENT ──
 export async function saveAdminTournament(
   tournament: Partial<AdminTournament>
 ): Promise<{ success: boolean; data?: any; error?: string }> {
+  try {
+    const res = await fetch('/api/tournaments', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ type: 'national', tournament })
+    });
+    if (res.ok) {
+      const result = await res.json();
+      if (result.data) {
+        saveToLocalTournaments(result.data);
+        return { success: true, data: result.data };
+      }
+    }
+  } catch (apiErr) {}
+
   const supabase = createClient();
   try {
     if (tournament.id && !tournament.id.startsWith('temp_') && !tournament.id.includes('-2026')) {
@@ -358,8 +376,8 @@ export async function saveAdminTournament(
         .select()
         .single();
       if (error) {
-        saveToLocalTournaments(tournament);
-        return { success: true, data: tournament };
+        const saved = saveToLocalTournaments(tournament);
+        return { success: true, data: saved };
       }
       return { success: true, data };
     } else {
@@ -425,9 +443,25 @@ function saveToLocalTournaments(tournament: Partial<AdminTournament>): AdminTour
 
 // ── DELETE TOURNAMENT ──
 export async function deleteAdminTournament(id: string): Promise<{ success: boolean; error?: string }> {
+  try {
+    const res = await fetch(`/api/tournaments?type=national&id=${id}`, {
+      method: 'DELETE'
+    });
+    if (res.ok) {
+      if (typeof window !== 'undefined') {
+        const local = localStorage.getItem('promax_tournaments');
+        if (local) {
+          const list: AdminTournament[] = JSON.parse(local);
+          localStorage.setItem('promax_tournaments', JSON.stringify(list.filter(t => t.id !== id)));
+        }
+      }
+      return { success: true };
+    }
+  } catch (apiErr) {}
+
   const supabase = createClient();
   try {
-    const { error } = await supabase.from('tournaments').delete().eq('id', id);
+    await supabase.from('tournaments').delete().eq('id', id);
     if (typeof window !== 'undefined') {
       const local = localStorage.getItem('promax_tournaments');
       if (local) {

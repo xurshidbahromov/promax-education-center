@@ -1,11 +1,12 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { createPortal } from "react-dom";
 import toast from "react-hot-toast";
 import Link from "next/link";
 import { useLanguage } from "@/context/LanguageContext";
+import { getAdminTournaments, AdminTournament } from "@/lib/tournaments";
 import {
   Trophy,
   Medal,
@@ -143,7 +144,16 @@ export const SAMPLE_OLYMPIADS: OlympiadItem[] = [
 
 export function OlympiadBannerTeaser() {
   const { t } = useLanguage();
-  const heroItem = SAMPLE_OLYMPIADS[0];
+  const [participantsCount, setParticipantsCount] = useState(1240);
+
+  useEffect(() => {
+    getAdminTournaments().then((list: AdminTournament[]) => {
+      if (list && list.length > 0) {
+        const total = list.reduce((acc: number, item: AdminTournament) => acc + (item.participantsCount || 0), 0);
+        if (total > 0) setParticipantsCount(total);
+      }
+    }).catch(() => {});
+  }, []);
 
   return (
     <div className="relative w-full">
@@ -173,7 +183,7 @@ export function OlympiadBannerTeaser() {
           <div className="flex-1 bg-white/60 dark:bg-slate-900/60 text-slate-900 dark:text-white px-2.5 sm:px-6 py-2.5 sm:py-3.5 rounded-t-3xl border-t border-r border-white/60 dark:border-slate-800/60 border-b-0 border-l-0 flex items-center justify-center gap-1.5 z-20 backdrop-blur-xl min-w-0">
             <Users size={14} className="text-brand-blue shrink-0" />
             <span className="text-xs sm:text-sm font-bold text-slate-700 dark:text-slate-300 whitespace-nowrap">
-              {t("olympiad.participants_count", { count: heroItem.participantsCount })}
+              {t("olympiad.participants_count", { count: participantsCount })}
             </span>
           </div>
         </div>
