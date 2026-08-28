@@ -52,7 +52,7 @@ export default function AdminCoursesPage() {
   const { data: dbSubjects, isLoading: loading } = useSubjects();
   const subjectsList: SubjectItem[] = (dbSubjects || []).map((s: any) => ({
     id: s.id,
-    title: s.title,
+    title: s.title || s.name || "Nomsiz Fan",
     description: s.description || null,
     cover_image: s.cover_image || null,
   }));

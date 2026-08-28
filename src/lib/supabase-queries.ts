@@ -589,32 +589,43 @@ export interface Material {
 }
 
 export async function getSubjects(): Promise<Subject[]> {
- const supabase = createClient();
- const { data, error } = await supabase
- .from('subjects')
- .select('*')
- .order('created_at', { ascending: false });
+  const supabase = createClient();
+  const { data, error } = await supabase
+    .from('subjects')
+    .select('*')
+    .order('created_at', { ascending: false });
 
- if (error) {
- console.error('Error fetching subjects:', error);
- return [];
- }
- return data || [];
+  if (error) {
+    console.error('Error fetching subjects:', error);
+    return [];
+  }
+  return (data || []).map((s: any) => ({
+    ...s,
+    title: s.title || s.name || 'Nomsiz Fan',
+    name: s.name || s.title || 'Nomsiz Fan',
+  }));
 }
 
 export async function getSubjectById(id: string): Promise<Subject | null> {
- const supabase = createClient();
- const { data, error } = await supabase
- .from('subjects')
- .select('*')
- .eq('id', id)
- .single();
+  const supabase = createClient();
+  const { data, error } = await supabase
+    .from('subjects')
+    .select('*')
+    .eq('id', id)
+    .single();
 
- if (error) {
- console.error('Error fetching subject:', error);
- return null;
- }
- return data;
+  if (error) {
+    console.error('Error fetching subject:', error);
+    return null;
+  }
+  if (data) {
+    return {
+      ...data,
+      title: data.title || data.name || 'Nomsiz Fan',
+      name: data.name || data.title || 'Nomsiz Fan',
+    };
+  }
+  return data;
 }
 
 export async function getLessonsBySubjectId(subjectId: string): Promise<Lesson[]> {

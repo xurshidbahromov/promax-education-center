@@ -778,15 +778,59 @@ export async function deleteVideoLesson(lessonId: string): Promise<{ success: bo
 // Subject CRUD & Aliases
 export async function createSubject(title: string, description?: string, cover_image?: string): Promise<{ success: boolean; error?: string }> {
   const supabase = createClient();
-  const { error } = await supabase.from('subjects').insert({ title, description: description || null, cover_image: cover_image || null });
-  if (error) return { success: false, error: error.message };
+  const trimmedTitle = title.trim();
+
+  // Supply both 'name' and 'title' so it satisfies both table schemas
+  const fullPayload: any = {
+    name: trimmedTitle,
+    title: trimmedTitle,
+    description: description?.trim() || null,
+    cover_image: cover_image?.trim() || null,
+  };
+
+  const { error } = await supabase.from('subjects').insert(fullPayload);
+  if (error) {
+    // If 'title' column doesn't exist in the database, insert with 'name' only
+    if (error.message?.includes('title') || error.code === '42703') {
+      const fallbackPayload: any = {
+        name: trimmedTitle,
+        description: description?.trim() || null,
+        cover_image: cover_image?.trim() || null,
+      };
+      const { error: fallbackError } = await supabase.from('subjects').insert(fallbackPayload);
+      if (fallbackError) return { success: false, error: fallbackError.message };
+      return { success: true };
+    }
+    return { success: false, error: error.message };
+  }
   return { success: true };
 }
 
 export async function updateSubject(id: string, title: string, description?: string, cover_image?: string): Promise<{ success: boolean; error?: string }> {
   const supabase = createClient();
-  const { error } = await supabase.from('subjects').update({ title, description: description || null, cover_image: cover_image || null }).eq('id', id);
-  if (error) return { success: false, error: error.message };
+  const trimmedTitle = title.trim();
+
+  const fullPayload: any = {
+    name: trimmedTitle,
+    title: trimmedTitle,
+    description: description?.trim() || null,
+    cover_image: cover_image?.trim() || null,
+  };
+
+  const { error } = await supabase.from('subjects').update(fullPayload).eq('id', id);
+  if (error) {
+    if (error.message?.includes('title') || error.code === '42703') {
+      const fallbackPayload: any = {
+        name: trimmedTitle,
+        description: description?.trim() || null,
+        cover_image: cover_image?.trim() || null,
+      };
+      const { error: fallbackError } = await supabase.from('subjects').update(fallbackPayload).eq('id', id);
+      if (fallbackError) return { success: false, error: fallbackError.message };
+      return { success: true };
+    }
+    return { success: false, error: error.message };
+  }
   return { success: true };
 }
 
@@ -800,6 +844,13 @@ export async function deleteSubject(id: string): Promise<{ success: boolean; err
 export async function getSubjectById(id: string) {
   const supabase = createClient();
   const { data } = await supabase.from('subjects').select('*').eq('id', id).single();
+  if (data) {
+    return {
+      ...data,
+      title: data.title || data.name || 'Nomsiz Fan',
+      name: data.name || data.title || 'Nomsiz Fan',
+    };
+  }
   return data;
 }
 
