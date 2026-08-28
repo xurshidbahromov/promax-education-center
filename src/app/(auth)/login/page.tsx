@@ -88,21 +88,28 @@ export default function LoginPage() {
         toast.success("Telegram orqali muvaffaqiyatli kirdingiz");
         router.push(data.profile?.role === 'student' ? '/dashboard' : '/dashboard');
       } else {
+        const rawPhone = user.user.phone_number || (data.telegramUser as any)?.phone_number || data.phone || '';
+        const formattedPhone = rawPhone ? formatPhoneNumber(rawPhone) : '';
+
         const normalizedUser = {
           id: user.user.id,
           first_name: user.user.name,
           username: user.user.preferred_username,
           photo_url: user.user.picture,
+          phone_number: rawPhone,
         };
         
         if (data.linked && data.needsPassword) {
           // Linked but needs password
           setLinkingUser(normalizedUser);
-          setLinkPhone(data.phone || '');
+          setLinkPhone(formattedPhone);
           setStep('link');
         } else {
           // Not linked, prompt to link
           setLinkingUser(normalizedUser);
+          if (formattedPhone) {
+            setLinkPhone(formattedPhone);
+          }
           setStep('link');
         }
       }

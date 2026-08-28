@@ -1,7 +1,7 @@
 /**
  * Format Uzbek phone numbers automatically into standard format: +998 (XX) XXX-XX-XX
  */
-export function formatUzPhone(input: string): string {
+export function formatUzPhone(input?: string | null): string {
   if (!input) return '';
 
   // Extract digits
@@ -16,7 +16,7 @@ export function formatUzPhone(input: string): string {
   digits = digits.slice(0, 9);
 
   if (digits.length === 0) {
-    return '+998 ';
+    return '';
   }
 
   let formatted = '+998';
@@ -40,7 +40,7 @@ export function formatUzPhone(input: string): string {
 /**
  * Clean phone number to raw e164 string like +998901234567 for database storage
  */
-export function cleanUzPhone(input: string): string {
+export function cleanUzPhone(input?: string | null): string {
   if (!input) return '';
   let digits = input.replace(/\D/g, '');
   if (!digits.startsWith('998') && digits.length === 9) {

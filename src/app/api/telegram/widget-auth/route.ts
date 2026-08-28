@@ -51,7 +51,20 @@ export async function POST(request: NextRequest) {
  .eq('telegram_id', telegramId)
  .single();
 
+ const userPhone = payload.user?.phone_number || (jwtPayload as any)?.phone_number || '';
+ const cleanPhone = userPhone ? userPhone.replace(/\D/g, '') : '';
+ const phoneWithPlus = cleanPhone ? '+' + cleanPhone : '';
+
  if (profile) {
+ // If phone is returned by Telegram and missing in profile, update it automatically
+ if (phoneWithPlus && (!profile.phone || profile.phone !== phoneWithPlus)) {
+   await supabase
+     .from('profiles')
+     .update({ phone: phoneWithPlus })
+     .eq('id', profile.id);
+   profile.phone = phoneWithPlus;
+ }
+
  // User is linked.
  // 1. Try deterministic sign-in (works if they registered via Telegram initially)
  const { email: detEmail, password: detPassword } = generateDeterministicAuth(telegramId);
@@ -79,6 +92,7 @@ export async function POST(request: NextRequest) {
  first_name: payload.user?.name || 'Telegram User',
  username: payload.user?.preferred_username,
  photo_url: payload.user?.picture,
+ phone_number: phoneWithPlus,
  };
  
  return NextResponse.json({ linked: false, telegramUser: tgUser });

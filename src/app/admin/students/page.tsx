@@ -218,10 +218,10 @@ export default function AdminStudentsPage() {
                       </h3>
                       <p className="text-xs text-slate-400 font-medium flex items-center gap-1.5 mt-0.5 truncate">
                         <Phone size={13} className="text-slate-400 shrink-0" />
-                        <span>{student.phone ? formatUzPhone(student.phone) : "Telefon kiritilmagan"}</span>
+                        <span>{formatUzPhone(student.phone) || "Telefon kiritilmagan"}</span>
                       </p>
                       <div className="mt-2.5">
-                        {student.parent_phone ? (
+                        {formatUzPhone(student.parent_phone) ? (
                           <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-blue-50/80 dark:bg-blue-950/40 border border-blue-200/50 dark:border-blue-900/50 text-[11px] font-bold overflow-hidden">
                             <UserCheck size={13} className="text-brand-blue shrink-0" />
                             <span className="text-slate-500 dark:text-slate-400 font-semibold shrink-0">Ota-onasi:</span>

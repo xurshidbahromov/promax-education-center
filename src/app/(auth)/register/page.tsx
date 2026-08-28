@@ -79,19 +79,26 @@ export default function RegisterPage() {
         toast.success("Telegram orqali muvaffaqiyatli kirdingiz");
         router.push('/dashboard');
       } else {
+        const rawPhone = user.user.phone_number || (data.telegramUser as any)?.phone_number || data.phone || '';
+        const formattedPhone = rawPhone ? formatPhoneNumber(rawPhone) : '';
+
         const normalizedUser = {
           id: user.user.id,
           first_name: user.user.name,
           username: user.user.preferred_username,
           photo_url: user.user.picture,
+          phone_number: rawPhone,
         };
         
         if (data.linked && data.needsPassword) {
           setLinkingUser(normalizedUser);
-          setLinkPhone(data.phone || '');
+          setLinkPhone(formattedPhone);
           setStep('link');
         } else {
           setLinkingUser(normalizedUser);
+          if (formattedPhone) {
+            setLinkPhone(formattedPhone);
+          }
           setStep('link');
         }
       }
