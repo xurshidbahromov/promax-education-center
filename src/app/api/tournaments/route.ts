@@ -1,5 +1,4 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createClient } from '@/utils/supabase/server';
 import fs from 'fs';
 import path from 'path';
 import { INITIAL_TOURNAMENTS, AdminTournament } from '@/lib/tournaments';
@@ -33,7 +32,7 @@ function ensureDataFiles() {
 }
 
 function loadNationalTournaments(): AdminTournament[] {
-  if (globalThis.__national_tournaments_cache && globalThis.__national_tournaments_cache.length > 0) {
+  if (globalThis.__national_tournaments_cache && Array.isArray(globalThis.__national_tournaments_cache)) {
     return globalThis.__national_tournaments_cache;
   }
 
@@ -42,7 +41,7 @@ function loadNationalTournaments(): AdminTournament[] {
     if (fs.existsSync(NATIONAL_FILE)) {
       const content = fs.readFileSync(NATIONAL_FILE, 'utf8');
       const parsed = JSON.parse(content);
-      if (Array.isArray(parsed) && parsed.length > 0) {
+      if (Array.isArray(parsed)) {
         globalThis.__national_tournaments_cache = parsed;
         return parsed;
       }
@@ -66,7 +65,7 @@ function saveNationalTournaments(list: AdminTournament[]) {
 }
 
 function loadIntlTournaments(): InternationalTournament[] {
-  if (globalThis.__intl_tournaments_cache && globalThis.__intl_tournaments_cache.length > 0) {
+  if (globalThis.__intl_tournaments_cache && Array.isArray(globalThis.__intl_tournaments_cache)) {
     return globalThis.__intl_tournaments_cache;
   }
 
@@ -75,7 +74,7 @@ function loadIntlTournaments(): InternationalTournament[] {
     if (fs.existsSync(INTL_FILE)) {
       const content = fs.readFileSync(INTL_FILE, 'utf8');
       const parsed = JSON.parse(content);
-      if (Array.isArray(parsed) && parsed.length > 0) {
+      if (Array.isArray(parsed)) {
         globalThis.__intl_tournaments_cache = parsed;
         return parsed;
       }
@@ -104,25 +103,6 @@ export async function GET(request: NextRequest) {
   const type = searchParams.get('type') || 'national';
   const id = searchParams.get('id');
 
-  // Attempt database sync from platform_settings if present
-  try {
-    const supabase = await createClient();
-    const settingKey = type === 'international' ? 'tournaments_international' : 'tournaments_national';
-    const { data: setting } = await supabase
-      .from('platform_settings')
-      .select('value')
-      .eq('key', settingKey)
-      .single();
-
-    if (setting?.value && Array.isArray(setting.value)) {
-      if (type === 'international') {
-        saveIntlTournaments(setting.value);
-      } else {
-        saveNationalTournaments(setting.value);
-      }
-    }
-  } catch (e) {}
-
   if (type === 'international') {
     const list = loadIntlTournaments();
     if (id) {
@@ -135,6 +115,7 @@ export async function GET(request: NextRequest) {
         headers: {
           'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate',
           'Pragma': 'no-cache',
+          'Expires': '0',
         },
       }
     );
@@ -152,6 +133,7 @@ export async function GET(request: NextRequest) {
       headers: {
         'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate',
         'Pragma': 'no-cache',
+        'Expires': '0',
       },
     }
   );
@@ -227,20 +209,6 @@ export async function POST(request: NextRequest) {
       }
 
       saveIntlTournaments(updatedList);
-
-      // Async persist to platform_settings if table exists
-      try {
-        const supabase = await createClient();
-        await supabase
-          .from('platform_settings')
-          .upsert({
-            key: 'tournaments_international',
-            value: updatedList,
-            category: 'general',
-            description: 'International tournaments database sync',
-          }, { onConflict: 'key' });
-      } catch (e) {}
-
       return NextResponse.json({ success: true, data: fullIntl });
     }
 
@@ -285,20 +253,6 @@ export async function POST(request: NextRequest) {
     }
 
     saveNationalTournaments(updatedList);
-
-    // Async persist to platform_settings if table exists
-    try {
-      const supabase = await createClient();
-      await supabase
-        .from('platform_settings')
-        .upsert({
-          key: 'tournaments_national',
-          value: updatedList,
-          category: 'general',
-          description: 'National tournaments database sync',
-        }, { onConflict: 'key' });
-    } catch (e) {}
-
     return NextResponse.json({ success: true, data: fullNational });
   } catch (error: any) {
     console.error('Error saving tournament:', error);
@@ -321,36 +275,12 @@ export async function DELETE(request: NextRequest) {
       const list = loadIntlTournaments();
       const updatedList = list.filter((t) => t.id !== id);
       saveIntlTournaments(updatedList);
-
-      try {
-        const supabase = await createClient();
-        await supabase
-          .from('platform_settings')
-          .upsert({
-            key: 'tournaments_international',
-            value: updatedList,
-            category: 'general',
-          }, { onConflict: 'key' });
-      } catch (e) {}
-
       return NextResponse.json({ success: true });
     }
 
     const list = loadNationalTournaments();
     const updatedList = list.filter((t) => t.id !== id);
     saveNationalTournaments(updatedList);
-
-    try {
-      const supabase = await createClient();
-      await supabase
-        .from('platform_settings')
-        .upsert({
-          key: 'tournaments_national',
-          value: updatedList,
-          category: 'general',
-        }, { onConflict: 'key' });
-    } catch (e) {}
-
     return NextResponse.json({ success: true });
   } catch (error: any) {
     console.error('Error deleting tournament:', error);

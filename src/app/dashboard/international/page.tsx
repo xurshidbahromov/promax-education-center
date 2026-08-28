@@ -127,6 +127,13 @@ export default function InternationalCompetitionsPage() {
 
   useEffect(() => {
     loadData();
+
+    const handleFocus = () => {
+      loadData();
+    };
+
+    window.addEventListener('focus', handleFocus);
+    return () => window.removeEventListener('focus', handleFocus);
   }, [user]);
 
   const loadData = async () => {

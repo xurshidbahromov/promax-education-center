@@ -285,13 +285,13 @@ const STORAGE_INTERNATIONAL_REGISTRATIONS = 'promax_intl_registrations_v1';
 
 export async function getInternationalTournaments(): Promise<InternationalTournament[]> {
   try {
-    const res = await fetch('/api/tournaments?type=international', {
+    const res = await fetch(`/api/tournaments?type=international&_t=${Date.now()}`, {
       cache: 'no-store',
-      headers: { 'Cache-Control': 'no-cache' }
+      headers: { 'Cache-Control': 'no-cache, no-store, must-revalidate' }
     });
     if (res.ok) {
       const data = await res.json();
-      if (Array.isArray(data.tournaments) && data.tournaments.length > 0) {
+      if (Array.isArray(data.tournaments)) {
         if (typeof window !== 'undefined') {
           localStorage.setItem(STORAGE_INTERNATIONAL_TOURNAMENTS, JSON.stringify(data.tournaments));
         }

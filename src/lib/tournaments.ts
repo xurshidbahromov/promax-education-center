@@ -287,13 +287,13 @@ export const INITIAL_LEADERBOARDS: Record<string, TournamentLeaderboardEntry[]> 
 // ── GET TOURNAMENTS ──
 export async function getAdminTournaments(): Promise<AdminTournament[]> {
   try {
-    const res = await fetch('/api/tournaments?type=national', {
+    const res = await fetch(`/api/tournaments?type=national&_t=${Date.now()}`, {
       cache: 'no-store',
-      headers: { 'Cache-Control': 'no-cache' }
+      headers: { 'Cache-Control': 'no-cache, no-store, must-revalidate' }
     });
     if (res.ok) {
       const data = await res.json();
-      if (Array.isArray(data.tournaments) && data.tournaments.length > 0) {
+      if (Array.isArray(data.tournaments)) {
         if (typeof window !== 'undefined') {
           localStorage.setItem('promax_tournaments', JSON.stringify(data.tournaments));
         }
