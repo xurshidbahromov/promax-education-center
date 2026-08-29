@@ -5,11 +5,13 @@ import { useRouter } from "next/navigation";
 import Image from "next/image";
 import toast from "react-hot-toast";
 import {
-  BookOpen, Plus, Edit2, Trash2, Layers, Video, Search, ChevronRight, X, Image as ImageIcon
+  BookOpen, Plus, Edit2, Trash2, Layers, Video, Search, ChevronRight, X, Image as ImageIcon,
+  UploadCloud, Upload, Loader2
 } from "lucide-react";
 import { createSubject, updateSubject, deleteSubject } from "@/lib/admin-queries";
 import { useQueryClient } from "@tanstack/react-query";
 import { useSubjects } from "@/hooks/useAdminData";
+import { createClient } from "@/utils/supabase/client";
 
 interface SubjectItem {
   id: string;
@@ -41,6 +43,7 @@ export default function AdminCoursesPage() {
   const [description, setDescription] = useState("");
   const [coverImage, setCoverImage] = useState("");
   const [saving, setSaving] = useState(false);
+  const [uploadingImg, setUploadingImg] = useState(false);
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -77,6 +80,73 @@ export default function AdminCoursesPage() {
     setDescription(subject.description || "");
     setCoverImage(subject.cover_image || "");
     setModalOpen(true);
+  };
+
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (!file.type.startsWith('image/')) {
+      toast.error("Faqat rasm fayllarini yuklash mumkin!");
+      return;
+    }
+
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error("Rasm hajmi 5 MB dan oshmasligi kerak!");
+      return;
+    }
+
+    setUploadingImg(true);
+    const toastId = toast.loading("Rasm yuklanmoqda...");
+
+    try {
+      const supabase = createClient();
+      const fileExt = file.name.split('.').pop() || 'png';
+      const fileName = `subject_${Date.now()}_${Math.random().toString(36).substring(7)}.${fileExt}`;
+      const filePath = `subjects/${fileName}`;
+
+      // 1. Try 'test-images' bucket
+      const { error: err1 } = await supabase.storage
+        .from('test-images')
+        .upload(filePath, file, { upsert: true });
+
+      if (!err1) {
+        const { data } = supabase.storage.from('test-images').getPublicUrl(filePath);
+        setCoverImage(data.publicUrl);
+        toast.success("Rasm muvaffaqiyatli yuklandi! 📸", { id: toastId });
+        return;
+      }
+
+      // 2. Try 'avatars' bucket
+      const { error: err2 } = await supabase.storage
+        .from('avatars')
+        .upload(filePath, file, { upsert: true });
+
+      if (!err2) {
+        const { data } = supabase.storage.from('avatars').getPublicUrl(filePath);
+        setCoverImage(data.publicUrl);
+        toast.success("Rasm muvaffaqiyatli yuklandi! 📸", { id: toastId });
+        return;
+      }
+
+      // 3. Fallback to base64 DataURL
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setCoverImage(reader.result as string);
+        toast.success("Rasm muvaffaqiyatli yuklandi! 📸", { id: toastId });
+      };
+      reader.readAsDataURL(file);
+    } catch (err: any) {
+      console.error("Upload error:", err);
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setCoverImage(reader.result as string);
+        toast.success("Rasm yuklandi! 📸", { id: toastId });
+      };
+      reader.readAsDataURL(file);
+    } finally {
+      setUploadingImg(false);
+    }
   };
 
   const handleSave = async () => {
@@ -145,7 +215,7 @@ export default function AdminCoursesPage() {
 
         <button
           onClick={openAddModal}
-          className="inline-flex items-center gap-2 px-4 py-2.5 bg-brand-blue hover:bg-blue-600 active:scale-[0.98] text-white rounded-xl text-xs font-bold transition-all shadow-md shadow-brand-blue/10 self-start md:self-auto"
+          className="inline-flex items-center gap-2 px-4 py-2.5 bg-blue-600 hover:bg-blue-700 active:scale-[0.98] text-white rounded-xl text-xs font-bold transition-all shadow-md shadow-blue-600/10 self-start md:self-auto cursor-pointer"
         >
           <Plus size={16} />
           <span>Yangi Fan Qo'shish</span>
@@ -196,7 +266,7 @@ export default function AdminCoursesPage() {
                       className="w-full h-full object-cover"
                     />
                   ) : (
-                    <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-blue-500/10 to-indigo-500/10 text-brand-blue">
+                    <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-blue-500/10 to-indigo-500/10 text-blue-600">
                       <BookOpen size={36} className="opacity-40" />
                     </div>
                   )}
@@ -223,14 +293,14 @@ export default function AdminCoursesPage() {
                 <div className="flex items-center gap-1.5">
                   <button
                     onClick={(e) => openEditModal(sub, e)}
-                    className="p-1.5 text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 transition-colors"
+                    className="p-1.5 text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 transition-colors cursor-pointer"
                     title="Tahrirlash"
                   >
                     <Edit2 size={16} />
                   </button>
                   <button
                     onClick={(e) => handleDelete(sub.id, sub.title, e)}
-                    className="p-1.5 text-slate-400 hover:text-red-500 transition-colors"
+                    className="p-1.5 text-slate-400 hover:text-rose-500 transition-colors cursor-pointer"
                     title="O'chirish"
                   >
                     <Trash2 size={16} />
@@ -245,12 +315,12 @@ export default function AdminCoursesPage() {
       {/* Add / Edit Modal */}
       {modalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-sm">
-          <div className="bg-white dark:bg-slate-900 rounded-3xl shadow-xl w-full max-w-md overflow-hidden border border-slate-200/80 dark:border-slate-800 p-6 space-y-4 max-h-[90vh] overflow-y-auto">
+          <div className="bg-white dark:bg-slate-900 rounded-3xl shadow-xl w-full max-w-lg overflow-hidden border border-slate-200/80 dark:border-slate-800 p-6 space-y-4 max-h-[90vh] overflow-y-auto">
             <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-3">
               <h3 className="font-bold text-base text-slate-800 dark:text-slate-100">
                 {editingSubject ? "Fanni Tahrirlash" : "Yangi Fan Qo'shish"}
               </h3>
-              <button onClick={() => setModalOpen(false)} className="text-slate-400 hover:text-slate-700">
+              <button onClick={() => setModalOpen(false)} className="text-slate-400 hover:text-slate-700 cursor-pointer">
                 <X size={18} />
               </button>
             </div>
@@ -265,7 +335,7 @@ export default function AdminCoursesPage() {
                   value={title}
                   onChange={(e) => setTitle(e.target.value)}
                   placeholder="Masalan: Matematika"
-                  className="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs sm:text-sm font-medium outline-none focus:ring-2 focus:ring-brand-blue/30"
+                  className="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs sm:text-sm font-medium outline-none focus:ring-2 focus:ring-blue-500/30"
                 />
               </div>
 
@@ -277,69 +347,127 @@ export default function AdminCoursesPage() {
                   value={description}
                   onChange={(e) => setDescription(e.target.value)}
                   placeholder="Fan haqida qisqacha ma'lumot..."
-                  className="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs sm:text-sm font-medium outline-none focus:ring-2 focus:ring-brand-blue/30 resize-none h-20"
+                  className="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs sm:text-sm font-medium outline-none focus:ring-2 focus:ring-blue-500/30 resize-none h-18"
                 />
               </div>
 
-              {/* Cover Image Selection */}
-              <div>
-                <label className="block text-xs font-bold text-slate-600 dark:text-slate-300 uppercase tracking-wider mb-1.5">
-                  Fan Muqova Rasmi (Cover Image URL)
+              {/* Cover Image Selection with Local File Upload */}
+              <div className="space-y-2.5">
+                <label className="block text-xs font-bold text-slate-600 dark:text-slate-300 uppercase tracking-wider">
+                  Fan Muqova Rasmi
                 </label>
-                
-                {/* Preset Options */}
-                <div className="grid grid-cols-3 gap-2 mb-2">
-                  {PRESET_IMAGES.map((preset, idx) => (
-                    <button
-                      key={idx}
-                      type="button"
-                      onClick={() => setCoverImage(preset.url)}
-                      className={`relative h-14 rounded-xl overflow-hidden border-2 transition-all text-left ${
-                        coverImage === preset.url
-                          ? 'border-brand-blue ring-2 ring-brand-blue/20'
-                          : 'border-slate-200 dark:border-slate-700 hover:border-slate-300'
-                      }`}
-                    >
-                      <img src={preset.url} alt={preset.name} className="w-full h-full object-cover" />
-                      <div className="absolute inset-0 bg-slate-900/40 flex items-center justify-center">
-                        <span className="text-[10px] font-bold text-white text-center px-1 truncate">
-                          {preset.name}
-                        </span>
+
+                {/* Local File Upload Box */}
+                <div className="relative">
+                  <input
+                    type="file"
+                    id="subject-cover-upload"
+                    accept="image/*"
+                    onChange={handleFileUpload}
+                    disabled={uploadingImg}
+                    className="hidden"
+                  />
+                  <label
+                    htmlFor="subject-cover-upload"
+                    className={`border-2 border-dashed rounded-2xl p-4 flex flex-col items-center justify-center gap-2 cursor-pointer transition-all ${
+                      uploadingImg
+                        ? 'opacity-60 pointer-events-none bg-slate-50 dark:bg-slate-800 border-slate-300 dark:border-slate-700'
+                        : 'border-blue-500/30 hover:border-blue-500 bg-blue-50/30 dark:bg-blue-950/20 hover:bg-blue-50/60 dark:hover:bg-blue-950/40'
+                    }`}
+                  >
+                    {uploadingImg ? (
+                      <div className="flex items-center gap-2 text-blue-600 text-xs font-bold py-1">
+                        <Loader2 size={18} className="animate-spin" />
+                        <span>Rasm yuklanmoqda...</span>
                       </div>
-                    </button>
-                  ))}
+                    ) : (
+                      <>
+                        <div className="w-10 h-10 rounded-xl bg-blue-500/10 text-blue-600 dark:text-blue-400 flex items-center justify-center">
+                          <UploadCloud size={20} />
+                        </div>
+                        <div className="text-center">
+                          <p className="text-xs font-bold text-slate-700 dark:text-slate-200">
+                            Kompyuter / Qurilmadan rasm tanlang
+                          </p>
+                          <p className="text-[11px] text-slate-400 mt-0.5">
+                            PNG, JPG, WEBP (Maksimal 5 MB)
+                          </p>
+                        </div>
+                      </>
+                    )}
+                  </label>
                 </div>
 
-                <div className="relative">
+                {/* Live Preview (if chosen) */}
+                {coverImage && (
+                  <div className="relative w-full h-28 rounded-2xl overflow-hidden border border-slate-200 dark:border-slate-700 group shadow-sm">
+                    <img src={coverImage} alt="Cover preview" className="w-full h-full object-cover" />
+                    <div className="absolute inset-0 bg-slate-900/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
+                      <button
+                        type="button"
+                        onClick={() => setCoverImage('')}
+                        className="px-3 py-1.5 bg-rose-500 hover:bg-rose-600 text-white rounded-xl text-xs font-bold flex items-center gap-1 shadow-md transition-colors cursor-pointer"
+                      >
+                        <Trash2 size={13} />
+                        <span>Rasmni olib tashlash</span>
+                      </button>
+                    </div>
+                  </div>
+                )}
+
+                {/* Presets */}
+                <div>
+                  <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-1.5">
+                    Yoki tayyor shablonlardan tanlang:
+                  </span>
+                  <div className="grid grid-cols-3 gap-1.5">
+                    {PRESET_IMAGES.map((preset, idx) => (
+                      <button
+                        key={idx}
+                        type="button"
+                        onClick={() => setCoverImage(preset.url)}
+                        className={`relative h-12 rounded-xl overflow-hidden border-2 transition-all text-left cursor-pointer ${
+                          coverImage === preset.url
+                            ? 'border-blue-600 ring-2 ring-blue-600/20'
+                            : 'border-slate-200 dark:border-slate-700 hover:border-slate-300 dark:hover:border-slate-600'
+                        }`}
+                      >
+                        <img src={preset.url} alt={preset.name} className="w-full h-full object-cover" />
+                        <div className="absolute inset-0 bg-slate-900/40 flex items-center justify-center">
+                          <span className="text-[10px] font-bold text-white text-center px-1 truncate">
+                            {preset.name}
+                          </span>
+                        </div>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Direct URL input */}
+                <div className="relative pt-1">
                   <input
                     type="text"
                     value={coverImage}
                     onChange={(e) => setCoverImage(e.target.value)}
-                    placeholder="https://images.unsplash.com/..."
-                    className="w-full pl-9 pr-4 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-medium outline-none"
+                    placeholder="Yoki to'g'ridan-to'g'ri rasm havolasi (URL)..."
+                    className="w-full pl-9 pr-4 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-medium outline-none text-slate-800 dark:text-slate-100"
                   />
                   <ImageIcon size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
                 </div>
-
-                {coverImage && (
-                  <div className="mt-2 relative w-full h-24 rounded-xl overflow-hidden border border-slate-200 dark:border-slate-700">
-                    <img src={coverImage} alt="Preview" className="w-full h-full object-cover" />
-                  </div>
-                )}
               </div>
             </div>
 
             <div className="flex items-center justify-end gap-3 pt-3 border-t border-slate-100 dark:border-slate-800">
               <button
                 onClick={() => setModalOpen(false)}
-                className="px-4 py-2 text-xs font-bold text-slate-500 hover:text-slate-800"
+                className="px-4 py-2 text-xs font-bold text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-200 cursor-pointer"
               >
                 Bekor qilish
               </button>
               <button
                 onClick={handleSave}
-                disabled={saving}
-                className="px-4 py-2.5 text-xs font-bold text-white bg-brand-blue hover:bg-blue-600 rounded-xl disabled:opacity-50"
+                disabled={saving || uploadingImg}
+                className="px-5 py-2.5 text-xs font-bold text-white bg-blue-600 hover:bg-blue-700 rounded-xl disabled:opacity-50 cursor-pointer shadow-sm"
               >
                 {saving ? "Saqlanmoqda..." : "Saqlash"}
               </button>
