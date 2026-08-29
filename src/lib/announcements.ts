@@ -171,7 +171,7 @@ export async function getAllAnnouncements(): Promise<Announcement[]> {
         // Resolve banner metadata: BannerMeta store → Supabase column → local list match → false
         const m = meta[item.id];
         const localMatch = localList.find(l => l.id === item.id || l.title === item.title);
-        const isFeatured = m?.is_featured ?? (item.is_featured === true) ?? localMatch?.is_featured ?? false;
+        const isFeatured = !!(m?.is_featured || item.is_featured === true || localMatch?.is_featured);
         const imageUrl = m?.image_url ?? item.image_url ?? localMatch?.image_url ?? null;
         const badge = m?.badge ?? item.badge ?? localMatch?.badge ?? null;
 
