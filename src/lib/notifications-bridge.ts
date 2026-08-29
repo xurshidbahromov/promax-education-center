@@ -28,6 +28,8 @@ export interface DTMResultNotificationParams {
   examDate: string;
   directionCode?: string;
   directionTitle?: string;
+  rank?: number;
+  totalParticipants?: number;
   scores: {
     total: number;
     comp_math?: number;

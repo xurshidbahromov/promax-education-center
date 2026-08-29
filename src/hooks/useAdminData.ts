@@ -1,7 +1,7 @@
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useEffect } from 'react';
 import { createClient } from '@/utils/supabase/client';
-import { getAdminStats, getRecentActivity, getTeachers, getStudents, getAllResults, Student, getGroups, getGroupStudents, getStudentsNotInGroup } from '@/lib/admin-queries';
+import { getAdminStats, getRecentActivity, getTeachers, getStudents, getAllResults, getExamsList, Student, getGroups, getGroupStudents, getStudentsNotInGroup } from '@/lib/admin-queries';
 import { getPaymentSummariesForStudents } from '@/lib/payments';
 import { getSubjects, getSubjectById, getLessonsBySubjectId, getMaterialsByLessonId } from '@/lib/supabase-queries';
 import { getAllTests, getTestWithQuestions, getTestResults, getTestGroups } from '@/lib/tests';
@@ -47,10 +47,17 @@ export const useStudentPaymentSummaries = (students: Student[]) => {
 };
 
 export const useAllResults = (limit: number = 20) => {
- return useQuery({
- queryKey: ['allResults', limit],
- queryFn: () => getAllResults(limit),
- });
+  return useQuery({
+    queryKey: ['allResults', limit],
+    queryFn: () => getAllResults(limit),
+  });
+};
+
+export const useExamsList = () => {
+  return useQuery({
+    queryKey: ['examsList'],
+    queryFn: () => getExamsList(),
+  });
 };
 
 // --- REAL-TIME HOOKS FOR COURSES / GROUPS / LESSONS ---

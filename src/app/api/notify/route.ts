@@ -205,6 +205,8 @@ async function handleDTMResultNotification({
   examDate,
   directionCode,
   directionTitle,
+  rank,
+  totalParticipants,
   scores,
 }: {
   studentId: string;
@@ -212,6 +214,8 @@ async function handleDTMResultNotification({
   examDate: string;
   directionCode?: string;
   directionTitle?: string;
+  rank?: number;
+  totalParticipants?: number;
   scores: {
     total: number;
     comp_math?: number;
@@ -263,6 +267,8 @@ async function handleDTMResultNotification({
     subject2Score: scores.subject_2 || 0,
     subject1Name: s1Name,
     subject2Name: s2Name,
+    rank,
+    totalParticipants,
     isParent: false,
   });
 
@@ -280,6 +286,8 @@ async function handleDTMResultNotification({
     subject2Score: scores.subject_2 || 0,
     subject1Name: s1Name,
     subject2Name: s2Name,
+    rank,
+    totalParticipants,
     isParent: true,
   });
 

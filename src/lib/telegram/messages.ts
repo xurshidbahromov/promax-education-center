@@ -411,6 +411,8 @@ export function buildDTMExamResultMessage({
   subject2Score = 0,
   subject1Name = "1-Asosiy fan",
   subject2Name = "2-Asosiy fan",
+  rank,
+  totalParticipants,
   isParent = false
 }: {
   studentName: string;
@@ -427,6 +429,8 @@ export function buildDTMExamResultMessage({
   subject2Score?: number;
   subject1Name?: string;
   subject2Name?: string;
+  rank?: number;
+  totalParticipants?: number;
   isParent?: boolean;
 }): string {
   const formattedDate = new Date(examDate).toLocaleDateString('uz-UZ', { year: 'numeric', month: 'long', day: 'numeric' });
@@ -438,12 +442,19 @@ export function buildDTMExamResultMessage({
   else if (totalScore >= 120) badge = '🥈 To\'lov-shartnoma uchun mustahkam natija!';
   else if (totalScore >= 80) badge = '📈 Yaxshi natija, yana o\'sish mumkin!';
 
+  const rankText = rank && totalParticipants
+    ? `🎖 <b>Reytingdagi o'rni: ${rank}-o'rin</b> (${totalParticipants} nafar o'quvchi orasida)\n\n`
+    : rank
+    ? `🎖 <b>Reytingdagi o'rni: ${rank}-o'rin</b>\n\n`
+    : '';
+
   return (
     `🏆 <b>DTM MOCK IMTIHONI NATIJASI</b> 📊\n\n` +
     `${roleGreeting}<b>${studentName}</b> yakshanbalik DTM Mock testini topshirdi:\n\n` +
     (examTitle ? `📝 Imtihon: <b>${examTitle}</b>\n` : '') +
     `📅 Sana: <b>${formattedDate}</b>\n` +
     `🎯 Yo'nalish: <b>${directionTitle}</b> ${directionCode ? `(kod: ${directionCode})` : ''}\n\n` +
+    rankText +
     `🌟 <b>UMUMIY NATIJA: ${totalScore.toFixed(1)} / ${maxScore.toFixed(1)} BALL (${percentage}%)</b>\n\n` +
     `📚 <b>Majburiy blok fanlar (10 tadan):</b>\n` +
     `• Ona tili: <b>${compulsoryLangScore.toFixed(1)} ball</b> (1.1)\n` +

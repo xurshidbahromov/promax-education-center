@@ -239,43 +239,134 @@ export async function deleteStudent(id: string): Promise<{ success: boolean; err
  return { success: true };
 }
 
+export async function createMockExam(
+  title: string,
+  date: string,
+  maxScore: number = 189.0
+): Promise<{ success: boolean; data?: any; error?: string }> {
+  const supabase = createClient();
+  try {
+    const { data, error } = await supabase
+      .from('exams')
+      .insert({
+        title,
+        date,
+        type: 'dtm',
+        status: 'finished',
+        max_score: maxScore
+      })
+      .select()
+      .single();
+
+    if (error) throw error;
+    return { success: true, data };
+  } catch (err: any) {
+    console.error('Error creating mock exam:', err);
+    return { success: false, error: err.message };
+  }
+}
+
+export async function getExamsList(): Promise<any[]> {
+  const supabase = createClient();
+  const { data, error } = await supabase
+    .from('exams')
+    .select('*')
+    .order('date', { ascending: false });
+
+  if (error) {
+    console.error('Error fetching exams:', error);
+    return [];
+  }
+  return data || [];
+}
+
+export async function deleteExam(examId: string, examTitle?: string): Promise<{ success: boolean; error?: string }> {
+  const supabase = createClient();
+  try {
+    // 1. Delete associated results by exam_id
+    if (examId && !examId.includes('___')) {
+      await supabase
+        .from('results')
+        .delete()
+        .eq('exam_id', examId);
+
+      await supabase
+        .from('exams')
+        .delete()
+        .eq('id', examId);
+    }
+
+    // 2. If examTitle is provided or examId was an aggregate key, delete by exam title
+    if (examTitle) {
+      // Find exam by title first to get id if needed
+      const { data: foundExams } = await supabase
+        .from('exams')
+        .select('id')
+        .eq('title', examTitle);
+
+      if (foundExams && foundExams.length > 0) {
+        for (const ex of foundExams) {
+          await supabase
+            .from('results')
+            .delete()
+            .eq('exam_id', ex.id);
+
+          await supabase
+            .from('exams')
+            .delete()
+            .eq('id', ex.id);
+        }
+      }
+    }
+
+    return { success: true };
+  } catch (err: any) {
+    console.error('Error deleting exam:', err);
+    return { success: false, error: err.message };
+  }
+}
+
 export async function saveExamResult(
- studentId: string,
- examDate: string,
- directionCode: string,
- scores: any
+  studentId: string,
+  examDate: string,
+  directionCode: string,
+  scores: any,
+  customExamTitle?: string,
+  customExamId?: string
 ): Promise<{ success: boolean; error?: string }> {
- const supabase = createClient();
+  const supabase = createClient();
 
- try {
- // 1. Find or Create Exam
- let examId;
- const { data: existingExams } = await supabase
- .from('exams')
- .select('id')
- .eq('date', examDate)
- .eq('type', 'dtm')
- .limit(1);
+  try {
+    // 1. Find or Create Exam
+    let examId = customExamId;
+    if (!examId) {
+      const examTitleToFind = customExamTitle || `DTM Mock Exam (${examDate})`;
+      const { data: existingExams } = await supabase
+        .from('exams')
+        .select('id')
+        .eq('title', examTitleToFind)
+        .limit(1);
 
- if (existingExams && existingExams.length > 0) {
- examId = existingExams[0].id;
- } else {
- // Create new exam
- const { data: newExam, error: createExamError } = await supabase
- .from('exams')
- .insert({
- title: `DTM Mock Exam (${examDate})`,
- date: examDate,
- type: 'dtm',
- status: 'finished',
- max_score: 189.0
- })
- .select()
- .single();
+      if (existingExams && existingExams.length > 0) {
+        examId = existingExams[0].id;
+      } else {
+        // Create new exam
+        const { data: newExam, error: createExamError } = await supabase
+          .from('exams')
+          .insert({
+            title: examTitleToFind,
+            date: examDate,
+            type: 'dtm',
+            status: 'finished',
+            max_score: 189.0
+          })
+          .select()
+          .single();
 
- if (createExamError) throw new Error('Error creating exam: '+ createExamError.message);
- examId = newExam.id;
- }
+        if (createExamError) throw new Error('Error creating exam: ' + createExamError.message);
+        examId = newExam.id;
+      }
+    }
 
  // 2. Find or Create Direction
  let directionId;
@@ -350,26 +441,26 @@ export async function saveExamResult(
   }
 }
 
-export async function getAllResults(limit: number = 20): Promise<any[]> {
- const supabase = createClient();
+export async function getAllResults(limit: number = 500): Promise<any[]> {
+  const supabase = createClient();
 
- const { data, error } = await supabase
- .from('results')
- .select(`
- *,
- student:profiles!results_student_id_fkey(full_name),
- exam:exams(title, date),
- direction:directions(title, code)
- `)
- .order('created_at', { ascending: false })
- .limit(limit);
+  const { data, error } = await supabase
+    .from('results')
+    .select(`
+      *,
+      student:profiles!results_student_id_fkey(id, full_name, phone, parent_name, parent_phone, telegram_id),
+      exam:exams(id, title, date, status, max_score),
+      direction:directions(id, title, code)
+    `)
+    .order('created_at', { ascending: false })
+    .limit(limit);
 
- if (error) {
- console.error('Error fetching results:', error);
- return [];
- }
+  if (error) {
+    console.error('Error fetching results:', error);
+    return [];
+  }
 
- return data;
+  return data;
 }
 
 export async function getStudentResults(studentId: string): Promise<any[]> {
