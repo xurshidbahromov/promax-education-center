@@ -20,7 +20,8 @@ import {
   Zap,
   TrendingUp
 } from "lucide-react";
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 import useSWR from "swr";
 import { getSubjects, type Subject } from "@/lib/supabase-queries";
 import { DashboardHomeSkeleton } from "@/components/ui/Skeleton";
@@ -84,46 +85,8 @@ interface FeaturedAnnouncement {
   badgeBg: string;
 }
 
-const featuredAnnouncements: FeaturedAnnouncement[] = [
-  {
-    id: "ielts-mock",
-    title: "MOCK IELTS Imtihoni",
-    message: "Yakshanba soat 10:00 da navbatdagi MOCK imtihoni bo'lib o'tadi. O'z bilimingizni haqiqiy IELTS imtihon muhitida sinab ko'ring va natijalarni 2 kunda oling.",
-    image: "https://images.unsplash.com/photo-1434030216411-0b793f4b4173?w=600&auto=format&fit=crop&q=80",
-    badge: "MOCK EXAM",
-    date: "Yakshanba, 10:00",
-    badgeBg: "bg-red-500/80 text-white"
-  },
-  {
-    id: "math-new",
-    title: "Yangi Matematika Guruhi",
-    message: "Noldan boshlab mukammal darajagacha bo'lgan yangi guruhimizga qabul ochildi. Darslar tajribali ustozlar tomonidan zamonaviy metodikalar asosida o'tiladi.",
-    image: "https://images.unsplash.com/photo-1635070041078-e363dbe005cb?w=600&auto=format&fit=crop&q=80",
-    badge: "YANGI KURS",
-    date: "Qabul ochiq",
-    badgeBg: "bg-emerald-500/80 text-white"
-  },
-  {
-    id: "physics-club",
-    title: "Fizika va Astronomiya To'garagi",
-    message: "Koinot sirlari va fizika qonunlarini qiziqarli amaliy tajribalar orqali o'rganishni istaysizmi? Bizning ilmiy to'garakka qo'shiling va kelajak olimiga aylaning.",
-    image: "https://images.unsplash.com/photo-1507668077129-56e32842fceb?w=600&auto=format&fit=crop&q=80",
-    badge: "TO'GARAK",
-    date: "Har seshanba",
-    badgeBg: "bg-violet-500/80 text-white"
-  },
-  {
-    id: "speaking-club",
-    title: "English Speaking Club",
-    message: "Har shanba erkin muloqot va yangi do'stlar orttirish imkoniyati. Native speakerlar bilan jonli suhbatlarda qatnashib, nutqingizni ravonlashtiring.",
-    image: "https://images.unsplash.com/photo-1529156069898-49953e39b3ac?w=600&auto=format&fit=crop&q=80",
-    badge: "SPEAKING CLUB",
-    date: "Shanba, 16:00",
-    badgeBg: "bg-amber-500/80 text-white"
-  }
-];
-
 export default function DashboardPage() {
+  const queryClient = useQueryClient();
   const { t } = useLanguage();
   const { data: user } = useCurrentUser();
   const { data: profile } = useUserProfile(user?.id);
@@ -131,22 +94,35 @@ export default function DashboardPage() {
   const { data: upcomingTests } = useUpcomingTests();
   const { data: dbAnnouncements = [] } = useAnnouncements();
 
+  useEffect(() => {
+    const handleUpdate = () => {
+      queryClient.invalidateQueries({ queryKey: ['announcements'] });
+    };
+
+    window.addEventListener('promax_announcements_updated', handleUpdate);
+    return () => {
+      window.removeEventListener('promax_announcements_updated', handleUpdate);
+    };
+  }, [queryClient]);
+
   const fetcher = () => getSubjects();
   const { data: subjects = [], isLoading: subjectsLoading } = useSWR('subjects', fetcher);
 
   const activeBannerAnnouncements = useMemo(() => {
     if (dbAnnouncements && dbAnnouncements.length > 0) {
-      return dbAnnouncements.map((a: any) => ({
-        id: a.id,
-        title: a.title,
-        message: a.content || a.message || "",
-        image: a.image_url || "https://images.unsplash.com/photo-1434030216411-0b793f4b4173?w=600&auto=format&fit=crop&q=80",
-        badge: a.badge || "E'LON",
-        date: new Date(a.created_at).toLocaleDateString('uz-UZ', { month: 'short', day: 'numeric' }),
-        badgeBg: a.type === 'error' ? "bg-red-500/80 text-white" : a.type === 'warning' ? "bg-amber-500/80 text-white" : a.type === 'success' ? "bg-emerald-500/80 text-white" : "bg-blue-500/80 text-white"
-      }));
+      return dbAnnouncements
+        .filter((a: any) => a.is_featured === true && a.is_active !== false && Boolean(a.image_url))
+        .map((a: any) => ({
+          id: a.id,
+          title: a.title,
+          message: a.content || a.message || "",
+          image: a.image_url!,
+          badge: a.badge || (a.type === 'error' ? "MOCK EXAM" : a.type === 'warning' ? "SPEAKING CLUB" : a.type === 'success' ? "YANGI KURS" : "TO'GARAK"),
+          date: new Date(a.created_at).toLocaleDateString('uz-UZ', { month: 'short', day: 'numeric' }),
+          badgeBg: a.type === 'error' ? "bg-red-500/80 text-white" : a.type === 'warning' ? "bg-amber-500/80 text-white" : a.type === 'success' ? "bg-emerald-500/80 text-white" : "bg-blue-500/80 text-white"
+        }));
     }
-    return featuredAnnouncements;
+    return [];
   }, [dbAnnouncements]);
 
   const isLoading = !user || subjectsLoading;
@@ -332,59 +308,61 @@ export default function DashboardPage() {
           )}
 
           {/* ── 7. YANGILIKLAR (FEATURED ANNOUNCEMENTS) ── */}
-          <section className="relative overflow-hidden w-full">
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-[13px] sm:text-[14px] font-bold text-slate-600 dark:text-slate-400 uppercase tracking-widest flex items-center gap-2">
-                <Megaphone size={16} className="text-brand-blue" />
-                Yangiliklar & E'lonlar
-              </h2>
-            </div>
+          {activeBannerAnnouncements.length > 0 && (
+            <section className="relative overflow-hidden w-full">
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="text-[13px] sm:text-[14px] font-bold text-slate-600 dark:text-slate-400 uppercase tracking-widest flex items-center gap-2">
+                  <Megaphone size={16} className="text-brand-blue" />
+                  Yangiliklar & E'lonlar
+                </h2>
+              </div>
 
-            <div className="flex gap-4 overflow-x-auto pb-4 snap-x snap-mandatory no-scrollbar w-full scroll-smooth">
-              {activeBannerAnnouncements.map((item, i) => (
-                <div
-                  key={item.id}
-                  className="snap-start shrink-0 w-[290px] sm:w-[380px] relative overflow-hidden rounded-[2rem] border border-white/60 dark:border-slate-800/60 shadow-none h-[210px] sm:h-[250px] bg-slate-100 dark:bg-slate-900"
-                >
-                  {/* Background Image */}
-                  <div className="absolute inset-0 z-0">
-                    <Image 
-                      src={item.image} 
-                      alt={item.title}
-                      fill
-                      sizes="(max-width: 640px) 290px, 380px"
-                      priority={i < 2}
-                      className="object-cover"
-                    />
-                    {/* Glassy/Dark Overlay */}
-                    <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/60 to-slate-900/10 dark:from-slate-950 dark:via-slate-950/70 dark:to-slate-950/20 z-10" />
-                  </div>
-
-                  {/* Content Overlay */}
-                  <div className="absolute inset-0 z-20 p-5 flex flex-col justify-between text-white">
-                    <div className="flex justify-between items-start">
-                      <span className={`text-[10px] font-extrabold px-3 py-1 rounded-full backdrop-blur-md shadow-none tracking-wider ${item.badgeBg}`}>
-                        {item.badge}
-                      </span>
-                      <span className="text-[11px] font-semibold text-slate-200/90 flex items-center gap-1.5 bg-black/40 backdrop-blur-md px-3 py-1 rounded-full border border-white/10">
-                        <Clock size={11} />
-                        {item.date}
-                      </span>
+              <div className="flex gap-4 overflow-x-auto pb-4 snap-x snap-mandatory no-scrollbar w-full scroll-smooth">
+                {activeBannerAnnouncements.map((item, i) => (
+                  <div
+                    key={item.id}
+                    className="snap-start shrink-0 w-[290px] sm:w-[380px] relative overflow-hidden rounded-[2rem] border border-white/60 dark:border-slate-800/60 shadow-none h-[210px] sm:h-[250px] bg-slate-100 dark:bg-slate-900"
+                  >
+                    {/* Background Image */}
+                    <div className="absolute inset-0 z-0">
+                      <Image 
+                        src={item.image} 
+                        alt={item.title}
+                        fill
+                        sizes="(max-width: 640px) 290px, 380px"
+                        priority={i < 2}
+                        className="object-cover"
+                      />
+                      {/* Glassy/Dark Overlay */}
+                      <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/60 to-slate-900/10 dark:from-slate-950 dark:via-slate-950/70 dark:to-slate-950/20 z-10" />
                     </div>
 
-                    <div>
-                      <h3 className="text-base sm:text-lg font-bold leading-snug font-fredoka tracking-wide text-white drop-shadow-sm line-clamp-1">
-                        {item.title}
-                      </h3>
-                      <p className="text-[12px] sm:text-[13px] text-slate-200/80 mt-1.5 line-clamp-2 leading-relaxed font-medium">
-                        {item.message}
-                      </p>
+                    {/* Content Overlay */}
+                    <div className="absolute inset-0 z-20 p-5 flex flex-col justify-between text-white">
+                      <div className="flex justify-between items-start">
+                        <span className={`text-[10px] font-extrabold px-3 py-1 rounded-full backdrop-blur-md shadow-none tracking-wider ${item.badgeBg}`}>
+                          {item.badge}
+                        </span>
+                        <span className="text-[11px] font-semibold text-slate-200/90 flex items-center gap-1.5 bg-black/40 backdrop-blur-md px-3 py-1 rounded-full border border-white/10">
+                          <Clock size={11} />
+                          {item.date}
+                        </span>
+                      </div>
+
+                      <div>
+                        <h3 className="text-base sm:text-lg font-bold leading-snug font-fredoka tracking-wide text-white drop-shadow-sm line-clamp-1">
+                          {item.title}
+                        </h3>
+                        <p className="text-[12px] sm:text-[13px] text-slate-200/80 mt-1.5 line-clamp-2 leading-relaxed font-medium">
+                          {item.message}
+                        </p>
+                      </div>
                     </div>
                   </div>
-                </div>
-              ))}
-            </div>
-          </section>
+                ))}
+              </div>
+            </section>
+          )}
 
         </>) /* end isLoading check */}
       </div>

@@ -1,6 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { createClient } from '@/utils/supabase/client';
 import { getDashboardStats, getRecentResultsForChart, getStudentActivity, getLeaderboard, getAvailableExams, getUserRank } from '@/lib/supabase-queries';
+import { getActiveStudentAnnouncements } from '@/lib/announcements';
 
 // Hook to get current user ID
 export const useCurrentUser = () => {
@@ -134,21 +135,10 @@ export const useUpcomingTests = () => {
 };
 
 export const useAnnouncements = () => {
- return useQuery({
- queryKey: ['announcements'],
- queryFn: async () => {
- const supabase = createClient();
- const { data, error } = await supabase
- .from('announcements')
- .select('*')
- .eq('is_active', true)
- .or('target_audience.eq.all,target_audience.eq.students')
- .order('created_at', { ascending: false })
- .order('priority', { ascending: false })
- .limit(5);
-
- if (error) throw error;
- return data || [];
- },
- });
+  return useQuery({
+    queryKey: ['announcements'],
+    queryFn: async () => {
+      return getActiveStudentAnnouncements();
+    },
+  });
 };

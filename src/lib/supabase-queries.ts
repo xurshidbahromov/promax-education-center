@@ -544,21 +544,14 @@ export async function markAllNotificationsAsRead() {
 }
 
 export async function getAnnouncements(limit: number = 5) {
- const supabase = createClient();
- const { data, error } = await supabase
- .from('announcements')
- .select('*')
- .eq('is_active', true)
- .or('target_audience.eq.all,target_audience.eq.students')
- .order('created_at', { ascending: false })
- .order('priority', { ascending: false })
- .limit(limit);
-
- if (error) {
- console.error('Error fetching announcements:', error);
- return [];
- }
- return data;
+  try {
+    const { getActiveStudentAnnouncements } = await import('@/lib/announcements');
+    const data = await getActiveStudentAnnouncements();
+    return data.slice(0, limit);
+  } catch (error) {
+    console.error('Error fetching announcements:', error);
+    return [];
+  }
 }
 
 export interface Subject {
