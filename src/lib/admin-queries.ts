@@ -305,29 +305,49 @@ export async function saveExamResult(
  directionId = newDirection.id;
  }
 
- // 3. Save Result
- const { error: saveError } = await supabase
- .from('results')
- .insert({
- student_id: studentId,
- exam_id: examId,
- direction_id: directionId,
- total_score: scores.total,
- compulsory_math_score: scores.comp_math,
- compulsory_history_score: scores.comp_history,
- compulsory_lang_score: scores.comp_lang,
- subject_1_score: scores.subject_1,
- subject_2_score: scores.subject_2
- });
+  // 3. Save Result (Upsert on exam_id, student_id)
+  const resultPayload = {
+    student_id: studentId,
+    exam_id: examId,
+    direction_id: directionId,
+    total_score: scores.total,
+    compulsory_math_score: scores.comp_math,
+    compulsory_history_score: scores.comp_history,
+    compulsory_lang_score: scores.comp_lang,
+    subject_1_score: scores.subject_1,
+    subject_2_score: scores.subject_2
+  };
 
- if (saveError) throw saveError;
+  const { error: saveError } = await supabase
+    .from('results')
+    .upsert(resultPayload, { onConflict: 'exam_id,student_id' });
 
- return { success: true };
+  if (saveError) {
+    // If upsert fails or onConflict syntax differs, check for existing row and update
+    const { data: existing } = await supabase
+      .from('results')
+      .select('id')
+      .eq('exam_id', examId)
+      .eq('student_id', studentId)
+      .maybeSingle();
 
- } catch (error: any) {
- console.error('Save result error:', error);
- return { success: false, error: error.message };
- }
+    if (existing) {
+      const { error: updateError } = await supabase
+        .from('results')
+        .update(resultPayload)
+        .eq('id', existing.id);
+      if (updateError) throw updateError;
+    } else {
+      throw saveError;
+    }
+  }
+
+  return { success: true };
+
+  } catch (error: any) {
+    console.error('Save result error:', error);
+    return { success: false, error: error.message };
+  }
 }
 
 export async function getAllResults(limit: number = 20): Promise<any[]> {
