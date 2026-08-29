@@ -930,7 +930,8 @@ export async function adminUpdateOrderStatus(
 export async function adminCreditCoinsDirectly(
   studentId: string,
   coinsToAdd: number,
-  orderId?: string
+  orderId?: string,
+  reason?: string
 ): Promise<{ success: boolean; newBalance?: number; error?: string }> {
   try {
     const res = await fetch('/api/admin/credit-coins', {
@@ -940,6 +941,7 @@ export async function adminCreditCoinsDirectly(
         studentId,
         coinsToAdd,
         orderId,
+        reason,
         status: 'delivered'
       })
     });

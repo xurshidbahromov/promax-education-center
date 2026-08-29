@@ -54,12 +54,19 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: uErr.message }, { status: 500 });
     }
 
-    // 3. Update shop order status if orderId provided
+    // 3. Update shop order status if orderId provided, or record bonus transaction
     if (orderId) {
       await supabase
         .from('shop_orders')
         .update({ status: status || 'delivered' })
         .eq('id', orderId);
+    } else {
+      await supabase.from('shop_orders').insert({
+        student_id: studentId,
+        coins_spent: 0,
+        status: 'delivered',
+        notes: body.reason ? `Bonus (${body.reason}): +${coinsToAdd} coin` : `Bonus: +${coinsToAdd} coin`
+      });
     }
 
     // 4. Send in-app notification to student

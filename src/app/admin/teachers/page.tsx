@@ -1,7 +1,6 @@
 'use client';
 
-import { useState, useMemo } from 'react';
-import Link from 'next/link';
+import { useState, useMemo, useEffect } from 'react';
 import {
   Search,
   GraduationCap,
@@ -13,14 +12,34 @@ import {
   BookOpen,
   ArrowUpDown,
   Edit2,
-  Layers,
-  ChevronRight
+  Check
 } from 'lucide-react';
-import { demoteToStudent, type Teacher } from '@/lib/admin-queries';
+import {
+  demoteToStudent,
+  updateTeacher,
+  promoteToTeacher,
+  getStudents,
+  type Teacher,
+  type Student
+} from '@/lib/admin-queries';
 import { useQueryClient } from '@tanstack/react-query';
-import { useTeachers } from '@/hooks/useAdminData';
-import { formatUzPhone } from '@/lib/phone-formatter';
+import { useTeachers, useSubjects } from '@/hooks/useAdminData';
+import { formatUzPhone, cleanUzPhone } from '@/lib/phone-formatter';
 import toast from 'react-hot-toast';
+
+const DEFAULT_FALLBACK_SUBJECTS = [
+  'Matematika',
+  'Ingliz tili',
+  'Fizika',
+  'Kimyo',
+  'Biologiya',
+  'Ona tili',
+  'Tarix',
+  'Rus tili',
+  'Koreys tili',
+  'Informatika',
+  'Huquq'
+];
 
 // ── SKELETON LOADER ──
 function TeachersGridSkeleton() {
@@ -64,8 +83,48 @@ export default function AdminTeachersPage() {
   const [selectedSubject, setSelectedSubject] = useState<string>('all');
   const [sortBy, setSortBy] = useState<'name_asc' | 'groups_desc' | 'students_desc' | 'newest'>('name_asc');
 
+  // Modal 1: Add / Promote Teacher Modal state
+  const [showAddModal, setShowAddModal] = useState(false);
+  const [studentsList, setStudentsList] = useState<Student[]>([]);
+  const [userSearchTerm, setUserSearchTerm] = useState('');
+  const [selectedStudentId, setSelectedStudentId] = useState('');
+  const [newTeacherSubjects, setNewTeacherSubjects] = useState<string[]>([]);
+  const [isPromoting, setIsPromoting] = useState(false);
+
+  // Modal 2: Edit Teacher Modal state
+  const [editingTeacher, setEditingTeacher] = useState<Teacher | null>(null);
+  const [editName, setEditName] = useState('');
+  const [editPhone, setEditPhone] = useState('');
+  const [editSubjects, setEditSubjects] = useState<string[]>([]);
+  const [isSaving, setIsSaving] = useState(false);
+
   const { data: teachers, isLoading: loading } = useTeachers();
+  const { data: dbSubjects = [] } = useSubjects();
   const teachersList: Teacher[] = teachers || [];
+
+  // Load students for promote selector
+  useEffect(() => {
+    getStudents().then(setStudentsList).catch(console.error);
+  }, []);
+
+  // Dynamic Subjects List (from Database Subjects table + Teachers existing subjects)
+  const dynamicSubjects = useMemo(() => {
+    const subs = new Set<string>();
+    // 1. From database created subjects
+    dbSubjects.forEach((s) => {
+      const title = s.title || (s as any).name;
+      if (title) subs.add(title);
+    });
+    // 2. From teachers assigned subjects
+    teachersList.forEach((t) => {
+      (t.subjects || []).forEach((s) => subs.add(s));
+    });
+    // 3. Fallback if empty
+    if (subs.size === 0) {
+      DEFAULT_FALLBACK_SUBJECTS.forEach((s) => subs.add(s));
+    }
+    return Array.from(subs);
+  }, [dbSubjects, teachersList]);
 
   // Global KPI Summary
   const stats = useMemo(() => {
@@ -81,16 +140,18 @@ export default function AdminTeachersPage() {
     return { total, totalGroups, totalStudents };
   }, [teachersList]);
 
-  // Available subjects list from teachers
-  const availableSubjects = useMemo(() => {
-    const subs = new Set<string>();
-    teachersList.forEach((t) => {
-      (t.subjects || []).forEach((s) => subs.add(s));
-    });
-    return Array.from(subs);
-  }, [teachersList]);
+  // Filtered Selectable Students for Promote Modal
+  const filteredSelectableStudents = useMemo(() => {
+    if (!userSearchTerm.trim()) return studentsList;
+    const term = userSearchTerm.toLowerCase();
+    return studentsList.filter(
+      (s) =>
+        (s.full_name || '').toLowerCase().includes(term) ||
+        (s.phone || '').includes(term)
+    );
+  }, [studentsList, userSearchTerm]);
 
-  // Filtered & Sorted Teachers
+  // Filtered & Sorted Teachers for Main View
   const filteredTeachers = useMemo(() => {
     return teachersList
       .filter((teacher) => {
@@ -115,7 +176,7 @@ export default function AdminTeachersPage() {
       });
   }, [teachersList, searchTerm, selectedSubject, sortBy]);
 
-  // Handlers
+  // ── DEMOTE TO STUDENT ──
   const handleDemote = async (id: string, name: string) => {
     if (!confirm(`"${name}" ni o'qituvchilar safidan chiqarib, oddiy o'quvchiga aylantirmoqchimisiz?`)) return;
 
@@ -134,6 +195,95 @@ export default function AdminTeachersPage() {
     }
   };
 
+  // ── OPEN EDIT MODAL ──
+  const openEditModal = (teacher: Teacher) => {
+    setEditingTeacher(teacher);
+    setEditName(teacher.full_name || '');
+    setEditPhone(teacher.phone || '');
+    setEditSubjects(teacher.subjects || []);
+  };
+
+  const toggleEditSubject = (sub: string) => {
+    setEditSubjects((prev) =>
+      prev.includes(sub) ? prev.filter((s) => s !== sub) : [...prev, sub]
+    );
+  };
+
+  const handleSaveEdit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editingTeacher) return;
+    if (!editName.trim()) {
+      toast.error("Ism-familiyani kiriting!");
+      return;
+    }
+
+    setIsSaving(true);
+    try {
+      const res = await updateTeacher(editingTeacher.id, {
+        full_name: editName.trim(),
+        phone: cleanUzPhone(editPhone),
+        subjects: editSubjects
+      });
+
+      if (res.success) {
+        queryClient.invalidateQueries({ queryKey: ['teachers'] });
+        toast.success("O'qituvchi ma'lumotlari muvaffaqiyatli saqlandi! ✅");
+        setEditingTeacher(null);
+      } else {
+        toast.error(res.error || "Saqlashda xatolik yuz berdi");
+      }
+    } catch (err: any) {
+      console.error(err);
+      toast.error("Xatolik: " + err.message);
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  // ── OPEN ADD / PROMOTE MODAL ──
+  const openAddModal = () => {
+    setSelectedStudentId('');
+    setUserSearchTerm('');
+    setNewTeacherSubjects([]);
+    setShowAddModal(true);
+  };
+
+  const toggleNewTeacherSubject = (sub: string) => {
+    setNewTeacherSubjects((prev) =>
+      prev.includes(sub) ? prev.filter((s) => s !== sub) : [...prev, sub]
+    );
+  };
+
+  const handlePromoteSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!selectedStudentId) {
+      toast.error("Foydalanuvchini tanlang!");
+      return;
+    }
+    if (newTeacherSubjects.length === 0) {
+      toast.error("Kamida bitta fanni tanlang!");
+      return;
+    }
+
+    setIsPromoting(true);
+    try {
+      const res = await promoteToTeacher(selectedStudentId, newTeacherSubjects);
+      if (res.success) {
+        queryClient.invalidateQueries({ queryKey: ['teachers'] });
+        queryClient.invalidateQueries({ queryKey: ['students'] });
+        toast.success("Yangi o'qituvchi muvaffaqiyatli tayinlandi! 👨‍🏫");
+        setShowAddModal(false);
+      } else {
+        toast.error(res.error || "Tayinlashda xatolik yuz berdi");
+      }
+    } catch (err: any) {
+      console.error(err);
+      toast.error("Xatolik: " + err.message);
+    } finally {
+      setIsPromoting(false);
+    }
+  };
+
   return (
     <div className="w-full max-w-[1400px] mx-auto space-y-6 pb-24">
       {/* ── TOP HEADER (CLEAN TYPOGRAPHY, NO ICON) ── */}
@@ -147,13 +297,14 @@ export default function AdminTeachersPage() {
           </p>
         </div>
 
-        <Link
-          href="/admin/teachers/create"
-          className="inline-flex items-center gap-2 px-4 py-2.5 bg-emerald-500 hover:bg-emerald-600 active:scale-95 text-white rounded-2xl text-xs font-bold transition-all shadow-sm self-start md:self-auto"
+        <button
+          type="button"
+          onClick={openAddModal}
+          className="inline-flex items-center gap-2 px-4 py-2.5 bg-emerald-500 hover:bg-emerald-600 active:scale-95 text-white rounded-2xl text-xs font-bold transition-all shadow-sm self-start md:self-auto cursor-pointer"
         >
           <Plus size={16} />
           <span>Yangi O'qituvchi Qo'shish</span>
-        </Link>
+        </button>
       </div>
 
       {/* ── GLOBAL KPI SUMMARY CARDS ── */}
@@ -199,7 +350,7 @@ export default function AdminTeachersPage() {
         </div>
 
         {/* Subject Filter */}
-        {availableSubjects.length > 0 && (
+        {dynamicSubjects.length > 0 && (
           <div className="w-full sm:w-auto shrink-0">
             <select
               value={selectedSubject}
@@ -207,7 +358,7 @@ export default function AdminTeachersPage() {
               className="w-full sm:w-auto px-3 py-1.5 bg-slate-100/80 dark:bg-slate-800/80 border border-slate-200/60 dark:border-slate-700/60 rounded-xl text-xs font-bold text-slate-700 dark:text-slate-200 outline-none cursor-pointer"
             >
               <option value="all">Barcha Fanlar</option>
-              {availableSubjects.map((sub) => (
+              {dynamicSubjects.map((sub) => (
                 <option key={sub} value={sub}>
                   {sub}
                 </option>
@@ -242,13 +393,13 @@ export default function AdminTeachersPage() {
             <p className="text-sm font-bold text-slate-700 dark:text-slate-300">Hech qanday o'qituvchi topilmadi</p>
             <p className="text-xs text-slate-400 mt-1">Qidiruv parametrlarini o'zgartiring yoki yangi o'qituvchi qo'shing</p>
           </div>
-          <Link
-            href="/admin/teachers/create"
+          <button
+            onClick={openAddModal}
             className="inline-flex items-center gap-2 px-6 py-2.5 bg-emerald-500 hover:bg-emerald-600 text-white rounded-2xl text-xs font-bold transition-all shadow-sm"
           >
             <Plus size={15} />
             <span>Yangi O'qituvchi Qo'shish</span>
-          </Link>
+          </button>
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
@@ -264,7 +415,7 @@ export default function AdminTeachersPage() {
                 <div className="space-y-4">
                   {/* Top: Avatar & Info */}
                   <div className="flex items-center gap-3.5 min-w-0">
-                    <div className="w-12 h-12 rounded-2xl bg-purple-500/10 text-purple-600 dark:text-purple-400 flex items-center justify-center font-black text-base font-sans-pro shrink-0 border border-purple-500/20">
+                    <div className="w-12 h-12 rounded-2xl bg-blue-500/10 text-blue-600 dark:text-blue-400 flex items-center justify-center font-black text-base font-sans-pro shrink-0 border border-blue-500/20">
                       {initial}
                     </div>
 
@@ -275,7 +426,7 @@ export default function AdminTeachersPage() {
                       {teacher.phone ? (
                         <a
                           href={`tel:${teacher.phone}`}
-                          className="text-xs text-slate-400 hover:text-emerald-600 dark:hover:text-emerald-400 font-medium flex items-center gap-1.5 mt-0.5 transition-colors"
+                          className="text-xs text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 font-medium flex items-center gap-1.5 mt-0.5 transition-colors"
                         >
                           <Phone size={12} className="shrink-0 text-slate-400" />
                           <span>{formattedPhone}</span>
@@ -338,24 +489,250 @@ export default function AdminTeachersPage() {
                 <div className="pt-3 border-t border-slate-100 dark:border-slate-800/60 flex items-center justify-between">
                   <button
                     onClick={() => handleDemote(teacher.id, teacher.full_name || "O'qituvchi")}
-                    className="inline-flex items-center gap-1.5 text-xs font-bold text-slate-400 hover:text-rose-500 transition-colors"
+                    className="inline-flex items-center gap-1.5 text-xs font-bold text-slate-400 hover:text-rose-500 transition-colors cursor-pointer"
                     title="O'quvchiga aylantirish"
                   >
                     <ShieldAlert size={14} />
                     <span>O'quvchi qilish</span>
                   </button>
 
-                  <Link
-                    href={`/admin/teachers/${teacher.id}/edit`}
-                    className="inline-flex items-center gap-1 px-3 py-1.5 rounded-xl bg-slate-100/80 dark:bg-slate-800/80 hover:bg-slate-200/80 dark:hover:bg-slate-700/80 text-xs font-bold text-slate-700 dark:text-slate-200 transition-colors"
+                  <button
+                    onClick={() => openEditModal(teacher)}
+                    className="inline-flex items-center gap-1 px-3 py-1.5 rounded-xl bg-slate-100/80 dark:bg-slate-800/80 hover:bg-slate-200/80 dark:hover:bg-slate-700/80 text-xs font-bold text-slate-700 dark:text-slate-200 transition-colors cursor-pointer"
                   >
                     <Edit2 size={13} />
                     <span>Tahrirlash</span>
-                  </Link>
+                  </button>
                 </div>
               </div>
             );
           })}
+        </div>
+      )}
+
+      {/* ── MODAL 1: ADD / PROMOTE TEACHER MODAL (WITH SEARCHABLE USER SELECTOR & DYNAMIC SUBJECTS) ── */}
+      {showAddModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-sm">
+          <div className="bg-white dark:bg-slate-900 rounded-3xl shadow-xl w-full max-w-lg overflow-hidden border border-slate-200/80 dark:border-slate-800 animate-in fade-in zoom-in-95 duration-150">
+            <div className="px-6 py-4 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between">
+              <div className="flex items-center gap-2 text-slate-800 dark:text-slate-100">
+                <GraduationCap size={18} className="text-emerald-500" />
+                <h3 className="font-bold text-base">Yangi O'qituvchi Tayinlash</h3>
+              </div>
+              <button
+                onClick={() => setShowAddModal(false)}
+                className="p-1.5 text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 transition-colors"
+              >
+                <X size={18} />
+              </button>
+            </div>
+
+            <form onSubmit={handlePromoteSubmit} className="p-6 space-y-4 max-h-[80vh] overflow-y-auto">
+              {/* Searchable Student / User Selector */}
+              <div>
+                <label className="block text-xs font-bold text-slate-600 dark:text-slate-300 mb-1.5">
+                  Foydalanuvchini qidiring va tanlang *
+                </label>
+
+                <div className="space-y-2">
+                  <div className="relative">
+                    <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+                    <input
+                      type="text"
+                      placeholder="Ism yoki telefon bo'yicha qidirish..."
+                      value={userSearchTerm}
+                      onChange={(e) => setUserSearchTerm(e.target.value)}
+                      className="w-full pl-9 pr-8 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-medium text-slate-800 dark:text-slate-100 outline-none"
+                    />
+                    {userSearchTerm && (
+                      <button
+                        type="button"
+                        onClick={() => setUserSearchTerm('')}
+                        className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200"
+                      >
+                        <X size={12} />
+                      </button>
+                    )}
+                  </div>
+
+                  <div className="max-h-44 overflow-y-auto space-y-1 p-1 rounded-2xl border border-slate-200/60 dark:border-slate-700/60 bg-slate-50/50 dark:bg-slate-800/40">
+                    {filteredSelectableStudents.length === 0 ? (
+                      <p className="text-xs text-center py-4 text-slate-400 font-medium">Foydalanuvchi topilmadi</p>
+                    ) : (
+                      filteredSelectableStudents.map((s) => {
+                        const isSelected = selectedStudentId === s.id;
+                        return (
+                          <div
+                            key={s.id}
+                            onClick={() => setSelectedStudentId(s.id)}
+                            className={`p-2 rounded-xl flex items-center justify-between gap-3 cursor-pointer transition-all ${
+                              isSelected
+                                ? 'bg-blue-600 text-white shadow-sm'
+                                : 'hover:bg-slate-200/60 dark:hover:bg-slate-700/60 text-slate-800 dark:text-slate-200'
+                            }`}
+                          >
+                            <div className="flex items-center gap-2.5 min-w-0">
+                              <div
+                                className={`w-7 h-7 rounded-lg flex items-center justify-center font-bold text-xs shrink-0 ${
+                                  isSelected ? 'bg-white/20 text-white' : 'bg-blue-500/10 text-blue-600 dark:text-blue-400'
+                                }`}
+                              >
+                                {(s.full_name || '?')[0].toUpperCase()}
+                              </div>
+                              <div className="min-w-0">
+                                <p className="text-xs font-bold truncate">{s.full_name || "Ismsiz"}</p>
+                                <p className={`text-[10px] ${isSelected ? 'text-blue-100' : 'text-slate-400'}`}>
+                                  {s.phone ? formatUzPhone(s.phone) : 'Raqamsiz'}
+                                </p>
+                              </div>
+                            </div>
+                            {isSelected && <Check size={14} className="text-white shrink-0" />}
+                          </div>
+                        );
+                      })
+                    )}
+                  </div>
+                </div>
+              </div>
+
+              {/* Dynamic Database Subjects Chips */}
+              <div>
+                <label className="block text-xs font-bold text-slate-600 dark:text-slate-300 mb-2">
+                  O'qitadigan Fanlari (Bir yoki bir nechta tanlang) *
+                </label>
+                <div className="flex flex-wrap gap-2">
+                  {dynamicSubjects.map((sub) => {
+                    const isSelected = newTeacherSubjects.includes(sub);
+                    return (
+                      <button
+                        key={sub}
+                        type="button"
+                        onClick={() => toggleNewTeacherSubject(sub)}
+                        className={`px-3 py-1.5 rounded-xl text-xs font-bold border transition-all flex items-center gap-1.5 cursor-pointer ${
+                          isSelected
+                            ? 'bg-blue-600 text-white border-blue-600'
+                            : 'bg-slate-50 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-700'
+                        }`}
+                      >
+                        {isSelected && <Check size={12} />}
+                        <span>{sub}</span>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+
+              <div className="flex items-center justify-end gap-3 pt-4 border-t border-slate-100 dark:border-slate-800">
+                <button
+                  type="button"
+                  onClick={() => setShowAddModal(false)}
+                  className="px-4 py-2 text-xs font-bold text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-100 transition-colors"
+                >
+                  Bekor qilish
+                </button>
+                <button
+                  type="submit"
+                  disabled={isPromoting || !selectedStudentId || newTeacherSubjects.length === 0}
+                  className="px-5 py-2 text-xs font-bold text-white bg-emerald-500 hover:bg-emerald-600 rounded-xl transition-colors disabled:opacity-50 cursor-pointer"
+                >
+                  {isPromoting ? 'Tayinlanmoqda...' : 'O\'qituvchi etib tayinlash'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* ── MODAL 2: EDIT TEACHER MODAL (WITH DYNAMIC SUBJECTS) ── */}
+      {editingTeacher && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-sm">
+          <div className="bg-white dark:bg-slate-900 rounded-3xl shadow-xl w-full max-w-lg overflow-hidden border border-slate-200/80 dark:border-slate-800 animate-in fade-in zoom-in-95 duration-150">
+            <div className="px-6 py-4 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between">
+              <div className="flex items-center gap-2 text-slate-800 dark:text-slate-100">
+                <Edit2 size={18} className="text-blue-500" />
+                <h3 className="font-bold text-base">O'qituvchini Tahrirlash</h3>
+              </div>
+              <button
+                onClick={() => setEditingTeacher(null)}
+                className="p-1.5 text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 transition-colors"
+              >
+                <X size={18} />
+              </button>
+            </div>
+
+            <form onSubmit={handleSaveEdit} className="p-6 space-y-4 max-h-[80vh] overflow-y-auto">
+              <div>
+                <label className="block text-xs font-bold text-slate-600 dark:text-slate-300 mb-1">
+                  Ism Familiya *
+                </label>
+                <input
+                  type="text"
+                  value={editName}
+                  onChange={(e) => setEditName(e.target.value)}
+                  className="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs sm:text-sm font-bold text-slate-800 dark:text-slate-100 outline-none"
+                  placeholder="Ustoz ismi..."
+                  required
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold text-slate-600 dark:text-slate-300 mb-1">
+                  Telefon Raqami
+                </label>
+                <input
+                  type="text"
+                  value={editPhone}
+                  onChange={(e) => setEditPhone(e.target.value)}
+                  className="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs sm:text-sm font-medium text-slate-800 dark:text-slate-100 outline-none"
+                  placeholder="+998 90 123 45 67"
+                />
+              </div>
+
+              {/* Dynamic Database Subjects Chips */}
+              <div>
+                <label className="block text-xs font-bold text-slate-600 dark:text-slate-300 mb-2">
+                  Biriktirilgan Fanlar (Baza fanlaridan)
+                </label>
+                <div className="flex flex-wrap gap-2">
+                  {dynamicSubjects.map((sub) => {
+                    const isSelected = editSubjects.includes(sub);
+                    return (
+                      <button
+                        key={sub}
+                        type="button"
+                        onClick={() => toggleEditSubject(sub)}
+                        className={`px-3 py-1.5 rounded-xl text-xs font-bold border transition-all flex items-center gap-1.5 cursor-pointer ${
+                          isSelected
+                            ? 'bg-blue-600 text-white border-blue-600'
+                            : 'bg-slate-50 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-700'
+                        }`}
+                      >
+                        {isSelected && <Check size={12} />}
+                        <span>{sub}</span>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+
+              <div className="flex items-center justify-end gap-3 pt-4 border-t border-slate-100 dark:border-slate-800">
+                <button
+                  type="button"
+                  onClick={() => setEditingTeacher(null)}
+                  className="px-4 py-2 text-xs font-bold text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-100 transition-colors"
+                >
+                  Bekor qilish
+                </button>
+                <button
+                  type="submit"
+                  disabled={isSaving}
+                  className="px-5 py-2 text-xs font-bold text-white bg-blue-600 hover:bg-blue-700 rounded-xl transition-colors disabled:opacity-50 cursor-pointer"
+                >
+                  {isSaving ? 'Saqlanmoqda...' : 'Saqlash'}
+                </button>
+              </div>
+            </form>
+          </div>
         </div>
       )}
     </div>

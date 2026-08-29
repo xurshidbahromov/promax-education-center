@@ -515,14 +515,14 @@ export default function AdminStudentsPage() {
                       <div className="min-w-0 flex-1">
                         <h3
                           onClick={() => router.push(`/admin/students/${student.id}`)}
-                          className="font-extrabold text-slate-800 dark:text-slate-100 text-base truncate font-sans-pro cursor-pointer hover:underline"
+                          className="font-extrabold text-slate-800 dark:text-slate-100 text-base truncate font-sans-pro cursor-pointer"
                         >
                           {student.full_name || "Ismsiz O'quvchi"}
                         </h3>
                         {student.phone ? (
                           <a
                             href={`tel:${student.phone}`}
-                            className="text-xs text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 font-medium flex items-center gap-1.5 mt-0.5 transition-colors"
+                            className="text-xs text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 font-medium flex items-center gap-1.5 mt-0.5 transition-colors"
                           >
                             <Smartphone size={12} className="shrink-0 text-slate-400" />
                             <span>{formattedPhone}</span>
@@ -544,14 +544,6 @@ export default function AdminStudentsPage() {
                         <UserCheck size={12} className="text-blue-500" />
                         <span>Ota-onasi:</span>
                       </span>
-                      {student.telegram_id ? (
-                        <span className="text-emerald-600 dark:text-emerald-400 flex items-center gap-0.5">
-                          <CheckCircle2 size={10} />
-                          <span>Telegram ulangan</span>
-                        </span>
-                      ) : (
-                        <span className="text-slate-400">Telegram ulanmagan</span>
-                      )}
                     </div>
                     {formattedParentPhone ? (
                       <div className="flex items-center justify-between gap-2 text-xs">
@@ -560,7 +552,7 @@ export default function AdminStudentsPage() {
                         </span>
                         <a
                           href={`tel:${student.parent_phone}`}
-                          className="font-semibold text-slate-500 hover:text-emerald-600 dark:text-slate-400 dark:hover:text-emerald-400 shrink-0 flex items-center gap-1 transition-colors"
+                          className="font-semibold text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200 shrink-0 flex items-center gap-1 transition-colors"
                         >
                           <Phone size={11} />
                           <span>{formattedParentPhone}</span>
@@ -570,80 +562,39 @@ export default function AdminStudentsPage() {
                       <p className="text-[11px] text-slate-400 italic">Ota-ona raqami kiritilmagan</p>
                     )}
                   </div>
-
-                  {/* Assigned Groups Chips */}
-                  <div>
-                    <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-1">
-                      Biriktirilgan Guruhlar:
-                    </span>
-                    <div className="flex flex-wrap gap-1.5">
-                      {student.groups && student.groups.length > 0 ? (
-                        student.groups.map((grp) => (
-                          <span
-                            key={grp.id}
-                            className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-blue-500/10 text-blue-600 dark:text-blue-400 border border-blue-500/20"
-                          >
-                            <BookOpen size={11} />
-                            <span>{grp.name}</span>
-                          </span>
-                        ))
-                      ) : (
-                        <span className="text-[11px] text-amber-600 dark:text-amber-400 font-medium">
-                          Hozircha guruhga biriktirilmagan
-                        </span>
-                      )}
-                    </div>
-                  </div>
                 </div>
 
                 {/* Card Footer Actions */}
-                <div className="pt-3 border-t border-slate-100 dark:border-slate-800/60 flex items-center justify-between">
-                  <div className="flex items-center gap-1.5">
-                    {/* Assign / Manage Groups Button */}
-                    <button
-                      onClick={() => openAssignModal(student)}
-                      className="inline-flex items-center gap-1 px-2.5 py-1 rounded-xl bg-blue-500/10 hover:bg-blue-500/20 text-blue-600 dark:text-blue-400 text-xs font-bold transition-colors"
-                      title="Guruhga qo'shish yoki boshqarish"
-                    >
-                      <Plus size={13} />
-                      <span>Guruhga qo'shish</span>
-                    </button>
+                <div className="pt-3 border-t border-slate-100 dark:border-slate-800/60 flex items-center justify-end gap-1">
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      openEditModal(student);
+                    }}
+                    className="p-1.5 text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+                    title="Tahrirlash"
+                  >
+                    <Edit2 size={15} />
+                  </button>
 
-                    {/* Promote to Teacher */}
-                    <button
-                      onClick={() => openPromoteModal(student.id, student.full_name || 'Ismsiz')}
-                      className="p-1.5 text-slate-400 hover:text-emerald-600 dark:hover:text-emerald-400 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
-                      title="O'qituvchi etib tayinlash"
-                    >
-                      <GraduationCap size={15} />
-                    </button>
-                  </div>
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleDelete(student.id, student.full_name || "O'quvchi");
+                    }}
+                    className="p-1.5 text-slate-400 hover:text-rose-500 rounded-lg hover:bg-rose-500/10 transition-colors"
+                    title="O'chirish"
+                  >
+                    <Trash2 size={15} />
+                  </button>
 
-                  <div className="flex items-center gap-1">
-                    <button
-                      onClick={() => openEditModal(student)}
-                      className="p-1.5 text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
-                      title="Tahrirlash"
-                    >
-                      <Edit2 size={15} />
-                    </button>
-
-                    <button
-                      onClick={() => router.push(`/admin/students/${student.id}`)}
-                      className="p-1.5 text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
-                      title="Profilga o'tish"
-                    >
-                      <ChevronRight size={16} />
-                    </button>
-
-                    <button
-                      onClick={() => handleDelete(student.id, student.full_name || "O'quvchi")}
-                      className="p-1.5 text-slate-400 hover:text-rose-500 rounded-lg hover:bg-rose-500/10 transition-colors"
-                      title="O'chirish"
-                    >
-                      <Trash2 size={15} />
-                    </button>
-                  </div>
+                  <button
+                    onClick={() => router.push(`/admin/students/${student.id}`)}
+                    className="p-1.5 text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+                    title="Profilga o'tish"
+                  >
+                    <ChevronRight size={16} />
+                  </button>
                 </div>
               </div>
             );
