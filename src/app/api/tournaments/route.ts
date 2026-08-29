@@ -1,13 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server';
 import fs from 'fs';
 import path from 'path';
-import { INITIAL_TOURNAMENTS, AdminTournament } from '@/lib/tournaments';
-import { INITIAL_INTERNATIONAL_TOURNAMENTS, InternationalTournament } from '@/lib/international-tournaments';
+import type { AdminTournament } from '@/lib/tournaments';
+import type { InternationalTournament } from '@/lib/international-tournaments';
 
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
 
-// Global memory cache for instant cross-user and cross-request synchronization
+// Global memory cache for cross-user and cross-request synchronization
 declare global {
   var __national_tournaments_cache: AdminTournament[] | undefined;
   var __intl_tournaments_cache: InternationalTournament[] | undefined;
@@ -23,11 +23,11 @@ function ensureDataFiles() {
   }
 
   if (!fs.existsSync(NATIONAL_FILE)) {
-    fs.writeFileSync(NATIONAL_FILE, JSON.stringify(INITIAL_TOURNAMENTS, null, 2), 'utf8');
+    fs.writeFileSync(NATIONAL_FILE, JSON.stringify([], null, 2), 'utf8');
   }
 
   if (!fs.existsSync(INTL_FILE)) {
-    fs.writeFileSync(INTL_FILE, JSON.stringify(INITIAL_INTERNATIONAL_TOURNAMENTS, null, 2), 'utf8');
+    fs.writeFileSync(INTL_FILE, JSON.stringify([], null, 2), 'utf8');
   }
 }
 
@@ -50,7 +50,7 @@ function loadNationalTournaments(): AdminTournament[] {
     console.error('Error reading national tournaments file:', err);
   }
 
-  globalThis.__national_tournaments_cache = [...INITIAL_TOURNAMENTS];
+  globalThis.__national_tournaments_cache = [];
   return globalThis.__national_tournaments_cache;
 }
 
@@ -83,7 +83,7 @@ function loadIntlTournaments(): InternationalTournament[] {
     console.error('Error reading international tournaments file:', err);
   }
 
-  globalThis.__intl_tournaments_cache = [...INITIAL_INTERNATIONAL_TOURNAMENTS];
+  globalThis.__intl_tournaments_cache = [];
   return globalThis.__intl_tournaments_cache;
 }
 

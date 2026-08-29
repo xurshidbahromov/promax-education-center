@@ -52,95 +52,7 @@ export interface OlympiadItem {
   topRankings?: { name: string; score: number; rank: number; avatar: string }[];
 }
 
-export const SAMPLE_OLYMPIADS: OlympiadItem[] = [
-  {
-    id: "math-pro-2026",
-    title: "Respublika Matematika Pro Onlayn Olimpiadasi",
-    subject: "Matematika",
-    subjectColor: "from-blue-600 to-indigo-600",
-    badge: "🔥 HAFTALIK GRAND MUSOBAQA",
-    badgeBg: "bg-gradient-to-r from-amber-500 to-rose-500 text-white shadow-lg shadow-amber-500/20",
-    status: "upcoming",
-    startDate: "18-Avgust, 2026",
-    startTime: "15:00",
-    durationMinutes: 60,
-    totalQuestions: 30,
-    entryCoins: 100,
-    prizePool: "1,500,000 SO'M + Planshet",
-    topPrizes: [
-      "🥇 1-O'rin: 1,000,000 So'm + Oltin Medal + Planshet",
-      "🥈 2-O meksarin: 300,000 So'm + Kumush Medal + Premium Akkaunt",
-      "🥉 3-O'rin: 200,000 So'm + Bronza Medal + 500 Tanga"
-    ],
-    participantsCount: 428,
-    description: "Matematika bo'yicha eng kuchli o'quvchilar bellashuvi! Murakkab va mantiqiy masalalarni yechib, qimmatbaho sovg'alar va sertifikatlarni qo'lga kiriting.",
-    rules: [
-      "Imtihon belgilangan vaqtda aniq boshlanadi va 60 daqiqa davom etadi.",
-      "Har bir to'g'ri javob uchun 3.1 ball beriladi va reyting real-vaqtda shakllanadi.",
-      "Olimpiada yakunlangach, top o'rin egalari mukofotlarni olish uchun Admin bilan bog'lanishadi."
-    ],
-    bannerGradient: "from-blue-600 via-indigo-700 to-purple-800",
-    topRankings: [
-      { name: "Sardor M.", score: 98, rank: 1, avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=Sardor" },
-      { name: "Malika K.", score: 95, rank: 2, avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=Malika" },
-      { name: "Javohir S.", score: 92, rank: 3, avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=Javohir" }
-    ]
-  },
-  {
-    id: "physics-master-2026",
-    title: "Fizika Bilimdonlari Milliy Chempionati",
-    subject: "Fizika",
-    subjectColor: "from-purple-600 to-pink-600",
-    badge: "⚡ JARA YONDA G'OLIB BO'LING",
-    badgeBg: "bg-purple-500/80 text-white backdrop-blur-md",
-    status: "upcoming",
-    startDate: "22-Avgust, 2026",
-    startTime: "16:30",
-    durationMinutes: 45,
-    totalQuestions: 25,
-    entryCoins: 50,
-    prizePool: "Brend Noutbuk Sumkasi + Sertifikat",
-    topPrizes: [
-      "🥇 1-O'rin: Brend Noutbuk Sumkasi + Oltin Medal",
-      "🥈 2-O'rin: PowerBank (20.000 mAh) + Kumush Medal",
-      "🥉 3-O'rin: Aqlli Soat + Bronza Medal"
-    ],
-    participantsCount: 289,
-    description: "Fizikaning eng qiziqarli mexanika va mekslektrodinamika bo'limlari bo'yicha bilimingizni sinang.",
-    rules: [
-      "Vaqt chegaralangan (45 minut).",
-      "G'oliblar ball va sarflangan vaqtga qarab aniqlanadi."
-    ],
-    bannerGradient: "from-purple-700 via-pink-700 to-rose-700"
-  },
-  {
-    id: "english-grammar-battle",
-    title: "English Grammar & Vocabulary Battle",
-    subject: "Ingliz tili",
-    subjectColor: "from-emerald-600 to-teal-600",
-    badge: "🌟 BEPUL QATNASHISH",
-    badgeBg: "bg-emerald-500/80 text-white backdrop-blur-md",
-    status: "upcoming",
-    startDate: "25-Avgust, 2026",
-    startTime: "18:00",
-    durationMinutes: 40,
-    totalQuestions: 40,
-    entryCoins: 0,
-    prizePool: "IELTS Kitoblar To'plami & Vafcherlar",
-    topPrizes: [
-      "🥇 1-O'rin: IELTS Official Cambridge Kitoblar To'plami",
-      "🥈 2-O'rin: Speaking Club 1 Oylik Bepul A'zolik",
-      "🥉 3-O'rin: 300 Tanga + Rasmiy Sertifikat"
-    ],
-    participantsCount: 512,
-    description: "Ingliz tili grammatikasi va soz boyligi bo'yicha tekoris musobaqa!",
-    rules: [
-      "Barcha foydalanuvchilar bepul qatnashishi mumkin.",
-      "Eng yuqori ball to'plagan 5 kishi sertifikat oladi."
-    ],
-    bannerGradient: "from-emerald-700"
-  }
-];
+export const SAMPLE_OLYMPIADS: OlympiadItem[] = [];
 
 export function OlympiadBannerTeaser() {
   const { t } = useLanguage();
@@ -229,6 +141,7 @@ export function OlympiadSection() {
   const [registeredIds, setRegisteredIds] = useState<string[]>([]);
 
   const heroItem = SAMPLE_OLYMPIADS[0];
+  if (!heroItem) return null;
 
   const handleRegister = (olympiad: OlympiadItem) => {
     if (registeredIds.includes(olympiad.id)) {

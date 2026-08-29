@@ -694,69 +694,6 @@ export interface ShopOrder {
   student?: { full_name: string; phone?: string };
 }
 
-export const defaultShopItems: ShopItem[] = [
-  {
-    id: 'item-1',
-    title: "Promax Brended Futbolka",
-    description: "Paxtadan tikilgan, sifatli va qulay Promax Education rasmiy futbolkasi.",
-    price_coins: 500,
-    category: 'merch',
-    image_url: "https://images.unsplash.com/photo-1521572267360-ee0c2909d518?w=500&auto=format&fit=crop&q=80",
-    stock: 12,
-    is_active: true
-  },
-  {
-    id: 'item-2',
-    title: "Mock Exam Bepul Chipta",
-    description: "Navbatdagi har qanday haftalik MOCK DTM imtihonida tekin qatnashish chiptasi.",
-    price_coins: 250,
-    category: 'exam',
-    image_url: "https://images.unsplash.com/photo-1434030216411-0b793f4b4173?w=500&auto=format&fit=crop&q=80",
-    stock: 50,
-    is_active: true
-  },
-  {
-    id: 'item-3',
-    title: "Branded Bloknot va Ruchka",
-    description: "Darslarda qeydlar olib borish uchun zamonaviy Promax kundaligi va ruchkasi.",
-    price_coins: 150,
-    category: 'merch',
-    image_url: "https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?w=500&auto=format&fit=crop&q=80",
-    stock: 25,
-    is_active: true
-  },
-  {
-    id: 'item-4',
-    title: "Promax Stikerlar To'plami",
-    description: "Noutbuk va telefonlar uchun 15 ta eksklyuziv ilmiy va motivatsion stikerlar.",
-    price_coins: 80,
-    category: 'merch',
-    image_url: "https://images.unsplash.com/photo-1572375992501-4b0892d50c69?w=500&auto=format&fit=crop&q=80",
-    stock: 100,
-    is_active: true
-  },
-  {
-    id: 'item-5',
-    title: "Oylik To'lov uchun 20% Chegirma",
-    description: "Keyingi oy to'lovi uchun maxsus 20 foizli vaucher.",
-    price_coins: 1200,
-    category: 'discount',
-    image_url: "https://images.unsplash.com/photo-1554224155-8d04cb21cd6c?w=500&auto=format&fit=crop&q=80",
-    stock: 5,
-    is_active: true
-  },
-  {
-    id: 'item-6',
-    title: "Promax Thermos Idishi",
-    description: "Issiq va sovuq ichimliklarni 12 soat saqlaydigan metall termos idish.",
-    price_coins: 750,
-    category: 'gadget',
-    image_url: "https://images.unsplash.com/photo-1602143407151-7111542de6e8?w=500&auto=format&fit=crop&q=80",
-    stock: 8,
-    is_active: true
-  }
-];
-
 export async function getShopItems(): Promise<ShopItem[]> {
   const supabase = createClient();
   const { data, error } = await supabase
@@ -765,8 +702,8 @@ export async function getShopItems(): Promise<ShopItem[]> {
     .eq('is_active', true)
     .order('created_at', { ascending: false });
 
-  if (error || !data || data.length === 0) {
-    return defaultShopItems;
+  if (error || !data) {
+    return [];
   }
   return data;
 }

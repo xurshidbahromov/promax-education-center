@@ -19,82 +19,18 @@ export interface Announcement {
   created_by?: string | null;
 }
 
-// localStorage is the SINGLE source of truth for all rich fields (is_featured, badge, image_url)
-const STORAGE_KEY = 'promax_announcements_v2'; // v2 to avoid stale data from previous versions
-
-export const INITIAL_ANNOUNCEMENTS: Announcement[] = [
-  {
-    id: "ann-mock-ielts",
-    title: "MOCK IELTS Imtihoni",
-    message: "Yakshanba soat 10:00 da navbatdagi MOCK imtihoni bo'lib o'tadi. O'z bilimingizni haqiqiy IELTS imtihon muhitida sinab ko'ring va natijalarni 2 kunda oling.",
-    type: "error",
-    priority: 10,
-    target_audience: "all",
-    badge: "MOCK EXAM",
-    image_url: "https://images.unsplash.com/photo-1434030216411-0b793f4b4173?w=600&auto=format&fit=crop&q=80",
-    is_featured: true,
-    is_active: true,
-    expires_at: null,
-    created_at: new Date(Date.now() - 1000 * 60 * 60 * 2).toISOString(),
-  },
-  {
-    id: "ann-math-group",
-    title: "Yangi Matematika Guruhi",
-    message: "Noldan boshlab mukammal darajagacha bo'lgan yangi guruhimizga qabul ochildi.",
-    type: "success",
-    priority: 8,
-    target_audience: "all",
-    badge: "YANGI KURS",
-    image_url: "https://images.unsplash.com/photo-1635070041078-e363dbe005cb?w=600&auto=format&fit=crop&q=80",
-    is_featured: true,
-    is_active: true,
-    expires_at: null,
-    created_at: new Date(Date.now() - 1000 * 60 * 60 * 24).toISOString(),
-  },
-  {
-    id: "ann-physics-club",
-    title: "Fizika va Astronomiya To'garagi",
-    message: "Koinot sirlari va fizika qonunlarini qiziqarli amaliy tajribalar orqali o'rganish.",
-    type: "info",
-    priority: 6,
-    target_audience: "all",
-    badge: "TO'GARAK",
-    image_url: "https://images.unsplash.com/photo-1507668077129-56e32842fceb?w=600&auto=format&fit=crop&q=80",
-    is_featured: true,
-    is_active: true,
-    expires_at: null,
-    created_at: new Date(Date.now() - 1000 * 60 * 60 * 48).toISOString(),
-  },
-  {
-    id: "ann-speaking-club",
-    title: "English Speaking Club",
-    message: "Har shanba erkin muloqot. Native speakerlar bilan jonli suhbatlarda qatnashib, nutqingizni ravonlashtiring.",
-    type: "warning",
-    priority: 4,
-    target_audience: "all",
-    badge: "SPEAKING CLUB",
-    image_url: "https://images.unsplash.com/photo-1529156069898-49953e39b3ac?w=600&auto=format&fit=crop&q=80",
-    is_featured: true,
-    is_active: true,
-    expires_at: null,
-    created_at: new Date(Date.now() - 1000 * 60 * 60 * 72).toISOString(),
-  }
-];
-
-// ─── localStorage helpers ────────────────────────────────────────────────────
+const STORAGE_KEY = 'promax_announcements_v3';
 
 function readLocalList(): Announcement[] {
-  if (typeof window === 'undefined') return INITIAL_ANNOUNCEMENTS;
+  if (typeof window === 'undefined') return [];
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
     if (raw) {
       const parsed = JSON.parse(raw) as Announcement[];
-      if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+      if (Array.isArray(parsed)) return parsed;
     }
   } catch {}
-  // First boot: write defaults and return
-  writeLocalList(INITIAL_ANNOUNCEMENTS, false);
-  return INITIAL_ANNOUNCEMENTS;
+  return [];
 }
 
 function writeLocalList(list: Announcement[], broadcast = true): void {
@@ -105,38 +41,45 @@ function writeLocalList(list: Announcement[], broadcast = true): void {
   } catch {}
 }
 
-// ─── Public API ──────────────────────────────────────────────────────────────
-
 /**
- * Get all announcements — localStorage is the truth.
- * We enrich with Supabase `is_active` status only (since that IS stored in Supabase).
+ * Get all announcements for Admin panel.
  */
 export async function getAllAnnouncements(): Promise<Announcement[]> {
   const local = readLocalList();
 
-  // Optionally refresh is_active from Supabase (the one field we trust from Supabase)
   try {
     const supabase = createClient();
     const { data, error } = await supabase
       .from('announcements')
-      .select('id, is_active, title')
+      .select('*')
       .order('created_at', { ascending: false });
 
-    if (!error && data && data.length > 0) {
-      let changed = false;
-      const updated = local.map(item => {
-        // Match by id or title
-        const row = data.find((r: any) => r.id === item.id || r.title === item.title);
-        if (row && row.is_active !== item.is_active) {
-          changed = true;
-          return { ...item, is_active: row.is_active };
-        }
-        return item;
+    if (!error && data) {
+      const mapped: Announcement[] = data.map((item: any) => {
+        const localMatch = local.find(l => l.id === item.id || l.title === item.title);
+        const isFeatured = item.is_featured ?? localMatch?.is_featured ?? false;
+        const imageUrl = item.image_url ?? localMatch?.image_url ?? null;
+        const badge = item.badge ?? localMatch?.badge ?? null;
+
+        return {
+          id: item.id,
+          title: item.title,
+          message: item.message || item.content || '',
+          type: (item.type || 'info') as AnnouncementType,
+          priority: item.priority || 0,
+          target_audience: (item.target_audience || 'all') as TargetAudience,
+          badge: isFeatured ? badge : null,
+          image_url: isFeatured ? imageUrl : null,
+          is_featured: isFeatured,
+          is_active: item.is_active !== undefined ? item.is_active : true,
+          expires_at: item.expires_at || null,
+          created_at: item.created_at || new Date().toISOString(),
+          created_by: item.created_by || null
+        };
       });
-      if (changed) {
-        writeLocalList(updated, false);
-        return updated;
-      }
+
+      writeLocalList(mapped, false);
+      return mapped;
     }
   } catch {}
 
@@ -155,9 +98,7 @@ export async function getActiveStudentAnnouncements(): Promise<Announcement[]> {
 }
 
 /**
- * Save (create or update) an announcement.
- * localStorage is updated immediately and fully.
- * Supabase sync happens in background for basic fields only.
+ * Save announcement (create or update).
  */
 export async function saveAnnouncementData(payload: {
   id?: string | null;
@@ -177,11 +118,10 @@ export async function saveAnnouncementData(payload: {
   const badge = isFeatured ? (payload.badge || null) : null;
 
   const list = readLocalList();
-
   let item: Announcement;
 
   if (payload.id) {
-    // UPDATE existing
+    // UPDATE
     const idx = list.findIndex(a => a.id === payload.id);
     const existing = idx >= 0 ? list[idx] : null;
     item = {
@@ -201,9 +141,9 @@ export async function saveAnnouncementData(payload: {
     if (idx >= 0) list[idx] = item;
     else list.unshift(item);
   } else {
-    // CREATE new
+    // CREATE
     item = {
-      id: 'local_' + Date.now() + '_' + Math.random().toString(36).substring(7),
+      id: 'ann_' + Date.now() + '_' + Math.random().toString(36).substring(7),
       title: payload.title,
       message: payload.message,
       type: payload.type,
@@ -219,10 +159,9 @@ export async function saveAnnouncementData(payload: {
     list.unshift(item);
   }
 
-  // Save to localStorage immediately — this is the source of truth
   writeLocalList(list);
 
-  // Background Supabase sync (basic fields only — no is_featured/badge/image_url)
+  // Sync to Supabase
   try {
     const supabase = createClient();
     const dbFields = {
@@ -235,11 +174,9 @@ export async function saveAnnouncementData(payload: {
       expires_at: payload.expires_at || null,
     };
 
-    if (payload.id && !payload.id.startsWith('local_') && !payload.id.startsWith('ann-')) {
-      // Update in Supabase
+    if (payload.id && !payload.id.startsWith('ann_')) {
       await supabase.from('announcements').update(dbFields).eq('id', payload.id);
     } else {
-      // Insert into Supabase
       const { data: inserted } = await supabase
         .from('announcements')
         .insert([dbFields])
@@ -247,7 +184,6 @@ export async function saveAnnouncementData(payload: {
         .single();
 
       if (inserted?.id) {
-        // Replace local ID with Supabase UUID in localStorage
         const refreshed = readLocalList();
         const idx2 = refreshed.findIndex(a => a.id === item.id);
         if (idx2 >= 0) {
@@ -273,7 +209,7 @@ export async function deleteAnnouncementData(id: string): Promise<void> {
 
   try {
     const supabase = createClient();
-    if (!id.startsWith('local_') && !id.startsWith('ann-')) {
+    if (!id.startsWith('ann_')) {
       await supabase.from('announcements').delete().eq('id', id);
     }
   } catch {}
@@ -293,7 +229,7 @@ export async function toggleAnnouncementActive(id: string, currentStatus: boolea
 
   try {
     const supabase = createClient();
-    if (!id.startsWith('local_') && !id.startsWith('ann-')) {
+    if (!id.startsWith('ann_')) {
       await supabase.from('announcements').update({ is_active: newStatus }).eq('id', id);
     }
   } catch {}

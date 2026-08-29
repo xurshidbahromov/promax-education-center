@@ -31,13 +31,11 @@ import {
 import {
   getTournamentById,
   submitTournamentAttempt,
-  SAMPLE_MATH_QUESTIONS,
   type TournamentQuestion
 } from "@/lib/tournaments";
 import {
   getInternationalTournamentById,
   submitInternationalAttempt,
-  SAMPLE_INTERNATIONAL_QUESTIONS,
   type InternationalQuestion
 } from "@/lib/international-tournaments";
 import MathRenderer from "@/components/MathRenderer";
@@ -89,7 +87,7 @@ export default function TakeTestPage() {
              duration_minutes: intlData.durationMinutes || 70,
              subject: intlData.subject
            });
-           const rawQs = intlData.questions && intlData.questions.length > 0 ? intlData.questions : SAMPLE_INTERNATIONAL_QUESTIONS;
+           const rawQs = intlData.questions && intlData.questions.length > 0 ? intlData.questions : [];
            const formattedQs: Question[] = rawQs.map((q: any, idx: number) => ({
              id: q.id || `intl_q_${idx}`,
              test_id: testId,
@@ -122,7 +120,7 @@ export default function TakeTestPage() {
              duration_minutes: tData.durationMinutes || 60,
              subject: tData.subject
            });
-           const rawQs = tData.questions && tData.questions.length > 0 ? tData.questions : SAMPLE_MATH_QUESTIONS;
+           const rawQs = tData.questions && tData.questions.length > 0 ? tData.questions : [];
            const formattedQs: Question[] = rawQs.map((q: any, idx: number) => ({
              id: q.id || `q_${idx}`,
              test_id: testId,
@@ -157,7 +155,7 @@ export default function TakeTestPage() {
          duration_minutes: tData.durationMinutes || 60,
          subject: tData.subject
        });
-       const rawQs = tData.questions && tData.questions.length > 0 ? tData.questions : SAMPLE_MATH_QUESTIONS;
+       const rawQs = tData.questions && tData.questions.length > 0 ? tData.questions : [];
        const formattedQs: Question[] = rawQs.map((q: any, idx: number) => ({
          id: q.id || `q_${idx}`,
          test_id: testId,

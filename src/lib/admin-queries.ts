@@ -1210,8 +1210,6 @@ export type {
 } from './tournaments';
 
 export {
-  INITIAL_TOURNAMENTS as INITIAL_ADMIN_TOURNAMENTS,
-  SAMPLE_MATH_QUESTIONS,
   getAdminTournaments,
   getTournamentById,
   duplicateAdminTournament,
@@ -1223,29 +1221,6 @@ export {
   submitTournamentAttempt
 } from './tournaments';
 
-export const INITIAL_ADMIN_COMMENTS: AdminTournamentComment[] = [
-  {
-    id: "c1",
-    tournament_id: "math-pro-2026",
-    author: "Jasurbek Aliyev",
-    avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=Jasurbek",
-    role: "O'quvchi",
-    time: "10 daqiqa avval",
-    text: "Matematika musobaqasi savollari darajasi qanday bo'ladi? Tayyorgarlik uchun tayyor testlar bormi?",
-    likes: 8
-  },
-  {
-    id: "c2",
-    tournament_id: "math-pro-2026",
-    author: "Promax Admin",
-    avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=PromaxAdmin",
-    role: "Tashkilotchi",
-    time: "5 daqiqa avval",
-    text: "Assalomu alaykum! Musobaqa testlari mantiqiy va standart murakkablikda bo'ladi. Testlar bo'limida tayyorgarlik testlarini yechishingiz mumkin.",
-    likes: 15
-  }
-];
-
 export async function getAdminTournamentComments(): Promise<AdminTournamentComment[]> {
   const supabase = createClient();
   try {
@@ -1254,13 +1229,11 @@ export async function getAdminTournamentComments(): Promise<AdminTournamentComme
       .select('*')
       .order('created_at', { ascending: false });
     
-    if (error || !data || data.length === 0) {
-      return INITIAL_ADMIN_COMMENTS;
+    if (!error && data) {
+      return data;
     }
-    return data;
-  } catch (err) {
-    return INITIAL_ADMIN_COMMENTS;
-  }
+  } catch (err) {}
+  return [];
 }
 
 export async function deleteAdminTournamentComment(id: string): Promise<{ success: boolean; error?: string }> {

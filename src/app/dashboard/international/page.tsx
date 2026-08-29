@@ -36,8 +36,7 @@ import {
   getInternationalTournaments,
   getInternationalLeaderboard,
   registerForInternationalTournament,
-  getInternationalRegistrations,
-  INITIAL_INTERNATIONAL_TOURNAMENTS
+  getInternationalRegistrations
 } from "@/lib/international-tournaments";
 import { useCurrentUser, useUserProfile } from "@/hooks/useDashboardData";
 import {

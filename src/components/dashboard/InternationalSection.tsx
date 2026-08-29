@@ -13,7 +13,7 @@ import {
   GraduationCap
 } from "lucide-react";
 import { useState, useEffect } from "react";
-import { getInternationalTournaments, InternationalTournament, INITIAL_INTERNATIONAL_TOURNAMENTS } from "@/lib/international-tournaments";
+import { getInternationalTournaments, InternationalTournament } from "@/lib/international-tournaments";
 
 export function InternationalBannerTeaser() {
   const { t } = useLanguage();
