@@ -148,39 +148,90 @@ export default function AnnouncementModal({
         </div>
 
         <form onSubmit={onSubmit} className="space-y-4">
-          {/* Announcement Type Selector (Bildirishnoma vs Kabinet Banneri) */}
-          <div className="bg-slate-50 dark:bg-slate-800/50 p-3 rounded-2xl border border-slate-100 dark:border-slate-800 space-y-2">
-            <span className="block text-xs font-bold text-slate-600 dark:text-slate-300 uppercase tracking-wider">
-              E'lon Formati
+          {/* ── FORMAT TANLOV — katta, tushunarli kartochkalar ── */}
+          <div className="space-y-2">
+            <span className="block text-xs font-extrabold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
+              E'lon Formati — qaysi biri kerak? *
             </span>
-            <div className="grid grid-cols-2 gap-2">
+            <div className="grid grid-cols-2 gap-3">
+              {/* BELL NOTIFICATION */}
               <button
                 type="button"
-                onClick={() => setFormData({ ...formData, is_featured: false })}
-                className={`flex items-center justify-center gap-2 p-2.5 rounded-xl border text-xs font-bold transition-all cursor-pointer ${
+                onClick={() => setFormData({ ...formData, is_featured: false, image_url: '' })}
+                className={`relative flex flex-col items-start gap-2 p-4 rounded-2xl border-2 text-left transition-all cursor-pointer group ${
                   !formData.is_featured
-                    ? 'border-blue-600 bg-blue-500/10 text-blue-600 dark:text-blue-400'
-                    : 'border-slate-200 dark:border-slate-700 text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800'
+                    ? 'border-blue-600 bg-blue-500/8 dark:bg-blue-950/30 shadow-sm ring-2 ring-blue-500/20'
+                    : 'border-slate-200 dark:border-slate-700 hover:border-slate-300 dark:hover:border-slate-600 bg-slate-50 dark:bg-slate-800/50'
                 }`}
               >
-                <Bell size={15} />
-                <span>Qo'ng'iroqcha (Bell)</span>
+                {/* Selection indicator */}
+                <div className={`absolute top-2.5 right-2.5 w-4 h-4 rounded-full border-2 transition-all flex items-center justify-center ${
+                  !formData.is_featured
+                    ? 'border-blue-600 bg-blue-600'
+                    : 'border-slate-300 dark:border-slate-600'
+                }`}>
+                  {!formData.is_featured && (
+                    <div className="w-1.5 h-1.5 rounded-full bg-white" />
+                  )}
+                </div>
+
+                <div className={`w-10 h-10 rounded-xl flex items-center justify-center transition-all ${
+                  !formData.is_featured
+                    ? 'bg-blue-500 text-white shadow-sm shadow-blue-500/30'
+                    : 'bg-slate-200 dark:bg-slate-700 text-slate-500'
+                }`}>
+                  <Bell size={20} />
+                </div>
+                <div>
+                  <p className="text-xs font-extrabold text-slate-800 dark:text-slate-100">
+                    Bildirishnoma
+                  </p>
+                  <p className="text-[10px] text-slate-500 dark:text-slate-400 mt-0.5 leading-relaxed">
+                    Faqat qo'ng'iroqcha (Bell) xabarlarida chiqadi. Rasm kerak emas.
+                  </p>
+                </div>
               </button>
 
+              {/* CABINET BANNER */}
               <button
                 type="button"
                 onClick={() => setFormData({ ...formData, is_featured: true })}
-                className={`flex items-center justify-center gap-2 p-2.5 rounded-xl border text-xs font-bold transition-all cursor-pointer ${
+                className={`relative flex flex-col items-start gap-2 p-4 rounded-2xl border-2 text-left transition-all cursor-pointer group ${
                   formData.is_featured
-                    ? 'border-blue-600 bg-blue-500/10 text-blue-600 dark:text-blue-400'
-                    : 'border-slate-200 dark:border-slate-700 text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800'
+                    ? 'border-indigo-600 bg-indigo-500/8 dark:bg-indigo-950/30 shadow-sm ring-2 ring-indigo-500/20'
+                    : 'border-slate-200 dark:border-slate-700 hover:border-slate-300 dark:hover:border-slate-600 bg-slate-50 dark:bg-slate-800/50'
                 }`}
               >
-                <Sparkles size={15} />
-                <span>Kabinet Banneri (Rasmli)</span>
+                {/* Selection indicator */}
+                <div className={`absolute top-2.5 right-2.5 w-4 h-4 rounded-full border-2 transition-all flex items-center justify-center ${
+                  formData.is_featured
+                    ? 'border-indigo-600 bg-indigo-600'
+                    : 'border-slate-300 dark:border-slate-600'
+                }`}>
+                  {formData.is_featured && (
+                    <div className="w-1.5 h-1.5 rounded-full bg-white" />
+                  )}
+                </div>
+
+                <div className={`w-10 h-10 rounded-xl flex items-center justify-center transition-all ${
+                  formData.is_featured
+                    ? 'bg-indigo-500 text-white shadow-sm shadow-indigo-500/30'
+                    : 'bg-slate-200 dark:bg-slate-700 text-slate-500'
+                }`}>
+                  <Sparkles size={20} />
+                </div>
+                <div>
+                  <p className="text-xs font-extrabold text-slate-800 dark:text-slate-100">
+                    Kabinet Banneri
+                  </p>
+                  <p className="text-[10px] text-slate-500 dark:text-slate-400 mt-0.5 leading-relaxed">
+                    Studentlar kabinetida katta rasmli banner sifatida chiqadi.
+                  </p>
+                </div>
               </button>
             </div>
           </div>
+
 
           <div>
             <label className="block text-xs font-bold text-slate-600 dark:text-slate-300 uppercase tracking-wider mb-1.5">
