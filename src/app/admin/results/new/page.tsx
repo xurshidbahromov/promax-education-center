@@ -17,17 +17,20 @@ import {
   UserCheck,
   Award,
   Sparkles,
-  Send
+  Send,
+  Loader2
 } from 'lucide-react';
 import directionsData from '@/data/dtm_directions.json';
-import { getStudents, saveExamResult, type Student } from '@/lib/admin-queries';
-import { sendDTMResultToStudentAndParents } from '@/lib/notifications-bridge';
+import { getStudents, saveExamResult, getResultById, updateFullResult, type Student } from '@/lib/admin-queries';
 import Link from 'next/link';
 import toast from 'react-hot-toast';
 
 function NewResultContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const editId = searchParams.get('editId');
+  const isEditMode = !!editId;
+
   const paramExamTitle = searchParams.get('examTitle') || '';
   const paramExamDate = searchParams.get('date') || '';
 
@@ -41,6 +44,15 @@ function NewResultContent() {
   const [saving, setSaving] = useState(false);
   const [status, setStatus] = useState<'idle' | 'success' | 'error'>('idle');
   const [message, setMessage] = useState('');
+
+  // Answers State (Number of correct answers)
+  const [answers, setAnswers] = useState({
+    comp_math: 0, // Max 10
+    comp_history: 0, // Max 10
+    comp_lang: 0, // Max 10
+    subject_1: 0, // Max 30
+    subject_2: 0, // Max 30
+  });
 
   // Fetch Students
   useEffect(() => {
@@ -58,20 +70,51 @@ function NewResultContent() {
     fetchStudents();
   }, []);
 
-  // Update from params if available
+  // Update from params if available (for create mode)
   useEffect(() => {
-    if (paramExamTitle) setExamTitle(paramExamTitle);
-    if (paramExamDate) setExamDate(paramExamDate);
-  }, [paramExamTitle, paramExamDate]);
+    if (!isEditMode) {
+      if (paramExamTitle) setExamTitle(paramExamTitle);
+      if (paramExamDate) setExamDate(paramExamDate);
+    }
+  }, [paramExamTitle, paramExamDate, isEditMode]);
 
-  // Answers State (Number of correct answers)
-  const [answers, setAnswers] = useState({
-    comp_math: 0, // Max 10
-    comp_history: 0, // Max 10
-    comp_lang: 0, // Max 10
-    subject_1: 0, // Max 30
-    subject_2: 0, // Max 30
-  });
+  // Load existing result for edit mode
+  useEffect(() => {
+    if (!editId) return;
+
+    const fetchExistingResult = async () => {
+      setLoading(true);
+      try {
+        const res = await getResultById(editId);
+        if (res) {
+          if (res.student_id) setSelectedStudentId(res.student_id);
+          if (res.exam?.title) setExamTitle(res.exam.title);
+          if (res.exam?.date) setExamDate(res.exam.date);
+          if (res.direction?.code) setSelectedDirectionCode(res.direction.code);
+
+          const calcCount = (score: any, multiplier: number, max: number) => {
+            if (!score) return 0;
+            return Math.min(max, Math.max(0, Math.round(Number(score) / multiplier)));
+          };
+
+          setAnswers({
+            comp_lang: calcCount(res.compulsory_lang_score, 1.1, 10),
+            comp_math: calcCount(res.compulsory_math_score, 1.1, 10),
+            comp_history: calcCount(res.compulsory_history_score, 1.1, 10),
+            subject_1: calcCount(res.subject_1_score, 3.1, 30),
+            subject_2: calcCount(res.subject_2_score, 2.1, 30),
+          });
+        }
+      } catch (err) {
+        console.error('Error fetching result for edit:', err);
+        toast.error("Natijani yuklashda xatolik yuz berdi");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchExistingResult();
+  }, [editId]);
 
   // Derived State
   const currentDirection = useMemo(
@@ -113,32 +156,56 @@ function NewResultContent() {
     setMessage('');
 
     try {
-      const result = await saveExamResult(
-        selectedStudentId,
-        examDate,
-        selectedDirectionCode,
-        scores,
-        examTitle
-      );
+      if (isEditMode && editId) {
+        const result = await updateFullResult(
+          editId,
+          selectedStudentId,
+          examDate,
+          selectedDirectionCode,
+          scores,
+          examTitle
+        );
 
-      if (result.success) {
-        setStatus('success');
-        setMessage('Natija muvaffaqiyatli saqlandi! Keyingi o\'quvchini tanlab davom etishingiz mumkin.');
-        toast.success('Natija saqlandi!');
-        
-        // Reset answers & student for next entry
-        setAnswers({
-          comp_math: 0,
-          comp_history: 0,
-          comp_lang: 0,
-          subject_1: 0,
-          subject_2: 0,
-        });
-        setSelectedStudentId('');
+        if (result.success) {
+          setStatus('success');
+          setMessage('Natija muvaffaqiyatli yangilandi!');
+          toast.success('Natija muvaffaqiyatli yangilandi!');
+          setTimeout(() => {
+            router.push(backUrl);
+          }, 500);
+        } else {
+          setStatus('error');
+          setMessage(result.error || 'Natijani saqlashda xatolik.');
+          toast.error('Saqlashda xatolik!');
+        }
       } else {
-        setStatus('error');
-        setMessage(result.error || 'Natijani saqlashda xatolik.');
-        toast.error('Saqlashda xatolik!');
+        const result = await saveExamResult(
+          selectedStudentId,
+          examDate,
+          selectedDirectionCode,
+          scores,
+          examTitle
+        );
+
+        if (result.success) {
+          setStatus('success');
+          setMessage('Natija muvaffaqiyatli saqlandi! Keyingi o\'quvchini tanlab davom etishingiz mumkin.');
+          toast.success('Natija saqlandi!');
+          
+          // Reset answers & student for next entry
+          setAnswers({
+            comp_math: 0,
+            comp_history: 0,
+            comp_lang: 0,
+            subject_1: 0,
+            subject_2: 0,
+          });
+          setSelectedStudentId('');
+        } else {
+          setStatus('error');
+          setMessage(result.error || 'Natijani saqlashda xatolik.');
+          toast.error('Saqlashda xatolik!');
+        }
       }
     } catch (error) {
       console.error('Save error:', error);
@@ -150,8 +217,8 @@ function NewResultContent() {
     }
   };
 
-  const backUrl = paramExamTitle
-    ? `/admin/results?exam=${encodeURIComponent(paramExamTitle)}`
+  const backUrl = (paramExamTitle || examTitle)
+    ? `/admin/results?exam=${encodeURIComponent(paramExamTitle || examTitle)}`
     : '/admin/results';
 
   return (
@@ -164,15 +231,15 @@ function NewResultContent() {
             className="p-2.5 rounded-2xl bg-white/60 dark:bg-slate-900/60 backdrop-blur-xl border border-slate-200/70 dark:border-slate-800/70 text-slate-700 dark:text-slate-300 hover:bg-slate-100/70 dark:hover:bg-slate-800/70 transition-colors flex items-center gap-2 group text-xs font-bold"
           >
             <ArrowLeft size={16} className="group-hover:-translate-x-0.5 transition-transform" />
-            <span>{paramExamTitle ? `${paramExamTitle} ga qaytish` : 'Imtihonlarga qaytish'}</span>
+            <span>{(paramExamTitle || examTitle) ? `${paramExamTitle || examTitle} ga qaytish` : 'Imtihonlarga qaytish'}</span>
           </Link>
 
           <div>
             <h1 className="text-2xl sm:text-3xl font-black text-slate-800 dark:text-slate-100 tracking-tight font-sans-pro">
-              O'quvchi Natijasini Kiritish
+              {isEditMode ? 'Natijani Tahrirlash' : 'O\'quvchi Natijasini Kiritish'}
             </h1>
             <p className="text-xs sm:text-sm font-medium text-slate-400 dark:text-slate-500 mt-0.5">
-              {examTitle} • To'g'ri javoblar sonini kiritish va ballarni hisoblash
+              {examTitle} • Fanlar kesimida to'g'ri javoblar sonini kiritish va ballarni hisoblash
             </p>
           </div>
         </div>
@@ -255,27 +322,28 @@ function NewResultContent() {
             </div>
           </div>
 
-          {/* Test Answers Inputs */}
+          {/* Test Answers Grid */}
           <div className="bg-white/60 dark:bg-slate-900/60 backdrop-blur-xl border border-slate-200/60 dark:border-slate-800/60 rounded-3xl p-6 space-y-6">
-            <div>
+            <div className="flex items-center justify-between">
               <h2 className="text-base font-extrabold text-slate-800 dark:text-slate-100 flex items-center gap-2">
                 <Calculator size={18} className="text-emerald-500" />
-                <span>To'g'ri Javoblar Soni</span>
+                <span>To'g'ri Javoblar Soni (Testlar soni)</span>
               </h2>
-              <p className="text-xs text-slate-400 mt-0.5">
-                DTM standarti bo'yicha har bir blokdagi to'g'ri javoblar sonini kiriting
-              </p>
+              <span className="text-xs font-bold text-slate-400">Jami 90 ta savol</span>
             </div>
 
             {/* Block 1: Compulsory Subjects (3x10 = 30 questions) */}
             <div className="space-y-3">
               <span className="text-[11px] font-extrabold text-slate-400 uppercase tracking-wider block">
-                1-Blok: Majburiy Fanlar (Har biri 1.1 ball)
+                1-Blok: Majburiy Fanlar (Har biri 1.1 balldan)
               </span>
 
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                <div className="p-3.5 bg-slate-100/60 dark:bg-slate-800/40 border border-slate-200/50 dark:border-slate-700/50 rounded-2xl space-y-2">
-                  <span className="text-xs font-bold text-slate-700 dark:text-slate-200 block">Ona Tili (10 ta)</span>
+                {/* Ona Tili */}
+                <div className="p-3.5 bg-slate-100/80 dark:bg-slate-800/80 rounded-2xl space-y-2 border border-slate-200/50 dark:border-slate-700/50">
+                  <span className="text-xs font-bold text-slate-700 dark:text-slate-200 block">
+                    Ona Tili (max 10)
+                  </span>
                   <div className="flex items-center gap-2">
                     <input
                       type="number"
@@ -291,8 +359,11 @@ function NewResultContent() {
                   </div>
                 </div>
 
-                <div className="p-3.5 bg-slate-100/60 dark:bg-slate-800/40 border border-slate-200/50 dark:border-slate-700/50 rounded-2xl space-y-2">
-                  <span className="text-xs font-bold text-slate-700 dark:text-slate-200 block">Matematika (10 ta)</span>
+                {/* Matematika */}
+                <div className="p-3.5 bg-slate-100/80 dark:bg-slate-800/80 rounded-2xl space-y-2 border border-slate-200/50 dark:border-slate-700/50">
+                  <span className="text-xs font-bold text-slate-700 dark:text-slate-200 block">
+                    Matematika (max 10)
+                  </span>
                   <div className="flex items-center gap-2">
                     <input
                       type="number"
@@ -308,8 +379,11 @@ function NewResultContent() {
                   </div>
                 </div>
 
-                <div className="p-3.5 bg-slate-100/60 dark:bg-slate-800/40 border border-slate-200/50 dark:border-slate-700/50 rounded-2xl space-y-2">
-                  <span className="text-xs font-bold text-slate-700 dark:text-slate-200 block">O'zbekiston Tarixi (10 ta)</span>
+                {/* O'zbekiston Tarixi */}
+                <div className="p-3.5 bg-slate-100/80 dark:bg-slate-800/80 rounded-2xl space-y-2 border border-slate-200/50 dark:border-slate-700/50">
+                  <span className="text-xs font-bold text-slate-700 dark:text-slate-200 block">
+                    Tarix (max 10)
+                  </span>
                   <div className="flex items-center gap-2">
                     <input
                       type="number"
@@ -392,7 +466,7 @@ function NewResultContent() {
                 className="w-full sm:w-auto px-8 py-3.5 bg-emerald-500 hover:bg-emerald-600 active:scale-98 text-white rounded-2xl font-bold text-sm transition-all flex items-center justify-center gap-2 disabled:opacity-50 shadow-sm"
               >
                 <Save size={18} />
-                <span>{saving ? 'Saqlanmoqda...' : 'Natijani Saqlash'}</span>
+                <span>{saving ? 'Saqlanmoqda...' : isEditMode ? 'O\'zgarishlarni Saqlash' : 'Natijani Saqlash'}</span>
               </button>
             </div>
           </div>
@@ -483,7 +557,7 @@ export default function ResultsPage() {
   return (
     <Suspense fallback={
       <div className="py-24 text-center text-slate-400">
-        <div className="w-8 h-8 border-3 border-emerald-500 border-t-transparent rounded-full animate-spin mx-auto mb-3" />
+        <Loader2 size={28} className="animate-spin mx-auto mb-2 text-emerald-500" />
         <p className="text-xs font-semibold">Yuklanmoqda...</p>
       </div>
     }>

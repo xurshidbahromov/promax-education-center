@@ -484,6 +484,106 @@ export async function getStudentResults(studentId: string): Promise<any[]> {
  return data;
 }
 
+export async function getResultById(id: string): Promise<any | null> {
+  const supabase = createClient();
+  const { data, error } = await supabase
+    .from('results')
+    .select(`
+      *,
+      student:profiles!results_student_id_fkey(id, full_name, phone, parent_name, parent_phone, telegram_id),
+      exam:exams(id, title, date, status, max_score),
+      direction:directions(id, title, code)
+    `)
+    .eq('id', id)
+    .single();
+
+  if (error) {
+    console.error('Error fetching result by id:', error);
+    return null;
+  }
+  return data;
+}
+
+export async function updateFullResult(
+  resultId: string,
+  studentId: string,
+  examDate: string,
+  directionCode: string,
+  scores: {
+    total: number;
+    comp_math?: number;
+    comp_history?: number;
+    comp_lang?: number;
+    subject_1?: number;
+    subject_2?: number;
+  },
+  examTitle?: string
+) {
+  const supabase = createClient();
+  try {
+    // 1. Resolve Exam
+    let examId: string | null = null;
+    if (examTitle) {
+      const { data: existingExam } = await supabase
+        .from('exams')
+        .select('id')
+        .eq('title', examTitle)
+        .maybeSingle();
+
+      if (existingExam) {
+        examId = existingExam.id;
+      }
+    }
+
+    // 2. Resolve Direction
+    let directionId: string | null = null;
+    const { data: existingDirection } = await supabase
+      .from('directions')
+      .select('id')
+      .eq('code', directionCode)
+      .maybeSingle();
+
+    if (existingDirection) {
+      directionId = existingDirection.id;
+    } else {
+      const dirInfo = directionsData.find(d => d.code === directionCode);
+      if (dirInfo) {
+        const { data: newDirection } = await supabase
+          .from('directions')
+          .insert({ code: dirInfo.code, title: dirInfo.name })
+          .select()
+          .single();
+        if (newDirection) directionId = newDirection.id;
+      }
+    }
+
+    const updates: any = {
+      student_id: studentId,
+      total_score: scores.total,
+      compulsory_math_score: scores.comp_math,
+      compulsory_history_score: scores.comp_history,
+      compulsory_lang_score: scores.comp_lang,
+      subject_1_score: scores.subject_1,
+      subject_2_score: scores.subject_2,
+    };
+
+    if (examId) updates.exam_id = examId;
+    if (directionId) updates.direction_id = directionId;
+
+    const { data, error } = await supabase
+      .from('results')
+      .update(updates)
+      .eq('id', resultId)
+      .select();
+
+    if (error) throw error;
+    return { success: true, data };
+  } catch (error: any) {
+    console.error('Update full result error:', error);
+    return { success: false, error: error.message };
+  }
+}
+
 export async function updateResult(id: string, updates: { total_score?: number; notes?: string }) {
   const supabase = createClient();
 
