@@ -2,10 +2,18 @@ import { createClient } from '@/utils/supabase/client';
 import { UserProfile } from './profile';
 import directionsData from "@/data/dtm_directions.json";
 
+export interface StudentGroupInfo {
+  id: string;
+  name: string;
+  subject?: string;
+}
+
 export interface Student extends UserProfile {
- status?: string; // Derived or placeholder
- course?: string; // Derived or placeholder
- joined_at: string;
+  status?: string; // Derived or placeholder
+  course?: string; // Derived or placeholder
+  joined_at: string;
+  groups?: StudentGroupInfo[];
+  is_enrolled?: boolean;
 }
 
 // Teacher Interface (extending Profile)
@@ -195,28 +203,74 @@ export async function getStudents(searchTerm: string = ""): Promise<Student[]> {
 
   let query = supabase
     .from('profiles')
-    .select('*')
+    .select(`
+      *,
+      group_students:group_students(
+        id,
+        group:groups(
+          id,
+          name,
+          subject:subjects(title)
+        )
+      )
+    `)
     .neq('role', 'teacher')
     .neq('role', 'admin')
     .order('created_at', { ascending: false });
 
   if (searchTerm) {
-    query = query.or(`full_name.ilike.%${searchTerm}%,phone.ilike.%${searchTerm}%,parent_phone.ilike.%${searchTerm}%`);
+    query = query.or(`full_name.ilike.%${searchTerm}%,phone.ilike.%${searchTerm}%,parent_phone.ilike.%${searchTerm}%,parent_name.ilike.%${searchTerm}%`);
   }
 
   const { data, error } = await query;
 
   if (error) {
-    console.error('Error fetching students:', error);
-    return [];
+    const { data: basicData, error: basicError } = await supabase
+      .from('profiles')
+      .select('*')
+      .neq('role', 'teacher')
+      .neq('role', 'admin')
+      .order('created_at', { ascending: false });
+
+    if (basicError) {
+      console.error('Error fetching students:', basicError);
+      return [];
+    }
+
+    return (basicData || []).map(profile => ({
+      ...profile,
+      joined_at: profile.created_at || '',
+      status: 'Unassigned',
+      course: 'N/A',
+      groups: [],
+      is_enrolled: false,
+    }));
   }
 
-  return (data || []).map(profile => ({
-    ...profile,
-    joined_at: profile.created_at,
-    status: 'Active',
-    course: 'N/A'
-  }));
+  return (data || []).map((profile: any) => {
+    const rawGroupStudents = profile.group_students || [];
+    const groups: StudentGroupInfo[] = rawGroupStudents
+      .map((gs: any) => {
+        if (!gs.group) return null;
+        return {
+          id: gs.group.id,
+          name: gs.group.name,
+          subject: gs.group.subject?.title || '',
+        };
+      })
+      .filter(Boolean);
+
+    const isEnrolled = groups.length > 0;
+
+    return {
+      ...profile,
+      joined_at: profile.created_at || '',
+      status: isEnrolled ? 'Active' : 'Unassigned',
+      course: groups.map(g => g.name).join(', ') || 'Guruhsiz',
+      groups,
+      is_enrolled: isEnrolled,
+    };
+  });
 }
 
 // Get Single Student
