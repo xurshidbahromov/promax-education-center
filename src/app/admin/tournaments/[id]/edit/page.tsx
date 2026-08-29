@@ -26,6 +26,7 @@ import {
 import MathRenderer from "@/components/MathRenderer";
 import { InlineMathPanel } from "@/components/MathToolbar";
 import { useLanguage } from "@/context/LanguageContext";
+import TournamentSchedulePicker from "@/components/admin/TournamentSchedulePicker";
 import {
   AdminTournament,
   TournamentQuestion,
@@ -374,94 +375,36 @@ export default function EditTournamentPage({ params }: PageProps) {
                 />
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-xs font-bold text-slate-600 dark:text-slate-300 uppercase tracking-wider mb-1.5">
-                    Fan *
-                  </label>
-                  <select
-                    value={subject}
-                    onChange={(e) => setSubject(e.target.value)}
-                    className="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-brand-blue/30 outline-none text-xs sm:text-sm font-bold text-slate-800 dark:text-slate-100"
-                  >
-                    {SUBJECT_OPTIONS.map((s) => (
-                      <option key={s} value={s}>
-                        {s}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-
-                <div>
-                  <label className="block text-xs font-bold text-slate-600 dark:text-slate-300 uppercase tracking-wider mb-1.5">
-                    Vaqt Chegarasi (daqiqa)
-                  </label>
-                  <input
-                    type="number"
-                    value={durationMinutes || ""}
-                    onChange={(e) =>
-                      setDurationMinutes(e.target.value ? parseInt(e.target.value) : null)
-                    }
-                    placeholder="Masalan: 60"
-                    className="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-brand-blue/30 outline-none text-xs sm:text-sm font-bold text-slate-800 dark:text-slate-100"
-                  />
-                </div>
+              <div>
+                <label className="block text-xs font-bold text-slate-600 dark:text-slate-300 uppercase tracking-wider mb-1.5">
+                  Fan *
+                </label>
+                <select
+                  value={subject}
+                  onChange={(e) => setSubject(e.target.value)}
+                  className="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-brand-blue/30 outline-none text-xs sm:text-sm font-bold text-slate-800 dark:text-slate-100"
+                >
+                  {SUBJECT_OPTIONS.map((s) => (
+                    <option key={s} value={s}>
+                      {s}
+                    </option>
+                  ))}
+                </select>
               </div>
 
-              {/* Tournament Specific Fields: Start/End Date, Time, Prize Pool */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                <div>
-                  <label className="block text-xs font-bold text-slate-600 dark:text-slate-300 uppercase tracking-wider mb-1.5">
-                    Boshlanish Sanasi
-                  </label>
-                  <input
-                    type="text"
-                    value={startDate}
-                    onChange={(e) => setStartDate(e.target.value)}
-                    placeholder="Masalan: 20-Avgust, 2026"
-                    className="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-brand-blue/30 outline-none text-xs sm:text-sm font-bold text-slate-800 dark:text-slate-100"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-xs font-bold text-slate-600 dark:text-slate-300 uppercase tracking-wider mb-1.5">
-                    Boshlanish Vaqti
-                  </label>
-                  <input
-                    type="text"
-                    value={startTime}
-                    onChange={(e) => setStartTime(e.target.value)}
-                    placeholder="Masalan: 15:00"
-                    className="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-brand-blue/30 outline-none text-xs sm:text-sm font-bold text-slate-800 dark:text-slate-100"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-xs font-bold text-slate-600 dark:text-slate-300 uppercase tracking-wider mb-1.5">
-                    Tugash Sanasi
-                  </label>
-                  <input
-                    type="text"
-                    value={endDate}
-                    onChange={(e) => setEndDate(e.target.value)}
-                    placeholder="Masalan: 20-Avgust, 2026"
-                    className="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-brand-blue/30 outline-none text-xs sm:text-sm font-bold text-slate-800 dark:text-slate-100"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-xs font-bold text-slate-600 dark:text-slate-300 uppercase tracking-wider mb-1.5">
-                    Tugash Vaqti
-                  </label>
-                  <input
-                    type="text"
-                    value={endTime}
-                    onChange={(e) => setEndTime(e.target.value)}
-                    placeholder="Masalan: 18:00"
-                    className="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-brand-blue/30 outline-none text-xs sm:text-sm font-bold text-slate-800 dark:text-slate-100"
-                  />
-                </div>
-              </div>
+              {/* ── INTERACTIVE SCHEDULE TABLE & PICKER ── */}
+              <TournamentSchedulePicker
+                startDate={startDate}
+                setStartDate={setStartDate}
+                startTime={startTime}
+                setStartTime={setStartTime}
+                endDate={endDate}
+                setEndDate={setEndDate}
+                endTime={endTime}
+                setEndTime={setEndTime}
+                durationMinutes={durationMinutes}
+                setDurationMinutes={setDurationMinutes}
+              />
 
               <div>
                 <label className="block text-xs font-bold text-slate-600 dark:text-slate-300 uppercase tracking-wider mb-1.5">

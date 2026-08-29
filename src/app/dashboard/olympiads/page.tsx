@@ -28,7 +28,8 @@ import {
   Sparkles,
   ShieldCheck,
   FileText,
-  AlertCircle
+  AlertCircle,
+  Timer
 } from "lucide-react";
 import {
   AdminTournament,
@@ -38,6 +39,7 @@ import {
   registerForTournament,
   getTournamentRegistrations
 } from "@/lib/tournaments";
+import { getTournamentTimingInfo, formatUzbekDate } from "@/lib/tournament-timing";
 import { useCurrentUser, useUserProfile } from "@/hooks/useDashboardData";
 import {
   OlympiadsBannerSkeleton,
@@ -391,8 +393,11 @@ export default function OlympiadsPage() {
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5">
             {tournaments.map((item) => {
+              const timing = getTournamentTimingInfo(item);
               const isRegistered = registeredIds.includes(item.id);
-              const isLive = item.status === "live";
+              const isLive = timing.status === "live";
+              const isUpcoming = timing.status === "upcoming";
+              const isFinished = timing.status === "finished";
 
               return (
                 <div
@@ -407,21 +412,23 @@ export default function OlympiadsPage() {
                           {item.subject}
                         </span>
                         {isLive ? (
-                          <span className="text-[11px] font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/40 px-2 py-0.5 rounded-md border border-emerald-500/20">
+                          <span className="text-[11px] font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/40 px-2.5 py-0.5 rounded-md border border-emerald-500/20 flex items-center gap-1.5">
+                            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
                             Faol
                           </span>
-                        ) : item.status === "upcoming" ? (
-                          <span className="text-[11px] font-bold text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-950/40 px-2 py-0.5 rounded-md border border-amber-500/20">
+                        ) : isUpcoming ? (
+                          <span className="text-[11px] font-bold text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-950/40 px-2.5 py-0.5 rounded-md border border-amber-500/20 flex items-center gap-1">
+                            <Clock size={11} />
                             Kutilmoqda
                           </span>
                         ) : (
-                          <span className="text-[11px] font-bold text-slate-500 dark:text-slate-400 bg-slate-100 dark:bg-slate-800 px-2 py-0.5 rounded-md">
+                          <span className="text-[11px] font-bold text-slate-500 dark:text-slate-400 bg-slate-100 dark:bg-slate-800 px-2.5 py-0.5 rounded-md">
                             Yakunlangan
                           </span>
                         )}
                       </div>
-                      <span className="text-sm font-bold text-[#EB7C0E] dark:text-orange-400 shrink-0">
-                        {item.startDate}
+                      <span className="text-xs sm:text-sm font-bold text-[#EB7C0E] dark:text-orange-400 shrink-0">
+                        {formatUzbekDate(item.startDate) || item.startDate}
                       </span>
                     </div>
 
@@ -432,7 +439,7 @@ export default function OlympiadsPage() {
 
                     {/* Description */}
                     <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 font-medium leading-relaxed line-clamp-2">
-                      {item.description || "Matematika bo'yicha eng kuchli o'quvchilar bellashuvi! Murakkab va mantiqiy masalalarni yechib, qimmatbaho mukofotlarga ega bo'ling."}
+                      {item.description || "Musobaqa qoidalariga muvofiq qatnashing va yuqori natijalarni qo'lga kiriting."}
                     </p>
 
                     {/* Specs Rows (Icons, Labels, Values) */}
@@ -443,17 +450,20 @@ export default function OlympiadsPage() {
                           <span>Vaqti:</span>
                         </span>
                         <span className="font-bold text-slate-900 dark:text-white">
-                          {item.startTime} ({item.durationMinutes} min)
+                          {item.startTime || "15:00"} ({item.durationMinutes || 60} daqiqa)
                         </span>
                       </div>
 
-                      <div className="flex items-center justify-between text-slate-600 dark:text-slate-400">
-                        <span className="flex items-center gap-2">
-                          <Users size={15} className="text-slate-400" />
-                          <span>Qatnashuvchilar:</span>
+                      {/* Live Dynamic Countdown Row */}
+                      <div className="flex items-center justify-between text-slate-600 dark:text-slate-400 bg-slate-50/80 dark:bg-slate-800/50 p-2.5 rounded-xl border border-slate-100 dark:border-slate-800">
+                        <span className="flex items-center gap-2 font-bold text-xs">
+                          <Timer size={14} className={isLive ? "text-emerald-500 animate-spin" : isUpcoming ? "text-amber-500" : "text-slate-400"} />
+                          <span>{timing.countdown.label}:</span>
                         </span>
-                        <span className="font-bold text-slate-900 dark:text-white">
-                          {item.participantsCount || 428} nafar qatnashuvchi
+                        <span className={`font-black text-xs sm:text-sm ${
+                          isLive ? "text-emerald-600 dark:text-emerald-400" : isUpcoming ? "text-amber-600 dark:text-amber-400" : "text-slate-400"
+                        }`}>
+                          {timing.countdown.formatted}
                         </span>
                       </div>
 
@@ -473,20 +483,20 @@ export default function OlympiadsPage() {
                   <div className="flex items-center gap-3 pt-2">
                     <button
                       onClick={() => setSelectedItem(item)}
-                      className="flex-1 py-3 rounded-2xl bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-white font-bold text-xs sm:text-sm active:scale-95 transition-all text-center"
+                      className="flex-1 py-3 rounded-2xl bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-white font-bold text-xs sm:text-sm active:scale-95 transition-all text-center cursor-pointer"
                     >
-                      Nizamnoma
+                      Nizom
                     </button>
 
                     {isLive ? (
                       <button
                         onClick={() => setConfirmStartItem(item)}
-                        className="flex-1 py-3 rounded-2xl bg-brand-blue hover:bg-blue-600 text-white font-bold text-xs sm:text-sm flex items-center justify-center gap-1.5 shadow-sm active:scale-95 transition-all text-center cursor-pointer"
+                        className="flex-1 py-3 rounded-2xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs sm:text-sm flex items-center justify-center gap-1.5 shadow-sm active:scale-95 transition-all text-center cursor-pointer animate-pulse"
                       >
+                        <Play size={14} className="fill-white" />
                         <span>Boshlash</span>
-                        <ArrowUpRight size={16} />
                       </button>
-                    ) : item.status === "finished" ? (
+                    ) : isFinished ? (
                       <button
                         onClick={() => {
                           handleTournamentSelectForLeaderboard(item.id);
@@ -499,11 +509,15 @@ export default function OlympiadsPage() {
                       </button>
                     ) : isRegistered ? (
                       <button
-                        onClick={() => setConfirmStartItem(item)}
-                        className="flex-1 py-3 rounded-2xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs sm:text-sm flex items-center justify-center gap-1.5 shadow-sm active:scale-95 transition-all text-center cursor-pointer"
+                        onClick={() => {
+                          toast.error(`Musobaqa hali boshlanmagan! Boshlanish vaqti: ${formatUzbekDate(item.startDate)} ${item.startTime || '15:00'}`, {
+                            duration: 4000
+                          });
+                        }}
+                        className="flex-1 py-3 rounded-2xl bg-amber-500/10 dark:bg-amber-950/40 text-amber-600 dark:text-amber-400 border border-amber-500/20 font-bold text-xs sm:text-sm flex items-center justify-center gap-1.5 shadow-none active:scale-95 transition-all text-center cursor-pointer"
                       >
-                        <Play size={14} className="fill-white" />
-                        <span>Boshlash</span>
+                        <Clock size={14} />
+                        <span>Kutilmoqda</span>
                       </button>
                     ) : (
                       <button

@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { X, Globe, Save, AlertCircle } from "lucide-react";
 import { useLanguage } from "@/context/LanguageContext";
 import { InternationalTournament } from "@/lib/international-tournaments";
+import TournamentSchedulePicker from "@/components/admin/TournamentSchedulePicker";
 
 interface InternationalTournamentModalProps {
   isOpen: boolean;
@@ -33,7 +34,9 @@ export default function InternationalTournamentModal({
   const [description, setDescription] = useState("");
   const [startDate, setStartDate] = useState("");
   const [startTime, setStartTime] = useState("15:00");
-  const [durationMinutes, setDurationMinutes] = useState(60);
+  const [endDate, setEndDate] = useState("");
+  const [endTime, setEndTime] = useState("18:00");
+  const [durationMinutes, setDurationMinutes] = useState<number | null>(60);
   const [totalQuestions, setTotalQuestions] = useState(30);
   const [entryCoins, setEntryCoins] = useState(100);
   const [prizePool, setPrizePool] = useState("");
@@ -50,8 +53,10 @@ export default function InternationalTournamentModal({
       setCategory(tournament.category || "sat");
       setSubject(tournament.subject || "SAT Math & Reading");
       setDescription(tournament.description || "");
-      setStartDate(tournament.startDate || "");
+      setStartDate(tournament.startDate || new Date().toISOString().split("T")[0]);
       setStartTime(tournament.startTime || "15:00");
+      setEndDate(tournament.endDate || tournament.startDate || new Date().toISOString().split("T")[0]);
+      setEndTime(tournament.endTime || "18:00");
       setDurationMinutes(tournament.durationMinutes || 60);
       setTotalQuestions(tournament.totalQuestions || 30);
       setEntryCoins(tournament.entryCoins || 100);
@@ -62,12 +67,15 @@ export default function InternationalTournamentModal({
       setStatus(tournament.status || "upcoming");
     } else {
       // Reset defaults for new international tournament
+      const today = new Date().toISOString().split("T")[0];
       setTitle("");
       setCategory("sat");
       setSubject("SAT Math & Reading");
       setDescription("Digital SAT formati bo'yicha xalqaro onlayn olimpiada.");
-      setStartDate(new Date().toISOString().split("T")[0]);
+      setStartDate(today);
       setStartTime("16:00");
+      setEndDate(today);
+      setEndTime("20:00");
       setDurationMinutes(70);
       setTotalQuestions(30);
       setEntryCoins(150);
@@ -130,6 +138,8 @@ export default function InternationalTournamentModal({
       description: description.trim(),
       startDate: startDate.trim(),
       startTime: startTime.trim(),
+      endDate: endDate.trim(),
+      endTime: endTime.trim(),
       durationMinutes: Number(durationMinutes) || 60,
       totalQuestions: Number(totalQuestions) || 30,
       entryCoins: Number(entryCoins) || 0,
@@ -150,33 +160,33 @@ export default function InternationalTournamentModal({
       <div className="relative w-full max-w-2xl bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-2xl overflow-hidden my-8">
         
         {/* Header */}
-        <div className="flex items-center justify-between px-6 py-5 border-b border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/50">
+        <div className="p-6 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-2xl bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 flex items-center justify-center font-bold">
-              <Globe size={20} />
+            <div className="w-10 h-10 rounded-2xl bg-indigo-500/10 text-indigo-500 flex items-center justify-center">
+              <Globe size={22} />
             </div>
             <div>
-              <h3 className="text-lg font-black font-fredoka text-slate-900 dark:text-white">
-                {tournament ? "Xalqaro Musobaqani Tahrirlash" : "Yangi Xalqaro Musobaqa Qo'shish"}
+              <h3 className="text-lg font-black text-slate-900 dark:text-white">
+                {tournament ? "Musobaqani Tahrirlash" : "Yangi Xalqaro Musobaqa"}
               </h3>
-              <p className="text-xs text-slate-500 dark:text-slate-400">
-                Digital SAT, AMC yoki IELTS xalqaro olimpiada sozlamalari
+              <p className="text-xs text-slate-500">
+                Digital SAT, AMC, IELTS va xalqaro bellashuvlar
               </p>
             </div>
           </div>
           <button
             onClick={onClose}
-            className="w-8 h-8 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-400 hover:text-slate-700 dark:hover:text-white transition-colors cursor-pointer"
+            className="p-2 rounded-xl text-slate-400 hover:text-slate-600 hover:bg-slate-100 dark:hover:bg-slate-800 transition-all"
           >
-            <X size={16} />
+            <X size={20} />
           </button>
         </div>
 
-        {/* Form Body */}
+        {/* Form */}
         <form onSubmit={handleSubmit} className="p-6 space-y-4 max-h-[75vh] overflow-y-auto">
           {error && (
-            <div className="p-3 rounded-2xl bg-red-50 dark:bg-red-500/10 border border-red-200 dark:border-red-500/20 flex items-center gap-2 text-xs font-bold text-red-600 dark:text-red-400">
-              <AlertCircle size={16} />
+            <div className="p-4 bg-red-500/10 border border-red-500/20 rounded-2xl text-red-600 dark:text-red-400 text-xs font-bold flex items-center gap-2">
+              <AlertCircle size={16} className="shrink-0" />
               <span>{error}</span>
             </div>
           )}
@@ -229,77 +239,48 @@ export default function InternationalTournamentModal({
             </div>
           </div>
 
-          {/* Scoring Scale & Status */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div className="space-y-1.5">
-              <label className="text-xs font-bold text-slate-700 dark:text-slate-300">
-                Baholash Shkalasi
-              </label>
-              <input
-                type="text"
-                value={scoringScale}
-                onChange={(e) => setScoringScale(e.target.value)}
-                placeholder="Masalan: 1600 Ballik SAT Shkalasi"
-                className="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 rounded-xl text-sm text-slate-900 dark:text-white outline-none focus:border-indigo-500 font-medium"
-              />
-            </div>
-
-            <div className="space-y-1.5">
-              <label className="text-xs font-bold text-slate-700 dark:text-slate-300">
-                Holati (Status)
-              </label>
-              <select
-                value={status}
-                onChange={(e) => setStatus(e.target.value as any)}
-                className="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 rounded-xl text-sm text-slate-900 dark:text-white outline-none focus:border-indigo-500 font-bold"
-              >
-                <option value="upcoming">🟡 Kutilmoqda (Upcoming)</option>
-                <option value="live">🟢 Faol (Live / Boshlangan)</option>
-                <option value="finished">⚪️ Yakunlangan (Finished)</option>
-              </select>
-            </div>
+          {/* Scoring Scale */}
+          <div className="space-y-1.5">
+            <label className="text-xs font-bold text-slate-700 dark:text-slate-300">
+              Baholash Shkalasi
+            </label>
+            <input
+              type="text"
+              value={scoringScale}
+              onChange={(e) => setScoringScale(e.target.value)}
+              placeholder="Masalan: 1600 Ballik SAT Shkalasi"
+              className="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 rounded-xl text-sm text-slate-900 dark:text-white outline-none focus:border-indigo-500 font-medium"
+            />
           </div>
 
-          {/* Date, Time & Duration */}
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-            <div className="space-y-1.5">
-              <label className="text-xs font-bold text-slate-700 dark:text-slate-300">
-                Boshlanish Sanasi
-              </label>
-              <input
-                type="text"
-                value={startDate}
-                onChange={(e) => setStartDate(e.target.value)}
-                placeholder="2026-08-25"
-                className="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 rounded-xl text-sm text-slate-900 dark:text-white outline-none focus:border-indigo-500"
-                required
-              />
-            </div>
+          {/* ── SCHEDULE PICKER & LIVE TABLE ── */}
+          <TournamentSchedulePicker
+            startDate={startDate}
+            setStartDate={setStartDate}
+            startTime={startTime}
+            setStartTime={setStartTime}
+            endDate={endDate}
+            setEndDate={setEndDate}
+            endTime={endTime}
+            setEndTime={setEndTime}
+            durationMinutes={durationMinutes}
+            setDurationMinutes={setDurationMinutes}
+          />
 
-            <div className="space-y-1.5">
-              <label className="text-xs font-bold text-slate-700 dark:text-slate-300">
-                Boshlanish Vaqti
-              </label>
-              <input
-                type="text"
-                value={startTime}
-                onChange={(e) => setStartTime(e.target.value)}
-                placeholder="16:00"
-                className="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 rounded-xl text-sm text-slate-900 dark:text-white outline-none focus:border-indigo-500"
-              />
-            </div>
-
-            <div className="space-y-1.5">
-              <label className="text-xs font-bold text-slate-700 dark:text-slate-300">
-                Davomiyligi (Daqiqa)
-              </label>
-              <input
-                type="number"
-                value={durationMinutes}
-                onChange={(e) => setDurationMinutes(Number(e.target.value))}
-                className="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 rounded-xl text-sm text-slate-900 dark:text-white outline-none focus:border-indigo-500"
-              />
-            </div>
+          {/* Status */}
+          <div className="space-y-1.5">
+            <label className="text-xs font-bold text-slate-700 dark:text-slate-300">
+              Holati (Status)
+            </label>
+            <select
+              value={status}
+              onChange={(e) => setStatus(e.target.value as any)}
+              className="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 rounded-xl text-sm text-slate-900 dark:text-white outline-none focus:border-indigo-500 font-bold"
+            >
+              <option value="upcoming">Kutilmoqda</option>
+              <option value="live">Faol</option>
+              <option value="finished">Yakunlangan</option>
+            </select>
           </div>
 
           {/* Description */}

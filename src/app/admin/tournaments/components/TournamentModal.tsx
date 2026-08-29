@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { X, Trophy, Save, AlertCircle } from "lucide-react";
 import { useLanguage } from "@/context/LanguageContext";
 import { AdminTournament } from "@/lib/admin-queries";
+import TournamentSchedulePicker from "@/components/admin/TournamentSchedulePicker";
 
 interface TournamentModalProps {
   isOpen: boolean;
@@ -37,7 +38,9 @@ export default function TournamentModal({
   const [description, setDescription] = useState("");
   const [startDate, setStartDate] = useState("");
   const [startTime, setStartTime] = useState("15:00");
-  const [durationMinutes, setDurationMinutes] = useState(60);
+  const [endDate, setEndDate] = useState("");
+  const [endTime, setEndTime] = useState("18:00");
+  const [durationMinutes, setDurationMinutes] = useState<number | null>(60);
   const [totalQuestions, setTotalQuestions] = useState(30);
   const [entryCoins, setEntryCoins] = useState(50);
   const [prizePool, setPrizePool] = useState("");
@@ -52,8 +55,10 @@ export default function TournamentModal({
       setTitle(tournament.title || "");
       setSubject(tournament.subject || "Matematika");
       setDescription(tournament.description || "");
-      setStartDate(tournament.startDate || "");
+      setStartDate(tournament.startDate || new Date().toISOString().split("T")[0]);
       setStartTime(tournament.startTime || "15:00");
+      setEndDate(tournament.endDate || tournament.startDate || new Date().toISOString().split("T")[0]);
+      setEndTime(tournament.endTime || "18:00");
       setDurationMinutes(tournament.durationMinutes || 60);
       setTotalQuestions(tournament.totalQuestions || 30);
       setEntryCoins(tournament.entryCoins || 50);
@@ -62,12 +67,14 @@ export default function TournamentModal({
       setRulesText((tournament.rules || []).join("\n"));
       setStatus(tournament.status || "upcoming");
     } else {
-      // Reset defaults for new tournament
+      const today = new Date().toISOString().split("T")[0];
       setTitle("");
       setSubject("Matematika");
       setDescription("");
-      setStartDate("20-Avgust, 2026");
+      setStartDate(today);
       setStartTime("16:00");
+      setEndDate(today);
+      setEndTime("20:00");
       setDurationMinutes(60);
       setTotalQuestions(30);
       setEntryCoins(50);
@@ -115,6 +122,8 @@ export default function TournamentModal({
       description: description.trim(),
       startDate: startDate.trim(),
       startTime: startTime.trim(),
+      endDate: endDate.trim(),
+      endTime: endTime.trim(),
       durationMinutes: Number(durationMinutes) || 60,
       totalQuestions: Number(totalQuestions) || 30,
       entryCoins: Number(entryCoins) || 0,
@@ -132,67 +141,86 @@ export default function TournamentModal({
 
   return (
     <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm flex items-center justify-center p-4 z-50">
-      <div className="bg-white dark:bg-slate-900 rounded-3xl p-6 sm:p-8 max-w-2xl w-full max-h-[90vh] overflow-y-auto border border-slate-200/80 dark:border-slate-800 shadow-xl space-y-5">
-        {/* Modal Header */}
-        <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-3">
-          <div className="flex items-center gap-2.5">
-            <Trophy size={20} className="text-brand-blue" />
+      <div className="bg-white dark:bg-slate-900 rounded-[2rem] w-full max-w-2xl overflow-hidden shadow-2xl border border-white/60 dark:border-slate-800 flex flex-col max-h-[90vh]">
+        
+        {/* Header */}
+        <div className="flex items-center justify-between p-6 border-b border-slate-100 dark:border-slate-800">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-2xl bg-amber-50 dark:bg-amber-950/40 flex items-center justify-center text-amber-500">
+              <Trophy size={20} />
+            </div>
             <div>
-              <h2 className="text-lg font-extrabold text-slate-800 dark:text-slate-100">
-                {tournament
-                  ? t("admin.tournaments.modal.edit_title") || "Musobaqani Tahrirlash"
-                  : t("admin.tournaments.modal.create_title") || "Yangi Musobaqa Yaratish"}
+              <h2 className="text-lg font-black font-fredoka text-slate-800 dark:text-slate-100">
+                {tournament ? t("admin.tournaments.edit") || "Musobaqani Tahrirlash" : t("admin.tournaments.create") || "Yangi Musobaqa Qo'shish"}
               </h2>
+              <p className="text-xs text-slate-400 font-medium">
+                {t("admin.tournaments.subtitle") || "Musobaqa ma'lumotlari va qoidalarini belgilang"}
+              </p>
             </div>
           </div>
           <button
             onClick={onClose}
-            className="p-1.5 text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+            className="w-8 h-8 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors"
           >
-            <X size={20} />
+            <X size={16} />
           </button>
         </div>
 
-        {/* Modal Body / Form */}
-        <form onSubmit={handleSubmit} className="space-y-4">
+        {/* Form */}
+        <form onSubmit={handleSubmit} className="p-6 overflow-y-auto space-y-4 flex-1">
           {error && (
-            <div className="p-3.5 rounded-2xl bg-red-50 dark:bg-red-950/30 border border-red-200 dark:border-red-800 text-red-600 dark:text-red-400 text-xs font-bold flex items-center gap-2">
+            <div className="p-4 rounded-xl bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-800/40 flex items-center gap-3 text-xs font-bold text-rose-600 dark:text-rose-400">
               <AlertCircle size={16} className="shrink-0" />
               <span>{error}</span>
             </div>
           )}
 
-          {/* Title & Subject */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div className="md:col-span-2 space-y-1.5">
-              <label className="text-xs font-bold text-slate-700 dark:text-slate-300">
-                {t("admin.tournaments.form.title") || "Musobaqa Nomi"} <span className="text-rose-500">*</span>
-              </label>
-              <input
-                type="text"
-                value={title}
-                onChange={(e) => setTitle(e.target.value)}
-                placeholder="Masalan: Respublika Matematika Pro Musobaqasi"
-                className="w-full px-4 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-slate-100 placeholder:text-slate-400 text-xs sm:text-sm focus:outline-none focus:border-brand-blue"
-                required
-              />
-            </div>
+          {/* Title */}
+          <div className="space-y-1.5">
+            <label className="text-xs font-bold text-slate-700 dark:text-slate-300">
+              {t("admin.tournaments.form.title") || "Musobaqa Sarlavhasi"} <span className="text-rose-500">*</span>
+            </label>
+            <input
+              type="text"
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+              placeholder="Masalan: Respublika Matematika Pro Musobaqasi 2026"
+              className="w-full px-4 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-slate-100 placeholder:text-slate-400 text-xs sm:text-sm focus:outline-none focus:border-brand-blue"
+              required
+            />
+          </div>
 
+          {/* Subject & Coins */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="space-y-1.5">
               <label className="text-xs font-bold text-slate-700 dark:text-slate-300">
-                {t("admin.tournaments.form.subject") || "Fani"}
+                {t("admin.tournaments.form.subject") || "Fan"}
               </label>
               <select
                 value={subject}
                 onChange={(e) => setSubject(e.target.value)}
                 className="w-full px-4 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-slate-100 text-xs sm:text-sm focus:outline-none focus:border-brand-blue"
               >
-                {SUBJECT_OPTIONS.map((sub) => (
-                  <option key={sub} value={sub}>
-                    {sub}
+                {SUBJECT_OPTIONS.map((s) => (
+                  <option key={s} value={s}>
+                    {s}
                   </option>
                 ))}
               </select>
+            </div>
+
+            <div className="space-y-1.5">
+              <label className="text-xs font-bold text-slate-700 dark:text-slate-300">
+                {t("admin.tournaments.form.coins") || "Qatnashish Narxi (Tanga)"}
+              </label>
+              <input
+                type="number"
+                value={entryCoins}
+                onChange={(e) => setEntryCoins(Number(e.target.value))}
+                placeholder="0 (Bepul bo'lsa 0 qoldiring)"
+                className="w-full px-4 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-slate-100 placeholder:text-slate-400 text-xs sm:text-sm focus:outline-none focus:border-brand-blue"
+                min={0}
+              />
             </div>
           </div>
 
@@ -210,63 +238,19 @@ export default function TournamentModal({
             />
           </div>
 
-          {/* Date, Time, Duration & Questions */}
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-            <div className="space-y-1.5">
-              <label className="text-xs font-bold text-slate-700 dark:text-slate-300">
-                {t("admin.tournaments.form.startDate") || "Sanasi"} <span className="text-rose-500">*</span>
-              </label>
-              <input
-                type="text"
-                value={startDate}
-                onChange={(e) => setStartDate(e.target.value)}
-                placeholder="18-Avgust, 2026"
-                className="w-full px-3 py-2 rounded-xl bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-slate-100 text-xs focus:outline-none focus:border-brand-blue"
-                required
-              />
-            </div>
-
-            <div className="space-y-1.5">
-              <label className="text-xs font-bold text-slate-700 dark:text-slate-300">
-                {t("admin.tournaments.form.startTime") || "Vaqti"}
-              </label>
-              <input
-                type="text"
-                value={startTime}
-                onChange={(e) => setStartTime(e.target.value)}
-                placeholder="15:00"
-                className="w-full px-3 py-2 rounded-xl bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-slate-100 text-xs focus:outline-none focus:border-brand-blue"
-              />
-            </div>
-
-            <div className="space-y-1.5">
-              <label className="text-xs font-bold text-slate-700 dark:text-slate-300">
-                {t("admin.tournaments.form.duration") || "Davomiyligi (daq)"}
-              </label>
-              <input
-                type="number"
-                value={durationMinutes}
-                onChange={(e) => setDurationMinutes(Number(e.target.value))}
-                className="w-full px-3 py-2 rounded-xl bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-slate-100 text-xs focus:outline-none focus:border-brand-blue"
-                min={10}
-                max={300}
-              />
-            </div>
-
-            <div className="space-y-1.5">
-              <label className="text-xs font-bold text-slate-700 dark:text-slate-300">
-                {t("admin.tournaments.form.questions") || "Savollar soni"}
-              </label>
-              <input
-                type="number"
-                value={totalQuestions}
-                onChange={(e) => setTotalQuestions(Number(e.target.value))}
-                className="w-full px-3 py-2 rounded-xl bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-slate-100 text-xs focus:outline-none focus:border-brand-blue"
-                min={5}
-                max={150}
-              />
-            </div>
-          </div>
+          {/* ── SCHEDULE PICKER ── */}
+          <TournamentSchedulePicker
+            startDate={startDate}
+            setStartDate={setStartDate}
+            startTime={startTime}
+            setStartTime={setStartTime}
+            endDate={endDate}
+            setEndDate={setEndDate}
+            endTime={endTime}
+            setEndTime={setEndTime}
+            durationMinutes={durationMinutes}
+            setDurationMinutes={setDurationMinutes}
+          />
 
           {/* Prize Pool & Status */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -293,13 +277,13 @@ export default function TournamentModal({
                 className="w-full px-4 py-2 rounded-xl bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-slate-100 text-xs sm:text-sm focus:outline-none focus:border-brand-blue"
               >
                 <option value="upcoming">
-                  ⏳ {t("admin.tournaments.filter.upcoming") || "Kutilmoqda"}
+                  {t("admin.tournaments.filter.upcoming") || "Kutilmoqda"}
                 </option>
                 <option value="live">
-                  🟢 {t("admin.tournaments.filter.live") || "Jonli / Faol"}
+                  {t("admin.tournaments.filter.live") || "Faol"}
                 </option>
                 <option value="finished">
-                  🏁 {t("admin.tournaments.filter.finished") || "Yakunlangan"}
+                  {t("admin.tournaments.filter.finished") || "Yakunlangan"}
                 </option>
               </select>
             </div>
