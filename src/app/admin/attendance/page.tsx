@@ -25,6 +25,7 @@ import {
   FileCheck
 } from 'lucide-react';
 import toast from 'react-hot-toast';
+import { sendAttendanceNotificationToStudentAndParents } from '@/lib/notifications-bridge';
 
 interface Group {
   id: string;
@@ -229,36 +230,28 @@ export default function AttendancePage() {
         throw error;
       }
 
-      // 2. Trigger Telegram alerts for absent / late / missing homework
+      // 2. Trigger Telegram alerts to student and all linked parents
       const currentGroup = groups.find((g) => g.id === selectedGroupId);
       let notifCount = 0;
 
       for (const st of students) {
-        const state = attendanceData[st.id];
-        if (state && (state.status === 'absent' || state.status === 'late' || state.homework === 'not_done')) {
-          try {
-            await fetch('/api/telegram/notify-attendance', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({
-                groupId: selectedGroupId,
-                groupName: currentGroup?.name,
-                studentId: st.id,
-                studentName: st.full_name,
-                date: selectedDate,
-                status: state.status,
-                homework: state.homework,
-              }),
-            });
-            notifCount++;
-          } catch (nErr) {
-            console.error('Failed notify:', nErr);
-          }
+        const state = attendanceData[st.id] || { status: 'present', homework: 'done', notes: '' };
+        if (state) {
+          sendAttendanceNotificationToStudentAndParents({
+            groupId: selectedGroupId,
+            groupName: currentGroup?.name,
+            studentId: st.id,
+            date: selectedDate,
+            status: state.status,
+            homework: state.homework,
+            notes: state.notes,
+          });
+          notifCount++;
         }
       }
 
       toast.success(
-        `Davomat saqlandi! ${notifCount > 0 ? `(${notifCount} ta Telegram ogohlantirish yuborildi)` : ''}`
+        `Davomat saqlandi va Telegram orqali xabarnoma yuborildi!`
       );
     } catch (err: any) {
       console.error('Error saving attendance:', err);

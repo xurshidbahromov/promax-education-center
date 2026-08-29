@@ -333,3 +333,159 @@ export function buildPaymentReceiptMessage({
     `✅ <i>To'lovingiz uchun rahmat! Promax Education o'quv markazi.</i>`
   );
 }
+
+export function buildAttendanceMessage({
+  studentName,
+  groupName,
+  date,
+  status,
+  homework,
+  notes,
+  isParent = false
+}: {
+  studentName: string;
+  groupName?: string;
+  date: string;
+  status: 'present' | 'absent' | 'late';
+  homework?: 'done' | 'not_done' | 'partially' | 'none';
+  notes?: string;
+  isParent?: boolean;
+}): string {
+  const formattedDate = new Date(date).toLocaleDateString('uz-UZ', { year: 'numeric', month: 'long', day: 'numeric' });
+  const roleGreeting = isParent ? `Hurmatli ota-ona!\nFarzandingiz ` : `Hurmatli `;
+
+  let statusBadge = '';
+  let statusIcon = '';
+  if (status === 'present') {
+    statusIcon = '✅';
+    statusBadge = '🟢 Darsda qatnashdi (Keldi)';
+  } else if (status === 'absent') {
+    statusIcon = '⚠️';
+    statusBadge = '🔴 Darsga KELMADI';
+  } else if (status === 'late') {
+    statusIcon = '⏱️';
+    statusBadge = '🟡 Darsga KECHIKIB KELDI';
+  }
+
+  let hwBadge = '';
+  if (homework === 'done') hwBadge = '✅ Bajarilgan';
+  else if (homework === 'not_done') hwBadge = '❌ Bajarilmagan';
+  else if (homework === 'partially') hwBadge = '⚠️ Qisman bajarilgan';
+
+  let msg = `${statusIcon} <b>DAVOMAT HISOBOTI</b>\n\n` +
+    `${roleGreeting}<b>${studentName}</b>ning dars davomati:\n\n` +
+    (groupName ? `🏫 Guruh / Fan: <b>${groupName}</b>\n` : '') +
+    `📅 Sana: <b>${formattedDate}</b>\n` +
+    `📌 Davomat holati: <b>${statusBadge}</b>\n`;
+
+  if (hwBadge && status !== 'absent') {
+    msg += `📚 Uy vazifasi: <b>${hwBadge}</b>\n`;
+  }
+
+  if (notes && notes.trim()) {
+    msg += `📝 O'qituvchi izohi: <i>${notes.trim()}</i>\n`;
+  }
+
+  if (status === 'absent') {
+    msg += `\n⚠️ <i>Iltimos, farzandingiz darslarni muntazam qoldirmasligini nazorat qiling.</i>\n`;
+  } else if (homework === 'not_done') {
+    msg += `\n📌 <i>Uy vazifalarini to'liq bajarishi uchun e'tibor qaratishingizni so'raymiz.</i>\n`;
+  }
+
+  msg += `\n✨ <i>Promax Education o'quv markazi</i>`;
+  return msg;
+}
+
+export function buildDTMExamResultMessage({
+  studentName,
+  examTitle,
+  examDate,
+  directionTitle,
+  directionCode,
+  totalScore,
+  maxScore = 189.0,
+  compulsoryMathScore = 0,
+  compulsoryHistoryScore = 0,
+  compulsoryLangScore = 0,
+  subject1Score = 0,
+  subject2Score = 0,
+  subject1Name = "1-Asosiy fan",
+  subject2Name = "2-Asosiy fan",
+  isParent = false
+}: {
+  studentName: string;
+  examTitle?: string;
+  examDate: string;
+  directionTitle: string;
+  directionCode?: string;
+  totalScore: number;
+  maxScore?: number;
+  compulsoryMathScore?: number;
+  compulsoryHistoryScore?: number;
+  compulsoryLangScore?: number;
+  subject1Score?: number;
+  subject2Score?: number;
+  subject1Name?: string;
+  subject2Name?: string;
+  isParent?: boolean;
+}): string {
+  const formattedDate = new Date(examDate).toLocaleDateString('uz-UZ', { year: 'numeric', month: 'long', day: 'numeric' });
+  const percentage = Math.round((totalScore / maxScore) * 100);
+  const roleGreeting = isParent ? `Hurmatli ota-ona!\nFarzandingiz ` : `Hurmatli `;
+
+  let badge = '💪 Ko\'proq tayyorgarlik talab etiladi';
+  if (totalScore >= 150) badge = '🥇 Davlat Granti uchun yuqori imkoniyat!';
+  else if (totalScore >= 120) badge = '🥈 To\'lov-shartnoma uchun mustahkam natija!';
+  else if (totalScore >= 80) badge = '📈 Yaxshi natija, yana o\'sish mumkin!';
+
+  return (
+    `🏆 <b>DTM MOCK IMTIHONI NATIJASI</b> 📊\n\n` +
+    `${roleGreeting}<b>${studentName}</b> yakshanbalik DTM Mock testini topshirdi:\n\n` +
+    (examTitle ? `📝 Imtihon: <b>${examTitle}</b>\n` : '') +
+    `📅 Sana: <b>${formattedDate}</b>\n` +
+    `🎯 Yo'nalish: <b>${directionTitle}</b> ${directionCode ? `(kod: ${directionCode})` : ''}\n\n` +
+    `🌟 <b>UMUMIY NATIJA: ${totalScore.toFixed(1)} / ${maxScore.toFixed(1)} BALL (${percentage}%)</b>\n\n` +
+    `📚 <b>Majburiy blok fanlar (10 tadan):</b>\n` +
+    `• Ona tili: <b>${compulsoryLangScore.toFixed(1)} ball</b> (1.1)\n` +
+    `• Matematika: <b>${compulsoryMathScore.toFixed(1)} ball</b> (1.1)\n` +
+    `• O'zbekiston tarixi: <b>${compulsoryHistoryScore.toFixed(1)} ball</b> (1.1)\n\n` +
+    `🎯 <b>Asosiy mutaxassislik bloklari:</b>\n` +
+    `• ${subject1Name} (30 ta): <b>${subject1Score.toFixed(1)} ball</b> (3.1)\n` +
+    `• ${subject2Name} (30 ta): <b>${subject2Score.toFixed(1)} ball</b> (2.1)\n\n` +
+    `⭐️ <b>Xulosa:</b> <b>${badge}</b>\n\n` +
+    `📱 <i>Batafsil natijalar va tahlillar Promax platformasida saqlanadi.</i>\n` +
+    `✨ <i>Promax Education — Sifatli ta'lim & Katta marralar sari!</i>`
+  );
+}
+
+export function buildOnlineTestResultMessage({
+  studentName,
+  testTitle,
+  score,
+  maxScore,
+  percentage,
+  timeSpent,
+  isParent = false
+}: {
+  studentName: string;
+  testTitle: string;
+  score: number;
+  maxScore: number;
+  percentage: number;
+  timeSpent?: string;
+  isParent?: boolean;
+}): string {
+  const roleGreeting = isParent ? `Hurmatli ota-ona!\nFarzandingiz ` : `Hurmatli `;
+  const emoji = percentage >= 80 ? '🏆' : percentage >= 50 ? '📈' : '💪';
+
+  return (
+    `${emoji} <b>TEST NATIJASI</b> 📝\n\n` +
+    `${roleGreeting}<b>${studentName}</b> online testni yakunladi:\n\n` +
+    `📖 Test nomi: <b>${testTitle}</b>\n` +
+    `📊 Natija: <b>${score} / ${maxScore} ball (${percentage}%)</b>\n` +
+    (timeSpent ? `⏱️ Sarflangan vaqt: <b>${timeSpent}</b>\n` : '') +
+    `\n` +
+    (percentage >= 80 ? '🎉 <i>Ajoyib natija, tabriklaymiz!</i>' : percentage >= 50 ? '👍 <i>Yaxshi natija, yanada o\'sishda davom eting!</i>' : '💪 <i>Keyingi safar albatta bundan ham yuqori natija bo\'ladi!</i>') +
+    `\n\n✨ <i>Promax Education platformasi</i>`
+  );
+}

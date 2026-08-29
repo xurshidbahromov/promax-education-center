@@ -18,6 +18,7 @@ import {
 } from "lucide-react";
 import directionsData from "@/data/dtm_directions.json";
 import { getStudents, saveExamResult, type Student } from "@/lib/admin-queries";
+import { sendDTMResultToStudentAndParents } from "@/lib/notifications-bridge";
 import Link from "next/link";
 import toast from "react-hot-toast";
 
@@ -104,9 +105,19 @@ export default function ResultsPage() {
       );
 
       if (result.success) {
+        // Send instant notification to student & parent(s) via Telegram & web
+        sendDTMResultToStudentAndParents({
+          studentId: selectedStudentId,
+          examTitle: `DTM Mock Imtihoni (${examDate})`,
+          examDate,
+          directionCode: selectedDirectionCode,
+          directionTitle: currentDirection?.name,
+          scores: scores,
+        });
+
         setStatus('success');
-        setMessage("Natija muvaffaqiyatli saqlandi!");
-        toast.success("Natija saqlandi!");
+        setMessage("Natija muvaffaqiyatli saqlandi va Telegram orqali xabarnoma yuborildi!");
+        toast.success("Natija saqlandi va Telegram orqali yuborildi!");
         // Reset form
         setAnswers({
           comp_math: 0, comp_history: 0, comp_lang: 0,

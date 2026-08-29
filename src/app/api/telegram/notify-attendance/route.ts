@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createTelegramBotClient } from '@/utils/supabase/server';
 import { sendMessage } from '@/lib/telegram/bot';
+import { buildAttendanceMessage } from '@/lib/telegram/messages';
 
 export async function POST(request: NextRequest) {
   try {
@@ -42,39 +43,50 @@ export async function POST(request: NextRequest) {
     }
 
     // 3. Formulate message text
-    let messageText = '';
-    const formattedDate = new Date(date).toLocaleDateString('uz-UZ', { year: 'numeric', month: 'long', day: 'numeric' });
     const nameStr = studentName || studentProfile?.full_name || "O'quvchi";
     const gNameStr = groupName || "Guruh";
 
-    if (status === 'absent') {
-      messageText = `⚠️ <b>DAVOMAT OGOHLANTIRISHI</b>\n\n` +
-        `Hurmatli ota-ona!\n` +
-        `Farzandingiz <b>${nameStr}</b> bugun (<b>${formattedDate}</b>) <b>${gNameStr}</b> darsiga ❌ <b>KELMADI</b>.\n\n` +
-        `<i>Iltimos, darsni o'tkazib yubormasligi uchun e'tiborli bo'ling.</i>`;
-    } else if (status === 'late') {
-      messageText = `🟡 <b>DAVOMAT OGOHLANTIRISHI</b>\n\n` +
-        `Hurmatli ota-ona!\n` +
-        `Farzandingiz <b>${nameStr}</b> bugun (<b>${formattedDate}</b>) <b>${gNameStr}</b> darsiga ⏱️ <b>KECHIKIB KELDI</b>.`;
-    } else if (homework === 'not_done') {
-      messageText = `❌ <b>UY VAZIFASI OGOHLANTIRISHI</b>\n\n` +
-        `Hurmatli ota-ona!\n` +
-        `Farzandingiz <b>${nameStr}</b> bugun (<b>${formattedDate}</b>) <b>${gNameStr}</b> darsida uy vazifasini 🔴 <b>BAJARMADI</b>.\n\n` +
-        `<i>Farzandingiz bilimi pasayib ketmasligi uchun uy vazifalarini nazorat qilishingizni so'raymiz.</i>`;
-    }
+    const studentMsg = buildAttendanceMessage({
+      studentName: nameStr,
+      groupName: gNameStr,
+      date,
+      status: status || 'present',
+      homework,
+      notes: body.notes,
+      isParent: false,
+    });
 
-    if (!messageText) {
-      return NextResponse.json({ success: true, message: 'No notification needed for present/done' });
-    }
+    const parentMsg = buildAttendanceMessage({
+      studentName: nameStr,
+      groupName: gNameStr,
+      date,
+      status: status || 'present',
+      homework,
+      notes: body.notes,
+      isParent: true,
+    });
 
     // 4. Send messages
     let sentCount = 0;
-    for (const tgId of recipientTelegramIds) {
+    if (studentProfile?.telegram_id) {
       try {
-        await sendMessage(tgId, messageText);
+        await sendMessage(studentProfile.telegram_id, studentMsg);
         sentCount++;
       } catch (err) {
-        console.error(`Failed to send telegram notification to ${tgId}:`, err);
+        console.error(`Failed to send telegram notification to student ${studentProfile.telegram_id}:`, err);
+      }
+    }
+
+    if (parentLinks && parentLinks.length > 0) {
+      for (const p of parentLinks) {
+        if (p.parent_telegram_id) {
+          try {
+            await sendMessage(p.parent_telegram_id, parentMsg);
+            sentCount++;
+          } catch (err) {
+            console.error(`Failed to send telegram notification to parent ${p.parent_telegram_id}:`, err);
+          }
+        }
       }
     }
 

@@ -316,12 +316,12 @@ export async function submitAnswer(
 export async function completeTestAttempt(attemptId: string, totalTimeSpent?: number): Promise<boolean> {
  const supabase = createClient();
 
- // 1. Fetch attempt to get test_id
- const { data: attempt, error: attemptError } = await supabase
- .from('test_attempts')
- .select('test_id, student_id')
- .eq('id', attemptId)
- .single();
+  // 1. Fetch attempt to get test_id and test title
+  const { data: attempt, error: attemptError } = await supabase
+    .from('test_attempts')
+    .select('test_id, student_id, test:tests(title)')
+    .eq('id', attemptId)
+    .single();
 
  if (attemptError || !attempt) {
  console.error('Error fetching attempt:', attemptError);
