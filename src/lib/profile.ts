@@ -13,6 +13,8 @@ export interface UserProfile {
  coins?: number;
  parent_phone?: string | null;
  parent_name?: string | null;
+ telegram_id?: string | null;
+ created_at?: string;
  settings?: {
  theme?: string;
  language?: string;

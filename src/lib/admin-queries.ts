@@ -10,40 +10,88 @@ export interface Student extends UserProfile {
 
 // Teacher Interface (extending Profile)
 export interface Teacher extends UserProfile {
- subjects: string[];
- total_tests: number;
- joined_date: string;
+  subjects: string[];
+  total_tests: number;
+  joined_date: string;
+  groups_count?: number;
+  students_count?: number;
+  assigned_groups?: { id: string; name: string; subject?: string }[];
 }
 
 // Fetch Teachers
 export async function getTeachers(searchTerm: string = ""): Promise<Teacher[]> {
- const supabase = createClient();
+  const supabase = createClient();
 
- let query = supabase
- .from('profiles')
- .select('*')
- .eq('role', 'teacher')
- .order('created_at', { ascending: false });
+  let query = supabase
+    .from('profiles')
+    .select(`
+      *,
+      groups:groups!groups_teacher_id_fkey(
+        id,
+        name,
+        subject:subjects(title),
+        group_students:group_students(id)
+      )
+    `)
+    .eq('role', 'teacher')
+    .order('created_at', { ascending: false });
 
- if (searchTerm) {
- query = query.or(`full_name.ilike.%${searchTerm}%,phone.ilike.%${searchTerm}%`);
- }
+  if (searchTerm) {
+    query = query.or(`full_name.ilike.%${searchTerm}%,phone.ilike.%${searchTerm}%`);
+  }
 
- const { data, error } = await query;
+  const { data, error } = await query;
 
- if (error) {
- console.error('Error fetching teachers:', error);
- return [];
- }
+  if (error) {
+    const { data: basicData, error: basicError } = await supabase
+      .from('profiles')
+      .select('*')
+      .eq('role', 'teacher')
+      .order('created_at', { ascending: false });
 
- // Mocking extra fields for now since they don't exist in DB yet
- // In real app, we would parse `settings` column for subjects
- return data.map(profile => ({
- ...profile,
- joined_date: profile.created_at,
- subjects: profile.settings?.subjects || ['Matematika'], // Fallback
- total_tests: 0 // Mock default
- }));
+    if (basicError) {
+      console.error('Error fetching teachers:', basicError);
+      return [];
+    }
+
+    return (basicData || []).map(profile => ({
+      ...profile,
+      joined_date: profile.created_at,
+      subjects: profile.settings?.subjects || ['Matematika'],
+      total_tests: 0,
+      groups_count: 0,
+      students_count: 0,
+      assigned_groups: [],
+    }));
+  }
+
+  return (data || []).map((profile: any) => {
+    const rawGroups = profile.groups || [];
+    const assignedGroups = rawGroups.map((g: any) => ({
+      id: g.id,
+      name: g.name,
+      subject: g.subject?.title || '',
+    }));
+
+    const groupSubjects = assignedGroups.map((g: any) => g.subject).filter(Boolean);
+    const settingSubjects = profile.settings?.subjects || [];
+    const allSubjects = Array.from(new Set([...groupSubjects, ...settingSubjects]));
+
+    let totalStudents = 0;
+    rawGroups.forEach((g: any) => {
+      totalStudents += (g.group_students || []).length;
+    });
+
+    return {
+      ...profile,
+      joined_date: profile.created_at,
+      subjects: allSubjects.length > 0 ? allSubjects : ['Matematika'],
+      total_tests: 0,
+      groups_count: rawGroups.length,
+      students_count: totalStudents,
+      assigned_groups: assignedGroups,
+    };
+  });
 }
 
 // Get Single Teacher
