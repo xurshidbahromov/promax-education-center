@@ -19,11 +19,8 @@ export interface Announcement {
   created_by?: string | null;
 }
 
-// Primary localStorage key — source of truth for is_featured / badge / image_url
-const STORAGE_KEY = 'promax_announcements';
-
-// Separate key to store banner metadata that Supabase table may not have columns for
-const BANNER_META_KEY = 'promax_announcement_meta';
+// localStorage is the SINGLE source of truth for all rich fields (is_featured, badge, image_url)
+const STORAGE_KEY = 'promax_announcements_v2'; // v2 to avoid stale data from previous versions
 
 export const INITIAL_ANNOUNCEMENTS: Announcement[] = [
   {
@@ -39,12 +36,11 @@ export const INITIAL_ANNOUNCEMENTS: Announcement[] = [
     is_active: true,
     expires_at: null,
     created_at: new Date(Date.now() - 1000 * 60 * 60 * 2).toISOString(),
-    created_by: null
   },
   {
     id: "ann-math-group",
     title: "Yangi Matematika Guruhi",
-    message: "Noldan boshlab mukammal darajagacha bo'lgan yangi guruhimizga qabul ochildi. Darslar tajribali ustozlar tomonidan zamonaviy metodikalar asosida o'tiladi.",
+    message: "Noldan boshlab mukammal darajagacha bo'lgan yangi guruhimizga qabul ochildi.",
     type: "success",
     priority: 8,
     target_audience: "all",
@@ -54,12 +50,11 @@ export const INITIAL_ANNOUNCEMENTS: Announcement[] = [
     is_active: true,
     expires_at: null,
     created_at: new Date(Date.now() - 1000 * 60 * 60 * 24).toISOString(),
-    created_by: null
   },
   {
     id: "ann-physics-club",
     title: "Fizika va Astronomiya To'garagi",
-    message: "Koinot sirlari va fizika qonunlarini qiziqarli amaliy tajribalar orqali o'rganishni istaysizmi? Bizning ilmiy to'garakka qo'shiling va kelajak olimiga aylaning.",
+    message: "Koinot sirlari va fizika qonunlarini qiziqarli amaliy tajribalar orqali o'rganish.",
     type: "info",
     priority: 6,
     target_audience: "all",
@@ -69,12 +64,11 @@ export const INITIAL_ANNOUNCEMENTS: Announcement[] = [
     is_active: true,
     expires_at: null,
     created_at: new Date(Date.now() - 1000 * 60 * 60 * 48).toISOString(),
-    created_by: null
   },
   {
     id: "ann-speaking-club",
     title: "English Speaking Club",
-    message: "Har shanba erkin muloqot va yangi do'stlar orttirish imkoniyati. Native speakerlar bilan jonli suhbatlarda qatnashib, nutqingizni ravonlashtiring.",
+    message: "Har shanba erkin muloqot. Native speakerlar bilan jonli suhbatlarda qatnashib, nutqingizni ravonlashtiring.",
     type: "warning",
     priority: 4,
     target_audience: "all",
@@ -84,130 +78,69 @@ export const INITIAL_ANNOUNCEMENTS: Announcement[] = [
     is_active: true,
     expires_at: null,
     created_at: new Date(Date.now() - 1000 * 60 * 60 * 72).toISOString(),
-    created_by: null
   }
 ];
 
-// ── Banner Metadata helpers ──────────────────────────────────────────────────
-// Supabase may not have is_featured / badge / image_url columns.
-// We persist them separately so Supabase reads never overwrite them.
+// ─── localStorage helpers ────────────────────────────────────────────────────
 
-interface BannerMeta {
-  is_featured: boolean;
-  badge: string | null;
-  image_url: string | null;
-}
-
-function getBannerMeta(): Record<string, BannerMeta> {
-  if (typeof window === 'undefined') return {};
-  try {
-    const raw = localStorage.getItem(BANNER_META_KEY);
-    if (raw) return JSON.parse(raw) as Record<string, BannerMeta>;
-  } catch {}
-  return {};
-}
-
-function setBannerMeta(id: string, meta: BannerMeta): void {
-  if (typeof window === 'undefined') return;
-  try {
-    const all = getBannerMeta();
-    all[id] = meta;
-    localStorage.setItem(BANNER_META_KEY, JSON.stringify(all));
-  } catch {}
-}
-
-function deleteBannerMeta(id: string): void {
-  if (typeof window === 'undefined') return;
-  try {
-    const all = getBannerMeta();
-    delete all[id];
-    localStorage.setItem(BANNER_META_KEY, JSON.stringify(all));
-  } catch {}
-}
-
-// ── Main storage helpers ──────────────────────────────────────────────────────
-
-function getStoredList(): Announcement[] {
+function readLocalList(): Announcement[] {
   if (typeof window === 'undefined') return INITIAL_ANNOUNCEMENTS;
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
     if (raw) {
-      const parsed = JSON.parse(raw);
+      const parsed = JSON.parse(raw) as Announcement[];
       if (Array.isArray(parsed) && parsed.length > 0) return parsed;
     }
   } catch {}
-  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(INITIAL_ANNOUNCEMENTS)); } catch {}
+  // First boot: write defaults and return
+  writeLocalList(INITIAL_ANNOUNCEMENTS, false);
   return INITIAL_ANNOUNCEMENTS;
 }
 
-function saveStoredList(list: Announcement[]): void {
+function writeLocalList(list: Announcement[], broadcast = true): void {
   if (typeof window === 'undefined') return;
   try {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(list));
-    window.dispatchEvent(new Event('promax_announcements_updated'));
+    if (broadcast) window.dispatchEvent(new Event('promax_announcements_updated'));
   } catch {}
 }
 
-// ── Core API ──────────────────────────────────────────────────────────────────
+// ─── Public API ──────────────────────────────────────────────────────────────
 
 /**
- * Fetch all announcements for Admin panel.
- * Supabase is used for basic fields; is_featured / badge / image_url come from
- * the separate BannerMeta store so they are never lost on Supabase reads.
+ * Get all announcements — localStorage is the truth.
+ * We enrich with Supabase `is_active` status only (since that IS stored in Supabase).
  */
 export async function getAllAnnouncements(): Promise<Announcement[]> {
-  const localList = getStoredList();
-  const meta = getBannerMeta();
+  const local = readLocalList();
 
+  // Optionally refresh is_active from Supabase (the one field we trust from Supabase)
   try {
     const supabase = createClient();
     const { data, error } = await supabase
       .from('announcements')
-      .select('*')
+      .select('id, is_active, title')
       .order('created_at', { ascending: false });
 
     if (!error && data && data.length > 0) {
-      const mapped: Announcement[] = data.map((item: any) => {
-        // Resolve banner metadata: BannerMeta store → Supabase column → local list match → false
-        const m = meta[item.id];
-        const localMatch = localList.find(l => l.id === item.id || l.title === item.title);
-        const isFeatured = !!(m?.is_featured || item.is_featured === true || localMatch?.is_featured);
-        const imageUrl = m?.image_url ?? item.image_url ?? localMatch?.image_url ?? null;
-        const badge = m?.badge ?? item.badge ?? localMatch?.badge ?? null;
-
-        return {
-          id: item.id,
-          title: item.title,
-          message: item.message || item.content || '',
-          type: (item.type || 'info') as AnnouncementType,
-          priority: item.priority || 0,
-          target_audience: (item.target_audience || 'all') as TargetAudience,
-          badge: isFeatured ? badge : null,
-          image_url: isFeatured ? imageUrl : null,
-          is_featured: isFeatured,
-          is_active: item.is_active !== undefined ? item.is_active : true,
-          expires_at: item.expires_at || null,
-          created_at: item.created_at || new Date().toISOString(),
-          created_by: item.created_by || null
-        };
+      let changed = false;
+      const updated = local.map(item => {
+        // Match by id or title
+        const row = data.find((r: any) => r.id === item.id || r.title === item.title);
+        if (row && row.is_active !== item.is_active) {
+          changed = true;
+          return { ...item, is_active: row.is_active };
+        }
+        return item;
       });
-
-      saveStoredList(mapped);
-      return mapped;
+      if (changed) {
+        writeLocalList(updated, false);
+        return updated;
+      }
     }
-  } catch (_) {}
+  } catch {}
 
-  // Fallback: enrich localList with meta
-  return localList.map(item => {
-    const m = meta[item.id];
-    if (!m) return item;
-    return {
-      ...item,
-      is_featured: m.is_featured,
-      badge: m.is_featured ? m.badge : null,
-      image_url: m.is_featured ? m.image_url : null
-    };
-  });
+  return local;
 }
 
 /**
@@ -223,6 +156,8 @@ export async function getActiveStudentAnnouncements(): Promise<Announcement[]> {
 
 /**
  * Save (create or update) an announcement.
+ * localStorage is updated immediately and fully.
+ * Supabase sync happens in background for basic fields only.
  */
 export async function saveAnnouncementData(payload: {
   id?: string | null;
@@ -241,118 +176,127 @@ export async function saveAnnouncementData(payload: {
   const imageUrl = isFeatured ? (payload.image_url || null) : null;
   const badge = isFeatured ? (payload.badge || null) : null;
 
-  const currentList = getStoredList();
-  let finalId = payload.id || ('ann_' + Date.now() + '_' + Math.random().toString(36).substring(7));
-  let createdAt = new Date().toISOString();
+  const list = readLocalList();
+
+  let item: Announcement;
 
   if (payload.id) {
-    const existing = currentList.find(a => a.id === payload.id);
-    if (existing) createdAt = existing.created_at;
-  }
-
-  const updatedItem: Announcement = {
-    id: finalId,
-    title: payload.title,
-    message: payload.message,
-    type: payload.type,
-    priority: payload.priority,
-    target_audience: payload.target_audience,
-    badge,
-    image_url: imageUrl,
-    is_featured: isFeatured,
-    is_active: payload.is_active,
-    expires_at: payload.expires_at || null,
-    created_at: createdAt
-  };
-
-  // Save to localStorage
-  if (payload.id) {
-    const idx = currentList.findIndex(a => a.id === payload.id);
-    if (idx >= 0) currentList[idx] = updatedItem;
-    else currentList.unshift(updatedItem);
+    // UPDATE existing
+    const idx = list.findIndex(a => a.id === payload.id);
+    const existing = idx >= 0 ? list[idx] : null;
+    item = {
+      id: payload.id,
+      title: payload.title,
+      message: payload.message,
+      type: payload.type,
+      priority: payload.priority,
+      target_audience: payload.target_audience,
+      badge,
+      image_url: imageUrl,
+      is_featured: isFeatured,
+      is_active: payload.is_active,
+      expires_at: payload.expires_at || null,
+      created_at: existing?.created_at ?? new Date().toISOString(),
+    };
+    if (idx >= 0) list[idx] = item;
+    else list.unshift(item);
   } else {
-    currentList.unshift(updatedItem);
+    // CREATE new
+    item = {
+      id: 'local_' + Date.now() + '_' + Math.random().toString(36).substring(7),
+      title: payload.title,
+      message: payload.message,
+      type: payload.type,
+      priority: payload.priority,
+      target_audience: payload.target_audience,
+      badge,
+      image_url: imageUrl,
+      is_featured: isFeatured,
+      is_active: payload.is_active,
+      expires_at: payload.expires_at || null,
+      created_at: new Date().toISOString(),
+    };
+    list.unshift(item);
   }
-  saveStoredList(currentList);
 
-  // Save banner meta separately — survives Supabase overwrites
-  setBannerMeta(finalId, { is_featured: isFeatured, badge, image_url: imageUrl });
+  // Save to localStorage immediately — this is the source of truth
+  writeLocalList(list);
 
-  // Sync basic fields to Supabase in background
+  // Background Supabase sync (basic fields only — no is_featured/badge/image_url)
   try {
     const supabase = createClient();
-    const dbPayload = {
+    const dbFields = {
       title: payload.title,
       message: payload.message,
       type: payload.type,
       priority: payload.priority,
       target_audience: payload.target_audience,
       is_active: payload.is_active,
-      expires_at: payload.expires_at || null
+      expires_at: payload.expires_at || null,
     };
 
-    const isLocalId = !payload.id || payload.id.startsWith('ann_') || payload.id.startsWith('ann-');
-    if (!isLocalId) {
-      await supabase.from('announcements').update(dbPayload).eq('id', payload.id!);
+    if (payload.id && !payload.id.startsWith('local_') && !payload.id.startsWith('ann-')) {
+      // Update in Supabase
+      await supabase.from('announcements').update(dbFields).eq('id', payload.id);
     } else {
-      const { data } = await supabase.from('announcements').insert([dbPayload]).select().single();
-      if (data?.id) {
-        // Update localStorage with real Supabase ID
-        const idx = currentList.findIndex(a => a.id === finalId);
-        if (idx >= 0) currentList[idx].id = data.id;
-        // Move banner meta to new ID
-        setBannerMeta(data.id, { is_featured: isFeatured, badge, image_url: imageUrl });
-        deleteBannerMeta(finalId);
-        finalId = data.id;
-        updatedItem.id = data.id;
-        saveStoredList(currentList);
+      // Insert into Supabase
+      const { data: inserted } = await supabase
+        .from('announcements')
+        .insert([dbFields])
+        .select('id')
+        .single();
+
+      if (inserted?.id) {
+        // Replace local ID with Supabase UUID in localStorage
+        const refreshed = readLocalList();
+        const idx2 = refreshed.findIndex(a => a.id === item.id);
+        if (idx2 >= 0) {
+          refreshed[idx2].id = inserted.id;
+          item.id = inserted.id;
+          writeLocalList(refreshed);
+        }
       }
     }
   } catch (e) {
-    console.warn('Supabase sync skipped:', e);
+    console.warn('[announcements] Supabase sync skipped:', e);
   }
 
-  return updatedItem;
+  return item;
 }
 
 /**
  * Delete announcement.
  */
 export async function deleteAnnouncementData(id: string): Promise<void> {
-  const updated = getStoredList().filter(a => a.id !== id);
-  saveStoredList(updated);
-  deleteBannerMeta(id);
+  const updated = readLocalList().filter(a => a.id !== id);
+  writeLocalList(updated);
 
   try {
     const supabase = createClient();
-    if (!id.startsWith('ann_') && !id.startsWith('ann-')) {
+    if (!id.startsWith('local_') && !id.startsWith('ann-')) {
       await supabase.from('announcements').delete().eq('id', id);
     }
-  } catch (e) {
-    console.warn('Supabase delete skipped:', e);
-  }
+  } catch {}
 }
 
 /**
  * Toggle active status.
  */
 export async function toggleAnnouncementActive(id: string, currentStatus: boolean): Promise<boolean> {
-  const list = getStoredList();
+  const list = readLocalList();
   const item = list.find(a => a.id === id);
   const newStatus = !currentStatus;
   if (item) {
     item.is_active = newStatus;
-    saveStoredList(list);
+    writeLocalList(list);
   }
 
   try {
     const supabase = createClient();
-    if (!id.startsWith('ann_') && !id.startsWith('ann-')) {
+    if (!id.startsWith('local_') && !id.startsWith('ann-')) {
       await supabase.from('announcements').update({ is_active: newStatus }).eq('id', id);
     }
-  } catch (e) {
-    console.warn('Supabase status update skipped:', e);
-  }
+  } catch {}
 
   return newStatus;
 }
