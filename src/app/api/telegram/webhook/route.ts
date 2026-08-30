@@ -49,7 +49,7 @@ export async function POST(request: NextRequest) {
 
       const { data: matchedStudents } = await supabase
         .from('profiles')
-        .select('id, full_name, parent_name, parent_phone')
+        .select('id, full_name, phone, parent_name, parent_phone')
         .or(`parent_phone.ilike.%${phoneClean}%,phone.ilike.%${phoneClean}%`);
 
       if (matchedStudents && matchedStudents.length > 0) {
@@ -60,6 +60,17 @@ export async function POST(request: NextRequest) {
             parent_name: msg.contact.first_name || 'Ota-ona',
             student_id: student.id,
           }, { onConflict: 'parent_telegram_id,student_id' });
+
+          // If the student's own phone matches, also link their profile telegram_id
+          const studentCleanPhone = (student.phone || '').replace(/\D/g, '');
+          if (studentCleanPhone && studentCleanPhone === phoneClean) {
+            await supabase.from('profiles').update({
+              telegram_id: telegramId,
+              telegram_username: msg.from?.username || null,
+              phone: phoneWithPlus,
+              updated_at: new Date().toISOString()
+            }).eq('id', student.id);
+          }
         }
         const studentNames = matchedStudents.map((s: any) => s.full_name || "O'quvchi");
         const parentName = msg.contact.first_name || 'Ota-ona';

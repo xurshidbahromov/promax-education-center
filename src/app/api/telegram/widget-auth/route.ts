@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createClient } from '@/utils/supabase/server';
+import { createClient, createTelegramBotClient } from '@/utils/supabase/server';
 import crypto from 'crypto';
 import { jwtVerify, createRemoteJWKSet } from 'jose';
 
@@ -58,9 +58,10 @@ export async function POST(request: NextRequest) {
  if (profile) {
  // If phone is returned by Telegram and missing in profile, update it automatically
  if (phoneWithPlus && (!profile.phone || profile.phone !== phoneWithPlus)) {
-   await supabase
+   const botClient = await createTelegramBotClient();
+   await botClient
      .from('profiles')
-     .update({ phone: phoneWithPlus })
+     .update({ phone: phoneWithPlus, updated_at: new Date().toISOString() })
      .eq('id', profile.id);
    profile.phone = phoneWithPlus;
  }
