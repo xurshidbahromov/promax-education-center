@@ -475,7 +475,7 @@ function TestCard({
 
         {/* Title & Description */}
         <div className="space-y-1">
-          <h3 className="font-extrabold text-slate-800 dark:text-slate-100 text-sm sm:text-base line-clamp-1 group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors font-sans-pro">
+          <h3 className="font-extrabold text-slate-800 dark:text-slate-100 text-sm sm:text-base line-clamp-1 transition-colors font-sans-pro">
             {test.title}
           </h3>
           <p className="text-xs text-slate-400 dark:text-slate-500 font-medium line-clamp-2 leading-relaxed">

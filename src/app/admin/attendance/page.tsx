@@ -1034,7 +1034,7 @@ CREATE POLICY "Allow all on attendance" ON attendance FOR ALL USING (true);`;
                               <span className="truncate max-w-[120px]">{subjectName}</span>
                             </span>
 
-                            <span className="text-[11px] font-bold text-slate-400 group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors flex items-center gap-1">
+                            <span className="text-[11px] font-bold text-slate-400 transition-colors flex items-center gap-1">
                               <span>Kirish</span>
                               <ChevronRight size={13} className="group-hover:translate-x-0.5 transition-transform" />
                             </span>
@@ -1042,7 +1042,7 @@ CREATE POLICY "Allow all on attendance" ON attendance FOR ALL USING (true);`;
 
                           {/* Group Name & Teacher */}
                           <div className="space-y-1.5">
-                            <h3 className="text-sm font-black text-slate-800 dark:text-slate-100 group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors line-clamp-1 font-sans-pro">
+                            <h3 className="text-sm font-black text-slate-800 dark:text-slate-100 transition-colors line-clamp-1 font-sans-pro">
                               {g.name}
                             </h3>
                             
