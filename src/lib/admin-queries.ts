@@ -320,25 +320,25 @@ export async function updateStudent(id: string, updates: { full_name: string; ph
   return { success: true };
 }
 
-// Delete Student (Hard Delete or Deactivate? Let's do Hard Delete for now as per usual admin req, or check constraints)
-// Actually, hard deleting a student might cascade delete results. Let's try it, but warn.
+// Delete Student (Cascades cleanly across all child records and removes profile)
 export async function deleteStudent(id: string): Promise<{ success: boolean; error?: string }> {
- const supabase = createClient();
+  try {
+    const res = await fetch('/api/admin/delete-user', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ userId: id })
+    });
 
- // In Supabase, deleting a user from 'auth.users' is the proper way, but we can't do that easily from client SDK without service role.
- // So we will just delete from 'profiles' and let triggers handle it or just leave orphan auth user (not ideal but consistent with current setup).
- // BETTER: Just delete from profiles.
+    const data = await res.json();
+    if (!res.ok) {
+      return { success: false, error: data.error || "O'chirishda xatolik yuz berdi" };
+    }
 
- const { error } = await supabase
- .from('profiles')
- .delete()
- .eq('id', id);
-
- if (error) {
- return { success: false, error: error.message };
- }
-
- return { success: true };
+    return { success: true };
+  } catch (err: any) {
+    console.error('Delete student request error:', err);
+    return { success: false, error: err.message || "Server bilan bog'lanishda xatolik" };
+  }
 }
 
 export async function createMockExam(
