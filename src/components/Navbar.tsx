@@ -204,7 +204,7 @@ const Navbar = () => {
   {user ? (
    <Link
      href="/dashboard"
-     className="bg-brand-blue text-white px-5 h-10 flex items-center justify-center rounded-full text-sm font-medium hover:bg-brand-blue/90 active:scale-95 transition-all shadow-sm"
+     className="bg-brand-blue text-white px-5 h-10 flex items-center justify-center rounded-full text-sm font-medium hover:bg-brand-blue/90 active:scale-[0.97] transition-[background-color,box-shadow,transform] duration-200 ease-out shadow-sm focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 outline-none"
    >
      Dashboard
    </Link>
@@ -212,14 +212,14 @@ const Navbar = () => {
   <>
     <Link
       href="/login"
-      className="text-sm font-medium text-slate-700 dark:text-slate-200 hover:text-brand-blue dark:hover:text-blue-400 transition-colors px-2"
+      className="text-sm font-medium text-slate-700 dark:text-slate-200 hover:text-brand-blue dark:hover:text-blue-400 transition-colors px-2 rounded-lg focus-visible:ring-2 focus-visible:ring-blue-500 outline-none"
     >
       {t('nav.login')}
     </Link>
 
     <Link
       href="/register"
-      className="bg-brand-orange text-white px-5 h-10 flex items-center justify-center rounded-full text-sm font-medium hover:bg-brand-orange/90 active:scale-95 transition-all shadow-sm ml-1"
+      className="bg-brand-orange text-white px-5 h-10 flex items-center justify-center rounded-full text-sm font-medium hover:bg-brand-orange/90 active:scale-[0.97] transition-[background-color,box-shadow,transform] duration-200 ease-out shadow-sm ml-1 focus-visible:ring-2 focus-visible:ring-orange-500 focus-visible:ring-offset-2 outline-none"
     >
       {t('hero.cta.primary')}
     </Link>
@@ -231,9 +231,9 @@ const Navbar = () => {
     {/* Mobile: Hamburger Menu Toggle Island */}
     <div className="lg:hidden flex justify-end pointer-events-auto">
       <button
-        className="flex items-center justify-center w-16 h-16 rounded-full text-slate-800 dark:text-slate-200 bg-white/80 dark:bg-slate-900/80 backdrop-blur-2xl border border-white/70 dark:border-white/10 shadow-sm active:scale-95 transition-all duration-300"
+        className="flex items-center justify-center w-16 h-16 rounded-full text-slate-800 dark:text-slate-200 bg-white/80 dark:bg-slate-900/80 backdrop-blur-2xl border border-white/70 dark:border-white/10 shadow-sm active:scale-[0.95] transition-[background-color,border-color,transform] duration-200 ease-out focus-visible:ring-2 focus-visible:ring-blue-500 outline-none cursor-pointer"
         onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-        aria-label="Toggle Menu"
+        aria-label="Asosiy menyuni ochish yoki yopish"
       >
         {mobileMenuOpen ? <X size={20} /> : <Menu size={20} />}
       </button>

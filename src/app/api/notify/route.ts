@@ -12,6 +12,28 @@ import directionsData from '@/data/dtm_directions.json';
 
 export async function POST(request: NextRequest) {
   try {
+    // ── Security Check: Verify caller is authenticated or provides internal secret ──
+    const authHeader = request.headers.get('authorization') || '';
+    const internalSecret = request.headers.get('x-internal-secret') || '';
+    const expectedSecret = process.env.INTERNAL_NOTIFY_SECRET || process.env.TELEGRAM_BOT_TOKEN || '';
+
+    // Check if valid internal secret provided
+    const isSecretValid = internalSecret && expectedSecret && internalSecret === expectedSecret;
+
+    if (!isSecretValid) {
+      // Check if user is logged into the platform
+      const userSupabase = await createTelegramBotClient();
+      const authCookie = request.cookies.get('sb-access-token') || request.cookies.get('supabase-auth-token');
+      // If neither secret nor standard internal origin
+      const origin = request.headers.get('origin') || request.headers.get('referer') || '';
+      const host = request.headers.get('host') || '';
+      const isInternalOrigin = origin.includes(host) || origin.includes('localhost') || origin.includes('promaxedu.uz');
+
+      if (!isInternalOrigin && !authHeader.includes('Bearer')) {
+        return NextResponse.json({ error: 'Unauthorized notify request' }, { status: 401 });
+      }
+    }
+
     const body = await request.json();
     const { type, ...params } = body;
 

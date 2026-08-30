@@ -50,29 +50,29 @@ const Hero = () => {
           {t('hero.slogan')}
         </p>
 
- {/* CTAs */}
- <motion.div
- className="mt-6 flex flex-col sm:flex-row gap-4 w-full sm:w-auto justify-center lg:justify-start"
- initial={{ opacity: 0, y: 20 }}
- animate={{ opacity: 1, y: 0 }}
- transition={{ duration: 0.5, delay: 0.4 }}
- >
- <Link
- href="/register"
- className="bg-brand-orange text-white px-8 py-4 rounded-full font-medium text-base shadow-lg shadow-orange-500/20 hover:bg-brand-orange/90 active:scale-95 transition-all flex items-center justify-center gap-2.5 uppercase tracking-wider"
- >
- <span>{t('hero.cta.primary')}</span>
- <ArrowRight className="w-5 h-5" />
- </Link>
- 
- <Link
- href="/courses"
- className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl border border-white/70 dark:border-white/10 text-slate-800 dark:text-slate-100 hover:bg-white/95 dark:hover:bg-slate-800/95 px-8 py-4 rounded-full font-medium text-base shadow-sm transition-all active:scale-95 flex items-center justify-center gap-2.5 uppercase tracking-wider"
- >
- <PlayCircle className="w-5 h-5 text-brand-orange" />
- <span>{t('hero.cta.tests')}</span>
- </Link>
- </motion.div>
+  {/* CTAs */}
+  <motion.div
+    className="mt-6 flex flex-col sm:flex-row gap-4 w-full sm:w-auto justify-center lg:justify-start"
+    initial={{ opacity: 0, y: 20 }}
+    animate={{ opacity: 1, y: 0 }}
+    transition={{ duration: 0.5, delay: 0.4 }}
+  >
+    <Link
+      href="/register"
+      className="bg-brand-orange text-white px-8 py-4 rounded-full font-medium text-base shadow-lg shadow-orange-500/20 hover:bg-brand-orange/90 active:scale-[0.97] transition-[background-color,box-shadow,transform] duration-200 ease-out flex items-center justify-center gap-2.5 uppercase tracking-wider focus-visible:ring-2 focus-visible:ring-orange-500 focus-visible:ring-offset-2 outline-none"
+    >
+      <span>{t('hero.cta.primary')}</span>
+      <ArrowRight className="w-5 h-5" />
+    </Link>
+    
+    <Link
+      href="/courses"
+      className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl border border-white/70 dark:border-white/10 text-slate-800 dark:text-slate-100 hover:bg-white/95 dark:hover:bg-slate-800/95 px-8 py-4 rounded-full font-medium text-base shadow-sm transition-[background-color,border-color,box-shadow,transform] duration-200 ease-out active:scale-[0.97] flex items-center justify-center gap-2.5 uppercase tracking-wider focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 outline-none"
+    >
+      <PlayCircle className="w-5 h-5 text-brand-orange" />
+      <span>{t('hero.cta.tests')}</span>
+    </Link>
+  </motion.div>
 
  {/* Trust Indicators */}
  <motion.div

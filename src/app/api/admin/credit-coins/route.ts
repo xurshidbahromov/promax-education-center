@@ -40,18 +40,26 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Talaba profili topilmadi' }, { status: 404 });
     }
 
-    const currentCoins = profile.coins || 0;
-    const newBalance = currentCoins + coinsToAdd;
+    // 2. Atomic update of coins via Postgres RPC or fallback
+    let newBalance = (profile.coins || 0) + coinsToAdd;
+    const { data: rpcBalance, error: rpcErr } = await supabase.rpc('increment_student_coins', {
+      p_student_id: studentId,
+      p_amount: coinsToAdd,
+    });
 
-    // 2. Update coins in profiles
-    const { error: uErr } = await supabase
-      .from('profiles')
-      .update({ coins: newBalance })
-      .eq('id', studentId);
+    if (!rpcErr && typeof rpcBalance === 'number') {
+      newBalance = rpcBalance;
+    } else {
+      // Fallback if RPC is not yet executed in database
+      const { error: uErr } = await supabase
+        .from('profiles')
+        .update({ coins: newBalance, updated_at: new Date().toISOString() })
+        .eq('id', studentId);
 
-    if (uErr) {
-      console.error('[Credit Coins API] DB update error:', uErr);
-      return NextResponse.json({ error: uErr.message }, { status: 500 });
+      if (uErr) {
+        console.error('[Credit Coins API] DB update error:', uErr);
+        return NextResponse.json({ error: uErr.message }, { status: 500 });
+      }
     }
 
     // 3. Update shop order status if orderId provided, or record bonus transaction

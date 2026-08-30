@@ -56,7 +56,7 @@ const Footer = () => {
                   href={social.href}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className={`w-10 h-10 flex items-center justify-center rounded-xl bg-white/70 dark:bg-slate-900/70 text-slate-600 dark:text-slate-400 border border-white/80 dark:border-slate-800 shadow-sm transition-all duration-300 hover:-translate-y-1 active:scale-95 ${social.color}`}
+                  className={`w-10 h-10 flex items-center justify-center rounded-xl bg-white/70 dark:bg-slate-900/70 text-slate-600 dark:text-slate-400 border border-white/80 dark:border-slate-800 shadow-sm transition-[color,background-color,border-color,box-shadow,transform] duration-200 ease-out hover:-translate-y-0.5 active:scale-[0.95] focus-visible:ring-2 focus-visible:ring-blue-500 outline-none ${social.color}`}
                   aria-label={social.label}
                 >
                   <social.icon size={18} />

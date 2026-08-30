@@ -70,14 +70,24 @@ export async function updateSession(request: NextRequest) {
       }
     }
 
-    // If user is logged in and tries to access login/register/root, redirect to dashboard
+    // If user is logged in and tries to access root '/', login, or register → automatically redirect to their account
     if (user && (
       request.nextUrl.pathname === '/' ||
       request.nextUrl.pathname.startsWith('/login') ||
       request.nextUrl.pathname.startsWith('/register')
     )) {
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('role')
+        .eq('id', user.id)
+        .single()
+
       const url = request.nextUrl.clone()
-      url.pathname = '/dashboard'
+      if (profile?.role && ['admin', 'staff', 'superadmin'].includes(profile.role)) {
+        url.pathname = '/admin'
+      } else {
+        url.pathname = '/dashboard'
+      }
       return NextResponse.redirect(url)
     }
 
