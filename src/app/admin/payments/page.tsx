@@ -207,6 +207,8 @@ function PaymentsContent() {
     data: null,
   });
 
+  const [paymentMode, setPaymentMode] = useState<'add_remaining' | 'set_total'>('add_remaining');
+
   const [paymentForm, setPaymentForm] = useState<{ amount: number; method: 'cash' | 'card' | 'transfer' }>({
     amount: 0,
     method: 'cash',
@@ -362,10 +364,31 @@ function PaymentsContent() {
   };
 
   const openPaymentModal = (item: ExpectedPayment) => {
-    setPaymentForm({
-      amount: item.payment ? item.payment.amount : item.groupPrice,
-      method: item.payment ? item.payment.payment_method : 'cash',
-    });
+    const prevPaid = item.payment?.amount || 0;
+    const remaining = Math.max(0, item.groupPrice - prevPaid);
+
+    if (item.payment && item.payment.status === 'partial') {
+      // Partial payment: Default to adding the remaining debt!
+      setPaymentMode('add_remaining');
+      setPaymentForm({
+        amount: remaining,
+        method: item.payment.payment_method || 'cash',
+      });
+    } else if (item.payment) {
+      // Already full: Default to set_total mode
+      setPaymentMode('set_total');
+      setPaymentForm({
+        amount: item.payment.amount,
+        method: item.payment.payment_method || 'cash',
+      });
+    } else {
+      // Unpaid: Default to full group price
+      setPaymentMode('set_total');
+      setPaymentForm({
+        amount: item.groupPrice,
+        method: 'cash',
+      });
+    }
     setPaymentModal({ isOpen: true, data: item });
   };
 
@@ -378,13 +401,24 @@ function PaymentsContent() {
     setIsSubmitting(true);
 
     const { amount, method } = paymentForm;
-    const { studentId, groupId, groupPrice } = paymentModal.data;
-    const status = amount >= groupPrice ? 'completed' : 'partial';
+    const { studentId, groupId, groupPrice, payment } = paymentModal.data;
+    const prevPaid = payment?.amount || 0;
 
-    const res = await processPayment(studentId, groupId, amount, currentMonth, method, status);
+    let finalAmount = amount;
+    if (paymentMode === 'add_remaining' && payment) {
+      finalAmount = prevPaid + amount;
+    }
+
+    const status = finalAmount >= groupPrice ? 'completed' : 'partial';
+
+    const res = await processPayment(studentId, groupId, finalAmount, currentMonth, method, status);
 
     if (res.success) {
-      toast.success("To'lov saqlandi va Telegram orqali kvitansiya yuborildi!");
+      toast.success(
+        status === 'completed'
+          ? "To'lov to'liq saqlandi va Telegram orqali kvitansiya yuborildi!"
+          : "Qisman to'lov saqlandi va Telegram orqali xabarnoma yuborildi!"
+      );
       mutate();
       closePaymentModal();
     } else {
@@ -644,8 +678,13 @@ function PaymentsContent() {
                           <>
                             <span>•</span>
                             <span className="text-emerald-600 dark:text-emerald-400 font-bold">
-                              To'landi: {formatMoney(item.payment.amount)} ({item.payment.payment_method === 'cash' ? 'Naqd' : item.payment.payment_method === 'card' ? 'Karta' : "O'tkazma"})
+                              To'landi: {formatMoney(item.payment.amount)}
                             </span>
+                            {isPartial && (
+                              <span className="text-rose-600 dark:text-rose-400 font-bold bg-rose-500/10 px-2 py-0.5 rounded-md border border-rose-500/20">
+                                Qolgan qarz: {formatMoney(Math.max(0, item.groupPrice - item.payment.amount))}
+                              </span>
+                            )}
                           </>
                         )}
                       </div>
@@ -659,11 +698,11 @@ function PaymentsContent() {
                       className={`px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 ${
                         isPaid
                           ? 'bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200'
-                          : 'bg-emerald-500 hover:bg-emerald-600 text-white active:scale-95'
+                          : 'bg-emerald-500 hover:bg-emerald-600 text-white active:scale-95 shadow-sm shadow-emerald-500/20'
                       }`}
                     >
                       <Receipt size={14} />
-                      <span>{item.payment ? "Tahrirlash" : "To'lov qabul qilish"}</span>
+                      <span>{isPartial ? "Qolganini to'lash" : isPaid ? "To'lovni tahrirlash" : "To'lov qabul qilish"}</span>
                     </button>
 
                     {item.payment && (
@@ -1132,8 +1171,15 @@ function PaymentsContent() {
                             </div>
                           )}
                           {item.payment && (
-                            <div className="text-xs text-slate-400 font-medium mt-1">
-                              {formatMoney(item.payment.amount)} to'landi • {item.payment.payment_method === 'cash' ? 'Naqd' : item.payment.payment_method === 'card' ? 'Karta' : "O'tkazma"}
+                            <div className="text-xs font-medium mt-1 space-y-0.5">
+                              <div className="text-slate-500 dark:text-slate-400">
+                                {formatMoney(item.payment.amount)} to'landi • {item.payment.payment_method === 'cash' ? 'Naqd' : item.payment.payment_method === 'card' ? 'Karta' : "O'tkazma"}
+                              </div>
+                              {isPartial && (
+                                <div className="text-rose-600 dark:text-rose-400 font-bold">
+                                  Qolgan qarz: {formatMoney(Math.max(0, item.groupPrice - item.payment.amount))}
+                                </div>
+                              )}
                             </div>
                           )}
                         </td>
@@ -1146,9 +1192,13 @@ function PaymentsContent() {
                           <div className="flex items-center justify-end gap-2">
                             <button
                               onClick={() => openPaymentModal(item)}
-                              className="px-3.5 py-1.5 bg-emerald-500 hover:bg-emerald-600 text-white rounded-xl text-xs font-bold transition-all"
+                              className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all ${
+                                isPaid
+                                  ? 'bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200'
+                                  : 'bg-emerald-500 hover:bg-emerald-600 text-white'
+                              }`}
                             >
-                              {item.payment ? "Tahrirlash" : "To'lov qabul qilish"}
+                              {isPartial ? "Qolganini to'lash" : isPaid ? "Tahrirlash" : "To'lov qabul qilish"}
                             </button>
                             {item.payment && (
                               <button
@@ -1172,52 +1222,205 @@ function PaymentsContent() {
       )}
 
       {/* Payment Modal */}
-      {paymentModal.isOpen && paymentModal.data && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-sm">
-          <div className="bg-white dark:bg-slate-900 rounded-3xl shadow-xl w-full max-w-md overflow-hidden border border-slate-200/80 dark:border-slate-800 p-6 space-y-4">
-            <div className="flex justify-between items-center border-b border-slate-100 dark:border-slate-800 pb-3">
-              <h3 className="font-bold text-base text-slate-800 dark:text-slate-100">
-                To'lov qabul qilish
-              </h3>
-              <button onClick={closePaymentModal} className="text-slate-400 hover:text-slate-700 dark:hover:text-slate-200">
-                <X size={18} />
-              </button>
-            </div>
+      {paymentModal.isOpen && paymentModal.data && (() => {
+        const prevPaid = paymentModal.data.payment?.amount || 0;
+        const groupPrice = paymentModal.data.groupPrice || 0;
+        const remainingDebt = Math.max(0, groupPrice - prevPaid);
+        const hasExistingPayment = !!paymentModal.data.payment;
 
-            <div className="bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-800 rounded-2xl p-4 space-y-1">
-              <p className="text-xs font-bold text-emerald-600 dark:text-emerald-400 uppercase tracking-wider">{paymentModal.data.studentName}</p>
-              <p className="text-slate-600 dark:text-slate-400 font-medium text-xs">
-                {paymentModal.data.groupName} • {currentMonth} oyi uchun
-              </p>
-              <div className="mt-2 pt-2 border-t border-slate-200/50 dark:border-slate-700/50 flex justify-between items-center text-xs">
-                <span className="text-slate-500 font-medium">Oylik to'lov summasi:</span>
-                <span className="text-slate-800 dark:text-slate-100 font-bold">{formatMoney(paymentModal.data.groupPrice)}</span>
+        // Dynamic real-time calculation
+        const inputVal = Number(paymentForm.amount) || 0;
+        const calculatedNewTotal = (paymentMode === 'add_remaining' && hasExistingPayment)
+          ? prevPaid + inputVal
+          : inputVal;
+        const calculatedRemaining = Math.max(0, groupPrice - calculatedNewTotal);
+        const willBeFullyPaid = calculatedNewTotal >= groupPrice;
+
+        return (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-sm animate-in fade-in duration-150">
+            <div className="bg-white dark:bg-slate-900 rounded-3xl shadow-2xl w-full max-w-lg overflow-hidden border border-slate-200/80 dark:border-slate-800 p-6 space-y-5">
+              
+              {/* Top Header */}
+              <div className="flex justify-between items-center border-b border-slate-100 dark:border-slate-800 pb-3">
+                <div>
+                  <h3 className="font-bold text-base text-slate-800 dark:text-slate-100">
+                    {hasExistingPayment && remainingDebt > 0
+                      ? "Qolgan to'lovni qabul qilish"
+                      : hasExistingPayment
+                      ? "To'lovni tahrirlash"
+                      : "To'lov qabul qilish"}
+                  </h3>
+                  <p className="text-xs text-slate-400 font-medium">
+                    {paymentModal.data.studentName} • {paymentModal.data.groupName} ({currentMonth})
+                  </p>
+                </div>
+                <button
+                  onClick={closePaymentModal}
+                  className="p-1.5 text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+                >
+                  <X size={18} />
+                </button>
               </div>
-            </div>
 
-            <div className="space-y-4">
-              <div>
-                <label className="block text-xs font-bold text-slate-600 dark:text-slate-300 mb-1 uppercase tracking-wider">To'langan summa</label>
+              {/* 3-Card Summary Grid */}
+              <div className="grid grid-cols-3 gap-2.5">
+                <div className="p-3 rounded-2xl bg-slate-50 dark:bg-slate-800/50 border border-slate-200/60 dark:border-slate-700/60">
+                  <p className="text-[10px] font-extrabold uppercase text-slate-400">Guruh to'lovi</p>
+                  <p className="text-xs sm:text-sm font-black text-slate-800 dark:text-slate-100 mt-0.5">
+                    {formatMoney(groupPrice)}
+                  </p>
+                </div>
+
+                <div className="p-3 rounded-2xl bg-emerald-500/5 dark:bg-emerald-950/20 border border-emerald-500/20">
+                  <p className="text-[10px] font-extrabold uppercase text-emerald-600 dark:text-emerald-400">Avval to'langan</p>
+                  <p className="text-xs sm:text-sm font-black text-emerald-600 dark:text-emerald-400 mt-0.5">
+                    {formatMoney(prevPaid)}
+                  </p>
+                </div>
+
+                <div className={`p-3 rounded-2xl border ${
+                  remainingDebt > 0 
+                    ? 'bg-rose-500/5 dark:bg-rose-950/20 border-rose-500/20 text-rose-600 dark:text-rose-400' 
+                    : 'bg-emerald-500/5 dark:bg-emerald-950/20 border-emerald-500/20 text-emerald-600 dark:text-emerald-400'
+                }`}>
+                  <p className="text-[10px] font-extrabold uppercase">{remainingDebt > 0 ? "Qolgan qarz" : "Qarzdorlik"}</p>
+                  <p className="text-xs sm:text-sm font-black mt-0.5">
+                    {remainingDebt > 0 ? formatMoney(remainingDebt) : "0 so'm"}
+                  </p>
+                </div>
+              </div>
+
+              {/* Mode Switcher Tabs if existing payment exists */}
+              {hasExistingPayment && (
+                <div className="flex rounded-2xl bg-slate-100 dark:bg-slate-800 p-1 gap-1 border border-slate-200/60 dark:border-slate-700/60">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setPaymentMode('add_remaining');
+                      setPaymentForm(prev => ({ ...prev, amount: remainingDebt }));
+                    }}
+                    className={`flex-1 py-1.5 px-3 rounded-xl text-xs font-bold transition-all ${
+                      paymentMode === 'add_remaining'
+                        ? 'bg-white dark:bg-slate-900 text-emerald-600 dark:text-emerald-400 shadow-sm'
+                        : 'text-slate-500 hover:text-slate-800 dark:hover:text-slate-200'
+                    }`}
+                  >
+                    + Qolgan qarzni qabul qilish
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setPaymentMode('set_total');
+                      setPaymentForm(prev => ({ ...prev, amount: prevPaid }));
+                    }}
+                    className={`flex-1 py-1.5 px-3 rounded-xl text-xs font-bold transition-all ${
+                      paymentMode === 'set_total'
+                        ? 'bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-100 shadow-sm'
+                        : 'text-slate-500 hover:text-slate-800 dark:hover:text-slate-200'
+                    }`}
+                  >
+                    Jami to'lovni tahrirlash
+                  </button>
+                </div>
+              )}
+
+              {/* Amount Input & Preset Pills */}
+              <div className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <label className="text-xs font-extrabold text-slate-700 dark:text-slate-300 uppercase tracking-wider">
+                    {paymentMode === 'add_remaining' && hasExistingPayment
+                      ? "Qo'shimcha to'lanayotgan summa"
+                      : "To'lanayotgan summa"}
+                  </label>
+                  {remainingDebt > 0 && paymentMode === 'add_remaining' && (
+                    <span className="text-[11px] font-bold text-rose-500">
+                      Qarz: {formatMoney(remainingDebt)}
+                    </span>
+                  )}
+                </div>
+
                 <div className="relative">
                   <input
                     type="number"
                     min="0"
-                    className="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm font-bold text-slate-800 dark:text-slate-100 outline-none"
+                    placeholder="Summani kiriting..."
+                    className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 rounded-2xl text-base font-black text-slate-800 dark:text-slate-100 outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 transition-all font-mono"
                     value={paymentForm.amount || ''}
                     onChange={e => setPaymentForm({ ...paymentForm, amount: parseInt(e.target.value) || 0 })}
                   />
-                  <div className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 text-xs font-bold">
-                    UZS
+                  <div className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 text-xs font-extrabold">
+                    SO'M
                   </div>
+                </div>
+
+                {/* Quick Presets */}
+                <div className="flex flex-wrap items-center gap-1.5 pt-1">
+                  {remainingDebt > 0 && paymentMode === 'add_remaining' && (
+                    <button
+                      type="button"
+                      onClick={() => setPaymentForm({ ...paymentForm, amount: remainingDebt })}
+                      className="px-2.5 py-1 rounded-lg bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 text-[11px] font-bold border border-emerald-500/20 transition-colors"
+                    >
+                      Qolgan qarzni to'lash ({formatMoney(remainingDebt)})
+                    </button>
+                  )}
+                  {paymentMode === 'set_total' && (
+                    <button
+                      type="button"
+                      onClick={() => setPaymentForm({ ...paymentForm, amount: groupPrice })}
+                      className="px-2.5 py-1 rounded-lg bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 text-[11px] font-bold border border-emerald-500/20 transition-colors"
+                    >
+                      To'liq to'lov ({formatMoney(groupPrice)})
+                    </button>
+                  )}
+                  <button
+                    type="button"
+                    onClick={() => setPaymentForm({ ...paymentForm, amount: 100000 })}
+                    className="px-2.5 py-1 rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 text-[11px] font-bold transition-colors"
+                  >
+                    100,000
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setPaymentForm({ ...paymentForm, amount: 200000 })}
+                    className="px-2.5 py-1 rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 text-[11px] font-bold transition-colors"
+                  >
+                    200,000
+                  </button>
                 </div>
               </div>
 
-              <div>
-                <label className="block text-xs font-bold text-slate-600 dark:text-slate-300 mb-1.5 uppercase tracking-wider">To'lov usuli</label>
-                <div className="grid grid-cols-3 gap-2.5">
+              {/* Dynamic Live Calculation Banner */}
+              <div className="p-3 rounded-2xl bg-slate-50 dark:bg-slate-800/40 border border-slate-200/60 dark:border-slate-700/60 text-xs font-semibold space-y-1">
+                <div className="flex justify-between items-center">
+                  <span className="text-slate-500 dark:text-slate-400">Yangi jami to'langan summa:</span>
+                  <span className="font-bold text-slate-800 dark:text-slate-100">{formatMoney(calculatedNewTotal)}</span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="text-slate-500 dark:text-slate-400">Natijaviy holat:</span>
+                  {willBeFullyPaid ? (
+                    <span className="font-bold text-emerald-600 dark:text-emerald-400 flex items-center gap-1">
+                      <CheckCircle2 size={13} />
+                      100% To'liq to'langan
+                    </span>
+                  ) : (
+                    <span className="font-bold text-amber-600 dark:text-amber-400 flex items-center gap-1">
+                      <AlertCircle size={13} />
+                      Qisman to'langan (Qarz: {formatMoney(calculatedRemaining)})
+                    </span>
+                  )}
+                </div>
+              </div>
+
+              {/* Payment Method Selector */}
+              <div className="space-y-1.5">
+                <label className="text-xs font-extrabold text-slate-700 dark:text-slate-300 uppercase tracking-wider block">
+                  To'lov usuli
+                </label>
+                <div className="grid grid-cols-3 gap-2">
                   {[
                     { id: 'cash', label: 'Naqd pul', icon: Banknote },
-                    { id: 'card', label: 'Karta', icon: CreditCard },
+                    { id: 'card', label: 'Karta (Click/Payme)', icon: CreditCard },
                     { id: 'transfer', label: "O'tkazma", icon: Wallet }
                   ].map(method => (
                     <button
@@ -1226,34 +1429,41 @@ function PaymentsContent() {
                       onClick={() => setPaymentForm({ ...paymentForm, method: method.id as 'cash'|'card'|'transfer' })}
                       className={`flex flex-col items-center justify-center gap-1.5 p-3 rounded-2xl border transition-all ${
                         paymentForm.method === method.id
-                          ? 'border-emerald-500 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 font-bold'
-                          : 'border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-800/40 text-slate-500 hover:bg-slate-100'
+                          ? 'border-emerald-500 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 font-bold shadow-sm'
+                          : 'border-slate-200/80 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/40 text-slate-500 hover:bg-slate-100'
                       }`}
                     >
                       <method.icon size={18} className={paymentForm.method === method.id ? 'text-emerald-500' : 'text-slate-400'} />
-                      <span className="text-xs font-bold">{method.label}</span>
+                      <span className="text-xs font-bold text-center leading-tight">{method.label}</span>
                     </button>
                   ))}
                 </div>
               </div>
-            </div>
 
-            <div className="flex items-center justify-end gap-3 pt-3 border-t border-slate-100 dark:border-slate-800">
-              <button onClick={closePaymentModal} className="px-4 py-2 text-xs font-bold text-slate-500">
-                Bekor qilish
-              </button>
-              <button
-                onClick={handleSavePayment}
-                disabled={isSubmitting || paymentForm.amount <= 0}
-                className="px-5 py-2.5 text-xs font-bold text-white bg-emerald-500 hover:bg-emerald-600 rounded-xl disabled:opacity-50 flex items-center gap-1.5"
-              >
-                <Send size={14} />
-                <span>{isSubmitting ? "Saqlanmoqda..." : "Saqlash va Chek Yuborish"}</span>
-              </button>
+              {/* Action Buttons */}
+              <div className="flex items-center justify-end gap-3 pt-3 border-t border-slate-100 dark:border-slate-800">
+                <button
+                  type="button"
+                  onClick={closePaymentModal}
+                  className="px-4 py-2.5 text-xs font-bold text-slate-500 hover:text-slate-800 dark:hover:text-slate-200 transition-colors"
+                >
+                  Bekor qilish
+                </button>
+                <button
+                  type="button"
+                  onClick={handleSavePayment}
+                  disabled={isSubmitting || paymentForm.amount <= 0}
+                  className="px-6 py-2.5 text-xs font-bold text-white bg-emerald-500 hover:bg-emerald-600 active:scale-95 rounded-xl disabled:opacity-50 flex items-center gap-1.5 shadow-md shadow-emerald-500/20 transition-all cursor-pointer"
+                >
+                  <Send size={14} />
+                  <span>{isSubmitting ? "Saqlanmoqda..." : "Saqlash va Chek Yuborish"}</span>
+                </button>
+              </div>
+
             </div>
           </div>
-        </div>
-      )}
+        );
+      })()}
     </div>
   );
 }
