@@ -82,7 +82,7 @@ export default function InternationalTournamentModal({
       setPrizePool("2,000,000 SO'M + Ivy League SAT Kursi");
       setScoringScale("1600 Ballik SAT Shkalasi");
       setTopPrizesText(
-        "🥇 1-O'rin: 1,000,000 So'm + Ivy League SAT Kursi\n🥈 2-O'rin: 600,000 So'm + Cambridge SAT Kitobi\n🥉 3-O'rin: 400,000 So'm + Sertifikat"
+        "1-O'rin: 1,000,000 So'm + Ivy League SAT Kursi\n2-O'rin: 600,000 So'm + Cambridge SAT Kitobi\n3-O'rin: 400,000 So'm + Sertifikat"
       );
       setRulesText(
         "Multiple choice va Grid-In (yopiq) savollar to'liq avtomatik tekshiriladi.\nTest davomiyligi 70 daqiqa.\nVaqt tugaganda test avtomatik topshiriladi."
@@ -145,7 +145,7 @@ export default function InternationalTournamentModal({
       entryCoins: Number(entryCoins) || 0,
       prizePool: prizePool.trim(),
       scoringScale: scoringScale.trim(),
-      topPrizes: topPrizes.length > 0 ? topPrizes : ["🥇 1-O'rin: Xalqaro Grant"],
+      topPrizes: topPrizes.length > 0 ? topPrizes : ["1-O'rin: Xalqaro Grant"],
       rules: rules.length > 0 ? rules : ["Belgilangan vaqt ichida testni topshiring."],
       status,
     };
@@ -320,7 +320,7 @@ export default function InternationalTournamentModal({
               value={topPrizesText}
               onChange={(e) => setTopPrizesText(e.target.value)}
               rows={3}
-              placeholder="🥇 1-O'rin: 1,000,000 So'm&#10;🥈 2-O'rin: 600,000 So'm&#10;🥉 3-O'rin: 400,000 So'm"
+              placeholder="1-O'rin: 1,000,000 So'm&#10;2-O'rin: 600,000 So'm&#10;3-O'rin: 400,000 So'm"
               className="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 rounded-xl text-xs text-slate-900 dark:text-white outline-none focus:border-indigo-500 font-mono"
             />
           </div>

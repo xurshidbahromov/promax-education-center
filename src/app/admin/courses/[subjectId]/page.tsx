@@ -67,7 +67,10 @@ export default function SubjectDetailPage({ params }: PageProps) {
     async function loadData() {
       try {
         const subData = await getSubjectById(subjectId);
-        if (subData) setSubject(subData);
+        if (subData) {
+          const cleanTitle = (subData.title || "").replace(/^[\p{Emoji}\p{Extended_Pictographic}\u200d\uFE0F\s]+/gu, '').trim() || subData.title;
+          setSubject({ ...subData, title: cleanTitle });
+        }
 
         const groupsData = await getSubjectGroups(subjectId);
         setGroups(groupsData);

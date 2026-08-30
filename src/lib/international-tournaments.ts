@@ -165,7 +165,7 @@ export async function getInternationalLeaderboard(tournamentId: string): Promise
         time_spent_seconds: d.time_spent_seconds || 0,
         rank: idx + 1,
         completed_at: d.created_at,
-        prize: idx === 0 ? "🥇 1-O'rin" : idx === 1 ? "🥈 2-O'rin" : idx === 2 ? "🥉 3-O'rin" : undefined
+        prize: idx === 0 ? "1-O'rin" : idx === 1 ? "2-O'rin" : idx === 2 ? "3-O'rin" : undefined
       }));
       return entries;
     }
@@ -242,9 +242,9 @@ export async function submitInternationalAttempt(
 
   currentList.forEach((entry, idx) => {
     entry.rank = idx + 1;
-    if (entry.rank === 1) entry.prize = "🥇 1-O'rin";
-    else if (entry.rank === 2) entry.prize = "🥈 2-O'rin";
-    else if (entry.rank === 3) entry.prize = "🥉 3-O'rin";
+    if (entry.rank === 1) entry.prize = "1-O'rin";
+    else if (entry.rank === 2) entry.prize = "2-O'rin";
+    else if (entry.rank === 3) entry.prize = "3-O'rin";
   });
 
   if (typeof window !== 'undefined') {
@@ -317,9 +317,9 @@ export async function saveInternationalTournament(
       entryCoins: tournament.entryCoins ?? 0,
       prizePool: tournament.prizePool || "Top o'rinlar uchun mukofotlar",
       topPrizes: tournament.topPrizes || [
-        "🥇 1-O'rin: Xalqaro Grant & Sertifikat",
-        "🥈 2-O'rin: 500,000 So'm Vafcher",
-        "🥉 3-O'rin: 300,000 So'm Vafcher"
+        "1-O'rin: Xalqaro Grant & Sertifikat",
+        "2-O'rin: 500,000 So'm Vafcher",
+        "3-O'rin: 300,000 So'm Vafcher"
       ],
       rules: tournament.rules || [
         "Test davomiyligi belgilangan vaqtda yakunlanadi.",

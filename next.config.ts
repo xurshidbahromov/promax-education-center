@@ -28,7 +28,6 @@ const nextConfig: NextConfig = {
   // Performance optimizations & tree-shaking
   experimental: {
     optimizePackageImports: [
-      'lucide-react',
       'framer-motion',
       '@tanstack/react-query',
       'date-fns',

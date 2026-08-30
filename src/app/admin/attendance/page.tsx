@@ -14,7 +14,6 @@ import {
   AlertCircle,
   Send,
   Save,
-  Check,
   Search,
   ChevronRight,
   GraduationCap,
@@ -236,14 +235,20 @@ function AttendanceContent() {
 
         if (error) throw error;
 
-        const formattedGroups: Group[] = (data || []).map((g: any) => ({
-          id: g.id,
-          name: g.name,
-          schedule: g.schedule,
-          teacher: Array.isArray(g.teacher) ? g.teacher[0] : g.teacher,
-          subject: Array.isArray(g.subject) ? g.subject[0] : g.subject,
-          students_count: g.group_students?.[0]?.count || 0,
-        }));
+        const formattedGroups: Group[] = (data || []).map((g: any) => {
+          const rawSubj = Array.isArray(g.subject) ? g.subject[0] : g.subject;
+          const rawTitle = rawSubj?.title || rawSubj?.name || 'Boshqa fanlar';
+          const cleanTitle = rawTitle.replace(/^[\p{Emoji}\p{Extended_Pictographic}\u200d\uFE0F\s]+/gu, '').trim() || rawTitle;
+
+          return {
+            id: g.id,
+            name: g.name,
+            schedule: g.schedule,
+            teacher: Array.isArray(g.teacher) ? g.teacher[0] : g.teacher,
+            subject: { title: cleanTitle, name: cleanTitle },
+            students_count: g.group_students?.[0]?.count || 0,
+          };
+        });
 
         setGroups(formattedGroups);
       } catch (err: any) {

@@ -73,9 +73,9 @@ export default function TestResultsPage() {
   const barColor = isExcellent ? "bg-emerald-500" : isGood ? "bg-amber-500" : "bg-red-500";
 
   const getPerformanceMessage = () => {
-    if (isExcellent) return { text: t('tests.result.msg.excellent') || "A'lo natija!", emoji: "🏆" };
-    if (isGood) return { text: t('tests.result.msg.good') || "Yaxshi natija!", emoji: "🌟" };
-    return { text: t('tests.result.msg.practice') || "Mashq qilish kerak!", emoji: "💪" };
+    if (isExcellent) return { text: t('tests.result.msg.excellent') || "A'lo natija!" };
+    if (isGood) return { text: t('tests.result.msg.good') || "Yaxshi natija!" };
+    return { text: t('tests.result.msg.practice') || "Mashq qilish kerak!" };
   };
 
   const performance = getPerformanceMessage();
@@ -115,7 +115,7 @@ export default function TestResultsPage() {
                 {percentage.toFixed(0)}% O'zlashtirish
               </div>
               <h1 className="text-3xl sm:text-4xl font-bold font-fredoka leading-tight">
-                {performance.emoji} {performance.text}
+                {performance.text}
               </h1>
               <p className="text-slate-500 dark:text-slate-400 text-lg font-medium">
                 {t('tests.result.finished') || "Test muvaffaqiyatli yakunlandi"}

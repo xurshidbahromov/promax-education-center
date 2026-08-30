@@ -125,16 +125,16 @@ export default function AdminLayout({
     }
   }, [pathname, userInfo, authorized]);
 
-  // Format date on client
+  // Format date on client reliably without browser locale ICU bugs (e.g. M08)
   useEffect(() => {
     const now = new Date();
-    const formatted = now.toLocaleDateString('uz-UZ', {
-      weekday: 'long',
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric'
-    });
-    setCurrentDate(formatted);
+    const UZ_MONTHS = ["Yanvar", "Fevral", "Mart", "Aprel", "May", "Iyun", "Iyul", "Avgust", "Sentabr", "Oktabr", "Noyabr", "Dekabr"];
+    const UZ_WEEKDAYS = ["Yakshanba", "Dushanba", "Seshanba", "Chorshanba", "Payshanba", "Juma", "Shanba"];
+    const day = now.getDate();
+    const month = UZ_MONTHS[now.getMonth()];
+    const year = now.getFullYear();
+    const weekday = UZ_WEEKDAYS[now.getDay()];
+    setCurrentDate(`${day}-${month}, ${year} • ${weekday}`);
   }, []);
 
   const handleLogout = async () => {

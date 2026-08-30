@@ -80,7 +80,7 @@ export default function TournamentModal({
       setEntryCoins(50);
       setPrizePool("1,000,000 SO'M");
       setTopPrizesText(
-        "🥇 1-O'rin: 600,000 So'm + Maxsus Sertifikat\n🥈 2-O'rin: 300,000 So'm\n🥉 3-O'rin: 100,000 So'm"
+        "1-O'rin: 600,000 So'm + Maxsus Sertifikat\n2-O'rin: 300,000 So'm\n3-O'rin: 100,000 So'm"
       );
       setRulesText(
         "Test davomiyligi 60 daqiqa, jami 30 ta savol.\nHar bir to'g'ri javob uchun 3.1 ball beriladi.\nVaqt tugaganda test avtomatik yakunlanadi."
@@ -298,7 +298,7 @@ export default function TournamentModal({
               value={topPrizesText}
               onChange={(e) => setTopPrizesText(e.target.value)}
               rows={3}
-              placeholder="🥇 1-O'rin: 1,000,000 So'm + Oltin Medal&#10;🥈 2-O'rin: 300,000 So'm&#10;🥉 3-O'rin: 100,000 So'm"
+              placeholder="1-O'rin: 1,000,000 So'm + Maxsus Sertifikat&#10;2-O'rin: 300,000 So'm&#10;3-O'rin: 100,000 So'm"
               className="w-full px-4 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-slate-100 text-xs focus:outline-none focus:border-brand-blue font-mono"
             />
           </div>

@@ -418,13 +418,13 @@ export async function getLeaderboard(limit: number = 1000) {
  return [];
  }
 
- return (data as any[]).map((user, index) => ({
- id: user.id,
- name: user.full_name,
- points: user.coins,
- rank: user.rank,
- avatar: user.rank === 1 ? "🥇" : user.rank === 2 ? "🥈" : user.rank === 3 ? "🥉" : "👤"
- }));
+  return (data as any[]).map((user, index) => ({
+    id: user.id,
+    name: user.full_name,
+    points: user.coins,
+    rank: user.rank,
+    avatar: ""
+  }));
 }
 
 /**
@@ -449,7 +449,7 @@ export async function getUserRank(userId: string) {
  name: user.full_name || 'User',
  points: user.coins || 0,
  rank: 0, // Special indicator
- avatar: "🛡️"
+ avatar: ""
  };
  }
 
@@ -466,7 +466,7 @@ export async function getUserRank(userId: string) {
  name: user.full_name || 'Student',
  points: user.coins || 0,
  rank: 0,
- avatar: "👤"
+ avatar: ""
  };
  }
 
@@ -478,7 +478,7 @@ export async function getUserRank(userId: string) {
  name: user.full_name || 'Student',
  points: points,
  rank,
- avatar: rank === 1 ? "🥇" : rank === 2 ? "🥈" : rank === 3 ? "🥉" : "👤"
+ avatar: ""
  };
 }
 

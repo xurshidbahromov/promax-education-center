@@ -255,11 +255,13 @@ function PaymentsContent() {
     >();
 
     payments.forEach((p) => {
+      const cleanSubj = (p.subjectTitle || 'Boshqa fanlar').replace(/^[\p{Emoji}\p{Extended_Pictographic}\u200d\uFE0F\s]+/gu, '').trim() || 'Boshqa fanlar';
+
       if (!groupMap.has(p.groupId)) {
         groupMap.set(p.groupId, {
           id: p.groupId,
           name: p.groupName,
-          subjectTitle: p.subjectTitle || 'Boshqa fanlar',
+          subjectTitle: cleanSubj,
           groupPrice: p.groupPrice || 0,
           students: [],
           expectedTotal: 0,

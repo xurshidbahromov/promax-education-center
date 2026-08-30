@@ -4,7 +4,9 @@ import { motion } from "framer-motion";
 import { ArrowRight, Calendar, Megaphone } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
+import { useState, useEffect } from "react";
 import { useLanguage } from "@/context/LanguageContext";
+import { getAllAnnouncements, Announcement } from "@/lib/announcements";
 
 interface NewsItem {
   id: string;
@@ -17,7 +19,7 @@ interface NewsItem {
   href: string;
 }
 
-const newsItems: NewsItem[] = [
+const DEFAULT_NEWS: NewsItem[] = [
   {
     id: "mock-exam",
     title: "MOCK IELTS & SAT Imtihonlari",
@@ -62,6 +64,32 @@ const newsItems: NewsItem[] = [
 
 export const NewsSection = () => {
   const { t } = useLanguage();
+  const [items, setItems] = useState<NewsItem[]>(DEFAULT_NEWS);
+
+  useEffect(() => {
+    getAllAnnouncements().then((data) => {
+      const activeFeatured = (data || []).filter(a => a.is_active && (a.is_featured || a.image_url));
+      if (activeFeatured.length > 0) {
+        const mapped: NewsItem[] = activeFeatured.slice(0, 4).map(a => ({
+          id: a.id,
+          title: a.title,
+          desc: a.message,
+          image: a.image_url || "https://images.unsplash.com/photo-1434030216411-0b793f4b4173?w=600&auto=format&fit=crop&q=80",
+          badge: a.badge || "E'LON",
+          badgeColor: a.type === 'error'
+            ? "bg-red-500/15 text-red-600 dark:text-red-400 border-red-500/30"
+            : a.type === 'warning'
+            ? "bg-amber-500/15 text-amber-600 dark:text-amber-400 border-amber-500/30"
+            : a.type === 'success'
+            ? "bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border-emerald-500/30"
+            : "bg-blue-500/15 text-blue-600 dark:text-blue-400 border-blue-500/30",
+          date: new Date(a.created_at).toLocaleDateString('uz-UZ', { month: 'short', day: 'numeric' }),
+          href: "/register"
+        }));
+        setItems(mapped);
+      }
+    }).catch(() => {});
+  }, []);
 
   return (
     <section className="py-16 md:py-24 relative px-4 sm:px-6 lg:px-8">
@@ -122,7 +150,7 @@ export const NewsSection = () => {
 
         {/* News Grid - 4 Columns */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-          {newsItems.map((item, index) => (
+          {items.map((item, index) => (
             <motion.div
               key={item.id}
               initial={{ opacity: 0, y: 30 }}

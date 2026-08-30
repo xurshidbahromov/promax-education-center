@@ -377,7 +377,7 @@ export default function TakeTestPage() {
         answers,
         timeSpentSeconds: timeSpent
       });
-      toast.success("Musobaqa yakunlandi!", { icon: "🏆" });
+      toast.success("Musobaqa yakunlandi!");
       router.push(`/dashboard/olympiads?tab=leaderboard&id=${testId}`);
       return;
     }
@@ -465,7 +465,7 @@ export default function TakeTestPage() {
         answers,
         timeSpentSeconds: Math.max(1, timeSpent)
       });
-      toast.success("Musobaqa muvaffaqiyatli yakunlandi! Natijangiz reytingga qo'shildi.", { icon: "🏆" });
+      toast.success("Musobaqa muvaffaqiyatli yakunlandi! Natijangiz reytingga qo'shildi.");
       router.push(`/dashboard/olympiads?tab=leaderboard&id=${testId}`);
       return;
     }

@@ -53,12 +53,17 @@ export default function AdminCoursesPage() {
   }, [searchTerm]);
 
   const { data: dbSubjects, isLoading: loading } = useSubjects();
-  const subjectsList: SubjectItem[] = (dbSubjects || []).map((s: any) => ({
-    id: s.id,
-    title: s.title || s.name || "Nomsiz Fan",
-    description: s.description || null,
-    cover_image: s.cover_image || null,
-  }));
+  const subjectsList: SubjectItem[] = (dbSubjects || []).map((s: any) => {
+    const rawTitle = s.title || s.name || "Nomsiz Fan";
+    const cleanTitle = rawTitle.replace(/^[\p{Emoji}\p{Extended_Pictographic}\u200d\uFE0F\s]+/gu, '').trim() || rawTitle;
+
+    return {
+      id: s.id,
+      title: cleanTitle,
+      description: s.description || null,
+      cover_image: s.cover_image || null,
+    };
+  });
 
   const filteredSubjects = subjectsList.filter(s =>
     s.title.toLowerCase().includes(debouncedSearchTerm.toLowerCase()) ||

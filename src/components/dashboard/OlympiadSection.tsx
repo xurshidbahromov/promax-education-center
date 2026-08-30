@@ -52,8 +52,6 @@ export interface OlympiadItem {
   topRankings?: { name: string; score: number; rank: number; avatar: string }[];
 }
 
-export const SAMPLE_OLYMPIADS: OlympiadItem[] = [];
-
 export function OlympiadBannerTeaser() {
   const { t } = useLanguage();
   const [participantsCount, setParticipantsCount] = useState(1240);
@@ -137,34 +135,31 @@ export function OlympiadBannerTeaser() {
 }
 
 export function OlympiadSection() {
-  const [selectedOlympiad, setSelectedOlympiad] = useState<OlympiadItem | null>(null);
+  const [tournaments, setTournaments] = useState<AdminTournament[]>([]);
+  const [selectedOlympiad, setSelectedOlympiad] = useState<any | null>(null);
   const [registeredIds, setRegisteredIds] = useState<string[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  const heroItem = SAMPLE_OLYMPIADS[0];
-  if (!heroItem) return null;
+  useEffect(() => {
+    getAdminTournaments().then((list) => {
+      setTournaments(list || []);
+      setLoading(false);
+    }).catch(() => {
+      setLoading(false);
+    });
+  }, []);
 
-  const handleRegister = (olympiad: OlympiadItem) => {
+  const heroItem = tournaments[0] as any;
+  if (loading || !heroItem) return null;
+
+  const handleRegister = (olympiad: any) => {
     if (registeredIds.includes(olympiad.id)) {
-      toast.success("Siz allaqachon uybushbu musobaqaga ro'yxatdan o'tgansiz!");
+      toast.success("Siz allaqachon ushbu musobaqaga ro'yxatdan o'tgansiz!");
       return;
     }
 
     setRegisteredIds(prev => [...prev, olympiad.id]);
-    toast.custom((t) => (
-      <div className={`${t.visible ? 'animate-enter' : 'animate-leave'} max-w-md w-full bg-white dark:bg-slate-900 shadow-2xl rounded-2xl pointer-events-auto flex ring-1 ring-black/5 border border-brand-blue/30 p-4 gap-3 items-center`}>
-        <div className="w-10 h-10 rounded-xl bg-emerald-500/10 text-emerald-500 flex items-center justify-center shrink-0 font-bold">
-          🏆
-        </div>
-        <div className="flex-1">
-          <p className="text-xs font-bold text-slate-800 dark:text-white">
-            Muvaffaqiyatli ro'yxatdan o'tdingiz!
-          </p>
-          <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">
-            "{olympiad.title}" boshlanishidan oldin sizga eslatma yuboriladi.
-          </p>
-        </div>
-      </div>
-    ), { duration: 4000 });
+    toast.success(`Muvaffaqiyatli ro'yxatdan o'tdingiz! "${olympiad.title}" boshlanishidan oldin sizga eslatma yuboriladi.`);
   };
 
   return (
@@ -203,8 +198,8 @@ export function OlympiadSection() {
           {/* Left Content Column (7 cols) */}
           <div className="lg:col-span-7 space-y-4">
             <div className="flex flex-wrap items-center gap-2">
-              <span className={`text-[10px] font-black px-3.5 py-1 rounded-full uppercase tracking-wider ${heroItem.badgeBg}`}>
-                {heroItem.badge}
+              <span className={`text-[10px] font-black px-3.5 py-1 rounded-full uppercase tracking-wider ${heroItem.badgeBg || "bg-amber-500/20 text-amber-300"}`}>
+                {heroItem.badge || "RESPUBLIKA"}
               </span>
               <span className="text-[11px] font-bold text-amber-400 flex items-center gap-1 bg-amber-400/10 px-3 py-1 rounded-full border border-amber-400/20">
                 <Sparkles size={12} />
@@ -307,7 +302,7 @@ export function OlympiadSection() {
 
               {/* Leaderboard Podiums List */}
               <div className="space-y-2.5">
-                {heroItem.topRankings?.map((item) => (
+                {(heroItem.topRankings || []).map((item: any) => (
                   <div
                     key={item.rank}
                     className={`flex items-center justify-between p-2.5 rounded-2xl border transition-all ${
@@ -350,9 +345,9 @@ export function OlympiadSection() {
         </div>
       </div>
 
-      {/* ── 2. UPCOMING OLYMPIADS LIST (3 CARDS) ── */}
+      {/* ── 2. UPCOMING OLYMPIADS LIST ── */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        {SAMPLE_OLYMPIADS.slice(1).map((item) => {
+        {tournaments.slice(1).map((item: any) => {
           const isRegistered = registeredIds.includes(item.id);
 
           return (
@@ -494,7 +489,7 @@ export function OlympiadSection() {
                     <span>Top O'rinlar Uchun Mukofotlar</span>
                   </h4>
                   <ul className="space-y-1 text-xs font-bold text-slate-700 dark:text-slate-200">
-                    {selectedOlympiad.topPrizes.map((pz, idx) => (
+                    {(selectedOlympiad.topPrizes || []).map((pz: any, idx: number) => (
                       <li key={idx} className="flex items-center gap-1.5">
                         <span>{pz}</span>
                       </li>
@@ -506,7 +501,7 @@ export function OlympiadSection() {
                 <div className="space-y-2">
                   <h4 className="text-xs font-bold text-slate-400 uppercase tracking-wider">Musobaqa Qoidalari</h4>
                   <ul className="space-y-1.5 text-xs text-slate-600 dark:text-slate-300 font-medium">
-                    {selectedOlympiad.rules.map((rule, idx) => (
+                    {(selectedOlympiad.rules || []).map((rule: any, idx: number) => (
                       <li key={idx} className="flex items-start gap-2">
                         <Info size={14} className="text-brand-blue shrink-0 mt-0.5" />
                         <span>{rule}</span>
