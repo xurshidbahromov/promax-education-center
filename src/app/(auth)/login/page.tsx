@@ -86,7 +86,7 @@ export default function LoginPage() {
       if (data.linked && !data.needsPassword) {
         // Logged in successfully via deterministic auth
         toast.success("Telegram orqali muvaffaqiyatli kirdingiz");
-        router.push(data.profile?.role === 'student' ? '/dashboard' : '/dashboard');
+        router.push(getRedirectPath(data.profile?.role || 'student'));
       } else {
         const rawPhone = user.user.phone_number || (data.telegramUser as any)?.phone_number || data.phone || '';
         const formattedPhone = rawPhone ? formatPhoneNumber(rawPhone) : '';
@@ -183,7 +183,7 @@ export default function LoginPage() {
       }
       
       toast.success(data.created ? "Yangi hisob yaratildi va Telegram ulandi" : "Hisobingiz Telegram bilan bog'landi");
-      router.push('/dashboard');
+      router.push(getRedirectPath(data.profile?.role || 'student'));
     } catch (error: any) {
       toast.error(error.message);
     } finally {

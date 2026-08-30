@@ -61,7 +61,7 @@ export async function updateSession(request: NextRequest) {
         .eq('id', user.id)
         .single()
 
-      const allowedRoles = ['admin', 'teacher']
+      const allowedRoles = ['admin', 'teacher', 'staff']
       if (!profile || !allowedRoles.includes(profile.role)) {
         // Not authorized → redirect to dashboard
         const url = request.nextUrl.clone()

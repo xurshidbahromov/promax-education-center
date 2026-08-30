@@ -24,7 +24,6 @@ import {
   List,
   Layers,
   ArrowUpDown,
-  Check,
   Send,
   Loader2
 } from 'lucide-react';
