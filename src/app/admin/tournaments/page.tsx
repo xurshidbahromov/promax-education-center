@@ -25,6 +25,7 @@ import {
 import {
   AdminTournament,
   AdminTournamentComment,
+  getCachedAdminTournaments,
   getAdminTournaments,
   saveAdminTournament,
   deleteAdminTournament,
@@ -35,9 +36,13 @@ import {
 
 export default function AdminTournamentsPage() {
   const { t } = useLanguage();
-  const [tournaments, setTournaments] = useState<AdminTournament[]>([]);
+  const [tournaments, setTournaments] = useState<AdminTournament[]>(() => {
+    return getCachedAdminTournaments();
+  });
   const [comments, setComments] = useState<AdminTournamentComment[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(() => {
+    return getCachedAdminTournaments().length === 0;
+  });
 
   // Tabs: 'tournaments' | 'comments'
   const [activeTab, setActiveTab] = useState<"tournaments" | "comments">("tournaments");
@@ -51,8 +56,10 @@ export default function AdminTournamentsPage() {
     loadData();
   }, []);
 
-  const loadData = async () => {
-    setLoading(true);
+  const loadData = async (isSilent: boolean = false) => {
+    if (!isSilent && tournaments.length === 0) {
+      setLoading(true);
+    }
     try {
       const [tList, cList] = await Promise.all([
         getAdminTournaments(),

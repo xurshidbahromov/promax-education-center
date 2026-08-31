@@ -6,7 +6,7 @@ import { createPortal } from "react-dom";
 import toast from "react-hot-toast";
 import Link from "next/link";
 import { useLanguage } from "@/context/LanguageContext";
-import { getAdminTournaments, AdminTournament } from "@/lib/tournaments";
+import { getAdminTournaments, getCachedAdminTournaments, AdminTournament } from "@/lib/tournaments";
 import {
   Trophy,
   Medal,
@@ -135,14 +135,20 @@ export function OlympiadBannerTeaser() {
 }
 
 export function OlympiadSection() {
-  const [tournaments, setTournaments] = useState<AdminTournament[]>([]);
+  const [tournaments, setTournaments] = useState<AdminTournament[]>(() => {
+    return getCachedAdminTournaments();
+  });
   const [selectedOlympiad, setSelectedOlympiad] = useState<any | null>(null);
   const [registeredIds, setRegisteredIds] = useState<string[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(() => {
+    return getCachedAdminTournaments().length === 0;
+  });
 
   useEffect(() => {
     getAdminTournaments().then((list) => {
-      setTournaments(list || []);
+      if (list && list.length > 0) {
+        setTournaments(list);
+      }
       setLoading(false);
     }).catch(() => {
       setLoading(false);

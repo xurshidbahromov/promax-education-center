@@ -78,6 +78,20 @@ const STORAGE_INTERNATIONAL_TOURNAMENTS = 'promax_intl_tournaments_v3';
 const STORAGE_INTERNATIONAL_LEADERBOARDS = 'promax_intl_leaderboards_v3';
 const STORAGE_INTERNATIONAL_REGISTRATIONS = 'promax_intl_registrations_v3';
 
+// ── GET CACHED INTERNATIONAL TOURNAMENTS (Instant Synchronous) ──
+export function getCachedInternationalTournaments(): InternationalTournament[] {
+  if (typeof window !== 'undefined') {
+    const stored = localStorage.getItem(STORAGE_INTERNATIONAL_TOURNAMENTS);
+    if (stored) {
+      try {
+        const parsed = JSON.parse(stored);
+        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+      } catch {}
+    }
+  }
+  return [];
+}
+
 // ── GET INTERNATIONAL TOURNAMENTS (Live Network-First) ──
 export async function getInternationalTournaments(): Promise<InternationalTournament[]> {
   // 1. Fetch from API first (Live cross-device source of truth)

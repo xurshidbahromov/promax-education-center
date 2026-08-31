@@ -34,6 +34,7 @@ import {
 import {
   InternationalTournament,
   InternationalLeaderboardEntry,
+  getCachedInternationalTournaments,
   getInternationalTournaments,
   getInternationalLeaderboard,
   registerForInternationalTournament,
@@ -69,9 +70,13 @@ export default function InternationalCompetitionsPage() {
   const initialTab = (searchParams.get("tab") as "tournaments" | "leaderboard" | "comments") || "tournaments";
   const [activeTab, setActiveTab] = useState<"tournaments" | "leaderboard" | "comments">(initialTab);
 
-  // Tournaments State
-  const [tournaments, setTournaments] = useState<InternationalTournament[]>([]);
-  const [loading, setLoading] = useState(true);
+  // Tournaments State (Instant initial state from cache for 0ms render)
+  const [tournaments, setTournaments] = useState<InternationalTournament[]>(() => {
+    return getCachedInternationalTournaments();
+  });
+  const [loading, setLoading] = useState(() => {
+    return getCachedInternationalTournaments().length === 0;
+  });
   const [leaderboardLoading, setLeaderboardLoading] = useState(false);
   const [selectedItem, setSelectedItem] = useState<InternationalTournament | null>(null);
   const [confirmStartItem, setConfirmStartItem] = useState<InternationalTournament | null>(null);
@@ -130,24 +135,26 @@ export default function InternationalCompetitionsPage() {
     loadData();
 
     const handleFocus = () => {
-      loadData();
+      loadData(true); // Silent revalidation on focus
     };
 
     window.addEventListener('focus', handleFocus);
     return () => window.removeEventListener('focus', handleFocus);
   }, [user]);
 
-  const loadData = async () => {
-    setLoading(true);
+  const loadData = async (isSilent: boolean = false) => {
+    // Only show full loading skeleton if cache is completely empty
+    if (!isSilent && tournaments.length === 0) {
+      setLoading(true);
+    }
     try {
       const data = await getInternationalTournaments();
-      setTournaments(data);
-      if (data.length > 0) {
+      if (Array.isArray(data) && data.length > 0) {
+        setTournaments(data);
         const queryId = searchParams.get("id");
         const defaultId = queryId && data.some(t => t.id === queryId) ? queryId : data[0].id;
         setSelectedTournamentId(defaultId);
-        const lb = await getInternationalLeaderboard(defaultId);
-        setLeaderboard(lb);
+        getInternationalLeaderboard(defaultId).then(setLeaderboard).catch(() => {});
       }
 
       const regList = getInternationalRegistrations(user?.id);

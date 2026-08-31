@@ -80,6 +80,20 @@ export interface AdminTournamentComment {
   created_at?: string;
 }
 
+// ── GET CACHED TOURNAMENTS (Instant Synchronous) ──
+export function getCachedAdminTournaments(): AdminTournament[] {
+  if (typeof window !== 'undefined') {
+    const local = localStorage.getItem('promax_tournaments_v3');
+    if (local) {
+      try {
+        const parsed = JSON.parse(local);
+        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+      } catch (e) {}
+    }
+  }
+  return [];
+}
+
 // ── GET TOURNAMENTS (Live Network-First) ──
 export async function getAdminTournaments(): Promise<AdminTournament[]> {
   // 1. Fetch from API first (Live cross-device source of truth)

@@ -1210,6 +1210,7 @@ export type {
 } from './tournaments';
 
 export {
+  getCachedAdminTournaments,
   getAdminTournaments,
   getTournamentById,
   duplicateAdminTournament,

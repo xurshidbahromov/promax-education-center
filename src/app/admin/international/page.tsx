@@ -26,6 +26,7 @@ import {
 import {
   InternationalTournament,
   InternationalComment,
+  getCachedInternationalTournaments,
   getInternationalTournaments,
   saveInternationalTournament,
   deleteInternationalTournament,
@@ -36,9 +37,13 @@ import {
 
 export default function AdminInternationalTournamentsPage() {
   const { t } = useLanguage();
-  const [tournaments, setTournaments] = useState<InternationalTournament[]>([]);
+  const [tournaments, setTournaments] = useState<InternationalTournament[]>(() => {
+    return getCachedInternationalTournaments();
+  });
   const [comments, setComments] = useState<InternationalComment[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(() => {
+    return getCachedInternationalTournaments().length === 0;
+  });
 
   // Tabs: 'tournaments' | 'comments'
   const [activeTab, setActiveTab] = useState<"tournaments" | "comments">("tournaments");
@@ -52,8 +57,10 @@ export default function AdminInternationalTournamentsPage() {
     loadData();
   }, []);
 
-  const loadData = async () => {
-    setLoading(true);
+  const loadData = async (isSilent: boolean = false) => {
+    if (!isSilent && tournaments.length === 0) {
+      setLoading(true);
+    }
     try {
       const [tList, cList] = await Promise.all([
         getInternationalTournaments(),

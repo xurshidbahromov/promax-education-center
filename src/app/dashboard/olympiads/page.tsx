@@ -34,6 +34,7 @@ import {
 import {
   AdminTournament,
   TournamentLeaderboardEntry,
+  getCachedAdminTournaments,
   getAdminTournaments,
   getTournamentLeaderboard,
   registerForTournament,
@@ -69,9 +70,13 @@ export default function OlympiadsPage() {
   const initialTab = (searchParams.get("tab") as "tournaments" | "leaderboard" | "comments") || "tournaments";
   const [activeTab, setActiveTab] = useState<"tournaments" | "leaderboard" | "comments">(initialTab);
 
-  // Tournaments State
-  const [tournaments, setTournaments] = useState<AdminTournament[]>([]);
-  const [loading, setLoading] = useState(true);
+  // Tournaments State (Instant initial state from cache for 0ms render)
+  const [tournaments, setTournaments] = useState<AdminTournament[]>(() => {
+    return getCachedAdminTournaments();
+  });
+  const [loading, setLoading] = useState(() => {
+    return getCachedAdminTournaments().length === 0;
+  });
   const [leaderboardLoading, setLeaderboardLoading] = useState(false);
   const [selectedItem, setSelectedItem] = useState<AdminTournament | null>(null);
   const [confirmStartItem, setConfirmStartItem] = useState<AdminTournament | null>(null);
@@ -130,24 +135,26 @@ export default function OlympiadsPage() {
     loadData();
 
     const handleFocus = () => {
-      loadData();
+      loadData(true); // Silent revalidation on focus
     };
 
     window.addEventListener('focus', handleFocus);
     return () => window.removeEventListener('focus', handleFocus);
   }, [user]);
 
-  const loadData = async () => {
-    setLoading(true);
+  const loadData = async (isSilent: boolean = false) => {
+    // Only show full loading skeleton if cache is completely empty
+    if (!isSilent && tournaments.length === 0) {
+      setLoading(true);
+    }
     try {
       const data = await getAdminTournaments();
-      setTournaments(data);
-      if (data.length > 0) {
+      if (Array.isArray(data) && data.length > 0) {
+        setTournaments(data);
         const queryId = searchParams.get("id");
         const defaultId = queryId && data.some(t => t.id === queryId) ? queryId : data[0].id;
         setSelectedTournamentId(defaultId);
-        const lb = await getTournamentLeaderboard(defaultId);
-        setLeaderboard(lb);
+        getTournamentLeaderboard(defaultId).then(setLeaderboard).catch(() => {});
       }
 
       const regList = getTournamentRegistrations(user?.id);
