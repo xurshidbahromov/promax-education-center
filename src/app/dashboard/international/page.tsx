@@ -612,46 +612,6 @@ export default function InternationalCompetitionsPage() {
               </div>
             </div>
 
-            {/* ── USER PERSONAL RESULT BANNER ── */}
-            {(() => {
-              const myResult = leaderboard.find(e => user?.id && e.user_id === user.id);
-              if (!myResult) return null;
-
-              return (
-                <div className="bg-gradient-to-r from-blue-600 via-indigo-600 to-violet-600 text-white rounded-[2rem] p-5 sm:p-6 shadow-none flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                  <div className="flex items-center gap-3.5">
-                    <div className="w-12 h-12 rounded-2xl bg-white/20 backdrop-blur-md text-white flex items-center justify-center font-black text-xl shrink-0">
-                      #{myResult.rank}
-                    </div>
-                    <div>
-                      <div className="flex items-center gap-2">
-                        <span className="text-[10px] font-black uppercase tracking-wider px-2.5 py-0.5 rounded-full bg-white/20">
-                          Sizning Natijangiz
-                        </span>
-                        {myResult.prize && (
-                          <span className="text-[10px] font-black px-2.5 py-0.5 rounded-full bg-amber-400 text-slate-950">
-                            {myResult.prize}
-                          </span>
-                        )}
-                      </div>
-                      <h4 className="text-base sm:text-lg font-bold font-fredoka mt-0.5">
-                        {profile?.full_name || "Siz"} — {myResult.score} ball ({myResult.percentage}%) {myResult.scaled_score ? `· ${myResult.scaled_score}` : ""}
-                      </h4>
-                    </div>
-                  </div>
-
-                  <div className="flex items-center gap-4 text-xs font-semibold bg-black/20 backdrop-blur-md px-4 py-2.5 rounded-xl self-start sm:self-auto">
-                    <span className="flex items-center gap-1.5">
-                      <Clock size={14} className="text-blue-200" />
-                      {Math.floor(myResult.time_spent_seconds / 60)} daq {myResult.time_spent_seconds % 60} son
-                    </span>
-                    <span>·</span>
-                    <span className="text-blue-100">Topshirildi: {myResult.completed_at}</span>
-                  </div>
-                </div>
-              );
-            })()}
-
             {/* ── 3D ISOMETRIC OLYMPIC PODIUM (TOP 3) ── */}
             {leaderboard.length >= 3 && (
               <div className="relative w-full bg-gradient-to-b from-white/70 via-slate-50/50 to-white/70 dark:from-slate-900/70 dark:via-slate-850/50 dark:to-slate-900/70 backdrop-blur-xl rounded-[2.5rem] p-5 sm:p-8 border border-white/60 dark:border-slate-800/60 shadow-none overflow-hidden">
