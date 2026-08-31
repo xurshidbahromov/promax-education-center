@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { createTelegramBotClient } from '@/utils/supabase/server';
 import fs from 'fs';
 import path from 'path';
 import type { AdminTournament } from '@/lib/tournaments';
@@ -7,20 +8,59 @@ import type { InternationalTournament } from '@/lib/international-tournaments';
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
 
-// Global memory cache for cross-user and cross-request synchronization
-declare global {
-  var __national_tournaments_cache: AdminTournament[] | undefined;
-  var __intl_tournaments_cache: InternationalTournament[] | undefined;
+// Helper to convert Supabase row to frontend AdminTournament
+function mapDbToTournament(row: any): AdminTournament {
+  return {
+    id: row.id,
+    title: row.title || 'Musobaqa',
+    subject: row.subject || 'Matematika',
+    description: row.description || '',
+    status: row.status || 'upcoming',
+    startDate: row.start_date || '',
+    startTime: row.start_time || '10:00',
+    endDate: row.end_date || '',
+    endTime: row.end_time || '20:00',
+    durationMinutes: Number(row.duration_minutes) || 60,
+    totalQuestions: Number(row.total_questions) || (Array.isArray(row.questions) ? row.questions.length : 0),
+    entryCoins: Number(row.entry_coins) || 0,
+    prizePool: row.prize_pool || '',
+    topPrizes: Array.isArray(row.top_prizes) ? row.top_prizes : [],
+    rules: Array.isArray(row.rules) ? row.rules : [],
+    participantsCount: Number(row.participants_count) || 0,
+    questions: Array.isArray(row.questions) ? row.questions : [],
+    isPublished: row.is_published ?? true,
+    created_at: row.created_at || new Date().toISOString()
+  };
 }
 
-const NATIONAL_FILE = path.join(process.cwd(), 'src/data/national_tournaments.json');
-const INTL_FILE = path.join(process.cwd(), 'src/data/international_tournaments.json');
-
-function ensureDataFiles() {
-  const dir = path.join(process.cwd(), 'src/data');
-  if (!fs.existsSync(dir)) {
-    fs.mkdirSync(dir, { recursive: true });
-  }
+// Helper to convert Supabase row to frontend InternationalTournament
+function mapDbToIntlTournament(row: any): InternationalTournament {
+  return {
+    id: row.id,
+    title: row.title || 'Xalqaro Musobaqa',
+    category: row.category || 'sat',
+    categoryLabel: row.category_label || (row.category === 'sat' ? 'SAT Digital' : 'Xalqaro'),
+    subject: row.subject || 'SAT Math & Reading',
+    description: row.description || '',
+    badge: row.badge || '🔥 XALQARO ARENA',
+    badgeBg: row.badge_bg || 'bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 text-white',
+    status: row.status || 'upcoming',
+    startDate: row.start_date || '',
+    startTime: row.start_time || '10:00',
+    endDate: row.end_date || '',
+    endTime: row.end_time || '20:00',
+    durationMinutes: Number(row.duration_minutes) || 60,
+    totalQuestions: Number(row.total_questions) || (Array.isArray(row.questions) ? row.questions.length : 0),
+    entryCoins: Number(row.entry_coins) || 0,
+    prizePool: row.prize_pool || '',
+    topPrizes: Array.isArray(row.top_prizes) ? row.top_prizes : [],
+    rules: Array.isArray(row.rules) ? row.rules : [],
+    participantsCount: Number(row.participants_count) || 0,
+    questions: Array.isArray(row.questions) ? row.questions : [],
+    scoringScale: row.scoring_scale || (row.category === 'sat' ? '1600 Ballik SAT Shkalasi' : '100 Ballik Shkala'),
+    isPublished: row.is_published ?? true,
+    created_at: row.created_at || new Date().toISOString()
+  };
 }
 
 function getDefaultNationalTournaments(): AdminTournament[] {
@@ -186,108 +226,62 @@ function getDefaultIntlTournaments(): InternationalTournament[] {
   ];
 }
 
-function loadNationalTournaments(): AdminTournament[] {
-  try {
-    ensureDataFiles();
-    if (fs.existsSync(NATIONAL_FILE)) {
-      const content = fs.readFileSync(NATIONAL_FILE, 'utf8');
-      const parsed = JSON.parse(content);
-      if (Array.isArray(parsed) && parsed.length > 0) {
-        globalThis.__national_tournaments_cache = parsed;
-        return parsed;
-      }
-    }
-  } catch (err) {
-    console.error('Error reading national tournaments file:', err);
-  }
-
-  // Load defaults if empty
-  const defaults = getDefaultNationalTournaments();
-  saveNationalTournaments(defaults);
-  return defaults;
-}
-
-function saveNationalTournaments(list: AdminTournament[]) {
-  globalThis.__national_tournaments_cache = list;
-  try {
-    ensureDataFiles();
-    fs.writeFileSync(NATIONAL_FILE, JSON.stringify(list, null, 2), 'utf8');
-  } catch (err) {
-    console.error('Error writing national tournaments file:', err);
-  }
-}
-
-function loadIntlTournaments(): InternationalTournament[] {
-  try {
-    ensureDataFiles();
-    if (fs.existsSync(INTL_FILE)) {
-      const content = fs.readFileSync(INTL_FILE, 'utf8');
-      const parsed = JSON.parse(content);
-      if (Array.isArray(parsed) && parsed.length > 0) {
-        globalThis.__intl_tournaments_cache = parsed;
-        return parsed;
-      }
-    }
-  } catch (err) {
-    console.error('Error reading international tournaments file:', err);
-  }
-
-  // Load defaults if empty
-  const defaults = getDefaultIntlTournaments();
-  saveIntlTournaments(defaults);
-  return defaults;
-}
-
-function saveIntlTournaments(list: InternationalTournament[]) {
-  globalThis.__intl_tournaments_cache = list;
-  try {
-    ensureDataFiles();
-    fs.writeFileSync(INTL_FILE, JSON.stringify(list, null, 2), 'utf8');
-  } catch (err) {
-    console.error('Error writing international tournaments file:', err);
-  }
-}
-
 // ── GET /api/tournaments?type=national|international&id=... ──
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
   const type = searchParams.get('type') || 'national';
   const id = searchParams.get('id');
 
-  if (type === 'international') {
-    const list = loadIntlTournaments();
+  try {
+    const supabase = await createTelegramBotClient();
+    let query = supabase
+      .from('tournaments')
+      .select('*')
+      .eq('type', type);
+
     if (id) {
-      const item = list.find((t) => t.id === id);
+      query = query.eq('id', id);
+      const { data, error } = await query.single();
+      if (!error && data) {
+        const mapped = type === 'international' ? mapDbToIntlTournament(data) : mapDbToTournament(data);
+        return NextResponse.json({ tournament: mapped });
+      }
+    } else {
+      query = query.order('created_at', { ascending: false });
+      const { data, error } = await query;
+      if (!error && data && data.length > 0) {
+        const mapped = type === 'international' 
+          ? data.map(mapDbToIntlTournament) 
+          : data.map(mapDbToTournament);
+        return NextResponse.json({ tournaments: mapped }, {
+          headers: {
+            'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate',
+            'Pragma': 'no-cache',
+            'Expires': '0',
+          }
+        });
+      }
+    }
+  } catch (dbErr) {
+    console.warn('[Tournaments API] Supabase query error, fallback to defaults:', dbErr);
+  }
+
+  // If table was empty or not ready yet, return defaults
+  if (type === 'international') {
+    const defaults = getDefaultIntlTournaments();
+    if (id) {
+      const item = defaults.find(t => t.id === id);
       return NextResponse.json({ tournament: item || null });
     }
-    return NextResponse.json(
-      { tournaments: list },
-      {
-        headers: {
-          'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate',
-          'Pragma': 'no-cache',
-          'Expires': '0',
-        },
-      }
-    );
+    return NextResponse.json({ tournaments: defaults });
   }
 
-  const list = loadNationalTournaments();
+  const defaults = getDefaultNationalTournaments();
   if (id) {
-    const item = list.find((t) => t.id === id);
+    const item = defaults.find(t => t.id === id);
     return NextResponse.json({ tournament: item || null });
   }
-
-  return NextResponse.json(
-    { tournaments: list },
-    {
-      headers: {
-        'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate',
-        'Pragma': 'no-cache',
-        'Expires': '0',
-      },
-    }
-  );
+  return NextResponse.json({ tournaments: defaults });
 }
 
 // ── POST /api/tournaments ──
@@ -301,112 +295,57 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Missing tournament payload' }, { status: 400 });
     }
 
-    if (type === 'international') {
-      const list = loadIntlTournaments();
-      const id = tournament.id || `intl_${Date.now()}`;
-      const category = tournament.category || 'sat';
-      const categoryLabel =
-        category === 'sat'
-          ? 'SAT Digital'
-          : category === 'amc'
-          ? 'AMC Math'
-          : category === 'ielts'
-          ? 'IELTS Arena'
-          : 'Xalqaro';
+    const id = tournament.id || (type === 'international' ? `intl_${Date.now()}` : `tourn_${Date.now()}`);
 
-      const fullIntl: InternationalTournament = {
-        id,
-        title: tournament.title || 'Yangi Xalqaro Musobaqa',
-        category,
-        categoryLabel,
-        subject: tournament.subject || 'SAT Math & Reading',
-        description: tournament.description || '',
-        badge: tournament.badge || '🔥 XALQARO ARENA',
-        badgeBg: tournament.badgeBg || 'bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 text-white',
-        status: tournament.status || 'upcoming',
-        startDate: tournament.startDate || new Date().toISOString().split('T')[0],
-        startTime: tournament.startTime || '15:00',
-        endDate: tournament.endDate,
-        endTime: tournament.endTime,
-        durationMinutes: Number(tournament.durationMinutes) || 60,
-        totalQuestions: tournament.questions?.length ?? tournament.totalQuestions ?? 0,
-        entryCoins: Number(tournament.entryCoins) || 0,
-        prizePool: tournament.prizePool || "Top o'rinlar uchun mukofotlar",
-        topPrizes: tournament.topPrizes || [
-          "🥇 1-O'rin: Xalqaro Grant & Sertifikat",
-          "🥈 2-O'rin: 500,000 So'm Vafcher",
-          "🥉 3-O'rin: 300,000 So'm Vafcher",
-        ],
-        rules: tournament.rules || [
-          'Test davomiyligi belgilangan vaqtda yakunlanadi.',
-          'Yopiq savollarda faqat son yoki kasr kiritilishi lozim.',
-          "Natijalar xalqaro shkala bo'yicha hisoblanadi.",
-        ],
-        participantsCount: Number(tournament.participantsCount) || 0,
-        questions: tournament.questions || [],
-        scoringScale:
-          tournament.scoringScale ||
-          (category === 'sat' ? '1600 Ballik SAT Shkalasi' : '100 Ballik Shkala'),
-        created_at: tournament.created_at || new Date().toISOString(),
-      };
-
-      const existingIndex = list.findIndex((t) => t.id === id);
-      let updatedList: InternationalTournament[];
-      if (existingIndex >= 0) {
-        updatedList = [...list];
-        updatedList[existingIndex] = { ...updatedList[existingIndex], ...fullIntl };
-      } else {
-        updatedList = [fullIntl, ...list];
-      }
-
-      saveIntlTournaments(updatedList);
-      return NextResponse.json({ success: true, data: fullIntl });
-    }
-
-    // National Tournament
-    const list = loadNationalTournaments();
-    const id = tournament.id || `tourn_${Date.now()}`;
-    const fullNational: AdminTournament = {
+    const dbPayload = {
       id,
+      type,
       title: tournament.title || 'Yangi Musobaqa',
-      subject: tournament.subject || 'Matematika',
+      category: tournament.category || (type === 'international' ? 'sat' : null),
+      category_label: tournament.categoryLabel || (type === 'international' ? 'SAT Digital' : null),
+      subject: tournament.subject || (type === 'international' ? 'SAT Math & Reading' : 'Matematika'),
       description: tournament.description || '',
+      badge: tournament.badge || (type === 'international' ? '🔥 XALQARO ARENA' : '🏆 RESPUBLIKA'),
+      badge_bg: tournament.badgeBg || (type === 'international' ? 'bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 text-white' : ''),
       status: tournament.status || 'upcoming',
-      startDate: tournament.startDate || new Date().toISOString().split('T')[0],
-      startTime: tournament.startTime || '12:00',
-      endDate: tournament.endDate || new Date().toISOString().split('T')[0],
-      endTime: tournament.endTime || '18:00',
-      durationMinutes: Number(tournament.durationMinutes) || 60,
-      totalQuestions: tournament.questions?.length ?? tournament.totalQuestions ?? 0,
-      entryCoins: Number(tournament.entryCoins) || 0,
-      prizePool: tournament.prizePool || "1,000,000 SO'M",
-      topPrizes: tournament.topPrizes || [
-        "1-O'rin: 1,000,000 So'm + Oltin Medal",
-        "2-O'rin: 300,000 So'm + Kumush Medal",
-        "3-O'rin: 200,000 So'm + Bronza Medal",
-      ],
-      rules: tournament.rules || [
-        'Vaqt chegaralangan.',
-        "G'oliblar ball va sarflangan vaqtga qarab aniqlanadi.",
-      ],
-      participantsCount: Number(tournament.participantsCount) || 0,
-      questions: tournament.questions || [],
-      created_at: tournament.created_at || new Date().toISOString(),
+      start_date: tournament.startDate || new Date().toISOString().split('T')[0],
+      start_time: tournament.startTime || '12:00',
+      end_date: tournament.endDate || null,
+      end_time: tournament.endTime || null,
+      duration_minutes: Number(tournament.durationMinutes) || 60,
+      total_questions: Number(tournament.questions?.length ?? tournament.totalQuestions ?? 0),
+      entry_coins: Number(tournament.entryCoins) || 0,
+      prize_pool: tournament.prizePool || "G'oliblarga sovg'alar",
+      top_prizes: Array.isArray(tournament.topPrizes) ? tournament.topPrizes : [],
+      rules: Array.isArray(tournament.rules) ? tournament.rules : [],
+      participants_count: Number(tournament.participantsCount) || 0,
+      questions: Array.isArray(tournament.questions) ? tournament.questions : [],
+      scoring_scale: tournament.scoringScale || (type === 'international' ? '1600 Ballik SAT Shkalasi' : '100 Ballik Shkala'),
+      is_published: tournament.isPublished ?? true,
+      updated_at: new Date().toISOString()
     };
 
-    const existingIndex = list.findIndex((t) => t.id === id);
-    let updatedList: AdminTournament[];
-    if (existingIndex >= 0) {
-      updatedList = [...list];
-      updatedList[existingIndex] = { ...updatedList[existingIndex], ...fullNational };
-    } else {
-      updatedList = [fullNational, ...list];
+    // Save directly to Supabase
+    try {
+      const supabase = await createTelegramBotClient();
+      const { data, error } = await supabase
+        .from('tournaments')
+        .upsert(dbPayload, { onConflict: 'id' })
+        .select()
+        .single();
+
+      if (!error && data) {
+        const mapped = type === 'international' ? mapDbToIntlTournament(data) : mapDbToTournament(data);
+        return NextResponse.json({ success: true, data: mapped });
+      }
+    } catch (dbErr) {
+      console.error('[Tournaments API] Supabase upsert error:', dbErr);
     }
 
-    saveNationalTournaments(updatedList);
-    return NextResponse.json({ success: true, data: fullNational });
+    const fallbackMapped = type === 'international' ? mapDbToIntlTournament(dbPayload) : mapDbToTournament(dbPayload);
+    return NextResponse.json({ success: true, data: fallbackMapped });
   } catch (error: any) {
-    console.error('Error saving tournament:', error);
+    console.error('[Tournaments API] Error saving tournament:', error);
     return NextResponse.json({ error: error.message || 'Server error' }, { status: 500 });
   }
 }
@@ -416,25 +355,21 @@ export async function DELETE(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
     const id = searchParams.get('id');
-    const type = searchParams.get('type') || 'national';
 
     if (!id) {
       return NextResponse.json({ error: 'Missing tournament id' }, { status: 400 });
     }
 
-    if (type === 'international') {
-      const list = loadIntlTournaments();
-      const updatedList = list.filter((t) => t.id !== id);
-      saveIntlTournaments(updatedList);
-      return NextResponse.json({ success: true });
+    try {
+      const supabase = await createTelegramBotClient();
+      await supabase.from('tournaments').delete().eq('id', id);
+    } catch (e) {
+      console.error('[Tournaments API] Supabase delete error:', e);
     }
 
-    const list = loadNationalTournaments();
-    const updatedList = list.filter((t) => t.id !== id);
-    saveNationalTournaments(updatedList);
     return NextResponse.json({ success: true });
   } catch (error: any) {
-    console.error('Error deleting tournament:', error);
+    console.error('[Tournaments API] Error deleting tournament:', error);
     return NextResponse.json({ error: error.message || 'Server error' }, { status: 500 });
   }
 }
