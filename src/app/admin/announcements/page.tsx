@@ -145,7 +145,7 @@ export default function AdminAnnouncementsPage() {
       });
 
       if (!editingId && !formData.is_featured) {
-        // Broadcast notification only if it's a bell notification, NOT a cabinet banner
+        // Broadcast notification to dashboard bell notifications
         await broadcastNotification(
           formData.title,
           formData.message,
@@ -154,7 +154,30 @@ export default function AdminAnnouncementsPage() {
         );
       }
 
-      toast.success(editingId ? "E'lon yangilandi" : "E'lon muvaffaqiyatli yaratildi");
+      // Broadcast to Telegram Bot users (both cabinet banners and bell notifications)
+      if (!editingId) {
+        try {
+          const typeEmoji = formData.type === 'error' ? '🚨' : formData.type === 'warning' ? '⚠️' : formData.type === 'success' ? '🎉' : '📢';
+          const categoryTitle = formData.is_featured ? "📌 KABINET E'LONI" : "🔔 YANGI BILDIRISHNOMA";
+          const badgeText = formData.badge ? ` [${formData.badge}]` : '';
+
+          const telegramText = `<b>${typeEmoji} ${categoryTitle}${badgeText}</b>\n\n<b>${formData.title}</b>\n\n${formData.message}\n\n<i>PROMAX Ta'lim Markazi</i>`;
+
+          await fetch('/api/telegram/send', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              text: telegramText,
+              targetAll: true,
+              targetAudience: formData.target_audience
+            })
+          });
+        } catch (botErr) {
+          console.warn('Error broadcasting announcement to Telegram bot:', botErr);
+        }
+      }
+
+      toast.success(editingId ? "E'lon yangilandi" : "E'lon muvaffaqiyatli yaratildi va Telegramga yuborildi");
       queryClient.invalidateQueries({ queryKey: ['announcements'] });
       setShowModal(false);
       resetForm();

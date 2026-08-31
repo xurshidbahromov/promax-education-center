@@ -143,18 +143,47 @@ export default function NotificationBell() {
  }
  };
 
- return (
- <div className="relative" ref={dropdownRef}>
- <button
- onClick={() => setIsOpen(!isOpen)}
- className="p-2 text-gray-600 dark:text-gray-300 active:bg-gray-100 dark:active:bg-slate-800 rounded-full relative transition-colors"
- aria-label="Notifications"
- >
- <Bell size={20} />
- {unreadCount > 0 && (
- <span className="absolute top-1.5 right-1.5 w-2.5 h-2.5 bg-red-500 rounded-full border-2 border-white dark:border-slate-900 animate-pulse"></span>
- )}
- </button>
+  return (
+    <div className="relative" ref={dropdownRef}>
+      <button
+        onClick={() => setIsOpen(!isOpen)}
+        className="p-2 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-slate-800 rounded-full relative transition-all duration-300 flex items-center justify-center cursor-pointer"
+        aria-label="Notifications"
+      >
+        {/* Ringing Sound Wave lines (vibration marks) */}
+        {unreadCount > 0 && (
+          <>
+            {/* Left sound wave */}
+            <span className="absolute -left-1 top-1/2 -translate-y-1/2 pointer-events-none text-amber-500 dark:text-amber-400">
+              <svg className="w-2.5 h-4.5 animate-[soundWaveLeft_1.5s_infinite]" viewBox="0 0 10 16" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
+                <path d="M8 2 C3 5, 3 11, 8 14" />
+              </svg>
+            </span>
+
+            {/* Right sound wave */}
+            <span className="absolute -right-1 top-1/2 -translate-y-1/2 pointer-events-none text-amber-500 dark:text-amber-400">
+              <svg className="w-2.5 h-4.5 animate-[soundWaveRight_1.5s_infinite]" viewBox="0 0 10 16" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
+                <path d="M2 2 C7 5, 7 11, 2 14" />
+              </svg>
+            </span>
+          </>
+        )}
+
+        {/* Bell Icon with Swing Animation */}
+        <div className={unreadCount > 0 ? "origin-top animate-[bellRing_2s_ease-in-out_infinite]" : ""}>
+          <Bell
+            size={20}
+            className={unreadCount > 0 ? "text-amber-600 dark:text-amber-400 fill-amber-500/20" : ""}
+          />
+        </div>
+
+        {/* Unread Counter Badge */}
+        {unreadCount > 0 && (
+          <span className="absolute top-0.5 right-0.5 min-w-[17px] h-[17px] px-1 bg-red-500 text-white text-[9px] font-black rounded-full border-2 border-white dark:border-slate-900 flex items-center justify-center shadow-sm animate-pulse">
+            {unreadCount > 9 ? '9+' : unreadCount}
+          </span>
+        )}
+      </button>
 
  {isOpen && (
  <div className="absolute right-0 mt-2 w-80 sm:w-96 bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-800 rounded-2xl shadow-xl z-50 overflow-hidden">
