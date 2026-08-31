@@ -31,11 +31,13 @@ import {
 import {
   getTournamentById,
   submitTournamentAttempt,
+  getUserCompletedTournamentIds,
   type TournamentQuestion
 } from "@/lib/tournaments";
 import {
   getInternationalTournamentById,
   submitInternationalAttempt,
+  getUserCompletedInternationalTournamentIds,
   type InternationalQuestion
 } from "@/lib/international-tournaments";
 import MathRenderer from "@/components/MathRenderer";
@@ -75,9 +77,19 @@ export default function TakeTestPage() {
  useEffect(() => {
    async function loadTestAndStart() {
      try {
+       const supabase = createClient();
+
        // 1. Check if it's an International Competition (SAT, AMC, IELTS, etc.)
        if (isInternationalParam || testId.startsWith("sat-") || testId.startsWith("amc-") || testId.startsWith("ielts-") || testId.startsWith("intl-")) {
          setIsInternational(true);
+         const currentUser = (await supabase.auth.getUser()).data.user;
+         const completedIntl = await getUserCompletedInternationalTournamentIds(currentUser?.id);
+         if (completedIntl.includes(testId)) {
+           toast.success("Siz ushbu xalqaro musobaqani allaqachon topshirgansiz! Natijangiz saqlangan.");
+           router.replace(`/dashboard/international?tab=leaderboard&id=${testId}`);
+           return;
+         }
+
          const intlData = await getInternationalTournamentById(testId);
          if (intlData) {
            setTournamentData(intlData);
@@ -111,6 +123,14 @@ export default function TakeTestPage() {
        // 2. Check if it's an Olympiad / Tournament
        if (isOlympiadParam || testId.startsWith("tournament_") || testId.startsWith("olympiad_") || testId.startsWith("grand_") || testId.startsWith("t_")) {
          setIsOlympiad(true);
+         const currentUser = (await supabase.auth.getUser()).data.user;
+         const completedOlympiads = await getUserCompletedTournamentIds(currentUser?.id);
+         if (completedOlympiads.includes(testId)) {
+           toast.success("Siz ushbu musobaqani allaqachon topshirgansiz! Natijangiz saqlangan.");
+           router.replace(`/dashboard/olympiads?tab=leaderboard&id=${testId}`);
+           return;
+         }
+
          const tData = await getTournamentById(testId);
          if (tData) {
            setTournamentData(tData);
@@ -181,7 +201,6 @@ export default function TakeTestPage() {
    setTest(testData);
 
    // Get questions
-   const supabase = createClient();
    const { data: questionsData } = await supabase
    .from('questions')
    .select('*')

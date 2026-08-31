@@ -339,9 +339,58 @@ export async function submitInternationalAttempt(
     }
     map[tournamentId] = currentList;
     localStorage.setItem(STORAGE_INTERNATIONAL_LEADERBOARDS, JSON.stringify(map));
+
+    const localKey = `promax_completed_intl_tournaments_${userId || 'current'}`;
+    try {
+      const raw = localStorage.getItem(localKey);
+      const list: string[] = raw ? JSON.parse(raw) : [];
+      if (!list.includes(tournamentId)) {
+        list.push(tournamentId);
+        localStorage.setItem(localKey, JSON.stringify(list));
+      }
+    } catch (e) {}
   }
 
   return { success: true, rank: myRank, scaledScore };
+}
+
+/**
+ * Get all international tournament IDs that the current user has completed.
+ */
+export async function getUserCompletedInternationalTournamentIds(userId?: string): Promise<string[]> {
+  if (!userId && typeof window === 'undefined') return [];
+
+  const localKey = `promax_completed_intl_tournaments_${userId || 'current'}`;
+  let localList: string[] = [];
+  if (typeof window !== 'undefined') {
+    try {
+      const raw = localStorage.getItem(localKey);
+      if (raw) localList = JSON.parse(raw);
+    } catch {}
+  }
+
+  if (userId) {
+    try {
+      const supabase = createClient();
+      const { data, error } = await supabase
+        .from('tournament_results')
+        .select('tournament_id')
+        .eq('student_id', userId);
+
+      if (!error && data) {
+        const dbIds = Array.from(new Set(data.map((d: any) => d.tournament_id as string)));
+        const merged = Array.from(new Set([...localList, ...dbIds]));
+        if (typeof window !== 'undefined') {
+          try {
+            localStorage.setItem(localKey, JSON.stringify(merged));
+          } catch {}
+        }
+        return merged;
+      }
+    } catch (e) {}
+  }
+
+  return localList;
 }
 
 // ── Admin Tournament Management ──

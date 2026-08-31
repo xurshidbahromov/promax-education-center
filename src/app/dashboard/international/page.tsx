@@ -38,7 +38,8 @@ import {
   getInternationalTournaments,
   getInternationalLeaderboard,
   registerForInternationalTournament,
-  getInternationalRegistrations
+  getInternationalRegistrations,
+  getUserCompletedInternationalTournamentIds
 } from "@/lib/international-tournaments";
 import { getTournamentTimingInfo, formatUzbekDate } from "@/lib/tournament-timing";
 import { useCurrentUser, useUserProfile } from "@/hooks/useDashboardData";
@@ -80,6 +81,7 @@ export default function InternationalCompetitionsPage() {
   const [selectedItem, setSelectedItem] = useState<InternationalTournament | null>(null);
   const [confirmStartItem, setConfirmStartItem] = useState<InternationalTournament | null>(null);
   const [registeredIds, setRegisteredIds] = useState<string[]>([]);
+  const [completedIds, setCompletedIds] = useState<string[]>([]);
   const hasLoadedRef = useRef(false);
 
   // Leaderboard State
@@ -160,8 +162,12 @@ export default function InternationalCompetitionsPage() {
         getInternationalLeaderboard(defaultId).then(setLeaderboard).catch(() => {});
       }
 
-      const regList = getInternationalRegistrations(user?.id);
+      const [regList, compList] = await Promise.all([
+        getInternationalRegistrations(user?.id),
+        getUserCompletedInternationalTournamentIds(user?.id)
+      ]);
       setRegisteredIds(regList);
+      setCompletedIds(compList);
     } catch (e) {
       console.error("Error loading international tournaments:", e);
     } finally {
@@ -396,6 +402,7 @@ export default function InternationalCompetitionsPage() {
             {tournaments.map((item) => {
               const timing = getTournamentTimingInfo(item);
               const isRegistered = registeredIds.includes(item.id);
+              const isCompleted = completedIds.includes(item.id);
               const isLive = timing.status === "live";
               const isUpcoming = timing.status === "upcoming";
               const isFinished = timing.status === "finished";
@@ -412,7 +419,12 @@ export default function InternationalCompetitionsPage() {
                         <span className="text-sm font-bold text-slate-700 dark:text-slate-200">
                           {item.subject}
                         </span>
-                        {isLive ? (
+                        {isCompleted ? (
+                          <span className="text-[11px] font-bold text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-950/40 px-2.5 py-0.5 rounded-md border border-indigo-500/20 flex items-center gap-1.5">
+                            <CheckCircle2 size={12} />
+                            Topshirilgan
+                          </span>
+                        ) : isLive ? (
                           <span className="text-[11px] font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/40 px-2.5 py-0.5 rounded-md border border-emerald-500/20 flex items-center gap-1.5">
                             <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
                             Faol
@@ -489,7 +501,18 @@ export default function InternationalCompetitionsPage() {
                       Nizom
                     </button>
 
-                    {isLive ? (
+                    {isCompleted ? (
+                      <button
+                        onClick={() => {
+                          handleTournamentSelectForLeaderboard(item.id);
+                          setActiveTab("leaderboard");
+                        }}
+                        className="flex-1 py-3 rounded-2xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs sm:text-sm flex items-center justify-center gap-1.5 shadow-sm active:scale-95 transition-all cursor-pointer"
+                      >
+                        <Award size={16} />
+                        <span>Natijangiz</span>
+                      </button>
+                    ) : isLive ? (
                       <button
                         onClick={() => setConfirmStartItem(item)}
                         className="flex-1 py-3 rounded-2xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs sm:text-sm flex items-center justify-center gap-1.5 shadow-sm active:scale-95 transition-all text-center cursor-pointer animate-pulse"
@@ -1053,7 +1076,20 @@ export default function InternationalCompetitionsPage() {
                   Yopish
                 </button>
 
-                {selectedItem.status === "live" || registeredIds.includes(selectedItem.id) ? (
+                {completedIds.includes(selectedItem.id) ? (
+                  <button
+                    onClick={() => {
+                      const id = selectedItem.id;
+                      setSelectedItem(null);
+                      handleTournamentSelectForLeaderboard(id);
+                      setActiveTab("leaderboard");
+                    }}
+                    className="flex-1 py-3 rounded-2xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs sm:text-sm flex items-center justify-center gap-1.5 shadow-sm active:scale-95 transition-all text-center cursor-pointer"
+                  >
+                    <Award size={16} />
+                    <span>Natijani ko'rish</span>
+                  </button>
+                ) : selectedItem.status === "live" || registeredIds.includes(selectedItem.id) ? (
                   <button
                     onClick={() => {
                       const item = selectedItem;
