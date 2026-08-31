@@ -68,6 +68,9 @@ export async function POST(request: NextRequest) {
     await botClient.from('shop_orders').delete().eq('student_id', userId);
     await botClient.from('notifications').delete().eq('user_id', userId);
     await botClient.from('results').delete().eq('student_id', userId);
+    await botClient.from('tournament_results').delete().eq('student_id', userId);
+    await botClient.from('tournament_registrations').delete().eq('student_id', userId);
+    await botClient.from('tournament_comments').update({ user_id: null }).eq('user_id', userId);
 
     // Fetch attempt IDs to delete responses
     const { data: attempts } = await botClient

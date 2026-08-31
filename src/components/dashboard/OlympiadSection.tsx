@@ -140,11 +140,13 @@ export function OlympiadSection() {
   });
   const [selectedOlympiad, setSelectedOlympiad] = useState<any | null>(null);
   const [registeredIds, setRegisteredIds] = useState<string[]>([]);
-  const [loading, setLoading] = useState(() => {
-    return getCachedAdminTournaments().length === 0;
-  });
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
+    const cached = getCachedAdminTournaments();
+    if (cached.length > 0) {
+      setTournaments(cached);
+    }
     getAdminTournaments().then((list) => {
       if (list && list.length > 0) {
         setTournaments(list);

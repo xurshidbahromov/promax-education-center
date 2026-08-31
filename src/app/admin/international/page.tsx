@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useMemo } from "react";
+import { useEffect, useState, useMemo, useRef } from "react";
 import Link from "next/link";
 import toast from "react-hot-toast";
 import { useLanguage } from "@/context/LanguageContext";
@@ -41,9 +41,8 @@ export default function AdminInternationalTournamentsPage() {
     return getCachedInternationalTournaments();
   });
   const [comments, setComments] = useState<InternationalComment[]>([]);
-  const [loading, setLoading] = useState(() => {
-    return getCachedInternationalTournaments().length === 0;
-  });
+  const [loading, setLoading] = useState(false);
+  const hasLoadedRef = useRef(false);
 
   // Tabs: 'tournaments' | 'comments'
   const [activeTab, setActiveTab] = useState<"tournaments" | "comments">("tournaments");
@@ -54,11 +53,18 @@ export default function AdminInternationalTournamentsPage() {
   const [categoryFilter, setCategoryFilter] = useState<string>("all");
 
   useEffect(() => {
-    loadData();
+    const cached = getCachedInternationalTournaments();
+    if (cached.length > 0) {
+      setTournaments(cached);
+      hasLoadedRef.current = true;
+      loadData(true);
+    } else {
+      loadData(false);
+    }
   }, []);
 
   const loadData = async (isSilent: boolean = false) => {
-    if (!isSilent && tournaments.length === 0) {
+    if (!isSilent && !hasLoadedRef.current && tournaments.length === 0) {
       setLoading(true);
     }
     try {
@@ -68,6 +74,7 @@ export default function AdminInternationalTournamentsPage() {
       ]);
       setTournaments(tList);
       setComments(cList);
+      hasLoadedRef.current = true;
     } catch (err) {
       console.error("Error loading international tournament data:", err);
       toast.error("Ma'lumotlarni yuklashda xatolik yuz berdi");

@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createClient } from '@/utils/supabase/server';
+import { createTelegramBotClient } from '@/utils/supabase/server';
 import fs from 'fs';
 import path from 'path';
 
@@ -70,7 +70,7 @@ export async function GET(request: NextRequest) {
 
   // 1. Try Supabase first
   try {
-    const supabase = await createClient();
+    const supabase = await createTelegramBotClient();
     let query = supabase
       .from('tournament_comments')
       .select('*')
@@ -144,7 +144,7 @@ export async function POST(request: NextRequest) {
 
     // 1. Try inserting to Supabase
     try {
-      const supabase = await createClient();
+      const supabase = await createTelegramBotClient();
       const { data, error } = await supabase
         .from('tournament_comments')
         .insert({
@@ -195,7 +195,7 @@ export async function PATCH(request: NextRequest) {
 
     // 1. Try Supabase update
     try {
-      const supabase = await createClient();
+      const supabase = await createTelegramBotClient();
       const { data: existing } = await supabase
         .from('tournament_comments')
         .select('likes')
@@ -245,7 +245,7 @@ export async function DELETE(request: NextRequest) {
   }
 
   try {
-    const supabase = await createClient();
+    const supabase = await createTelegramBotClient();
     await supabase.from('tournament_comments').delete().eq('id', id);
   } catch (e) {}
 

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useMemo } from "react";
+import { useEffect, useState, useMemo, useRef } from "react";
 import Link from "next/link";
 import toast from "react-hot-toast";
 import { useLanguage } from "@/context/LanguageContext";
@@ -20,7 +20,11 @@ import {
   Users,
   Award,
   PlayCircle,
-  MessageSquare
+  MessageSquare,
+  AlertCircle,
+  Send,
+  ThumbsUp,
+  X
 } from "lucide-react";
 import {
   AdminTournament,
@@ -40,9 +44,8 @@ export default function AdminTournamentsPage() {
     return getCachedAdminTournaments();
   });
   const [comments, setComments] = useState<AdminTournamentComment[]>([]);
-  const [loading, setLoading] = useState(() => {
-    return getCachedAdminTournaments().length === 0;
-  });
+  const [loading, setLoading] = useState(false);
+  const hasLoadedRef = useRef(false);
 
   // Tabs: 'tournaments' | 'comments'
   const [activeTab, setActiveTab] = useState<"tournaments" | "comments">("tournaments");
@@ -53,11 +56,18 @@ export default function AdminTournamentsPage() {
   const [subjectFilter, setSubjectFilter] = useState<string>("all");
 
   useEffect(() => {
-    loadData();
+    const cached = getCachedAdminTournaments();
+    if (cached.length > 0) {
+      setTournaments(cached);
+      hasLoadedRef.current = true;
+      loadData(true);
+    } else {
+      loadData(false);
+    }
   }, []);
 
   const loadData = async (isSilent: boolean = false) => {
-    if (!isSilent && tournaments.length === 0) {
+    if (!isSilent && !hasLoadedRef.current && tournaments.length === 0) {
       setLoading(true);
     }
     try {
@@ -67,6 +77,7 @@ export default function AdminTournamentsPage() {
       ]);
       setTournaments(tList);
       setComments(cList);
+      hasLoadedRef.current = true;
     } catch (err) {
       console.error("Error loading tournament data:", err);
       toast.error("Ma'lumotlarni yuklashda xatolik yuz berdi");

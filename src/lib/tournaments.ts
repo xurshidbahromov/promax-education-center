@@ -282,6 +282,7 @@ export async function registerForTournament(
   tournamentId: string,
   user: { id: string; name: string; avatar?: string }
 ): Promise<{ success: boolean; message?: string }> {
+  // 1. Sync to local storage
   if (typeof window !== 'undefined') {
     try {
       const key = `tournament_registrations_${user.id || 'current'}`;
@@ -291,20 +292,38 @@ export async function registerForTournament(
         list.push(tournamentId);
         localStorage.setItem(key, JSON.stringify(list));
       }
+    } catch (e) {}
+  }
 
-      const tournament = await getTournamentById(tournamentId);
-      if (tournament) {
-        await saveAdminTournament({
-          ...tournament,
-          participantsCount: (tournament.participantsCount || 0) + 1
-        });
-      }
-      return { success: true, message: "Muvaffaqiyatli ro'yxatdan o'tdingiz!" };
-    } catch (e) {
-      return { success: true };
+  // 2. Persist to Supabase tournament_registrations table
+  if (user.id) {
+    try {
+      const supabase = createClient();
+      await supabase
+        .from('tournament_registrations')
+        .upsert({
+          id: `reg_${tournamentId}_${user.id}`,
+          tournament_id: tournamentId,
+          student_id: user.id,
+          created_at: new Date().toISOString()
+        }, { onConflict: 'tournament_id,student_id' });
+    } catch (dbErr) {
+      console.warn('[Tournaments] Registration DB insert skipped:', dbErr);
     }
   }
-  return { success: true };
+
+  // 3. Increment participant count
+  try {
+    const tournament = await getTournamentById(tournamentId);
+    if (tournament) {
+      await saveAdminTournament({
+        ...tournament,
+        participantsCount: (tournament.participantsCount || 0) + 1
+      });
+    }
+  } catch (e) {}
+
+  return { success: true, message: "Muvaffaqiyatli ro'yxatdan o'tdingiz!" };
 }
 
 export function getTournamentRegistrations(userId?: string): string[] {
@@ -320,6 +339,43 @@ export function getTournamentRegistrations(userId?: string): string[] {
 
 // ── LEADERBOARD & SUBMISSION ──
 export async function getTournamentLeaderboard(tournamentId: string): Promise<TournamentLeaderboardEntry[]> {
+  // 1. Query live Supabase database
+  try {
+    const supabase = createClient();
+    const { data, error } = await supabase
+      .from('tournament_results')
+      .select('*, profile:profiles(full_name, avatar_url)')
+      .eq('tournament_id', tournamentId)
+      .order('score', { ascending: false })
+      .order('time_spent_seconds', { ascending: true });
+
+    if (!error && data && data.length > 0) {
+      const mapped = data.map((d: any, idx: number) => ({
+        id: d.id,
+        tournament_id: tournamentId,
+        user_id: d.student_id,
+        student_name: d.profile?.full_name || "O'quvchi",
+        student_avatar: d.profile?.avatar_url || "",
+        score: Number(d.score),
+        max_score: Number(d.max_score),
+        percentage: Number(d.percentage) || Math.round((Number(d.score) / (Number(d.max_score) || 1)) * 100),
+        time_spent_seconds: Number(d.time_spent_seconds) || 0,
+        rank: idx + 1,
+        prize: d.prize || undefined,
+        completed_at: d.completed_at ? new Date(d.completed_at).toLocaleString('uz-UZ', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }) : "Yaqinda"
+      }));
+
+      if (typeof window !== 'undefined') {
+        try {
+          localStorage.setItem(`promax_leaderboard_${tournamentId}`, JSON.stringify(mapped));
+        } catch (e) {}
+      }
+
+      return mapped;
+    }
+  } catch (e) {}
+
+  // 2. Offline / LocalStorage fallback
   if (typeof window !== 'undefined') {
     try {
       const local = localStorage.getItem(`promax_leaderboard_${tournamentId}`);
@@ -328,31 +384,6 @@ export async function getTournamentLeaderboard(tournamentId: string): Promise<To
       }
     } catch (e) {}
   }
-
-  try {
-    const supabase = createClient();
-    const { data, error } = await supabase
-      .from('tournament_results')
-      .select('*, profile:profiles(full_name, avatar_url)')
-      .eq('tournament_id', tournamentId)
-      .order('score', { ascending: false });
-
-    if (!error && data && data.length > 0) {
-      return data.map((d: any, idx: number) => ({
-        id: d.id,
-        tournament_id: tournamentId,
-        user_id: d.student_id,
-        student_name: d.profile?.full_name || "O'quvchi",
-        student_avatar: d.profile?.avatar_url || "",
-        score: d.score,
-        max_score: d.max_score,
-        percentage: Math.round((d.score / (d.max_score || 1)) * 100),
-        time_spent_seconds: d.time_spent_seconds || 0,
-        rank: idx + 1,
-        completed_at: d.created_at
-      }));
-    }
-  } catch (e) {}
 
   return [];
 }
@@ -382,8 +413,9 @@ export async function submitTournamentAttempt(params: {
   const percentage = maxScore > 0 ? Math.round((totalScore / maxScore) * 100) : 0;
   const currentLeaderboard = await getTournamentLeaderboard(params.tournamentId);
 
+  const attemptId = `sub_${params.tournamentId}_${params.userId}_${Date.now()}`;
   const newEntry: TournamentLeaderboardEntry = {
-    id: `sub_${Date.now()}`,
+    id: attemptId,
     tournament_id: params.tournamentId,
     user_id: params.userId,
     student_name: params.studentName || "O'quvchi",
@@ -412,12 +444,34 @@ export async function submitTournamentAttempt(params: {
     }
   });
 
+  const assignedResult = updatedList.find(e => e.user_id === params.userId) || newEntry;
+
+  // 1. Save to Supabase tournament_results table
+  try {
+    const supabase = createClient();
+    await supabase.from('tournament_results').upsert({
+      id: attemptId,
+      tournament_id: params.tournamentId,
+      student_id: params.userId,
+      score: assignedResult.score,
+      max_score: assignedResult.max_score,
+      percentage: assignedResult.percentage,
+      time_spent_seconds: assignedResult.time_spent_seconds,
+      answers: params.answers,
+      rank: assignedResult.rank,
+      prize: assignedResult.prize || null,
+      completed_at: new Date().toISOString()
+    });
+  } catch (dbErr) {
+    console.warn('[Tournaments] DB attempt save error:', dbErr);
+  }
+
+  // 2. Keep local cache synced
   if (typeof window !== 'undefined') {
     try {
       localStorage.setItem(`promax_leaderboard_${params.tournamentId}`, JSON.stringify(updatedList));
     } catch (e) {}
   }
 
-  const assignedResult = updatedList.find(e => e.user_id === params.userId) || newEntry;
   return { success: true, result: assignedResult };
 }

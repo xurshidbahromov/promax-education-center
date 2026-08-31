@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -67,6 +67,7 @@ export default function OlympiadsPage() {
   const { data: profile } = useUserProfile(user?.id);
 
   // Tab State: "tournaments" | "leaderboard" | "comments"
+  // Tab State: "tournaments" | "leaderboard" | "comments"
   const initialTab = (searchParams.get("tab") as "tournaments" | "leaderboard" | "comments") || "tournaments";
   const [activeTab, setActiveTab] = useState<"tournaments" | "leaderboard" | "comments">(initialTab);
 
@@ -74,13 +75,12 @@ export default function OlympiadsPage() {
   const [tournaments, setTournaments] = useState<AdminTournament[]>(() => {
     return getCachedAdminTournaments();
   });
-  const [loading, setLoading] = useState(() => {
-    return getCachedAdminTournaments().length === 0;
-  });
+  const [loading, setLoading] = useState(false);
   const [leaderboardLoading, setLeaderboardLoading] = useState(false);
   const [selectedItem, setSelectedItem] = useState<AdminTournament | null>(null);
   const [confirmStartItem, setConfirmStartItem] = useState<AdminTournament | null>(null);
   const [registeredIds, setRegisteredIds] = useState<string[]>([]);
+  const hasLoadedRef = useRef(false);
 
   // Leaderboard State
   const [selectedTournamentId, setSelectedTournamentId] = useState<string>("");
@@ -110,7 +110,7 @@ export default function OlympiadsPage() {
       loadComments();
       const interval = setInterval(() => {
         loadComments();
-      }, 3500);
+      }, 5000);
       return () => clearInterval(interval);
     }
   }, [activeTab]);
@@ -132,27 +132,30 @@ export default function OlympiadsPage() {
   };
 
   useEffect(() => {
-    loadData();
-
-    const handleFocus = () => {
-      loadData(true); // Silent revalidation on focus
-    };
-
-    window.addEventListener('focus', handleFocus);
-    return () => window.removeEventListener('focus', handleFocus);
-  }, [user]);
+    const cached = getCachedAdminTournaments();
+    if (cached.length > 0) {
+      setTournaments(cached);
+      hasLoadedRef.current = true;
+      const queryId = searchParams.get("id");
+      const defaultId = queryId && cached.some(t => t.id === queryId) ? queryId : cached[0].id;
+      setSelectedTournamentId(defaultId);
+      loadData(true);
+    } else {
+      loadData(false);
+    }
+  }, [user?.id]);
 
   const loadData = async (isSilent: boolean = false) => {
-    // Only show full loading skeleton if cache is completely empty
-    if (!isSilent && tournaments.length === 0) {
+    if (!isSilent && !hasLoadedRef.current && tournaments.length === 0) {
       setLoading(true);
     }
     try {
       const data = await getAdminTournaments();
       if (Array.isArray(data) && data.length > 0) {
         setTournaments(data);
+        hasLoadedRef.current = true;
         const queryId = searchParams.get("id");
-        const defaultId = queryId && data.some(t => t.id === queryId) ? queryId : data[0].id;
+        const defaultId = queryId && data.some(t => t.id === queryId) ? queryId : (selectedTournamentId || data[0].id);
         setSelectedTournamentId(defaultId);
         getTournamentLeaderboard(defaultId).then(setLeaderboard).catch(() => {});
       }
@@ -168,14 +171,11 @@ export default function OlympiadsPage() {
 
   const handleTournamentSelectForLeaderboard = async (id: string) => {
     setSelectedTournamentId(id);
-    setLeaderboardLoading(true);
     try {
       const lb = await getTournamentLeaderboard(id);
       setLeaderboard(lb);
     } catch (e) {
       console.error("Error loading tournament leaderboard:", e);
-    } finally {
-      setLeaderboardLoading(false);
     }
   };
 

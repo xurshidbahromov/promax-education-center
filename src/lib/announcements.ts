@@ -170,6 +170,9 @@ export async function saveAnnouncementData(payload: {
       type: payload.type,
       priority: payload.priority,
       target_audience: payload.target_audience,
+      is_featured: isFeatured,
+      image_url: imageUrl,
+      badge: badge,
       is_active: payload.is_active,
       expires_at: payload.expires_at || null,
     };
@@ -209,9 +212,7 @@ export async function deleteAnnouncementData(id: string): Promise<void> {
 
   try {
     const supabase = createClient();
-    if (!id.startsWith('ann_')) {
-      await supabase.from('announcements').delete().eq('id', id);
-    }
+    await supabase.from('announcements').delete().eq('id', id);
   } catch {}
 }
 

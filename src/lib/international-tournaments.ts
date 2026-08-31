@@ -160,16 +160,7 @@ export async function getInternationalTournamentById(id: string): Promise<Intern
 }
 
 export async function getInternationalLeaderboard(tournamentId: string): Promise<InternationalLeaderboardEntry[]> {
-  if (typeof window !== 'undefined') {
-    const stored = localStorage.getItem(STORAGE_INTERNATIONAL_LEADERBOARDS);
-    if (stored) {
-      try {
-        const map = JSON.parse(stored);
-        if (map[tournamentId]) return map[tournamentId];
-      } catch {}
-    }
-  }
-
+  // 1. Query live Supabase database
   try {
     const supabase = createClient();
     const { data, error } = await supabase
@@ -184,37 +175,77 @@ export async function getInternationalLeaderboard(tournamentId: string): Promise
         id: d.id,
         tournament_id: tournamentId,
         user_id: d.student_id,
-        student_name: d.profile?.full_name || 'O\'quvchi',
+        student_name: d.profile?.full_name || "O'quvchi",
         student_avatar: d.profile?.avatar_url || '',
-        score: d.score,
-        max_score: d.max_score,
+        score: Number(d.score),
+        max_score: Number(d.max_score),
         scaled_score: d.scaled_score,
-        percentage: Math.round((d.score / (d.max_score || 1)) * 100),
-        time_spent_seconds: d.time_spent_seconds || 0,
+        percentage: Number(d.percentage) || Math.round((Number(d.score) / (Number(d.max_score) || 1)) * 100),
+        time_spent_seconds: Number(d.time_spent_seconds) || 0,
         rank: idx + 1,
-        completed_at: d.created_at,
-        prize: idx === 0 ? "1-O'rin" : idx === 1 ? "2-O'rin" : idx === 2 ? "3-O'rin" : undefined
+        completed_at: d.completed_at ? new Date(d.completed_at).toLocaleString('uz-UZ', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }) : "Yaqinda",
+        prize: d.prize || (idx === 0 ? "1-O'rin" : idx === 1 ? "2-O'rin" : idx === 2 ? "3-O'rin" : undefined)
       }));
+
+      if (typeof window !== 'undefined') {
+        try {
+          const stored = localStorage.getItem(STORAGE_INTERNATIONAL_LEADERBOARDS);
+          let map: Record<string, InternationalLeaderboardEntry[]> = stored ? JSON.parse(stored) : {};
+          map[tournamentId] = entries;
+          localStorage.setItem(STORAGE_INTERNATIONAL_LEADERBOARDS, JSON.stringify(map));
+        } catch {}
+      }
+
       return entries;
     }
   } catch {}
 
+  // 2. Offline / LocalStorage fallback
+  if (typeof window !== 'undefined') {
+    const stored = localStorage.getItem(STORAGE_INTERNATIONAL_LEADERBOARDS);
+    if (stored) {
+      try {
+        const map = JSON.parse(stored);
+        if (map[tournamentId]) return map[tournamentId];
+      } catch {}
+    }
+  }
+
   return [];
 }
 
-export function registerForInternationalTournament(tournamentId: string, userId?: string): boolean {
-  if (typeof window === 'undefined') return false;
+export async function registerForInternationalTournament(tournamentId: string, userId?: string): Promise<boolean> {
   const userKey = userId || 'anonymous_user';
-  const stored = localStorage.getItem(STORAGE_INTERNATIONAL_REGISTRATIONS);
-  let regMap: Record<string, string[]> = {};
-  if (stored) {
-    try { regMap = JSON.parse(stored); } catch (e) {}
+
+  // 1. Sync to local storage
+  if (typeof window !== 'undefined') {
+    const stored = localStorage.getItem(STORAGE_INTERNATIONAL_REGISTRATIONS);
+    let regMap: Record<string, string[]> = {};
+    if (stored) {
+      try { regMap = JSON.parse(stored); } catch (e) {}
+    }
+    if (!regMap[userKey]) regMap[userKey] = [];
+    if (!regMap[userKey].includes(tournamentId)) {
+      regMap[userKey].push(tournamentId);
+      localStorage.setItem(STORAGE_INTERNATIONAL_REGISTRATIONS, JSON.stringify(regMap));
+    }
   }
-  if (!regMap[userKey]) regMap[userKey] = [];
-  if (!regMap[userKey].includes(tournamentId)) {
-    regMap[userKey].push(tournamentId);
-    localStorage.setItem(STORAGE_INTERNATIONAL_REGISTRATIONS, JSON.stringify(regMap));
+
+  // 2. Persist to Supabase
+  if (userId) {
+    try {
+      const supabase = createClient();
+      await supabase
+        .from('tournament_registrations')
+        .upsert({
+          id: `reg_intl_${tournamentId}_${userId}`,
+          tournament_id: tournamentId,
+          student_id: userId,
+          created_at: new Date().toISOString()
+        }, { onConflict: 'tournament_id,student_id' });
+    } catch (e) {}
   }
+
   return true;
 }
 
@@ -243,9 +274,10 @@ export async function submitInternationalAttempt(
   const percentage = Math.round((score / (maxScore || 1)) * 100);
   const scaledScoreNum = 400 + Math.round((score / (maxScore || 1)) * 1200);
   const scaledScore = `${scaledScoreNum} / 1600`;
+  const attemptId = `intl_attempt_${tournamentId}_${userId}_${Date.now()}`;
 
   const newEntry: InternationalLeaderboardEntry = {
-    id: `intl_attempt_${Date.now()}`,
+    id: attemptId,
     tournament_id: tournamentId,
     user_id: userId,
     student_name: userName || "O'quvchi",
@@ -256,7 +288,7 @@ export async function submitInternationalAttempt(
     percentage,
     time_spent_seconds: timeSpentSeconds,
     rank: 1,
-    completed_at: new Date().toLocaleString('uz-UZ', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })
+    completed_at: "Hozirginagina"
   };
 
   let currentList = await getInternationalLeaderboard(tournamentId);
@@ -275,6 +307,30 @@ export async function submitInternationalAttempt(
     else if (entry.rank === 3) entry.prize = "3-O'rin";
   });
 
+  const myRank = currentList.find(e => e.user_id === userId)?.rank || 1;
+  const myPrize = myRank === 1 ? "1-O'rin" : myRank === 2 ? "2-O'rin" : myRank === 3 ? "3-O'rin" : null;
+
+  // 1. Save to Supabase tournament_results table
+  try {
+    const supabase = createClient();
+    await supabase.from('tournament_results').upsert({
+      id: attemptId,
+      tournament_id: tournamentId,
+      student_id: userId,
+      score,
+      max_score: maxScore,
+      scaled_score: scaledScore,
+      percentage,
+      time_spent_seconds: timeSpentSeconds,
+      rank: myRank,
+      prize: myPrize,
+      completed_at: new Date().toISOString()
+    });
+  } catch (dbErr) {
+    console.warn('[International] DB attempt save error:', dbErr);
+  }
+
+  // 2. Keep local storage synced
   if (typeof window !== 'undefined') {
     const stored = localStorage.getItem(STORAGE_INTERNATIONAL_LEADERBOARDS);
     let map: Record<string, InternationalLeaderboardEntry[]> = {};
@@ -285,19 +341,6 @@ export async function submitInternationalAttempt(
     localStorage.setItem(STORAGE_INTERNATIONAL_LEADERBOARDS, JSON.stringify(map));
   }
 
-  try {
-    const supabase = createClient();
-    await supabase.from('tournament_results').insert({
-      tournament_id: tournamentId,
-      student_id: userId,
-      score,
-      max_score: maxScore,
-      scaled_score: scaledScore,
-      time_spent_seconds: timeSpentSeconds
-    });
-  } catch {}
-
-  const myRank = currentList.find(e => e.id === newEntry.id)?.rank || 1;
   return { success: true, rank: myRank, scaledScore };
 }
 
