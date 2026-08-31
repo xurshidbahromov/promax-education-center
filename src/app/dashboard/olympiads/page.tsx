@@ -618,6 +618,46 @@ export default function OlympiadsPage() {
               </div>
             </div>
 
+            {/* ── USER PERSONAL RESULT BANNER ── */}
+            {(() => {
+              const myResult = leaderboard.find(e => user?.id && e.user_id === user.id);
+              if (!myResult) return null;
+
+              return (
+                <div className="bg-gradient-to-r from-blue-600 via-indigo-600 to-violet-600 text-white rounded-[2rem] p-5 sm:p-6 shadow-none flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                  <div className="flex items-center gap-3.5">
+                    <div className="w-12 h-12 rounded-2xl bg-white/20 backdrop-blur-md text-white flex items-center justify-center font-black text-xl shrink-0">
+                      #{myResult.rank}
+                    </div>
+                    <div>
+                      <div className="flex items-center gap-2">
+                        <span className="text-[10px] font-black uppercase tracking-wider px-2.5 py-0.5 rounded-full bg-white/20">
+                          Sizning Natijangiz
+                        </span>
+                        {myResult.prize && (
+                          <span className="text-[10px] font-black px-2.5 py-0.5 rounded-full bg-amber-400 text-slate-950">
+                            {myResult.prize}
+                          </span>
+                        )}
+                      </div>
+                      <h4 className="text-base sm:text-lg font-bold font-fredoka mt-0.5">
+                        {profile?.full_name || "Siz"} — {myResult.score} ball ({myResult.percentage}%)
+                      </h4>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-4 text-xs font-semibold bg-black/20 backdrop-blur-md px-4 py-2.5 rounded-xl self-start sm:self-auto">
+                    <span className="flex items-center gap-1.5">
+                      <Clock size={14} className="text-blue-200" />
+                      {Math.floor(myResult.time_spent_seconds / 60)} daq {myResult.time_spent_seconds % 60} son
+                    </span>
+                    <span>·</span>
+                    <span className="text-blue-100">Topshirildi: {myResult.completed_at}</span>
+                  </div>
+                </div>
+              );
+            })()}
+
             {/* ── 3D ISOMETRIC OLYMPIC PODIUM (TOP 3 - PREMIUM GLASSY 3D) ── */}
             {leaderboard.length >= 3 && (
               <div className="relative w-full bg-gradient-to-b from-white/70 via-slate-50/50 to-white/70 dark:from-slate-900/70 dark:via-slate-850/50 dark:to-slate-900/70 backdrop-blur-xl rounded-[2.5rem] p-5 sm:p-8 border border-white/60 dark:border-slate-800/60 shadow-none overflow-hidden">
@@ -838,25 +878,36 @@ export default function OlympiadsPage() {
                   Ishtirokchilar Natijalari
                 </h4>
                 <span className="text-xs text-slate-400 font-medium">
-                  {filteredLeaderboard.filter((e) => e.rank > 3).length} ta ishtirokchi
+                  {leaderboard.length} ta ishtirokchi
                 </span>
               </div>
 
-              {filteredLeaderboard.filter((e) => e.rank > 3).length === 0 ? (
-                <div className="text-center py-8 space-y-1.5">
-                  <Award className="mx-auto text-slate-300 dark:text-slate-700" size={36} />
+              {leaderboard.length === 0 ? (
+                <div className="text-center py-10 space-y-2">
+                  <Award className="mx-auto text-slate-300 dark:text-slate-700" size={40} />
+                  <p className="font-bold text-slate-700 dark:text-slate-200 text-sm">
+                    Ushbu musobaqa bo'yicha hali natijalar mavjud emas
+                  </p>
+                  <p className="text-xs text-slate-400">
+                    Musobaqada qatnashing va birinchi bo'lib reytingga kiring!
+                  </p>
+                </div>
+              ) : (leaderboard.length >= 3 && filteredLeaderboard.filter((e) => e.rank > 3).length === 0) ? (
+                <div className="text-center py-6 space-y-1">
+                  <Award className="mx-auto text-slate-300 dark:text-slate-700" size={32} />
                   <p className="font-bold text-slate-600 dark:text-slate-300 text-xs">
                     Barcha ishtirokchilar yuqoridagi g'oliblar shoxsupasida aks etgan
                   </p>
                 </div>
               ) : (
                 <div className="space-y-2">
-                  {filteredLeaderboard
-                    .filter((entry) => entry.rank > 3)
-                    .map((entry) => {
-                      const isSelf = user?.id && entry.user_id === user.id;
-                      const avatar = isSelf ? (profile?.avatar_url || entry.student_avatar) : entry.student_avatar;
-                      const hasAvatar = avatar && !avatar.includes('dicebear');
+                  {(leaderboard.length >= 3
+                    ? filteredLeaderboard.filter((entry) => entry.rank > 3)
+                    : filteredLeaderboard
+                  ).map((entry) => {
+                    const isSelf = user?.id && entry.user_id === user.id;
+                    const avatar = isSelf ? (profile?.avatar_url || entry.student_avatar) : entry.student_avatar;
+                    const hasAvatar = avatar && !avatar.includes('dicebear');
 
                       return (
                         <div

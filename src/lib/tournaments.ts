@@ -344,26 +344,45 @@ export async function getTournamentLeaderboard(tournamentId: string): Promise<To
     const supabase = createClient();
     const { data, error } = await supabase
       .from('tournament_results')
-      .select('*, profile:profiles(full_name, avatar_url)')
+      .select('*')
       .eq('tournament_id', tournamentId)
       .order('score', { ascending: false })
       .order('time_spent_seconds', { ascending: true });
 
     if (!error && data && data.length > 0) {
-      const mapped = data.map((d: any, idx: number) => ({
-        id: d.id,
-        tournament_id: tournamentId,
-        user_id: d.student_id,
-        student_name: d.profile?.full_name || "O'quvchi",
-        student_avatar: d.profile?.avatar_url || "",
-        score: Number(d.score),
-        max_score: Number(d.max_score),
-        percentage: Number(d.percentage) || Math.round((Number(d.score) / (Number(d.max_score) || 1)) * 100),
-        time_spent_seconds: Number(d.time_spent_seconds) || 0,
-        rank: idx + 1,
-        prize: d.prize || undefined,
-        completed_at: d.completed_at ? new Date(d.completed_at).toLocaleString('uz-UZ', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }) : "Yaqinda"
-      }));
+      const studentIds = Array.from(new Set(data.map((d: any) => d.student_id).filter(Boolean)));
+      let profilesMap: Record<string, { full_name: string; avatar_url: string }> = {};
+      if (studentIds.length > 0) {
+        try {
+          const { data: profs } = await supabase
+            .from('profiles')
+            .select('id, full_name, avatar_url')
+            .in('id', studentIds);
+          if (profs) {
+            profs.forEach((p: any) => {
+              profilesMap[p.id] = { full_name: p.full_name, avatar_url: p.avatar_url };
+            });
+          }
+        } catch {}
+      }
+
+      const mapped: TournamentLeaderboardEntry[] = data.map((d: any, idx: number) => {
+        const prof = profilesMap[d.student_id];
+        return {
+          id: d.id,
+          tournament_id: tournamentId,
+          user_id: d.student_id,
+          student_name: prof?.full_name || d.student_name || "O'quvchi",
+          student_avatar: prof?.avatar_url || d.student_avatar || "",
+          score: Number(d.score),
+          max_score: Number(d.max_score),
+          percentage: Number(d.percentage) || Math.round((Number(d.score) / (Number(d.max_score) || 1)) * 100),
+          time_spent_seconds: Number(d.time_spent_seconds) || 0,
+          rank: idx + 1,
+          prize: d.prize || (idx === 0 ? "1-O'rin" : idx === 1 ? "2-O'rin" : idx === 2 ? "3-O'rin" : undefined),
+          completed_at: d.completed_at ? new Date(d.completed_at).toLocaleString('uz-UZ', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }) : "Yaqinda"
+        };
+      });
 
       if (typeof window !== 'undefined') {
         try {
@@ -373,7 +392,9 @@ export async function getTournamentLeaderboard(tournamentId: string): Promise<To
 
       return mapped;
     }
-  } catch (e) {}
+  } catch (e) {
+    console.error("Error fetching tournament leaderboard:", e);
+  }
 
   // 2. Offline / LocalStorage fallback
   if (typeof window !== 'undefined') {
