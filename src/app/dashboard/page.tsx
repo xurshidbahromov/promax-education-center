@@ -155,66 +155,7 @@ export default function DashboardPage() {
             </h1>
           </div>
 
-          {/* ── 2. KABINET BANNERLARI (Tepada — Foydalanuvchiga birinchi bo'lib ko'rinadi) ── */}
-          {activeBannerAnnouncements.length > 0 && (
-            <section className="relative overflow-hidden w-full">
-              <div className="flex items-center justify-between mb-3">
-                <h2 className="text-[13px] sm:text-[14px] font-bold text-slate-600 dark:text-slate-400 uppercase tracking-widest flex items-center gap-2">
-                  <Megaphone size={16} className="text-brand-blue" />
-                  E'lonlar & Yangiliklar
-                </h2>
-              </div>
-
-              <div className="flex gap-4 overflow-x-auto pb-2 snap-x snap-mandatory no-scrollbar w-full scroll-smooth">
-                {activeBannerAnnouncements.map((item, i) => (
-                  <div
-                    key={item.id}
-                    className="snap-start shrink-0 w-[290px] sm:w-[380px] relative overflow-hidden rounded-[2rem] border border-white/60 dark:border-slate-800/60 shadow-none h-[200px] sm:h-[230px] bg-gradient-to-br from-slate-900 via-indigo-950 to-slate-900 text-white"
-                  >
-                    {/* Background Image if exists */}
-                    {item.image ? (
-                      <div className="absolute inset-0 z-0">
-                        <img 
-                          src={item.image} 
-                          alt={item.title}
-                          className="w-full h-full object-cover"
-                        />
-                        <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/60 to-slate-900/20 z-10" />
-                      </div>
-                    ) : (
-                      <div className="absolute inset-0 z-0 bg-gradient-to-tr from-brand-blue/90 via-indigo-900/90 to-purple-900/90" />
-                    )}
-
-                    {/* Content Overlay */}
-                    <div className="relative z-20 p-5 flex flex-col justify-between h-full text-white">
-                      <div className="flex justify-between items-start">
-                        <span className={`text-[10px] font-extrabold px-3 py-1 rounded-full backdrop-blur-md shadow-none tracking-wider ${item.badgeBg}`}>
-                          {item.badge}
-                        </span>
-                        {item.date && (
-                          <span className="text-[11px] font-semibold text-slate-200/90 flex items-center gap-1.5 bg-black/40 backdrop-blur-md px-3 py-1 rounded-full border border-white/10">
-                            <Clock size={11} />
-                            {item.date}
-                          </span>
-                        )}
-                      </div>
-
-                      <div className="space-y-1">
-                        <h3 className="text-base sm:text-lg font-bold leading-snug font-fredoka tracking-wide text-white drop-shadow-sm line-clamp-1">
-                          {item.title}
-                        </h3>
-                        <p className="text-[12px] sm:text-[13px] text-slate-200/90 line-clamp-2 leading-relaxed font-medium">
-                          {item.message}
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </section>
-          )}
-
-          {/* ── 3. ONLAYN OLIMPIADALAR BANNER (Fanlardan avval) ── */}
+          {/* ── 2. ONLAYN OLIMPIADALAR BANNER (Tepada - Fanlardan avval) ── */}
           <div className="flex flex-col gap-4">
             <OlympiadBannerTeaser />
             <InternationalBannerTeaser />
@@ -361,6 +302,65 @@ export default function DashboardPage() {
                     </div>
                     <ChevronRight size={18} className="text-slate-300 dark:text-slate-600 group-active:text-brand-blue group-active:scale-95 transition-all shrink-0" />
                   </Link>
+                ))}
+              </div>
+            </section>
+          )}
+
+          {/* ── 7. YANGILIKLAR & E'LONLAR (Eng pastda) ── */}
+          {activeBannerAnnouncements.length > 0 && (
+            <section className="relative overflow-hidden w-full">
+              <div className="flex items-center justify-between mb-3">
+                <h2 className="text-[13px] sm:text-[14px] font-bold text-slate-600 dark:text-slate-400 uppercase tracking-widest flex items-center gap-2">
+                  <Megaphone size={16} className="text-brand-blue" />
+                  Yangiliklar & E'lonlar
+                </h2>
+              </div>
+
+              <div className="flex gap-4 overflow-x-auto pb-4 snap-x snap-mandatory no-scrollbar w-full scroll-smooth">
+                {activeBannerAnnouncements.map((item, i) => (
+                  <div
+                    key={item.id}
+                    className="snap-start shrink-0 w-[290px] sm:w-[380px] relative overflow-hidden rounded-[2rem] border border-white/60 dark:border-slate-800/60 shadow-none h-[200px] sm:h-[230px] bg-gradient-to-br from-slate-900 via-indigo-950 to-slate-900 text-white"
+                  >
+                    {/* Background Image if exists */}
+                    {item.image ? (
+                      <div className="absolute inset-0 z-0">
+                        <img 
+                          src={item.image} 
+                          alt={item.title}
+                          className="w-full h-full object-cover"
+                        />
+                        <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/60 to-slate-900/20 z-10" />
+                      </div>
+                    ) : (
+                      <div className="absolute inset-0 z-0 bg-gradient-to-tr from-brand-blue/90 via-indigo-900/90 to-purple-900/90" />
+                    )}
+
+                    {/* Content Overlay */}
+                    <div className="relative z-20 p-5 flex flex-col justify-between h-full text-white">
+                      <div className="flex justify-between items-start">
+                        <span className={`text-[10px] font-extrabold px-3 py-1 rounded-full backdrop-blur-md shadow-none tracking-wider ${item.badgeBg}`}>
+                          {item.badge}
+                        </span>
+                        {item.date && (
+                          <span className="text-[11px] font-semibold text-slate-200/90 flex items-center gap-1.5 bg-black/40 backdrop-blur-md px-3 py-1 rounded-full border border-white/10">
+                            <Clock size={11} />
+                            {item.date}
+                          </span>
+                        )}
+                      </div>
+
+                      <div className="space-y-1">
+                        <h3 className="text-base sm:text-lg font-bold leading-snug font-fredoka tracking-wide text-white drop-shadow-sm line-clamp-1">
+                          {item.title}
+                        </h3>
+                        <p className="text-[12px] sm:text-[13px] text-slate-200/90 line-clamp-2 leading-relaxed font-medium">
+                          {item.message}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
                 ))}
               </div>
             </section>
