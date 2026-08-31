@@ -13,17 +13,25 @@ import {
   GraduationCap
 } from "lucide-react";
 import { useState, useEffect } from "react";
-import { getInternationalTournaments, InternationalTournament } from "@/lib/international-tournaments";
+import { getInternationalTournaments, getCachedInternationalTournaments, InternationalTournament } from "@/lib/international-tournaments";
 
 export function InternationalBannerTeaser() {
   const { t } = useLanguage();
-  const [participantsCount, setParticipantsCount] = useState(1920);
+  const [participantsCount, setParticipantsCount] = useState(() => {
+    const cached = getCachedInternationalTournaments();
+    return cached.reduce((acc: number, item: InternationalTournament) => acc + (item.participantsCount || 0), 0);
+  });
 
   useEffect(() => {
+    const cached = getCachedInternationalTournaments();
+    if (cached.length > 0) {
+      const total = cached.reduce((acc: number, item: InternationalTournament) => acc + (item.participantsCount || 0), 0);
+      setParticipantsCount(total);
+    }
     getInternationalTournaments().then((list: InternationalTournament[]) => {
       if (list && list.length > 0) {
         const total = list.reduce((acc: number, item: InternationalTournament) => acc + (item.participantsCount || 0), 0);
-        if (total > 0) setParticipantsCount(total);
+        setParticipantsCount(total);
       }
     }).catch(() => {});
   }, []);

@@ -54,13 +54,21 @@ export interface OlympiadItem {
 
 export function OlympiadBannerTeaser() {
   const { t } = useLanguage();
-  const [participantsCount, setParticipantsCount] = useState(1240);
+  const [participantsCount, setParticipantsCount] = useState(() => {
+    const cached = getCachedAdminTournaments();
+    return cached.reduce((acc: number, item: AdminTournament) => acc + (item.participantsCount || 0), 0);
+  });
 
   useEffect(() => {
+    const cached = getCachedAdminTournaments();
+    if (cached.length > 0) {
+      const total = cached.reduce((acc: number, item: AdminTournament) => acc + (item.participantsCount || 0), 0);
+      setParticipantsCount(total);
+    }
     getAdminTournaments().then((list: AdminTournament[]) => {
       if (list && list.length > 0) {
         const total = list.reduce((acc: number, item: AdminTournament) => acc + (item.participantsCount || 0), 0);
-        if (total > 0) setParticipantsCount(total);
+        setParticipantsCount(total);
       }
     }).catch(() => {});
   }, []);
