@@ -78,19 +78,9 @@ const STORAGE_INTERNATIONAL_TOURNAMENTS = 'promax_intl_tournaments_v3';
 const STORAGE_INTERNATIONAL_LEADERBOARDS = 'promax_intl_leaderboards_v3';
 const STORAGE_INTERNATIONAL_REGISTRATIONS = 'promax_intl_registrations_v3';
 
+// ── GET INTERNATIONAL TOURNAMENTS (Live Network-First) ──
 export async function getInternationalTournaments(): Promise<InternationalTournament[]> {
-  // 1. Read from localStorage first
-  if (typeof window !== 'undefined') {
-    const stored = localStorage.getItem(STORAGE_INTERNATIONAL_TOURNAMENTS);
-    if (stored) {
-      try {
-        const parsed = JSON.parse(stored);
-        if (Array.isArray(parsed)) return parsed;
-      } catch {}
-    }
-  }
-
-  // 2. Fetch from API / Supabase
+  // 1. Fetch from API first (Live cross-device source of truth)
   try {
     const res = await fetch(`/api/tournaments?type=international&_t=${Date.now()}`, {
       cache: 'no-store',
@@ -98,15 +88,29 @@ export async function getInternationalTournaments(): Promise<InternationalTourna
     });
     if (res.ok) {
       const data = await res.json();
-      if (Array.isArray(data.tournaments)) {
+      if (Array.isArray(data.tournaments) && data.tournaments.length > 0) {
         if (typeof window !== 'undefined') {
           localStorage.setItem(STORAGE_INTERNATIONAL_TOURNAMENTS, JSON.stringify(data.tournaments));
         }
         return data.tournaments;
       }
     }
-  } catch {}
+  } catch (apiErr) {
+    console.warn('Live intl tournaments fetch failed, fallback to local storage:', apiErr);
+  }
 
+  // 2. Offline / LocalStorage fallback
+  if (typeof window !== 'undefined') {
+    const stored = localStorage.getItem(STORAGE_INTERNATIONAL_TOURNAMENTS);
+    if (stored) {
+      try {
+        const parsed = JSON.parse(stored);
+        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+      } catch {}
+    }
+  }
+
+  // 3. Database fallback if available
   try {
     const supabase = createClient();
     const { data, error } = await supabase
@@ -115,7 +119,7 @@ export async function getInternationalTournaments(): Promise<InternationalTourna
       .eq('is_published', true)
       .order('created_at', { ascending: false });
 
-    if (!error && data) {
+    if (!error && data && data.length > 0) {
       if (typeof window !== 'undefined') {
         localStorage.setItem(STORAGE_INTERNATIONAL_TOURNAMENTS, JSON.stringify(data));
       }
@@ -127,6 +131,16 @@ export async function getInternationalTournaments(): Promise<InternationalTourna
 }
 
 export async function getInternationalTournamentById(id: string): Promise<InternationalTournament | null> {
+  try {
+    const res = await fetch(`/api/tournaments?type=international&id=${id}&_t=${Date.now()}`, {
+      cache: 'no-store'
+    });
+    if (res.ok) {
+      const data = await res.json();
+      if (data.tournament) return data.tournament;
+    }
+  } catch (e) {}
+
   const tournaments = await getInternationalTournaments();
   return tournaments.find(t => t.id === id) || null;
 }
@@ -277,90 +291,112 @@ export async function submitInternationalAttempt(
 export async function saveInternationalTournament(
   tournament: Partial<InternationalTournament>
 ): Promise<InternationalTournament> {
-  const currentList = await getInternationalTournaments();
-  let updatedTournament: InternationalTournament;
+  const id = tournament.id || `intl_${Date.now()}`;
+  const category = tournament.category || 'sat';
+  const categoryLabel = category === 'sat' ? 'SAT Digital' : category === 'amc' ? 'AMC Math' : category === 'ielts' ? 'IELTS Arena' : 'Xalqaro';
+  
+  const fullTournament: InternationalTournament = {
+    id,
+    title: tournament.title || "Yangi Xalqaro Musobaqa",
+    category,
+    categoryLabel,
+    subject: tournament.subject || "SAT Math & Reading",
+    description: tournament.description || "",
+    badge: tournament.badge || "🔥 XALQARO ARENA",
+    badgeBg: tournament.badgeBg || "bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 text-white",
+    status: tournament.status || "upcoming",
+    startDate: tournament.startDate || new Date().toISOString().split("T")[0],
+    startTime: tournament.startTime || "15:00",
+    endDate: tournament.endDate,
+    endTime: tournament.endTime,
+    durationMinutes: tournament.durationMinutes ?? 60,
+    totalQuestions: tournament.questions?.length ?? tournament.totalQuestions ?? 0,
+    entryCoins: tournament.entryCoins ?? 0,
+    prizePool: tournament.prizePool || "Top o'rinlar uchun mukofotlar",
+    topPrizes: tournament.topPrizes || [
+      "1-O'rin: Xalqaro Grant & Sertifikat",
+      "2-O'rin: 500,000 So'm Vafcher",
+      "3-O'rin: 300,000 So'm Vafcher"
+    ],
+    rules: tournament.rules || [
+      "Test davomiyligi belgilangan vaqtda yakunlanadi.",
+      "Yopiq savollarda faqat son yoki kasr kiritilishi lozim.",
+      "Natijalar xalqaro shkala bo'yicha hisoblanadi."
+    ],
+    participantsCount: tournament.participantsCount ?? 0,
+    questions: tournament.questions || [],
+    scoringScale: tournament.scoringScale || (category === 'sat' ? '1600 Ballik SAT Shkalasi' : '100 Ballik Shkala'),
+    created_at: tournament.created_at || new Date().toISOString()
+  };
 
-  if (tournament.id && currentList.some(t => t.id === tournament.id)) {
-    // Update existing
-    const existing = currentList.find(t => t.id === tournament.id)!;
-    updatedTournament = {
-      ...existing,
-      ...tournament,
-      totalQuestions: tournament.questions ? tournament.questions.length : (tournament.totalQuestions ?? existing.totalQuestions)
-    };
-    const newList = currentList.map(t => t.id === tournament.id ? updatedTournament : t);
-    if (typeof window !== 'undefined') {
-      localStorage.setItem(STORAGE_INTERNATIONAL_TOURNAMENTS, JSON.stringify(newList));
-    }
-  } else {
-    // Create new
-    const id = tournament.id || `intl_${Date.now()}`;
-    const category = tournament.category || 'sat';
-    const categoryLabel = category === 'sat' ? 'SAT Digital' : category === 'amc' ? 'AMC Math' : category === 'ielts' ? 'IELTS Arena' : 'Xalqaro';
-    
-    updatedTournament = {
-      id,
-      title: tournament.title || "Yangi Xalqaro Musobaqa",
-      category,
-      categoryLabel,
-      subject: tournament.subject || "SAT Math & Reading",
-      description: tournament.description || "",
-      badge: tournament.badge || "🔥 XALQARO ARENA",
-      badgeBg: tournament.badgeBg || "bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 text-white",
-      status: tournament.status || "upcoming",
-      startDate: tournament.startDate || new Date().toISOString().split("T")[0],
-      startTime: tournament.startTime || "15:00",
-      endDate: tournament.endDate,
-      endTime: tournament.endTime,
-      durationMinutes: tournament.durationMinutes ?? 60,
-      totalQuestions: tournament.questions?.length ?? tournament.totalQuestions ?? 0,
-      entryCoins: tournament.entryCoins ?? 0,
-      prizePool: tournament.prizePool || "Top o'rinlar uchun mukofotlar",
-      topPrizes: tournament.topPrizes || [
-        "1-O'rin: Xalqaro Grant & Sertifikat",
-        "2-O'rin: 500,000 So'm Vafcher",
-        "3-O'rin: 300,000 So'm Vafcher"
-      ],
-      rules: tournament.rules || [
-        "Test davomiyligi belgilangan vaqtda yakunlanadi.",
-        "Yopiq savollarda faqat son yoki kasr kiritilishi lozim.",
-        "Natijalar xalqaro shkala bo'yicha hisoblanadi."
-      ],
-      participantsCount: tournament.participantsCount ?? 0,
-      questions: tournament.questions || [],
-      scoringScale: tournament.scoringScale || (category === 'sat' ? '1600 Ballik SAT Shkalasi' : '100 Ballik Shkala'),
-      created_at: new Date().toISOString()
-    };
-
-    const newList = [updatedTournament, ...currentList];
-    if (typeof window !== 'undefined') {
-      localStorage.setItem(STORAGE_INTERNATIONAL_TOURNAMENTS, JSON.stringify(newList));
-    }
-  }
-
-  // Sync to API
+  // 1. Sync to API
   try {
-    await fetch('/api/tournaments', {
+    const res = await fetch('/api/tournaments', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ type: 'international', tournament: updatedTournament })
+      body: JSON.stringify({ type: 'international', tournament: fullTournament })
     });
-  } catch {}
+    if (res.ok) {
+      const resJson = await res.json();
+      if (resJson.data) {
+        if (typeof window !== 'undefined') {
+          const stored = localStorage.getItem(STORAGE_INTERNATIONAL_TOURNAMENTS);
+          let list: InternationalTournament[] = [];
+          try { if (stored) list = JSON.parse(stored); } catch (e) {}
+          const existingIndex = list.findIndex(t => t.id === id);
+          if (existingIndex >= 0) {
+            list[existingIndex] = resJson.data;
+          } else {
+            list = [resJson.data, ...list];
+          }
+          localStorage.setItem(STORAGE_INTERNATIONAL_TOURNAMENTS, JSON.stringify(list));
+        }
+        return resJson.data;
+      }
+    }
+  } catch (err) {
+    console.error('Save international tournament error:', err);
+  }
 
-  return updatedTournament;
+  // 2. Local fallback
+  if (typeof window !== 'undefined') {
+    const stored = localStorage.getItem(STORAGE_INTERNATIONAL_TOURNAMENTS);
+    let list: InternationalTournament[] = [];
+    try { if (stored) list = JSON.parse(stored); } catch (e) {}
+    const existingIndex = list.findIndex(t => t.id === id);
+    if (existingIndex >= 0) {
+      list[existingIndex] = fullTournament;
+    } else {
+      list = [fullTournament, ...list];
+    }
+    localStorage.setItem(STORAGE_INTERNATIONAL_TOURNAMENTS, JSON.stringify(list));
+  }
+
+  return fullTournament;
 }
 
 export async function deleteInternationalTournament(id: string): Promise<boolean> {
+  try {
+    await fetch(`/api/tournaments?type=international&id=${id}`, { method: 'DELETE' });
+  } catch (e) {
+    console.error('Delete intl tournament error:', e);
+  }
+
   if (typeof window !== 'undefined') {
     const stored = localStorage.getItem(STORAGE_INTERNATIONAL_TOURNAMENTS);
-    const list: InternationalTournament[] = stored ? JSON.parse(stored) : [];
-    const newList = list.filter(t => t.id !== id);
-    localStorage.setItem(STORAGE_INTERNATIONAL_TOURNAMENTS, JSON.stringify(newList));
+    if (stored) {
+      try {
+        const list: InternationalTournament[] = JSON.parse(stored);
+        const newList = list.filter(t => t.id !== id);
+        localStorage.setItem(STORAGE_INTERNATIONAL_TOURNAMENTS, JSON.stringify(newList));
+      } catch (e) {}
+    }
   }
 
   try {
-    await fetch(`/api/tournaments?type=international&id=${id}`, { method: 'DELETE' });
-  } catch {}
+    const supabase = createClient();
+    await supabase.from('tournaments').delete().eq('id', id);
+  } catch (e) {}
 
   return true;
 }
