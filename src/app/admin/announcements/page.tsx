@@ -144,8 +144,8 @@ export default function AdminAnnouncementsPage() {
         expires_at: formData.expires_at || null,
       });
 
-      if (!editingId) {
-        // Broadcast notification if it's targeted for students/all
+      if (!editingId && !formData.is_featured) {
+        // Broadcast notification only if it's a bell notification, NOT a cabinet banner
         await broadcastNotification(
           formData.title,
           formData.message,

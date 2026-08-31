@@ -49,10 +49,13 @@ export default function NotificationBell() {
  if (showLoading) setLoading(true);
  const [notifsData, announcementsData] = await Promise.all([
  getNotifications(20),
- getAnnouncements(5)
+ getAnnouncements(10)
  ]);
  
- const mappedAnnouncements: Notification[] = (announcementsData || []).map((a: any) => ({
+ // Only include announcements that are intended for the bell (not cabinet banners)
+ const mappedAnnouncements: Notification[] = (announcementsData || [])
+  .filter((a: any) => !a.is_featured)
+  .map((a: any) => ({
  id: `announcement-${a.id}`,
  title: a.title,
  message: a.message,
