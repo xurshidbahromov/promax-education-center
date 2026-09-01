@@ -18,7 +18,8 @@ import {
   ArrowUpDown,
   Megaphone,
   Layers,
-  PauseCircle
+  PauseCircle,
+  Send
 } from 'lucide-react';
 import { broadcastNotification } from '@/lib/admin-queries';
 import { useQueryClient } from '@tanstack/react-query';
@@ -43,6 +44,7 @@ export default function AdminAnnouncementsPage() {
   const [announcements, setAnnouncements] = useState<Announcement[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
+  const [sendingTelegramId, setSendingTelegramId] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<'all' | 'banners' | 'bells' | 'active' | 'inactive'>('all');
   const [filterType, setFilterType] = useState<'all' | AnnouncementType>('all');
   const [sortBy, setSortBy] = useState<'newest' | 'priority' | 'title'>('newest');
@@ -169,7 +171,8 @@ export default function AdminAnnouncementsPage() {
             body: JSON.stringify({
               text: telegramText,
               targetAll: true,
-              targetAudience: formData.target_audience
+              targetAudience: formData.target_audience,
+              imageUrl: formData.image_url || undefined
             })
           });
         } catch (botErr) {
@@ -177,7 +180,7 @@ export default function AdminAnnouncementsPage() {
         }
       }
 
-      toast.success(editingId ? "E'lon yangilandi" : "E'lon muvaffaqiyatli yaratildi va Telegramga yuborildi");
+      toast.success(editingId ? "E'lon yangilandi" : "E'lon muvaffaqiyatli yaratildi va Telegram botga yuborildi");
       queryClient.invalidateQueries({ queryKey: ['announcements'] });
       setShowModal(false);
       resetForm();
@@ -233,6 +236,46 @@ export default function AdminAnnouncementsPage() {
     } catch (error: any) {
       console.error("Error toggling active:", error);
       toast.error("Statusni o'zgartirishda xatolik");
+    }
+  };
+
+  const handleSendToTelegram = async (announcement: Announcement) => {
+    if (sendingTelegramId) return;
+    setSendingTelegramId(announcement.id);
+    const toastId = toast.loading("Telegram botga yuborilmoqda...");
+
+    try {
+      const typeEmoji = announcement.type === 'error' ? '🚨' : announcement.type === 'warning' ? '⚠️' : announcement.type === 'success' ? '🎉' : '📢';
+      const categoryTitle = announcement.is_featured ? "📌 KABINET E'LONI" : "🔔 YANGI BILDIRISHNOMA";
+      const badgeText = announcement.badge ? ` [${announcement.badge}]` : '';
+
+      const telegramText = `<b>${typeEmoji} ${categoryTitle}${badgeText}</b>\n\n<b>${announcement.title}</b>\n\n${announcement.message}\n\n<i>PROMAX Ta'lim Markazi</i>`;
+
+      const res = await fetch('/api/telegram/send', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          text: telegramText,
+          targetAll: true,
+          targetAudience: announcement.target_audience,
+          imageUrl: announcement.image_url || undefined
+        })
+      });
+
+      const data = await res.json();
+      if (res.ok && data.success) {
+        toast.success(
+          `Telegram botga yuborildi! (${data.sent || 0} ta foydalanuvchi${data.hasPhoto ? ', rasm bilan' : ''})`,
+          { id: toastId }
+        );
+      } else {
+        toast.error("Telegramga yuborishda xatolik: " + (data.error || "Noma'lum xatolik"), { id: toastId });
+      }
+    } catch (e: any) {
+      console.error("Error sending to telegram:", e);
+      toast.error("Telegramga yuborishda xatolik: " + (e?.message || "Tarmoq xatosi"), { id: toastId });
+    } finally {
+      setSendingTelegramId(null);
     }
   };
 
@@ -527,6 +570,15 @@ export default function AdminAnnouncementsPage() {
                   </button>
 
                   <div className="flex items-center gap-1">
+                    <button
+                      onClick={() => handleSendToTelegram(a)}
+                      disabled={sendingTelegramId === a.id}
+                      className="p-2 text-slate-400 hover:text-sky-500 rounded-xl hover:bg-sky-500/10 transition-colors cursor-pointer disabled:opacity-50"
+                      title="Telegram botga yuborish"
+                    >
+                      <Send size={15} className={sendingTelegramId === a.id ? "animate-spin text-sky-500" : ""} />
+                    </button>
+
                     <button
                       onClick={() => handleEdit(a)}
                       className="p-2 text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer"

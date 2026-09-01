@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient, createTelegramBotClient } from '@/utils/supabase/server';
-import { broadcastMessage, sendMessage } from '@/lib/telegram/bot';
+import { broadcastMessage, broadcastPhoto, sendMessage, sendPhoto } from '@/lib/telegram/bot';
 
 export async function POST(request: NextRequest) {
   try {
@@ -28,11 +28,13 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json();
-    const { chatId, text, targetAll, targetAudience = 'all' } = body;
+    const { chatId, text, targetAll, targetAudience = 'all', imageUrl, photoUrl } = body;
 
     if (!text) {
       return NextResponse.json({ error: 'text is required' }, { status: 400 });
     }
+
+    const validPhotoUrl = (imageUrl || photoUrl || '').startsWith('http') ? (imageUrl || photoUrl) : null;
 
     if (targetAll) {
       const botClient = await createTelegramBotClient();
@@ -67,18 +69,30 @@ export async function POST(request: NextRequest) {
       ])).filter(id => id && !isNaN(id));
 
       if (allChatIds.length > 0) {
-        await broadcastMessage(allChatIds, text);
+        if (validPhotoUrl) {
+          await broadcastPhoto(allChatIds, validPhotoUrl, text);
+        } else {
+          await broadcastMessage(allChatIds, text);
+        }
       }
 
       return NextResponse.json({
         success: true,
         sent: allChatIds.length,
+        hasPhoto: !!validPhotoUrl,
       });
     }
 
     if (chatId) {
-      await sendMessage(chatId, text);
-      return NextResponse.json({ success: true });
+      if (validPhotoUrl) {
+        const photoRes = await sendPhoto(chatId, validPhotoUrl, text);
+        if (!photoRes?.ok) {
+          await sendMessage(chatId, text);
+        }
+      } else {
+        await sendMessage(chatId, text);
+      }
+      return NextResponse.json({ success: true, hasPhoto: !!validPhotoUrl });
     }
 
     return NextResponse.json({ error: 'chatId or targetAll required' }, { status: 400 });

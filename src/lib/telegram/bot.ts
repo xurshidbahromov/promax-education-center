@@ -32,6 +32,24 @@ export async function sendMessage(
  });
 }
 
+export async function sendPhoto(
+  chatId: number | string,
+  photoUrl: string,
+  caption?: string,
+  options: Record<string, unknown> = {}
+) {
+  const payload: Record<string, unknown> = {
+    chat_id: chatId,
+    photo: photoUrl,
+    parse_mode: 'HTML',
+    ...options,
+  };
+  if (caption) {
+    payload.caption = caption.length > 1024 ? caption.slice(0, 1020) + '...' : caption;
+  }
+  return callTelegramAPI('sendPhoto', payload);
+}
+
 export async function editMessageText(
  chatId: number | string,
  messageId: number,
@@ -60,17 +78,45 @@ export async function answerCallbackQuery(
 }
 
 export async function broadcastMessage(
- chatIds: (number | string)[],
- text: string,
- options: Record<string, unknown> = {}
+  chatIds: (number | string)[],
+  text: string,
+  options: Record<string, unknown> = {}
 ) {
- const results = [];
- for (const chatId of chatIds) {
- await new Promise(r => setTimeout(r, 40));
- const result = await sendMessage(chatId, text, options);
- results.push(result);
- }
- return results;
+  const results = [];
+  for (const chatId of chatIds) {
+    await new Promise(r => setTimeout(r, 40));
+    const result = await sendMessage(chatId, text, options);
+    results.push(result);
+  }
+  return results;
+}
+
+export async function broadcastPhoto(
+  chatIds: (number | string)[],
+  photoUrl: string,
+  caption?: string,
+  options: Record<string, unknown> = {}
+) {
+  const results = [];
+  for (const chatId of chatIds) {
+    await new Promise(r => setTimeout(r, 40));
+    try {
+      const result = await sendPhoto(chatId, photoUrl, caption, options);
+      if (!result?.ok && caption) {
+        // Fallback to text message if photo fails
+        const fallback = await sendMessage(chatId, caption, options);
+        results.push(fallback);
+      } else {
+        results.push(result);
+      }
+    } catch {
+      if (caption) {
+        const fallback = await sendMessage(chatId, caption, options);
+        results.push(fallback);
+      }
+    }
+  }
+  return results;
 }
 
 export async function setWebhook(url: string, secret: string) {
