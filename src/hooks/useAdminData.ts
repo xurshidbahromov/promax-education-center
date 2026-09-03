@@ -3,7 +3,7 @@ import { useEffect } from 'react';
 import { createClient } from '@/utils/supabase/client';
 import { getAdminStats, getRecentActivity, getTeachers, getStudents, getAllResults, getExamsList, Student, getGroups, getGroupStudents, getStudentsNotInGroup } from '@/lib/admin-queries';
 import { getPaymentSummariesForStudents } from '@/lib/payments';
-import { getSubjects, getSubjectById, getLessonsBySubjectId, getMaterialsByLessonId } from '@/lib/supabase-queries';
+import { getSubjects, getAllSubjects, getSubjectById, getLessonsBySubjectId, getMaterialsByLessonId } from '@/lib/supabase-queries';
 import { getAllTests, getTestWithQuestions, getTestResults, getTestGroups } from '@/lib/tests';
 
 
@@ -65,7 +65,7 @@ export const useExamsList = () => {
 export const useSubjects = () => {
  return useQuery({
    queryKey: ['subjects'],
-   queryFn: () => getSubjects(),
+   queryFn: () => getAllSubjects(),
  });
 };
 

@@ -1025,28 +1025,51 @@ export async function getStudentsNotInGroup(groupId: string, searchTerm: string 
 
 // --- VIDEO LESSONS ---
 
-export async function createVideoLesson(subjectId: string, title: string, description: string, videoUrl: string, orderNum: number = 1): Promise<{ success: boolean; error?: string }> {
+export async function createVideoLesson(
+  subjectId: string, 
+  title: string, 
+  param3: string, 
+  param4?: string, 
+  orderNum: number = 1
+): Promise<{ success: boolean; error?: string }> {
   const supabase = createClient();
   
+  // Smart detection: check if param3 is a video URL or description
+  let description = '';
+  let videoUrl = '';
+
+  const isUrl = (str: string) => /^(https?:\/\/|www\.|[a-zA-Z0-9_-]{11})/i.test(str.trim());
+
+  if (isUrl(param3)) {
+    videoUrl = param3.trim();
+    description = param4 && !isUrl(param4) ? param4.trim() : '';
+  } else {
+    description = param3 ? param3.trim() : '';
+    videoUrl = param4?.trim() || '';
+  }
+
   // 1. Create Lesson
   const { data: lesson, error: lessonError } = await supabase.from('lessons').insert({
     subject_id: subjectId,
-    title,
-    description,
+    title: title.trim(),
+    description: description || null,
     order_num: orderNum
   }).select().single();
 
   if (lessonError) return { success: false, error: lessonError.message };
 
   // 2. Create Material (Video)
-  const { error: materialError } = await supabase.from('materials').insert({
-    lesson_id: lesson.id,
-    title: "Asosiy Video",
-    type: 'video',
-    url: videoUrl
-  });
+  if (videoUrl && lesson?.id) {
+    const { error: materialError } = await supabase.from('materials').insert({
+      lesson_id: lesson.id,
+      title: "Asosiy Video",
+      type: 'video',
+      url: videoUrl
+    });
 
-  if (materialError) return { success: false, error: materialError.message };
+    if (materialError) console.warn("Material insert warning:", materialError);
+  }
+
   return { success: true };
 }
 

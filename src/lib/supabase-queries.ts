@@ -581,7 +581,7 @@ export interface Material {
  created_at: string;
 }
 
-export async function getSubjects(): Promise<Subject[]> {
+export async function getAllSubjects(): Promise<Subject[]> {
   const supabase = createClient();
   const { data, error } = await supabase
     .from('subjects')
@@ -589,10 +589,49 @@ export async function getSubjects(): Promise<Subject[]> {
     .order('created_at', { ascending: false });
 
   if (error) {
-    console.error('Error fetching subjects:', error);
+    console.error('Error fetching all subjects:', error);
     return [];
   }
   return (data || []).map((s: any) => ({
+    ...s,
+    title: s.title || s.name || 'Nomsiz Fan',
+    name: s.name || s.title || 'Nomsiz Fan',
+  }));
+}
+
+export async function getSubjects(options?: { onlyWithLessons?: boolean }): Promise<Subject[]> {
+  const onlyWithLessons = options?.onlyWithLessons ?? true;
+  const supabase = createClient();
+
+  if (!onlyWithLessons) {
+    return getAllSubjects();
+  }
+
+  // Fetch subjects and lessons to ensure only subjects with video lessons appear in student panels
+  const [subjectsRes, lessonsRes] = await Promise.all([
+    supabase
+      .from('subjects')
+      .select('*')
+      .order('created_at', { ascending: false }),
+    supabase
+      .from('lessons')
+      .select('subject_id')
+  ]);
+
+  if (subjectsRes.error) {
+    console.error('Error fetching subjects:', subjectsRes.error);
+    return [];
+  }
+
+  const subjectIdsWithLessons = new Set(
+    (lessonsRes.data || []).map((l: any) => l.subject_id).filter(Boolean)
+  );
+
+  const filtered = (subjectsRes.data || []).filter((s: any) =>
+    subjectIdsWithLessons.has(s.id)
+  );
+
+  return filtered.map((s: any) => ({
     ...s,
     title: s.title || s.name || 'Nomsiz Fan',
     name: s.name || s.title || 'Nomsiz Fan',

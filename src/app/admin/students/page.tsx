@@ -36,7 +36,7 @@ import {
   type Student,
   type Group
 } from '@/lib/admin-queries';
-import { getSubjects, type Subject } from '@/lib/supabase-queries';
+import { getAllSubjects, type Subject } from '@/lib/supabase-queries';
 import { useQueryClient } from '@tanstack/react-query';
 import { useStudents } from '@/hooks/useAdminData';
 import { formatUzPhone, cleanUzPhone } from '@/lib/phone-formatter';
@@ -118,7 +118,7 @@ export default function AdminStudentsPage() {
   // Load Groups and Subjects on mount
   useEffect(() => {
     getGroups().then(setAllGroups).catch(console.error);
-    getSubjects().then(setSubjects).catch(console.error);
+    getAllSubjects().then(setSubjects).catch(console.error);
   }, []);
 
   const { data: students, isLoading: loading } = useStudents();
