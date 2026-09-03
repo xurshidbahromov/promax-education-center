@@ -9,7 +9,9 @@ export const dynamic = 'force-dynamic';
 export const revalidate = 0;
 
 // Helper to convert Supabase row to frontend AdminTournament
-function mapDbToTournament(row: any): AdminTournament {
+function mapDbToTournament(row: any, liveCount?: number): AdminTournament {
+  const storedCount = Number(row.participants_count) || 0;
+  const count = liveCount !== undefined ? Math.max(storedCount, liveCount) : storedCount;
   return {
     id: row.id,
     title: row.title || 'Musobaqa',
@@ -26,7 +28,7 @@ function mapDbToTournament(row: any): AdminTournament {
     prizePool: row.prize_pool || '',
     topPrizes: Array.isArray(row.top_prizes) ? row.top_prizes : [],
     rules: Array.isArray(row.rules) ? row.rules : [],
-    participantsCount: Number(row.participants_count) || 0,
+    participantsCount: count,
     questions: Array.isArray(row.questions) ? row.questions : [],
     isPublished: row.is_published ?? true,
     created_at: row.created_at || new Date().toISOString()
@@ -34,7 +36,9 @@ function mapDbToTournament(row: any): AdminTournament {
 }
 
 // Helper to convert Supabase row to frontend InternationalTournament
-function mapDbToIntlTournament(row: any): InternationalTournament {
+function mapDbToIntlTournament(row: any, liveCount?: number): InternationalTournament {
+  const storedCount = Number(row.participants_count) || 0;
+  const count = liveCount !== undefined ? Math.max(storedCount, liveCount) : storedCount;
   return {
     id: row.id,
     title: row.title || 'Xalqaro Musobaqa',
@@ -55,7 +59,7 @@ function mapDbToIntlTournament(row: any): InternationalTournament {
     prizePool: row.prize_pool || '',
     topPrizes: Array.isArray(row.top_prizes) ? row.top_prizes : [],
     rules: Array.isArray(row.rules) ? row.rules : [],
-    participantsCount: Number(row.participants_count) || 0,
+    participantsCount: count,
     questions: Array.isArray(row.questions) ? row.questions : [],
     scoringScale: row.scoring_scale || (row.category === 'sat' ? '1600 Ballik SAT Shkalasi' : '100 Ballik Shkala'),
     isPublished: row.is_published ?? true,
@@ -239,20 +243,70 @@ export async function GET(request: NextRequest) {
       .select('*')
       .eq('type', type);
 
+    // Fetch live participants count from registrations and results
+    const [regRes, resultsRes] = await Promise.all([
+      supabase.from('tournament_registrations').select('tournament_id, student_id'),
+      supabase.from('tournament_results').select('tournament_id, student_id')
+    ]);
+
+    const participantMap = new Map<string, Set<string>>();
+
+    if (regRes.data) {
+      for (const r of regRes.data) {
+        if (r.tournament_id && r.student_id) {
+          if (!participantMap.has(r.tournament_id)) {
+            participantMap.set(r.tournament_id, new Set());
+          }
+          participantMap.get(r.tournament_id)!.add(r.student_id);
+        }
+      }
+    }
+
+    if (resultsRes.data) {
+      for (const res of resultsRes.data) {
+        if (res.tournament_id && res.student_id) {
+          if (!participantMap.has(res.tournament_id)) {
+            participantMap.set(res.tournament_id, new Set());
+          }
+          participantMap.get(res.tournament_id)!.add(res.student_id);
+        }
+      }
+    }
+
     if (id) {
       query = query.eq('id', id);
       const { data, error } = await query.single();
       if (!error && data) {
-        const mapped = type === 'international' ? mapDbToIntlTournament(data) : mapDbToTournament(data);
+        const liveCount = participantMap.get(data.id)?.size || 0;
+        const stored = Number(data.participants_count) || 0;
+        if (liveCount > stored) {
+          supabase.from('tournaments').update({ participants_count: liveCount }).eq('id', data.id).then(() => {}, () => {});
+        }
+        const mapped = (data.type === 'international' || type === 'international') 
+          ? mapDbToIntlTournament(data, liveCount) 
+          : mapDbToTournament(data, liveCount);
         return NextResponse.json({ tournament: mapped });
       }
     } else {
       query = query.order('created_at', { ascending: false });
       const { data, error } = await query;
       if (!error && data && data.length > 0) {
-        const mapped = type === 'international' 
-          ? data.map(mapDbToIntlTournament) 
-          : data.map(mapDbToTournament);
+        const mapped = data.map((row: any) => {
+          const liveCount = participantMap.get(row.id)?.size || 0;
+          return type === 'international'
+            ? mapDbToIntlTournament(row, liveCount)
+            : mapDbToTournament(row, liveCount);
+        });
+
+        // Sync participant counts back to tournaments table in background if needed
+        for (const row of data) {
+          const live = participantMap.get(row.id)?.size || 0;
+          const stored = Number(row.participants_count) || 0;
+          if (live > stored) {
+            supabase.from('tournaments').update({ participants_count: live }).eq('id', row.id).then(() => {}, () => {});
+          }
+        }
+
         return NextResponse.json({ tournaments: mapped }, {
           headers: {
             'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate',

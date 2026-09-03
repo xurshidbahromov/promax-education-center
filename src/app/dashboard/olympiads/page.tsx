@@ -688,6 +688,16 @@ export default function OlympiadsPage() {
                                   {item.prizePool || "Top o'rinlar uchun mukofotlar"}
                                 </span>
                               </div>
+
+                              <div className="flex items-center justify-between text-slate-600 dark:text-slate-400">
+                                <span className="flex items-center gap-2">
+                                  <Users size={15} className="text-slate-400" />
+                                  <span>Qatnashuvchilar:</span>
+                                </span>
+                                <span className="font-bold text-slate-900 dark:text-white">
+                                  {item.participantsCount || 0} nafar
+                                </span>
+                              </div>
                             </div>
                           </div>
 
@@ -1297,6 +1307,11 @@ export default function OlympiadsPage() {
                     <li key={idx}>{rule}</li>
                   ))}
                 </ul>
+              </div>
+
+              <div className="flex items-center gap-2 px-3.5 py-2.5 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-100 dark:border-slate-800 text-xs font-semibold text-slate-600 dark:text-slate-300">
+                <Users size={15} className="text-brand-blue shrink-0" />
+                <span>Qatnashuvchilar soni: <b className="text-slate-900 dark:text-white">{selectedItem.participantsCount || 0} nafar</b></span>
               </div>
 
               <div className="flex items-center gap-2 pt-2">

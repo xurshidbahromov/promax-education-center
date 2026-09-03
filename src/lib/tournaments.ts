@@ -132,13 +132,36 @@ export async function getAdminTournaments(): Promise<AdminTournament[]> {
     const { data, error } = await supabase
       .from('tournaments')
       .select('*')
+      .eq('type', 'national')
       .order('created_at', { ascending: false });
     
     if (!error && data && data.length > 0) {
+      const mapped: AdminTournament[] = data.map((row: any) => ({
+        id: row.id,
+        title: row.title || 'Musobaqa',
+        subject: row.subject || 'Matematika',
+        description: row.description || '',
+        status: row.status || 'upcoming',
+        startDate: row.start_date || '',
+        startTime: row.start_time || '10:00',
+        endDate: row.end_date || '',
+        endTime: row.end_time || '20:00',
+        durationMinutes: Number(row.duration_minutes) || 60,
+        totalQuestions: Number(row.total_questions) || (Array.isArray(row.questions) ? row.questions.length : 0),
+        entryCoins: Number(row.entry_coins) || 0,
+        prizePool: row.prize_pool || '',
+        topPrizes: Array.isArray(row.top_prizes) ? row.top_prizes : [],
+        rules: Array.isArray(row.rules) ? row.rules : [],
+        participantsCount: Number(row.participants_count) || 0,
+        questions: Array.isArray(row.questions) ? row.questions : [],
+        isPublished: row.is_published ?? true,
+        created_at: row.created_at || new Date().toISOString()
+      }));
+
       if (typeof window !== 'undefined') {
-        localStorage.setItem('promax_tournaments_v3', JSON.stringify(data));
+        localStorage.setItem('promax_tournaments_v3', JSON.stringify(mapped));
       }
-      return data;
+      return mapped;
     }
   } catch (err) {}
 
@@ -291,6 +314,20 @@ export async function registerForTournament(
       if (!list.includes(tournamentId)) {
         list.push(tournamentId);
         localStorage.setItem(key, JSON.stringify(list));
+
+        // Also update cached tournament participant count
+        const local = localStorage.getItem('promax_tournaments_v3');
+        if (local) {
+          try {
+            const parsed = JSON.parse(local);
+            if (Array.isArray(parsed)) {
+              const updated = parsed.map((t: any) =>
+                t.id === tournamentId ? { ...t, participantsCount: (t.participantsCount || 0) + 1 } : t
+              );
+              localStorage.setItem('promax_tournaments_v3', JSON.stringify(updated));
+            }
+          } catch (e) {}
+        }
       }
     } catch (e) {}
   }

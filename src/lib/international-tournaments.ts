@@ -131,13 +131,41 @@ export async function getInternationalTournaments(): Promise<InternationalTourna
       .from('tournaments')
       .select('*')
       .eq('is_published', true)
+      .eq('type', 'international')
       .order('created_at', { ascending: false });
 
     if (!error && data && data.length > 0) {
+      const mapped: InternationalTournament[] = data.map((row: any) => ({
+        id: row.id,
+        title: row.title || 'Xalqaro Musobaqa',
+        category: row.category || 'sat',
+        categoryLabel: row.category_label || (row.category === 'sat' ? 'SAT Digital' : 'Xalqaro'),
+        subject: row.subject || 'SAT Math & Reading',
+        description: row.description || '',
+        badge: row.badge || '🔥 XALQARO ARENA',
+        badgeBg: row.badge_bg || 'bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 text-white',
+        status: row.status || 'upcoming',
+        startDate: row.start_date || '',
+        startTime: row.start_time || '10:00',
+        endDate: row.end_date || '',
+        endTime: row.end_time || '20:00',
+        durationMinutes: Number(row.duration_minutes) || 60,
+        totalQuestions: Number(row.total_questions) || (Array.isArray(row.questions) ? row.questions.length : 0),
+        entryCoins: Number(row.entry_coins) || 0,
+        prizePool: row.prize_pool || '',
+        topPrizes: Array.isArray(row.top_prizes) ? row.top_prizes : [],
+        rules: Array.isArray(row.rules) ? row.rules : [],
+        participantsCount: Number(row.participants_count) || 0,
+        questions: Array.isArray(row.questions) ? row.questions : [],
+        scoringScale: row.scoring_scale || (row.category === 'sat' ? '1600 Ballik SAT Shkalasi' : '100 Ballik Shkala'),
+        isPublished: row.is_published ?? true,
+        created_at: row.created_at || new Date().toISOString()
+      }));
+
       if (typeof window !== 'undefined') {
-        localStorage.setItem(STORAGE_INTERNATIONAL_TOURNAMENTS, JSON.stringify(data));
+        localStorage.setItem(STORAGE_INTERNATIONAL_TOURNAMENTS, JSON.stringify(mapped));
       }
-      return data as any;
+      return mapped;
     }
   } catch {}
 
@@ -249,6 +277,20 @@ export async function registerForInternationalTournament(tournamentId: string, u
     if (!regMap[userKey].includes(tournamentId)) {
       regMap[userKey].push(tournamentId);
       localStorage.setItem(STORAGE_INTERNATIONAL_REGISTRATIONS, JSON.stringify(regMap));
+
+      // Also update cached tournament participant count
+      const storedTournaments = localStorage.getItem(STORAGE_INTERNATIONAL_TOURNAMENTS);
+      if (storedTournaments) {
+        try {
+          const list = JSON.parse(storedTournaments);
+          if (Array.isArray(list)) {
+            const updated = list.map((t: any) =>
+              t.id === tournamentId ? { ...t, participantsCount: (t.participantsCount || 0) + 1 } : t
+            );
+            localStorage.setItem(STORAGE_INTERNATIONAL_TOURNAMENTS, JSON.stringify(updated));
+          }
+        } catch (e) {}
+      }
     }
   }
 

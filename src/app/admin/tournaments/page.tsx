@@ -390,6 +390,10 @@ export default function AdminTournamentsPage() {
                       <span className="text-slate-400 text-xs font-bold">
                         {tournament.questions?.length || tournament.totalQuestions || 0} ta savol
                       </span>
+                      <span className="flex items-center gap-1 text-slate-500 dark:text-slate-400 text-xs font-bold">
+                        <Users size={13} className="text-brand-blue shrink-0" />
+                        {tournament.participantsCount || 0} ta qatnashuvchi
+                      </span>
                       {tournament.prizePool && (
                         <span className="text-amber-600 dark:text-amber-400 text-xs font-bold truncate max-w-[140px]">
                           {tournament.prizePool}

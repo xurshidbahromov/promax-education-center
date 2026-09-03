@@ -240,8 +240,11 @@ export default function InternationalCompetitionsPage() {
     }
 
     try {
-      registerForInternationalTournament(item.id, user?.id);
+      await registerForInternationalTournament(item.id, user?.id);
       setRegisteredIds(prev => [...prev, item.id]);
+      setTournaments(prev =>
+        prev.map(t => t.id === item.id ? { ...t, participantsCount: (t.participantsCount || 0) + 1 } : t)
+      );
       toast.success(`"${item.title}" musobaqasiga muvaffaqiyatli ro'yxatdan o'tdingiz!`, {
         icon: "🎓"
       });
@@ -680,6 +683,16 @@ export default function InternationalCompetitionsPage() {
                                 </span>
                                 <span className="font-bold text-[#EB7C0E] dark:text-orange-400 truncate max-w-[200px] text-right">
                                   {item.prizePool || "Top o'rinlar uchun mukofotlar"}
+                                </span>
+                              </div>
+
+                              <div className="flex items-center justify-between text-slate-600 dark:text-slate-400">
+                                <span className="flex items-center gap-2">
+                                  <Users size={15} className="text-slate-400" />
+                                  <span>Qatnashuvchilar:</span>
+                                </span>
+                                <span className="font-bold text-slate-900 dark:text-white">
+                                  {item.participantsCount || 0} nafar
                                 </span>
                               </div>
                             </div>
@@ -1273,6 +1286,11 @@ export default function InternationalCompetitionsPage() {
                     <li key={idx}>{rule}</li>
                   ))}
                 </ul>
+              </div>
+
+              <div className="flex items-center gap-2 px-3.5 py-2.5 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-100 dark:border-slate-800 text-xs font-semibold text-slate-600 dark:text-slate-300">
+                <Users size={15} className="text-brand-blue shrink-0" />
+                <span>Qatnashuvchilar soni: <b className="text-slate-900 dark:text-white">{selectedItem.participantsCount || 0} nafar</b></span>
               </div>
 
               <div className="flex items-center gap-2 pt-2">
