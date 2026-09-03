@@ -29,7 +29,8 @@ import {
   ShieldCheck,
   FileText,
   AlertCircle,
-  Timer
+  Timer,
+  Calendar
 } from "lucide-react";
 import {
   AdminTournament,
@@ -580,148 +581,181 @@ export default function OlympiadsPage() {
                     return (
                       <div
                         key={item.id}
-                        className="bg-white/60 dark:bg-slate-900/60 backdrop-blur-xl rounded-[2rem] p-6 border border-white/60 dark:border-slate-800/60 shadow-none flex flex-col justify-between gap-5 transition-all active:scale-[0.99]"
+                        className="bg-white/75 dark:bg-slate-900/75 backdrop-blur-xl rounded-[2rem] border border-white/60 dark:border-slate-800/60 transition-all duration-300 hover:shadow-xl active:scale-[0.99] flex flex-col justify-between overflow-hidden relative"
                       >
-                        <div className="space-y-3.5">
-                          {/* Top Row: Subject + Status Badge & Date */}
-                          <div className="flex items-center justify-between gap-2">
-                            <div className="flex items-center gap-2 flex-wrap">
-                              <span className="text-sm font-bold text-slate-700 dark:text-slate-200">
-                                {item.subject}
-                              </span>
-                              {isCompleted ? (
-                                <span className="text-[11px] font-bold text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-950/40 px-2.5 py-0.5 rounded-md border border-indigo-500/20 flex items-center gap-1.5">
-                                  <CheckCircle2 size={12} />
-                                  Topshirilgan
-                                </span>
-                              ) : isLive ? (
-                                <span className="text-[11px] font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/40 px-2.5 py-0.5 rounded-md border border-emerald-500/20 flex items-center gap-1.5">
-                                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                                  Faol
-                                </span>
-                              ) : isUpcoming ? (
-                                <span className="text-[11px] font-bold text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-950/40 px-2.5 py-0.5 rounded-md border border-amber-500/20 flex items-center gap-1">
-                                  <Clock size={11} />
-                                  Kutilmoqda
-                                </span>
-                              ) : (
-                                <span className="text-[11px] font-bold text-slate-500 dark:text-slate-400 bg-slate-100 dark:bg-slate-800 px-2.5 py-0.5 rounded-md">
-                                  Yakunlangan
-                                </span>
-                              )}
-                            </div>
-                            <span className="text-xs sm:text-sm font-bold text-[#EB7C0E] dark:text-orange-400 shrink-0">
-                              {formatUzbekDate(item.startDate) || item.startDate}
-                            </span>
+                        {/* ── MINIMAL PREMIUM TICKET / RECEIPT STUB (CHIPTA QISMI) ── */}
+                        <div className="relative bg-slate-50/80 dark:bg-slate-800/50 backdrop-blur-md px-6 py-4 flex items-center justify-between gap-3">
+                          {/* Left: Sana & Vaqt */}
+                          <div className="flex items-center gap-1.5 text-xs font-semibold text-slate-700 dark:text-slate-300">
+                            <Calendar size={14} className="text-[#EB7C0E] dark:text-orange-400 shrink-0" />
+                            <span className="text-slate-800 dark:text-slate-200">{formatUzbekDate(item.startDate) || item.startDate}</span>
                           </div>
 
-                          {/* Title */}
-                          <h3 className="text-lg sm:text-xl font-black font-fredoka text-slate-900 dark:text-white leading-tight">
-                            {item.title}
-                          </h3>
-
-                          {/* Description */}
-                          <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 font-medium leading-relaxed line-clamp-2">
-                            {item.description || "Musobaqa qoidalariga muvofiq qatnashing va yuqori natijalarni qo'lga kiriting."}
-                          </p>
-
-                          {/* Specs Rows (Icons, Labels, Values) */}
-                          <div className="space-y-2 pt-1 text-xs sm:text-sm">
-                            <div className="flex items-center justify-between text-slate-600 dark:text-slate-400">
-                              <span className="flex items-center gap-2">
-                                <Clock size={15} className="text-slate-400" />
-                                <span>Vaqti:</span>
+                          {/* Right: Solid Smooth Glassy Status Badge (Bordersiz, toza glassy uslubda) */}
+                          <div className="shrink-0">
+                            {isCompleted ? (
+                              <span className="text-xs font-semibold text-indigo-600 dark:text-indigo-400 bg-indigo-500/15 dark:bg-indigo-500/20 px-3 py-1 rounded-full backdrop-blur-md flex items-center gap-1.5">
+                                <CheckCircle2 size={12} />
+                                <span>Topshirilgan</span>
                               </span>
-                              <span className="font-bold text-slate-900 dark:text-white">
-                                {item.startTime || "15:00"} ({item.durationMinutes || 60} daqiqa)
+                            ) : isLive ? (
+                              <span className="text-xs font-semibold text-emerald-600 dark:text-emerald-400 bg-emerald-500/15 dark:bg-emerald-500/20 px-3 py-1 rounded-full backdrop-blur-md flex items-center gap-1.5">
+                                <span className="h-2 w-2 rounded-full bg-emerald-500" />
+                                <span>Faol</span>
                               </span>
-                            </div>
-
-                            {/* Live Dynamic Countdown Row */}
-                            <div className="flex items-center justify-between text-slate-600 dark:text-slate-400 bg-slate-50/80 dark:bg-slate-800/50 p-2.5 rounded-xl border border-slate-100 dark:border-slate-800">
-                              <span className="flex items-center gap-2 font-bold text-xs">
-                                <Timer size={14} className={isLive ? "text-emerald-500 animate-spin" : isUpcoming ? "text-amber-500" : "text-slate-400"} />
-                                <span>{timing.countdown.label}:</span>
+                            ) : isUpcoming ? (
+                              <span className="text-xs font-semibold text-amber-600 dark:text-amber-400 bg-amber-500/15 dark:bg-amber-500/20 px-3 py-1 rounded-full backdrop-blur-md flex items-center gap-1.5">
+                                <Clock size={12} />
+                                <span>Kutilmoqda</span>
                               </span>
-                              <span className={`font-black text-xs sm:text-sm ${
-                                isLive ? "text-emerald-600 dark:text-emerald-400" : isUpcoming ? "text-amber-600 dark:text-amber-400" : "text-slate-400"
-                              }`}>
-                                {timing.countdown.formatted}
+                            ) : (
+                              <span className="text-xs font-semibold text-slate-500 dark:text-slate-400 bg-slate-500/15 dark:bg-slate-500/20 px-3 py-1 rounded-full backdrop-blur-md flex items-center gap-1.5">
+                                <span>Yakunlangan</span>
                               </span>
-                            </div>
-
-                            <div className="flex items-center justify-between text-slate-600 dark:text-slate-400">
-                              <span className="flex items-center gap-2">
-                                <Gift size={15} className="text-slate-400" />
-                                <span>Sovrinlar:</span>
-                              </span>
-                              <span className="font-bold text-[#EB7C0E] dark:text-orange-400 truncate max-w-[200px] text-right">
-                                {item.prizePool || "Top o'rinlar uchun mukofotlar"}
-                              </span>
-                            </div>
+                            )}
                           </div>
                         </div>
 
-                        {/* Bottom Action Buttons */}
-                        <div className="flex items-center gap-3 pt-2">
-                          <button
-                            onClick={() => setSelectedItem(item)}
-                            className="flex-1 py-3 rounded-2xl bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-white font-bold text-xs sm:text-sm active:scale-95 transition-all text-center cursor-pointer"
-                          >
-                            Nizom
-                          </button>
+                        {/* ── SMOOTH GLASSY TICKET PERFORATION LINE & TICKET NOTCHES ── */}
+                        <div className="relative w-full flex items-center h-0 z-20">
+                          {/* Left ticket cutout notch (Smooth 24px Yarim oy, ochiq og'iz) */}
+                          <div className="absolute -left-[1px] top-1/2 -translate-y-1/2 w-3.5 h-6 overflow-hidden pointer-events-none">
+                            <div className="w-6 h-6 rounded-full -ml-3 bg-[var(--background)] border border-slate-200/90 dark:border-slate-800" />
+                          </div>
 
-                          {isCompleted ? (
+                          {/* Smooth, refined chipta perforatsiya chizig'i */}
+                          <div className="w-full px-4 flex items-center overflow-hidden">
+                            <svg className="w-full h-[2px] text-slate-200/90 dark:text-slate-800" preserveAspectRatio="none">
+                              <line
+                                x1="0"
+                                y1="1"
+                                x2="100%"
+                                y2="1"
+                                stroke="currentColor"
+                                strokeWidth="1.5"
+                                strokeDasharray="6 5"
+                                strokeLinecap="round"
+                              />
+                            </svg>
+                          </div>
+
+                          {/* Right ticket cutout notch (Smooth 24px Yarim oy, ochiq og'iz) */}
+                          <div className="absolute -right-[1px] top-1/2 -translate-y-1/2 w-3.5 h-6 overflow-hidden pointer-events-none">
+                            <div className="w-6 h-6 rounded-full bg-[var(--background)] border border-slate-200/90 dark:border-slate-800" />
+                          </div>
+                        </div>
+
+                        {/* ── CARD BODY (TITLE, DESCRIPTION, SPECS, ACTIONS) ── */}
+                        <div className="p-5 sm:p-6 flex flex-col justify-between gap-5 flex-1">
+                          <div className="space-y-3.5">
+                            {/* Title */}
+                            <h3 className="text-lg sm:text-xl font-black font-fredoka text-slate-900 dark:text-white leading-tight">
+                              {item.title}
+                            </h3>
+
+                            {/* Description */}
+                            <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 font-medium leading-relaxed line-clamp-2">
+                              {item.description || "Musobaqa qoidalariga muvofiq qatnashing va yuqori natijalarni qo'lga kiriting."}
+                            </p>
+
+                            {/* Specs Rows (Icons, Labels, Values) */}
+                            <div className="space-y-2 pt-1 text-xs sm:text-sm">
+                              <div className="flex items-center justify-between text-slate-600 dark:text-slate-400">
+                                <span className="flex items-center gap-2">
+                                  <Clock size={15} className="text-slate-400" />
+                                  <span>Vaqti:</span>
+                                </span>
+                                <span className="font-bold text-slate-900 dark:text-white">
+                                  {item.startTime || "15:00"} ({item.durationMinutes || 60} daqiqa)
+                                </span>
+                              </div>
+
+                              {/* Live Dynamic Countdown Row */}
+                              <div className="flex items-center justify-between text-slate-600 dark:text-slate-400 bg-slate-50/80 dark:bg-slate-800/50 p-2.5 rounded-xl border border-slate-100 dark:border-slate-800">
+                                <span className="flex items-center gap-2 font-bold text-xs">
+                                  <Timer size={14} className={isLive ? "text-emerald-500" : isUpcoming ? "text-amber-500" : "text-slate-400"} />
+                                  <span>{timing.countdown.label}:</span>
+                                </span>
+                                <span className={`font-black text-xs sm:text-sm ${
+                                  isLive ? "text-emerald-600 dark:text-emerald-400" : isUpcoming ? "text-amber-600 dark:text-amber-400" : "text-slate-400"
+                                }`}>
+                                  {timing.countdown.formatted}
+                                </span>
+                              </div>
+
+                              <div className="flex items-center justify-between text-slate-600 dark:text-slate-400">
+                                <span className="flex items-center gap-2">
+                                  <Gift size={15} className="text-slate-400" />
+                                  <span>Sovrinlar:</span>
+                                </span>
+                                <span className="font-bold text-[#EB7C0E] dark:text-orange-400 truncate max-w-[200px] text-right">
+                                  {item.prizePool || "Top o'rinlar uchun mukofotlar"}
+                                </span>
+                              </div>
+                            </div>
+                          </div>
+
+                          {/* Bottom Action Buttons */}
+                          <div className="flex items-center gap-3 pt-2">
                             <button
-                              onClick={() => {
-                                handleTournamentSelectForLeaderboard(item.id);
-                                setActiveTab("leaderboard");
-                              }}
-                              className="flex-1 py-3 rounded-2xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs sm:text-sm flex items-center justify-center gap-1.5 shadow-sm active:scale-95 transition-all cursor-pointer"
+                              onClick={() => setSelectedItem(item)}
+                              className="flex-1 py-3 rounded-2xl bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-white font-bold text-xs sm:text-sm active:scale-95 transition-all text-center cursor-pointer"
                             >
-                              <Award size={16} />
-                              <span>Natijangiz</span>
+                              Nizom
                             </button>
-                          ) : isLive ? (
-                            <button
-                              onClick={() => setConfirmStartItem(item)}
-                              className="flex-1 py-3 rounded-2xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs sm:text-sm flex items-center justify-center gap-1.5 shadow-sm active:scale-95 transition-all text-center cursor-pointer animate-pulse"
-                            >
-                              <Play size={14} className="fill-white" />
-                              <span>Boshlash</span>
-                            </button>
-                          ) : isFinished ? (
-                            <button
-                              onClick={() => {
-                                handleTournamentSelectForLeaderboard(item.id);
-                                setActiveTab("leaderboard");
-                              }}
-                              className="flex-1 py-3 rounded-2xl bg-brand-blue hover:bg-blue-600 text-white font-bold text-xs sm:text-sm flex items-center justify-center gap-1.5 shadow-sm active:scale-95 transition-all cursor-pointer"
-                            >
-                              <Award size={16} />
-                              <span>Reyting</span>
-                            </button>
-                          ) : isRegistered ? (
-                            <button
-                              onClick={() => {
-                                toast.error(`Musobaqa hali boshlanmagan! Boshlanish vaqti: ${formatUzbekDate(item.startDate)} ${item.startTime || '15:00'}`, {
-                                  duration: 4000
-                                });
-                              }}
-                              className="flex-1 py-3 rounded-2xl bg-amber-500/10 dark:bg-amber-950/40 text-amber-600 dark:text-amber-400 border border-amber-500/20 font-bold text-xs sm:text-sm flex items-center justify-center gap-1.5 shadow-none active:scale-95 transition-all text-center cursor-pointer"
-                            >
-                              <Clock size={14} />
-                              <span>Kutilmoqda</span>
-                            </button>
-                          ) : (
-                            <button
-                              onClick={() => handleRegister(item)}
-                              className="flex-1 py-3 rounded-2xl font-bold text-xs sm:text-sm active:scale-95 flex items-center justify-center gap-1.5 transition-all bg-brand-blue hover:bg-blue-600 text-white shadow-sm"
-                            >
-                              <span>Qatnashish</span>
-                              <ArrowUpRight size={16} />
-                            </button>
-                          )}
+
+                            {isCompleted ? (
+                              <button
+                                onClick={() => {
+                                  handleTournamentSelectForLeaderboard(item.id);
+                                  setActiveTab("leaderboard");
+                                }}
+                                className="flex-1 py-3 rounded-2xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs sm:text-sm flex items-center justify-center gap-1.5 shadow-sm active:scale-95 transition-all cursor-pointer"
+                              >
+                                <Award size={16} />
+                                <span>Natijangiz</span>
+                              </button>
+                            ) : isLive ? (
+                              <button
+                                onClick={() => setConfirmStartItem(item)}
+                                className="flex-1 py-3 rounded-2xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs sm:text-sm flex items-center justify-center gap-1.5 shadow-sm active:scale-95 transition-all text-center cursor-pointer"
+                              >
+                                <Play size={14} className="fill-white" />
+                                <span>Boshlash</span>
+                              </button>
+                            ) : isFinished ? (
+                              <button
+                                onClick={() => {
+                                  handleTournamentSelectForLeaderboard(item.id);
+                                  setActiveTab("leaderboard");
+                                }}
+                                className="flex-1 py-3 rounded-2xl bg-brand-blue hover:bg-blue-600 text-white font-bold text-xs sm:text-sm flex items-center justify-center gap-1.5 shadow-sm active:scale-95 transition-all cursor-pointer"
+                              >
+                                <Award size={16} />
+                                <span>Reyting</span>
+                              </button>
+                            ) : isRegistered ? (
+                              <button
+                                onClick={() => {
+                                  toast.error(`Musobaqa hali boshlanmagan! Boshlanish vaqti: ${formatUzbekDate(item.startDate)} ${item.startTime || '15:00'}`, {
+                                    duration: 4000
+                                  });
+                                }}
+                                className="flex-1 py-3 rounded-2xl bg-amber-500/10 dark:bg-amber-950/40 text-amber-600 dark:text-amber-400 border border-amber-500/20 font-bold text-xs sm:text-sm flex items-center justify-center gap-1.5 shadow-none active:scale-95 transition-all text-center cursor-pointer"
+                              >
+                                <Clock size={14} />
+                                <span>Kutilmoqda</span>
+                              </button>
+                            ) : (
+                              <button
+                                onClick={() => handleRegister(item)}
+                                className="flex-1 py-3 rounded-2xl font-bold text-xs sm:text-sm active:scale-95 flex items-center justify-center gap-1.5 transition-all bg-brand-blue hover:bg-blue-600 text-white shadow-sm cursor-pointer"
+                              >
+                                <span>Qatnashish</span>
+                                <ArrowUpRight size={16} />
+                              </button>
+                            )}
+                          </div>
                         </div>
                       </div>
                     );
