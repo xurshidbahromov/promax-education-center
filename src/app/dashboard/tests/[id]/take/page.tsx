@@ -688,20 +688,19 @@ export default function TakeTestPage() {
                     setZoomedImage(currentQuestion.image_url);
                     setZoomScale(1);
                   }}
-                  className="group relative w-full rounded-2xl overflow-hidden border border-slate-200/80 dark:border-slate-800 bg-slate-50/70 dark:bg-slate-900/50 p-3 sm:p-5 flex items-center justify-center cursor-zoom-in transition-all duration-200 hover:border-brand-blue/50 hover:shadow-lg"
+                  className="group relative w-full rounded-2xl overflow-hidden border border-slate-200/80 dark:border-slate-800 bg-slate-50/70 dark:bg-slate-900/50 p-2 sm:p-4 flex items-center justify-center cursor-zoom-in transition-all duration-200 hover:border-brand-blue/50 hover:shadow-lg"
                   title="Kattalashtirib ko'rish uchun bosing"
                 >
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img
                     src={currentQuestion.image_url}
                     alt="Savol rasmi"
-                    className="max-h-[380px] sm:max-h-[480px] w-auto max-w-full rounded-xl object-contain shadow-sm transition-transform duration-300 group-hover:scale-[1.015]"
+                    className="max-h-[500px] sm:max-h-[620px] w-auto max-w-full rounded-xl object-contain shadow-sm transition-transform duration-300 group-hover:scale-[1.01]"
                   />
 
-                  {/* Hover overlay hint */}
-                  <div className="absolute top-3 right-3 sm:top-4 sm:right-4 flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-900/80 dark:bg-slate-800/90 text-white text-xs font-semibold backdrop-blur-md opacity-90 sm:opacity-0 group-hover:opacity-100 transition-opacity shadow-lg pointer-events-none">
-                    <Maximize2 size={13} />
-                    <span>Kattalashtirish</span>
+                  {/* Small icon indicator */}
+                  <div className="absolute top-3 right-3 sm:top-4 sm:right-4 w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-slate-900/70 dark:bg-slate-800/80 text-white/90 flex items-center justify-center backdrop-blur-md shadow-md border border-white/15 transition-all duration-200 group-hover:bg-brand-blue group-hover:text-white group-hover:scale-105 pointer-events-none">
+                    <Maximize2 size={15} />
                   </div>
                 </div>
               </div>
