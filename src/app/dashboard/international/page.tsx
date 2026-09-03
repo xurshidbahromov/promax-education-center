@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -68,9 +68,11 @@ export default function InternationalCompetitionsPage() {
   const { data: profile } = useUserProfile(user?.id);
 
   // Tab State: "tournaments" | "leaderboard" | "comments"
-  // Tab State: "tournaments" | "leaderboard" | "comments"
   const initialTab = (searchParams.get("tab") as "tournaments" | "leaderboard" | "comments") || "tournaments";
   const [activeTab, setActiveTab] = useState<"tournaments" | "leaderboard" | "comments">(initialTab);
+
+  // Status Filter State for tournaments: "all" | "live" | "upcoming" | "finished"
+  const [statusFilter, setStatusFilter] = useState<"all" | "live" | "upcoming" | "finished">("all");
 
   // Tournaments State (Instant initial state from cache for 0ms render)
   const [tournaments, setTournaments] = useState<InternationalTournament[]>(() => {
@@ -83,6 +85,51 @@ export default function InternationalCompetitionsPage() {
   const [registeredIds, setRegisteredIds] = useState<string[]>([]);
   const [completedIds, setCompletedIds] = useState<string[]>([]);
   const hasLoadedRef = useRef(false);
+
+  // Precompute timing maps & counts for instant filtering
+  const timingMap = useMemo(() => {
+    const map = new Map<string, ReturnType<typeof getTournamentTimingInfo>>();
+    tournaments.forEach(t => {
+      map.set(t.id, getTournamentTimingInfo(t));
+    });
+    return map;
+  }, [tournaments]);
+
+  const counts = useMemo(() => {
+    let live = 0;
+    let upcoming = 0;
+    let finished = 0;
+    tournaments.forEach(t => {
+      const timing = timingMap.get(t.id);
+      if (timing?.status === "live") live++;
+      else if (timing?.status === "upcoming") upcoming++;
+      else if (timing?.status === "finished") finished++;
+    });
+    return {
+      all: tournaments.length,
+      live,
+      upcoming,
+      finished
+    };
+  }, [tournaments, timingMap]);
+
+  const filteredTournaments = useMemo(() => {
+    return tournaments
+      .filter(t => {
+        if (statusFilter === "all") return true;
+        const timing = timingMap.get(t.id);
+        return timing?.status === statusFilter;
+      })
+      .sort((a, b) => {
+        if (statusFilter === "all") {
+          const statusWeight = (s?: string) => s === "live" ? 0 : s === "upcoming" ? 1 : 2;
+          const weightA = statusWeight(timingMap.get(a.id)?.status);
+          const weightB = statusWeight(timingMap.get(b.id)?.status);
+          if (weightA !== weightB) return weightA - weightB;
+        }
+        return 0;
+      });
+  }, [tournaments, statusFilter, timingMap]);
 
   // Leaderboard State
   const [selectedTournamentId, setSelectedTournamentId] = useState<string>("");
@@ -392,171 +439,290 @@ export default function InternationalCompetitionsPage() {
         </div>
 
         {/* ══════════════════════════════════════════════════════════════ */}
-        {/* ── TAB 1: MUSOBAQALAR (TOURNAMENTS GRID MATCHING OLYMPIADS) ── */}
+        {/* ── TAB 1: MUSOBAQALAR (TOURNAMENTS GRID WITH STATUS FILTER) ── */}
         {/* ══════════════════════════════════════════════════════════════ */}
         {activeTab === "tournaments" && (
           loading ? (
             <TournamentsSkeleton />
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5">
-            {tournaments.map((item) => {
-              const timing = getTournamentTimingInfo(item);
-              const isRegistered = registeredIds.includes(item.id);
-              const isCompleted = completedIds.includes(item.id);
-              const isLive = timing.status === "live";
-              const isUpcoming = timing.status === "upcoming";
-              const isFinished = timing.status === "finished";
-
-              return (
-                <div
-                  key={item.id}
-                  className="bg-white/60 dark:bg-slate-900/60 backdrop-blur-xl rounded-[2rem] p-6 border border-white/60 dark:border-slate-800/60 shadow-none flex flex-col justify-between gap-5 transition-all active:scale-[0.99]"
+            <div className="space-y-5">
+              {/* ── STATUS FILTER PILLS (BARCHASI / FAOL / KUTILAYOTGAN / YAKUNLANGAN) ── */}
+              <div className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-none sm:flex-wrap">
+                {/* Barchasi */}
+                <button
+                  onClick={() => setStatusFilter("all")}
+                  className={`px-4 py-2.5 rounded-2xl text-xs sm:text-sm font-bold transition-all shrink-0 cursor-pointer flex items-center gap-2 ${
+                    statusFilter === "all"
+                      ? "bg-slate-900 text-white dark:bg-white dark:text-slate-900 shadow-sm"
+                      : "bg-white/60 dark:bg-slate-900/60 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white border border-white/60 dark:border-slate-800/60"
+                  }`}
                 >
-                  <div className="space-y-3.5">
-                    {/* Top Row: Subject + Status Badge & Date */}
-                    <div className="flex items-center justify-between gap-2">
-                      <div className="flex items-center gap-2 flex-wrap">
-                        <span className="text-sm font-bold text-slate-700 dark:text-slate-200">
-                          {item.subject}
-                        </span>
-                        {isCompleted ? (
-                          <span className="text-[11px] font-bold text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-950/40 px-2.5 py-0.5 rounded-md border border-indigo-500/20 flex items-center gap-1.5">
-                            <CheckCircle2 size={12} />
-                            Topshirilgan
-                          </span>
-                        ) : isLive ? (
-                          <span className="text-[11px] font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/40 px-2.5 py-0.5 rounded-md border border-emerald-500/20 flex items-center gap-1.5">
-                            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                            Faol
-                          </span>
-                        ) : isUpcoming ? (
-                          <span className="text-[11px] font-bold text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-950/40 px-2.5 py-0.5 rounded-md border border-amber-500/20 flex items-center gap-1">
-                            <Clock size={11} />
-                            Kutilmoqda
-                          </span>
-                        ) : (
-                          <span className="text-[11px] font-bold text-slate-500 dark:text-slate-400 bg-slate-100 dark:bg-slate-800 px-2.5 py-0.5 rounded-md">
-                            Yakunlangan
-                          </span>
-                        )}
-                      </div>
-                      <span className="text-xs sm:text-sm font-bold text-[#EB7C0E] dark:text-orange-400 shrink-0">
-                        {formatUzbekDate(item.startDate) || item.startDate}
-                      </span>
-                    </div>
+                  <Globe size={14} className={statusFilter === "all" ? "text-amber-400 dark:text-amber-500" : "text-slate-400"} />
+                  <span>Barchasi</span>
+                  <span className={`px-2 py-0.5 rounded-full text-[11px] font-extrabold ${
+                    statusFilter === "all"
+                      ? "bg-white/20 dark:bg-slate-900/20 text-white dark:text-slate-900"
+                      : "bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400"
+                  }`}>
+                    {counts.all}
+                  </span>
+                </button>
 
-                    {/* Title */}
-                    <h3 className="text-lg sm:text-xl font-black font-fredoka text-slate-900 dark:text-white leading-tight">
-                      {item.title}
-                    </h3>
+                {/* Faol */}
+                <button
+                  onClick={() => setStatusFilter("live")}
+                  className={`px-4 py-2.5 rounded-2xl text-xs sm:text-sm font-bold transition-all shrink-0 cursor-pointer flex items-center gap-2 ${
+                    statusFilter === "live"
+                      ? "bg-emerald-600 text-white shadow-sm"
+                      : "bg-white/60 dark:bg-slate-900/60 text-slate-600 dark:text-slate-400 hover:text-emerald-600 dark:hover:text-emerald-400 border border-white/60 dark:border-slate-800/60"
+                  }`}
+                >
+                  <span className="relative flex h-2 w-2">
+                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                    <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+                  </span>
+                  <span>Faol</span>
+                  <span className={`px-2 py-0.5 rounded-full text-[11px] font-extrabold ${
+                    statusFilter === "live"
+                      ? "bg-white/20 text-white"
+                      : "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400"
+                  }`}>
+                    {counts.live}
+                  </span>
+                </button>
 
-                    {/* Description */}
-                    <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 font-medium leading-relaxed line-clamp-2">
-                      {item.description}
-                    </p>
+                {/* Kutilayotgan */}
+                <button
+                  onClick={() => setStatusFilter("upcoming")}
+                  className={`px-4 py-2.5 rounded-2xl text-xs sm:text-sm font-bold transition-all shrink-0 cursor-pointer flex items-center gap-2 ${
+                    statusFilter === "upcoming"
+                      ? "bg-amber-500 text-white shadow-sm"
+                      : "bg-white/60 dark:bg-slate-900/60 text-slate-600 dark:text-slate-400 hover:text-amber-600 dark:hover:text-amber-400 border border-white/60 dark:border-slate-800/60"
+                  }`}
+                >
+                  <Clock size={14} className={statusFilter === "upcoming" ? "text-white" : "text-amber-500"} />
+                  <span>Kutilayotgan</span>
+                  <span className={`px-2 py-0.5 rounded-full text-[11px] font-extrabold ${
+                    statusFilter === "upcoming"
+                      ? "bg-white/20 text-white"
+                      : "bg-amber-500/10 text-amber-600 dark:text-amber-400"
+                  }`}>
+                    {counts.upcoming}
+                  </span>
+                </button>
 
-                    {/* Specs Rows (Icons, Labels, Values) */}
-                    <div className="space-y-2 pt-1 text-xs sm:text-sm">
-                      <div className="flex items-center justify-between text-slate-600 dark:text-slate-400">
-                        <span className="flex items-center gap-2">
-                          <Clock size={15} className="text-slate-400" />
-                          <span>Vaqti:</span>
-                        </span>
-                        <span className="font-bold text-slate-900 dark:text-white">
-                          {item.startTime || "15:00"} ({item.durationMinutes || 60} daqiqa)
-                        </span>
-                      </div>
+                {/* Yakunlangan */}
+                <button
+                  onClick={() => setStatusFilter("finished")}
+                  className={`px-4 py-2.5 rounded-2xl text-xs sm:text-sm font-bold transition-all shrink-0 cursor-pointer flex items-center gap-2 ${
+                    statusFilter === "finished"
+                      ? "bg-indigo-600 text-white shadow-sm"
+                      : "bg-white/60 dark:bg-slate-900/60 text-slate-600 dark:text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400 border border-white/60 dark:border-slate-800/60"
+                  }`}
+                >
+                  <CheckCircle2 size={14} className={statusFilter === "finished" ? "text-white" : "text-indigo-500"} />
+                  <span>Yakunlangan</span>
+                  <span className={`px-2 py-0.5 rounded-full text-[11px] font-extrabold ${
+                    statusFilter === "finished"
+                      ? "bg-white/20 text-white"
+                      : "bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400"
+                  }`}>
+                    {counts.finished}
+                  </span>
+                </button>
+              </div>
 
-                      {/* Live Dynamic Countdown Row */}
-                      <div className="flex items-center justify-between text-slate-600 dark:text-slate-400 bg-slate-50/80 dark:bg-slate-800/50 p-2.5 rounded-xl border border-slate-100 dark:border-slate-800">
-                        <span className="flex items-center gap-2 font-bold text-xs">
-                          <Timer size={14} className={isLive ? "text-emerald-500 animate-spin" : isUpcoming ? "text-amber-500" : "text-slate-400"} />
-                          <span>{timing.countdown.label}:</span>
-                        </span>
-                        <span className={`font-black text-xs sm:text-sm ${
-                          isLive ? "text-emerald-600 dark:text-emerald-400" : isUpcoming ? "text-amber-600 dark:text-amber-400" : "text-slate-400"
-                        }`}>
-                          {timing.countdown.formatted}
-                        </span>
-                      </div>
-
-                      <div className="flex items-center justify-between text-slate-600 dark:text-slate-400">
-                        <span className="flex items-center gap-2">
-                          <Gift size={15} className="text-slate-400" />
-                          <span>Sovrinlar:</span>
-                        </span>
-                        <span className="font-bold text-[#EB7C0E] dark:text-orange-400 truncate max-w-[200px] text-right">
-                          {item.prizePool || "Top o'rinlar uchun mukofotlar"}
-                        </span>
-                      </div>
-                    </div>
+              {/* Grid or Empty State */}
+              {filteredTournaments.length === 0 ? (
+                <div className="bg-white/60 dark:bg-slate-900/60 backdrop-blur-xl rounded-[2rem] p-10 text-center border border-white/60 dark:border-slate-800/60 flex flex-col items-center justify-center gap-3">
+                  <div className="w-16 h-16 rounded-2xl bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-400">
+                    <Globe size={28} />
                   </div>
-
-                  {/* Bottom Action Buttons */}
-                  <div className="flex items-center gap-3 pt-2">
+                  <h4 className="text-base font-bold text-slate-800 dark:text-white">
+                    {statusFilter === "live"
+                      ? "Hozirda faol xalqaro musobaqa mavjud emas"
+                      : statusFilter === "upcoming"
+                      ? "Hozircha kutilayotgan xalqaro musobaqalar yo'q"
+                      : statusFilter === "finished"
+                      ? "Hali yakunlangan xalqaro musobaqalar mavjud emas"
+                      : "Xalqaro musobaqalar topilmadi"}
+                  </h4>
+                  <p className="text-xs text-slate-500 max-w-sm">
+                    {statusFilter === "live"
+                      ? "Yaqinda boshlanadigan xalqaro musobaqalarga ro'yxatdan o'tib, tayyorgarlik ko'rishingiz mumkin."
+                      : "Yangi xalqaro musobaqalar muntazam e'lon qilib boriladi."}
+                  </p>
+                  {statusFilter !== "all" && (
                     <button
-                      onClick={() => setSelectedItem(item)}
-                      className="flex-1 py-3 rounded-2xl bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-white font-bold text-xs sm:text-sm active:scale-95 transition-all text-center cursor-pointer"
+                      onClick={() => setStatusFilter("all")}
+                      className="mt-2 px-4 py-2 rounded-xl bg-brand-blue text-white text-xs font-bold hover:bg-blue-600 transition-colors cursor-pointer"
                     >
-                      Nizom
+                      Barcha musobaqalarni ko'rish
                     </button>
-
-                    {isCompleted ? (
-                      <button
-                        onClick={() => {
-                          handleTournamentSelectForLeaderboard(item.id);
-                          setActiveTab("leaderboard");
-                        }}
-                        className="flex-1 py-3 rounded-2xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs sm:text-sm flex items-center justify-center gap-1.5 shadow-sm active:scale-95 transition-all cursor-pointer"
-                      >
-                        <Award size={16} />
-                        <span>Natijangiz</span>
-                      </button>
-                    ) : isLive ? (
-                      <button
-                        onClick={() => setConfirmStartItem(item)}
-                        className="flex-1 py-3 rounded-2xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs sm:text-sm flex items-center justify-center gap-1.5 shadow-sm active:scale-95 transition-all text-center cursor-pointer animate-pulse"
-                      >
-                        <Play size={14} className="fill-white" />
-                        <span>Boshlash</span>
-                      </button>
-                    ) : isFinished ? (
-                      <button
-                        onClick={() => {
-                          handleTournamentSelectForLeaderboard(item.id);
-                          setActiveTab("leaderboard");
-                        }}
-                        className="flex-1 py-3 rounded-2xl bg-brand-blue hover:bg-blue-600 text-white font-bold text-xs sm:text-sm flex items-center justify-center gap-1.5 shadow-sm active:scale-95 transition-all cursor-pointer"
-                      >
-                        <Award size={16} />
-                        <span>Reyting</span>
-                      </button>
-                    ) : isRegistered ? (
-                      <button
-                        onClick={() => {
-                          toast.error(`Musobaqa hali boshlanmagan! Boshlanish vaqti: ${formatUzbekDate(item.startDate)} ${item.startTime || '15:00'}`, {
-                            duration: 4000
-                          });
-                        }}
-                        className="flex-1 py-3 rounded-2xl bg-amber-500/10 dark:bg-amber-950/40 text-amber-600 dark:text-amber-400 border border-amber-500/20 font-bold text-xs sm:text-sm flex items-center justify-center gap-1.5 shadow-none active:scale-95 transition-all text-center cursor-pointer"
-                      >
-                        <Clock size={14} />
-                        <span>Kutilmoqda</span>
-                      </button>
-                    ) : (
-                      <button
-                        onClick={() => handleRegister(item)}
-                        className="flex-1 py-3 rounded-2xl font-bold text-xs sm:text-sm active:scale-95 flex items-center justify-center gap-1.5 transition-all bg-brand-blue hover:bg-blue-600 text-white shadow-sm cursor-pointer"
-                      >
-                        <span>Qatnashish</span>
-                        <ArrowUpRight size={16} />
-                      </button>
-                    )}
-                  </div>
+                  )}
                 </div>
-              );
-            })}
-          </div>
+              ) : (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5">
+                  {filteredTournaments.map((item) => {
+                    const timing = timingMap.get(item.id) || getTournamentTimingInfo(item);
+                    const isRegistered = registeredIds.includes(item.id);
+                    const isCompleted = completedIds.includes(item.id);
+                    const isLive = timing.status === "live";
+                    const isUpcoming = timing.status === "upcoming";
+                    const isFinished = timing.status === "finished";
+
+                    return (
+                      <div
+                        key={item.id}
+                        className="bg-white/60 dark:bg-slate-900/60 backdrop-blur-xl rounded-[2rem] p-6 border border-white/60 dark:border-slate-800/60 shadow-none flex flex-col justify-between gap-5 transition-all active:scale-[0.99]"
+                      >
+                        <div className="space-y-3.5">
+                          {/* Top Row: Subject + Status Badge & Date */}
+                          <div className="flex items-center justify-between gap-2">
+                            <div className="flex items-center gap-2 flex-wrap">
+                              <span className="text-sm font-bold text-slate-700 dark:text-slate-200">
+                                {item.subject}
+                              </span>
+                              {isCompleted ? (
+                                <span className="text-[11px] font-bold text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-950/40 px-2.5 py-0.5 rounded-md border border-indigo-500/20 flex items-center gap-1.5">
+                                  <CheckCircle2 size={12} />
+                                  Topshirilgan
+                                </span>
+                              ) : isLive ? (
+                                <span className="text-[11px] font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/40 px-2.5 py-0.5 rounded-md border border-emerald-500/20 flex items-center gap-1.5">
+                                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                                  Faol
+                                </span>
+                              ) : isUpcoming ? (
+                                <span className="text-[11px] font-bold text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-950/40 px-2.5 py-0.5 rounded-md border border-amber-500/20 flex items-center gap-1">
+                                  <Clock size={11} />
+                                  Kutilmoqda
+                                </span>
+                              ) : (
+                                <span className="text-[11px] font-bold text-slate-500 dark:text-slate-400 bg-slate-100 dark:bg-slate-800 px-2.5 py-0.5 rounded-md">
+                                  Yakunlangan
+                                </span>
+                              )}
+                            </div>
+                            <span className="text-xs sm:text-sm font-bold text-[#EB7C0E] dark:text-orange-400 shrink-0">
+                              {formatUzbekDate(item.startDate) || item.startDate}
+                            </span>
+                          </div>
+
+                          {/* Title */}
+                          <h3 className="text-lg sm:text-xl font-black font-fredoka text-slate-900 dark:text-white leading-tight">
+                            {item.title}
+                          </h3>
+
+                          {/* Description */}
+                          <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 font-medium leading-relaxed line-clamp-2">
+                            {item.description}
+                          </p>
+
+                          {/* Specs Rows (Icons, Labels, Values) */}
+                          <div className="space-y-2 pt-1 text-xs sm:text-sm">
+                            <div className="flex items-center justify-between text-slate-600 dark:text-slate-400">
+                              <span className="flex items-center gap-2">
+                                <Clock size={15} className="text-slate-400" />
+                                <span>Vaqti:</span>
+                              </span>
+                              <span className="font-bold text-slate-900 dark:text-white">
+                                {item.startTime || "15:00"} ({item.durationMinutes || 60} daqiqa)
+                              </span>
+                            </div>
+
+                            {/* Live Dynamic Countdown Row */}
+                            <div className="flex items-center justify-between text-slate-600 dark:text-slate-400 bg-slate-50/80 dark:bg-slate-800/50 p-2.5 rounded-xl border border-slate-100 dark:border-slate-800">
+                              <span className="flex items-center gap-2 font-bold text-xs">
+                                <Timer size={14} className={isLive ? "text-emerald-500 animate-spin" : isUpcoming ? "text-amber-500" : "text-slate-400"} />
+                                <span>{timing.countdown.label}:</span>
+                              </span>
+                              <span className={`font-black text-xs sm:text-sm ${
+                                isLive ? "text-emerald-600 dark:text-emerald-400" : isUpcoming ? "text-amber-600 dark:text-amber-400" : "text-slate-400"
+                              }`}>
+                                {timing.countdown.formatted}
+                              </span>
+                            </div>
+
+                            <div className="flex items-center justify-between text-slate-600 dark:text-slate-400">
+                              <span className="flex items-center gap-2">
+                                <Gift size={15} className="text-slate-400" />
+                                <span>Sovrinlar:</span>
+                              </span>
+                              <span className="font-bold text-[#EB7C0E] dark:text-orange-400 truncate max-w-[200px] text-right">
+                                {item.prizePool || "Top o'rinlar uchun mukofotlar"}
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Bottom Action Buttons */}
+                        <div className="flex items-center gap-3 pt-2">
+                          <button
+                            onClick={() => setSelectedItem(item)}
+                            className="flex-1 py-3 rounded-2xl bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-white font-bold text-xs sm:text-sm active:scale-95 transition-all text-center cursor-pointer"
+                          >
+                            Nizom
+                          </button>
+
+                          {isCompleted ? (
+                            <button
+                              onClick={() => {
+                                handleTournamentSelectForLeaderboard(item.id);
+                                setActiveTab("leaderboard");
+                              }}
+                              className="flex-1 py-3 rounded-2xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs sm:text-sm flex items-center justify-center gap-1.5 shadow-sm active:scale-95 transition-all cursor-pointer"
+                            >
+                              <Award size={16} />
+                              <span>Natijangiz</span>
+                            </button>
+                          ) : isLive ? (
+                            <button
+                              onClick={() => setConfirmStartItem(item)}
+                              className="flex-1 py-3 rounded-2xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs sm:text-sm flex items-center justify-center gap-1.5 shadow-sm active:scale-95 transition-all text-center cursor-pointer animate-pulse"
+                            >
+                              <Play size={14} className="fill-white" />
+                              <span>Boshlash</span>
+                            </button>
+                          ) : isFinished ? (
+                            <button
+                              onClick={() => {
+                                handleTournamentSelectForLeaderboard(item.id);
+                                setActiveTab("leaderboard");
+                              }}
+                              className="flex-1 py-3 rounded-2xl bg-brand-blue hover:bg-blue-600 text-white font-bold text-xs sm:text-sm flex items-center justify-center gap-1.5 shadow-sm active:scale-95 transition-all cursor-pointer"
+                            >
+                              <Award size={16} />
+                              <span>Reyting</span>
+                            </button>
+                          ) : isRegistered ? (
+                            <button
+                              onClick={() => {
+                                toast.error(`Musobaqa hali boshlanmagan! Boshlanish vaqti: ${formatUzbekDate(item.startDate)} ${item.startTime || '15:00'}`, {
+                                  duration: 4000
+                                });
+                              }}
+                              className="flex-1 py-3 rounded-2xl bg-amber-500/10 dark:bg-amber-950/40 text-amber-600 dark:text-amber-400 border border-amber-500/20 font-bold text-xs sm:text-sm flex items-center justify-center gap-1.5 shadow-none active:scale-95 transition-all text-center cursor-pointer"
+                            >
+                              <Clock size={14} />
+                              <span>Kutilmoqda</span>
+                            </button>
+                          ) : (
+                            <button
+                              onClick={() => handleRegister(item)}
+                              className="flex-1 py-3 rounded-2xl font-bold text-xs sm:text-sm active:scale-95 flex items-center justify-center gap-1.5 transition-all bg-brand-blue hover:bg-blue-600 text-white shadow-sm cursor-pointer"
+                            >
+                              <span>Qatnashish</span>
+                              <ArrowUpRight size={16} />
+                            </button>
+                          )}
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
           )
         )}
 
