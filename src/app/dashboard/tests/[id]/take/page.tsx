@@ -667,6 +667,22 @@ export default function TakeTestPage() {
  {t('tests.take.points', { points: currentQuestion.points })}
  </span>
  <div className="flex-1" />
+
+  {/* Enlarge Image button in toolbar: NEVER overlaps with image content */}
+  {currentQuestion.image_url && (
+    <button
+      type="button"
+      onClick={() => {
+        setZoomedImage(currentQuestion.image_url);
+        setZoomScale(1);
+      }}
+      className="flex items-center justify-center w-10 h-10 rounded-full bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-500 hover:text-brand-blue dark:text-slate-400 dark:hover:text-white transition-all cursor-pointer shadow-xs"
+      title="Rasmni kattalashtirib ko'rish"
+    >
+      <Maximize2 size={18} />
+    </button>
+  )}
+
  <button
  onClick={() => handleMarkForReview(currentQuestion.id)}
  className={`flex items-center justify-center w-10 h-10 rounded-full transition-all ${
@@ -680,7 +696,7 @@ export default function TakeTestPage() {
  </button>
  </div>
 
-            {/* Question Image (ABOVE QUESTION TEXT & ENLARGEABLE) */}
+            {/* Question Image (BORDER-FREE, MAXIMUM SIZE & RESPONSIVENESS, NO OVERLAPPING ICONS) */}
             {currentQuestion.image_url && (
               <div className="mb-6">
                 <div
@@ -688,20 +704,15 @@ export default function TakeTestPage() {
                     setZoomedImage(currentQuestion.image_url);
                     setZoomScale(1);
                   }}
-                  className="group relative w-full rounded-2xl overflow-hidden border border-slate-200/80 dark:border-slate-800 bg-slate-50/70 dark:bg-slate-900/50 p-2 sm:p-4 flex items-center justify-center cursor-zoom-in transition-all duration-200 hover:border-brand-blue/50 hover:shadow-lg"
+                  className="w-full flex items-center justify-center cursor-zoom-in group"
                   title="Kattalashtirib ko'rish uchun bosing"
                 >
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img
                     src={currentQuestion.image_url}
                     alt="Savol rasmi"
-                    className="max-h-[500px] sm:max-h-[620px] w-auto max-w-full rounded-xl object-contain shadow-sm transition-transform duration-300 group-hover:scale-[1.01]"
+                    className="w-auto max-w-full max-h-[640px] sm:max-h-[750px] rounded-2xl object-contain transition-transform duration-300 group-hover:scale-[1.01]"
                   />
-
-                  {/* Small icon indicator */}
-                  <div className="absolute top-3 right-3 sm:top-4 sm:right-4 w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-slate-900/70 dark:bg-slate-800/80 text-white/90 flex items-center justify-center backdrop-blur-md shadow-md border border-white/15 transition-all duration-200 group-hover:bg-brand-blue group-hover:text-white group-hover:scale-105 pointer-events-none">
-                    <Maximize2 size={15} />
-                  </div>
                 </div>
               </div>
             )}
