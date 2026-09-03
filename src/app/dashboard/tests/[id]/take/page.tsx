@@ -16,7 +16,10 @@ import {
  Trophy,
  Globe,
  BookOpen,
- X
+ X,
+ Maximize2,
+ ZoomIn,
+ ZoomOut
 } from "lucide-react";
 import {
  getTestById,
@@ -69,9 +72,23 @@ export default function TakeTestPage() {
  const [autoSaving, setAutoSaving] = useState(false);
  const [showConfirmModal, setShowConfirmModal] = useState(false);
  const [showFormulaModal, setShowFormulaModal] = useState(false);
+ const [zoomedImage, setZoomedImage] = useState<string | null>(null);
+ const [zoomScale, setZoomScale] = useState<number>(1);
 
  const autoSaveInterval = useRef<NodeJS.Timeout | null>(null);
  const questionStartTime = useRef<number>(Date.now());
+
+ // Close image zoom modal with Escape key
+ useEffect(() => {
+   const handleKeyDown = (e: KeyboardEvent) => {
+     if (e.key === "Escape" && zoomedImage) {
+       setZoomedImage(null);
+       setZoomScale(1);
+     }
+   };
+   window.addEventListener("keydown", handleKeyDown);
+   return () => window.removeEventListener("keydown", handleKeyDown);
+ }, [zoomedImage]);
 
  // Load test and start attempt
  useEffect(() => {
@@ -663,22 +680,39 @@ export default function TakeTestPage() {
  </button>
  </div>
 
- {/* Question Text & Image */}
- <div className="mb-8 space-y-4">
- <div className="text-[18px] sm:text-[20px] font-medium text-slate-800 dark:text-slate-100 leading-relaxed">
- <MathRenderer content={currentQuestion.question_text} />
- </div>
- {currentQuestion.image_url && (
- <div className="rounded-2xl overflow-hidden border border-slate-200/80 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/30 p-2 max-h-72 flex items-center justify-center">
- {/* eslint-disable-next-line @next/next/no-img-element */}
- <img
- src={currentQuestion.image_url}
- alt="Savol rasmi"
- className="max-h-64 w-auto rounded-xl object-contain shadow-sm"
- />
- </div>
- )}
- </div>
+            {/* Question Image (ABOVE QUESTION TEXT & ENLARGEABLE) */}
+            {currentQuestion.image_url && (
+              <div className="mb-6">
+                <div
+                  onClick={() => {
+                    setZoomedImage(currentQuestion.image_url);
+                    setZoomScale(1);
+                  }}
+                  className="group relative w-full rounded-2xl overflow-hidden border border-slate-200/80 dark:border-slate-800 bg-slate-50/70 dark:bg-slate-900/50 p-3 sm:p-5 flex items-center justify-center cursor-zoom-in transition-all duration-200 hover:border-brand-blue/50 hover:shadow-lg"
+                  title="Kattalashtirib ko'rish uchun bosing"
+                >
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src={currentQuestion.image_url}
+                    alt="Savol rasmi"
+                    className="max-h-[380px] sm:max-h-[480px] w-auto max-w-full rounded-xl object-contain shadow-sm transition-transform duration-300 group-hover:scale-[1.015]"
+                  />
+
+                  {/* Hover overlay hint */}
+                  <div className="absolute top-3 right-3 sm:top-4 sm:right-4 flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-900/80 dark:bg-slate-800/90 text-white text-xs font-semibold backdrop-blur-md opacity-90 sm:opacity-0 group-hover:opacity-100 transition-opacity shadow-lg pointer-events-none">
+                    <Maximize2 size={13} />
+                    <span>Kattalashtirish</span>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Question Text */}
+            <div className="mb-8">
+              <div className="text-[18px] sm:text-[20px] font-medium text-slate-800 dark:text-slate-100 leading-relaxed">
+                <MathRenderer content={currentQuestion.question_text} />
+              </div>
+            </div>
 
  {/* Answer Options */}
  <div className="flex flex-col gap-3">
@@ -1078,6 +1112,108 @@ export default function TakeTestPage() {
  )}
  </div>
  </div>
+
+      {/* ── IMAGE ZOOM LIGHTBOX MODAL ── */}
+      {zoomedImage && (
+        <div
+          className="fixed inset-0 z-[100] bg-black/90 backdrop-blur-md flex flex-col items-center justify-between p-4 sm:p-6 animate-in fade-in duration-200"
+          onClick={() => {
+            setZoomedImage(null);
+            setZoomScale(1);
+          }}
+        >
+          {/* Top Header Controls */}
+          <div
+            className="w-full max-w-4xl flex items-center justify-between z-10 py-2 text-white"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-center gap-2">
+              <span className="text-sm font-bold tracking-wide text-white/90">
+                Savol rasmi
+              </span>
+              <span className="text-xs px-2 py-0.5 rounded-md bg-white/10 text-white/70">
+                Savol #{currentQuestionIndex + 1}
+              </span>
+            </div>
+
+            <div className="flex items-center gap-2">
+              {/* Zoom Out */}
+              <button
+                type="button"
+                onClick={() => setZoomScale((prev) => Math.max(0.75, prev - 0.25))}
+                className="p-2 rounded-xl bg-white/10 hover:bg-white/20 text-white transition-colors cursor-pointer"
+                title="Kichiklashtirish"
+              >
+                <ZoomOut size={18} />
+              </button>
+
+              {/* Scale % */}
+              <button
+                type="button"
+                onClick={() => setZoomScale(1)}
+                className="px-2.5 py-1 text-xs font-bold rounded-lg bg-white/10 hover:bg-white/20 text-white/90 transition-colors cursor-pointer"
+                title="Asl o'lchamga qaytarish"
+              >
+                {Math.round(zoomScale * 100)}%
+              </button>
+
+              {/* Zoom In */}
+              <button
+                type="button"
+                onClick={() => setZoomScale((prev) => Math.min(3, prev + 0.25))}
+                className="p-2 rounded-xl bg-white/10 hover:bg-white/20 text-white transition-colors cursor-pointer"
+                title="Kattalashtirish"
+              >
+                <ZoomIn size={18} />
+              </button>
+
+              {/* Close button */}
+              <button
+                type="button"
+                onClick={() => {
+                  setZoomedImage(null);
+                  setZoomScale(1);
+                }}
+                className="p-2 rounded-xl bg-white/10 hover:bg-rose-500/80 text-white transition-colors ml-2 cursor-pointer"
+                title="Yopish (Esc)"
+              >
+                <X size={20} />
+              </button>
+            </div>
+          </div>
+
+          {/* Zoomable Image Content */}
+          <div
+            className="flex-1 w-full max-w-5xl flex items-center justify-center overflow-auto p-2"
+            onClick={(e) => {
+              if (e.target === e.currentTarget) {
+                setZoomedImage(null);
+                setZoomScale(1);
+              }
+            }}
+          >
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src={zoomedImage}
+              alt="Kattalashtirilgan savol rasmi"
+              style={{ transform: `scale(${zoomScale})` }}
+              className="max-h-[85vh] max-w-full rounded-2xl object-contain shadow-2xl transition-transform duration-200 select-none cursor-pointer"
+              onClick={(e) => {
+                e.stopPropagation();
+                setZoomScale((prev) => (prev > 1.2 ? 1 : 1.5));
+              }}
+            />
+          </div>
+
+          {/* Footer hint */}
+          <div
+            className="text-xs text-white/60 text-center py-1 select-none"
+            onClick={(e) => e.stopPropagation()}
+          >
+            Yopish uchun tashqariga bosing yoki Esc tugmasidan foydalaning
+          </div>
+        </div>
+      )}
  </div>
  );
 }
