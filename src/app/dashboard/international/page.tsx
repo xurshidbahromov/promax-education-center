@@ -447,7 +447,7 @@ export default function InternationalCompetitionsPage() {
           ) : (
             <div className="space-y-5">
               {/* ── STATUS FILTER PILLS (BARCHASI / FAOL / KUTILAYOTGAN / YAKUNLANGAN) ── */}
-              <div className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-none sm:flex-wrap">
+              <div className="flex items-center gap-2 overflow-x-auto pb-1 no-scrollbar scrollbar-none [scrollbar-width:none] [&::-webkit-scrollbar]:hidden sm:flex-wrap">
                 {/* Barchasi */}
                 <button
                   onClick={() => setStatusFilter("all")}
