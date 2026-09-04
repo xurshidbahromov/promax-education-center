@@ -12,6 +12,7 @@ import NextTopLoader from "nextjs-toploader";
 import Script from "next/script";
 import { Analytics } from "@vercel/analytics/next";
 import { SpeedInsights } from "@vercel/speed-insights/next";
+import TournamentReminderTicker from "@/components/TournamentReminderTicker";
 
 const atkinson = Atkinson_Hyperlegible({
   variable: "--font-atkinson",
@@ -100,6 +101,7 @@ export default function RootLayout({
  }
  }}
  />
+ <TournamentReminderTicker />
  {children}
  </LanguageProvider>
  </QueryProvider>

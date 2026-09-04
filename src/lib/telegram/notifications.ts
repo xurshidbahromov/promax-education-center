@@ -122,11 +122,11 @@ export async function notifyTournamentRegistration(
 }
 
 /**
- * Sends 15-min countdown reminder or Live alert to all registered students of a tournament
+ * Sends 10-min countdown reminder or Live alert to all registered students of a tournament
  */
 export async function sendBulkTournamentReminders(
   tournamentId: string,
-  mode: '15min' | 'live' = '15min'
+  mode: '10min' | '15min' | 'live' = '10min'
 ): Promise<{
   success: boolean;
   totalRegistered: number;
@@ -194,7 +194,7 @@ export async function sendBulkTournamentReminders(
         : buildTournamentReminderMessage({
             studentName,
             tournamentTitle: tournament.title,
-            minutesLeft: 15,
+            minutesLeft: mode === '15min' ? 15 : 10,
             startTime: tournament.start_time || '15:00',
             durationMinutes: Number(tournament.duration_minutes) || 60,
           });

@@ -81,7 +81,7 @@ export default function InternationalTournamentDetailPage({ params }: PageProps)
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           tournamentId: tournament.id,
-          mode: '15min'
+          mode: '10min'
         })
       });
       const data = await res.json();
@@ -231,10 +231,10 @@ export default function InternationalTournamentDetailPage({ params }: PageProps)
             onClick={handleSendTelegramReminder}
             disabled={sendingReminder}
             className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs sm:text-sm font-bold transition-all active:scale-95 bg-sky-50 dark:bg-sky-950/30 text-sky-600 dark:text-sky-400 hover:bg-sky-100 dark:hover:bg-sky-900/40 border border-sky-200/60 dark:border-sky-800/60 cursor-pointer disabled:opacity-50"
-            title="Ro'yxatdan o'tgan barcha o'quvchilarga Telegram orqali 15-min eslatma yuborish"
+            title="Ro'yxatdan o'tgan barcha o'quvchilarga Telegram orqali 10-min eslatma yuborish"
           >
             <Bell size={15} className={sendingReminder ? "animate-spin" : ""} />
-            <span>{sendingReminder ? "Yuborilmoqda..." : "Telegram Eslatma (15 min)"}</span>
+            <span>{sendingReminder ? "Yuborilmoqda..." : "Telegram Eslatma (10 min)"}</span>
           </button>
 
           <Link

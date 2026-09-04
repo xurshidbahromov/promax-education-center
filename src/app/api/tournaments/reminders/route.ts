@@ -1,11 +1,17 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createTelegramBotClient } from '@/utils/supabase/server';
 import { notifyTournamentRegistration, sendBulkTournamentReminders } from '@/lib/telegram/notifications';
+import { checkAndSendDueReminders, ensureReminderWorkerRunning } from '@/lib/telegram/reminder-worker';
+import { recordReminderSent } from '@/lib/telegram/reminder-tracker';
+
+export const dynamic = 'force-dynamic';
 
 export async function POST(request: NextRequest) {
   try {
+    ensureReminderWorkerRunning();
+
     const body = await request.json();
-    const { tournamentId, mode = '15min', studentId } = body;
+    const { tournamentId, mode = '10min', studentId } = body;
 
     if (!tournamentId) {
       return NextResponse.json({ error: 'tournamentId is required' }, { status: 400 });
@@ -43,63 +49,29 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ success: true, sent });
     }
 
-    // 2. Bulk reminder (15min or live)
-    const result = await sendBulkTournamentReminders(tournamentId, mode as '15min' | 'live');
+    // 2. Bulk reminder ('10min', '15min' or 'live')
+    const normalizedMode = mode === 'live' ? 'live' : '10min';
+    recordReminderSent(tournamentId, normalizedMode);
+
+    const result = await sendBulkTournamentReminders(tournamentId, normalizedMode);
 
     return NextResponse.json(result);
   } catch (error: any) {
-    console.error('[API /api/tournaments/reminders] Error:', error);
+    console.error('[API /api/tournaments/reminders POST] Error:', error);
     return NextResponse.json({ error: error.message || 'Internal error' }, { status: 500 });
   }
 }
 
 export async function GET(request: NextRequest) {
   try {
-    const supabase = await createTelegramBotClient();
+    ensureReminderWorkerRunning();
 
-    // Find all upcoming tournaments
-    const { data: tournaments, error } = await supabase
-      .from('tournaments')
-      .select('*')
-      .eq('status', 'upcoming');
-
-    if (error || !tournaments) {
-      return NextResponse.json({ processed: 0, tournaments: [] });
-    }
-
-    const now = new Date();
-    // Tashkent time is UTC+5
-    const tashkentOffsetMs = 5 * 60 * 60 * 1000;
-    const localNow = new Date(now.getTime() + tashkentOffsetMs);
-    const todayStr = localNow.toISOString().split('T')[0];
-    const currentHours = localNow.getUTCHours();
-    const currentMinutes = localNow.getUTCMinutes();
-    const currentTotalMinutes = currentHours * 60 + currentMinutes;
-
-    const processed: any[] = [];
-
-    for (const t of tournaments) {
-      if (!t.start_time) continue;
-      // If tournament has start_date, check if it is today
-      if (t.start_date && t.start_date !== todayStr) continue;
-
-      const [hStr, mStr] = t.start_time.split(':');
-      const startH = parseInt(hStr, 10) || 0;
-      const startM = parseInt(mStr, 10) || 0;
-      const tournamentStartMinutes = startH * 60 + startM;
-
-      // Check if tournament starts within 10 to 20 minutes (approx 15 min reminder window)
-      const diff = tournamentStartMinutes - currentTotalMinutes;
-      if (diff >= 0 && diff <= 20) {
-        const res = await sendBulkTournamentReminders(t.id, '15min');
-        processed.push({ id: t.id, title: t.title, diffMinutes: diff, ...res });
-      }
-    }
+    const result = await checkAndSendDueReminders();
 
     return NextResponse.json({
       success: true,
-      processedCount: processed.length,
-      tournaments: processed,
+      serverTimeTashkent: new Date(Date.now() + 5 * 3600 * 1000).toISOString(),
+      ...result,
     });
   } catch (error: any) {
     console.error('[API /api/tournaments/reminders GET] Error:', error);

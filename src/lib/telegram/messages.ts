@@ -543,7 +543,7 @@ export function buildTournamentRegistrationMessage({
     (startTime ? `🕒 Vaqti: <b>${startTime}</b>\n` : '') +
     (durationMinutes ? `⏳ Davomiyligi: <b>${durationMinutes} daqiqa</b>\n` : '') +
     (prizePool ? `🎁 Sovrin: <b>${prizePool}</b>\n` : '') +
-    `\n🔔 <i>Musobaqa boshlanishiga 15 daqiqa qolganda sizga ushbu bot orqali eslatma yuboramiz! O'z vaqtida tayyor turing! 🚀</i>\n\n` +
+    `\n🔔 <i>Musobaqa boshlanishiga 10 daqiqa qolganda sizga ushbu bot orqali eslatma yuboramiz! O'z vaqtida tayyor turing! 🚀</i>\n\n` +
     `✨ <i>Promax Education — Katta marralar sari!</i>`
   );
 }
@@ -551,7 +551,7 @@ export function buildTournamentRegistrationMessage({
 export function buildTournamentReminderMessage({
   studentName,
   tournamentTitle,
-  minutesLeft = 15,
+  minutesLeft = 10,
   startTime,
   durationMinutes,
 }: {
@@ -562,7 +562,7 @@ export function buildTournamentReminderMessage({
   durationMinutes?: number;
 }): string {
   return (
-    `⏰ <b>DIQQAT! MUSOBAQAGA OZ VAQT QOLDI!</b> ⚡\n\n` +
+    `⏰ <b>DIQQAT! MUSOBAQAGA ATIGI ${minutesLeft} DAQIQA QOLDI!</b> ⚡\n\n` +
     `Hurmatli <b>${studentName}</b>!\n` +
     `Siz ro'yxatdan o'tgan <b>${tournamentTitle}</b> boshlanishiga atigi <b>${minutesLeft} daqiqa</b> qoldi!\n\n` +
     (startTime ? `🕒 Boshlanish vaqti: <b>${startTime}</b>\n` : '') +
