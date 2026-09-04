@@ -500,3 +500,94 @@ export function buildOnlineTestResultMessage({
     `\n\n✨ <i>Promax Education platformasi</i>`
   );
 }
+
+// ─── TOURNAMENT / OLYMPIAD NOTIFICATIONS ────────────────────────────────────────
+
+export function buildTournamentKeyboard(isInternational: boolean = false) {
+  const path = isInternational ? '/dashboard/international' : '/dashboard/olympiads';
+  return {
+    inline_keyboard: [
+      [
+        {
+          text: '⚡ Musobaqaga kirish',
+          web_app: { url: `${APP_URL}${path}` },
+        },
+      ],
+    ],
+  };
+}
+
+export function buildTournamentRegistrationMessage({
+  studentName,
+  tournamentTitle,
+  subject,
+  startDate,
+  startTime,
+  durationMinutes,
+  prizePool,
+}: {
+  studentName: string;
+  tournamentTitle: string;
+  subject?: string;
+  startDate?: string;
+  startTime?: string;
+  durationMinutes?: number;
+  prizePool?: string;
+}): string {
+  return (
+    `🎉 <b>RO'YXATDAN O'TISH TASDIQLANDI!</b> 🏆\n\n` +
+    `Hurmatli <b>${studentName}</b>, siz musobaqaga muvaffaqiyatli ro'yxatdan o'tdingiz!\n\n` +
+    `🏆 Musobaqa: <b>${tournamentTitle}</b>\n` +
+    (subject ? `📚 Fani: <b>${subject}</b>\n` : '') +
+    (startDate ? `📅 Sana: <b>${startDate}</b>\n` : '') +
+    (startTime ? `🕒 Vaqti: <b>${startTime}</b>\n` : '') +
+    (durationMinutes ? `⏳ Davomiyligi: <b>${durationMinutes} daqiqa</b>\n` : '') +
+    (prizePool ? `🎁 Sovrin: <b>${prizePool}</b>\n` : '') +
+    `\n🔔 <i>Musobaqa boshlanishiga 15 daqiqa qolganda sizga ushbu bot orqali eslatma yuboramiz! O'z vaqtida tayyor turing! 🚀</i>\n\n` +
+    `✨ <i>Promax Education — Katta marralar sari!</i>`
+  );
+}
+
+export function buildTournamentReminderMessage({
+  studentName,
+  tournamentTitle,
+  minutesLeft = 15,
+  startTime,
+  durationMinutes,
+}: {
+  studentName: string;
+  tournamentTitle: string;
+  minutesLeft?: number;
+  startTime?: string;
+  durationMinutes?: number;
+}): string {
+  return (
+    `⏰ <b>DIQQAT! MUSOBAQAGA OZ VAQT QOLDI!</b> ⚡\n\n` +
+    `Hurmatli <b>${studentName}</b>!\n` +
+    `Siz ro'yxatdan o'tgan <b>${tournamentTitle}</b> boshlanishiga atigi <b>${minutesLeft} daqiqa</b> qoldi!\n\n` +
+    (startTime ? `🕒 Boshlanish vaqti: <b>${startTime}</b>\n` : '') +
+    (durationMinutes ? `⏳ Davomiyligi: <b>${durationMinutes} daqiqa</b>\n` : '') +
+    `\n🚀 <b>Tavsiya:</b> Internet aloqangizni tekshiring, qulay joyga o'tiring va start berilishiga tayyor turing!\n\n` +
+    `G'alaba siz tomonda bo'lsin! 🏆 Omadingizni bersin!`
+  );
+}
+
+export function buildTournamentLiveMessage({
+  studentName,
+  tournamentTitle,
+  durationMinutes,
+}: {
+  studentName: string;
+  tournamentTitle: string;
+  durationMinutes?: number;
+}): string {
+  return (
+    `🔥 <b>START BERILDI! MUSOBAQA JONLI EFIRDA!</b> 🏆\n\n` +
+    `Hurmatli <b>${studentName}</b>!\n` +
+    `<b>${tournamentTitle}</b> rasman boshlandi!\n\n` +
+    (durationMinutes ? `⏳ Ajratilgan vaqt: <b>${durationMinutes} daqiqa</b>\n` : '') +
+    `\n⚡ Hoziroq kirib testlarni yechishni boshlang va yuqori ball bilan yetakchilar qatoridan joy oling!\n\n` +
+    `🎯 Qani, start tugmasini bosing! 👇`
+  );
+}
+

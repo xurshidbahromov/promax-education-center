@@ -20,7 +20,8 @@ import {
   ChevronUp,
   BarChart3,
   Check,
-  Plus
+  Plus,
+  Bell
 } from "lucide-react";
 import MathRenderer from "@/components/MathRenderer";
 import {
@@ -42,6 +43,7 @@ export default function TournamentDetailPage({ params }: PageProps) {
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<"questions" | "rules" | "results">("questions");
   const [expandedQ, setExpandedQ] = useState<string | null>(null);
+  const [sendingReminder, setSendingReminder] = useState(false);
 
   useEffect(() => {
     loadTournament();
@@ -60,6 +62,39 @@ export default function TournamentDetailPage({ params }: PageProps) {
     }
   };
 
+  const handleSendTelegramReminder = async () => {
+    if (!tournament) return;
+    if (!confirm(`"${tournament.title}" musobaqasiga ro'yxatdan o'tgan barcha o'quvchilarga Telegram orqali eslatma yuborishni tasdiqlaysizmi?`)) return;
+
+    setSendingReminder(true);
+    try {
+      const res = await fetch('/api/tournaments/reminders', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          tournamentId: tournament.id,
+          mode: '15min'
+        })
+      });
+      const data = await res.json();
+      if (data.success) {
+        if (data.sentCount > 0) {
+          toast.success(`${data.sentCount} nafar o'quvchiga Telegram eslatma yuborildi!`);
+        } else if (data.totalRegistered === 0) {
+          toast.error("Musobaqaga hali hech kim ro'yxatdan o'tmagan");
+        } else {
+          toast.error(`${data.totalRegistered} nafar ro'yxatdan o'tgan, lekin ularning profili Telegram botga ulanmagan`);
+        }
+      } else {
+        toast.error("Xatolik: " + (data.error || "Yuborib bo'lmadi"));
+      }
+    } catch (err: any) {
+      toast.error("Eslatma yuborishda xatolik yuz berdi");
+    } finally {
+      setSendingReminder(false);
+    }
+  };
+
   const handleToggleStatus = async () => {
     if (!tournament) return;
     const isLive = tournament.status === "live";
@@ -74,6 +109,18 @@ export default function TournamentDetailPage({ params }: PageProps) {
             ? "Musobaqa nashr qilindi (jonli)!"
             : "Musobaqa qoralamaga o'tkazildi!"
         );
+
+        // If publishing to live, automatically alert registered students in background
+        if (nextStatus === "live") {
+          fetch('/api/tournaments/reminders', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              tournamentId: tournament.id,
+              mode: 'live'
+            })
+          }).catch(() => {});
+        }
       }
     } catch (err) {
       toast.error("Statusni o'zgartirishda xatolik");
@@ -173,6 +220,16 @@ export default function TournamentDetailPage({ params }: PageProps) {
                 <CheckCircle size={15} /> <span>Nashr qilish</span>
               </>
             )}
+          </button>
+
+          <button
+            onClick={handleSendTelegramReminder}
+            disabled={sendingReminder}
+            className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs sm:text-sm font-bold transition-all active:scale-95 bg-sky-50 dark:bg-sky-950/30 text-sky-600 dark:text-sky-400 hover:bg-sky-100 dark:hover:bg-sky-900/40 border border-sky-200/60 dark:border-sky-800/60 cursor-pointer disabled:opacity-50"
+            title="Ro'yxatdan o'tgan barcha o'quvchilarga Telegram orqali 15-min eslatma yuborish"
+          >
+            <Bell size={15} className={sendingReminder ? "animate-spin" : ""} />
+            <span>{sendingReminder ? "Yuborilmoqda..." : "Telegram Eslatma (15 min)"}</span>
           </button>
 
           <Link

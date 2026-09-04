@@ -307,6 +307,19 @@ export async function registerForInternationalTournament(tournamentId: string, u
           created_at: new Date().toISOString()
         }, { onConflict: 'tournament_id,student_id' });
     } catch (e) {}
+
+    // 3. Send Telegram registration confirmation in background
+    try {
+      fetch('/api/tournaments/reminders', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          tournamentId,
+          studentId: userId,
+          mode: 'registration'
+        })
+      }).catch(() => {});
+    } catch (e) {}
   }
 
   return true;

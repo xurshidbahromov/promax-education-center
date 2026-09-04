@@ -360,6 +360,21 @@ export async function registerForTournament(
     }
   } catch (e) {}
 
+  // 4. Send Telegram registration confirmation in background
+  if (user.id) {
+    try {
+      fetch('/api/tournaments/reminders', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          tournamentId,
+          studentId: user.id,
+          mode: 'registration'
+        })
+      }).catch(() => {});
+    } catch (e) {}
+  }
+
   return { success: true, message: "Muvaffaqiyatli ro'yxatdan o'tdingiz!" };
 }
 
