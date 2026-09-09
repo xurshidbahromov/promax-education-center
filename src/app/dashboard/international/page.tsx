@@ -223,7 +223,7 @@ export default function InternationalCompetitionsPage() {
         const defaultId = queryId && data.some(t => t.id === queryId) ? queryId : (selectedTournamentId || data[0].id);
         setSelectedTournamentId(defaultId);
         getInternationalLeaderboard(defaultId).then((fresh) => {
-          if (Array.isArray(fresh) && fresh.length > 0) {
+          if (Array.isArray(fresh)) {
             setLeaderboard(fresh);
           }
         }).catch(() => {});
@@ -248,13 +248,11 @@ export default function InternationalCompetitionsPage() {
     let isMounted = true;
 
     const cached = getCachedInternationalLeaderboard(selectedTournamentId);
-    if (cached.length > 0) {
-      setLeaderboard(cached);
-    }
+    setLeaderboard(cached);
 
     getInternationalLeaderboard(selectedTournamentId)
       .then((fresh) => {
-        if (isMounted && Array.isArray(fresh) && fresh.length > 0) {
+        if (isMounted && Array.isArray(fresh)) {
           setLeaderboard(fresh);
         }
       })
@@ -268,12 +266,10 @@ export default function InternationalCompetitionsPage() {
   const handleTournamentSelectForLeaderboard = async (id: string) => {
     setSelectedTournamentId(id);
     const cached = getCachedInternationalLeaderboard(id);
-    if (cached.length > 0) {
-      setLeaderboard(cached);
-    }
+    setLeaderboard(cached);
     try {
       const lb = await getInternationalLeaderboard(id);
-      if (Array.isArray(lb) && lb.length > 0) {
+      if (Array.isArray(lb)) {
         setLeaderboard(lb);
       }
     } catch (e) {
@@ -882,7 +878,7 @@ export default function InternationalCompetitionsPage() {
                     
                     {/* 🥈 2ND PLACE */}
                     {(() => {
-                      const item = leaderboard[1];
+                      const item = leaderboard.find(e => e.rank === 2) || leaderboard[1];
                       if (!item) {
                         return (
                           <div className="flex flex-col items-center text-center group">
@@ -958,7 +954,7 @@ export default function InternationalCompetitionsPage() {
                             </div>
                             <div className="flex items-center justify-center gap-1 text-[10px] text-slate-400 font-medium">
                               <Clock size={10} />
-                              <span>{Math.floor(item.time_spent_seconds / 60)} daq</span>
+                              <span>{Math.floor((item.time_spent_seconds || 0) / 60)} daq</span>
                             </div>
                           </div>
 
@@ -976,7 +972,7 @@ export default function InternationalCompetitionsPage() {
 
                     {/* 🥇 1ST PLACE */}
                     {(() => {
-                      const item = leaderboard[0];
+                      const item = leaderboard.find(e => e.rank === 1) || leaderboard[0];
                       const isSelf = user?.id && item.user_id === user.id;
                       const avatar = isSelf ? (profile?.avatar_url || item.student_avatar) : item.student_avatar;
                       const hasAvatar = avatar && !avatar.includes('dicebear');
@@ -1020,7 +1016,7 @@ export default function InternationalCompetitionsPage() {
                             </div>
                             <div className="flex items-center justify-center gap-1 text-[10px] sm:text-[11px] text-slate-400 font-medium">
                               <Clock size={10} />
-                              <span>{Math.floor(item.time_spent_seconds / 60)} daq {item.time_spent_seconds % 60} son</span>
+                              <span>{Math.floor((item.time_spent_seconds || 0) / 60)} daq {(item.time_spent_seconds || 0) % 60} son</span>
                             </div>
                           </div>
 
@@ -1038,7 +1034,7 @@ export default function InternationalCompetitionsPage() {
 
                     {/* 🥉 3RD PLACE */}
                     {(() => {
-                      const item = leaderboard[2];
+                      const item = leaderboard.find(e => e.rank === 3) || leaderboard[2];
                       if (!item) {
                         return (
                           <div className="flex flex-col items-center text-center group">
@@ -1066,7 +1062,7 @@ export default function InternationalCompetitionsPage() {
                             {/* 3D Glassy Isometric Stand 3 */}
                             <div className="w-full">
                               <div className="h-4 sm:h-5 w-full bg-gradient-to-r from-orange-200 via-amber-200 to-rose-200 dark:from-orange-500 dark:via-amber-400 dark:to-rose-400 rounded-t-2xl transform -skew-x-2 border-t border-x border-white/80 dark:border-white/30 shadow-none" />
-                              <div className="h-24 sm:h-30 w-full bg-gradient-to-b from-orange-500/80 via-orange-600/80 to-amber-700/80 dark:from-orange-600/80 dark:via-orange-700/80 dark:to-amber-800/80 backdrop-blur-xl rounded-b-2xl shadow-none flex flex-col items-center justify-center text-white relative overflow-hidden">
+                              <div className="h-24 sm:h-30 w-full bg-gradient-to-b from-orange-500/80 via-orange-600/80 to-amber-700/80 dark:from-orange-600/80 dark:via-orange-700/80 dark:to-amber-800 backdrop-blur-xl rounded-b-2xl shadow-none flex flex-col items-center justify-center text-white relative overflow-hidden">
                                 <span className="text-4xl sm:text-5xl font-black font-fredoka tracking-tighter drop-shadow-md">
                                   3
                                 </span>
@@ -1114,7 +1110,7 @@ export default function InternationalCompetitionsPage() {
                             </div>
                             <div className="flex items-center justify-center gap-1 text-[10px] text-slate-400 font-medium">
                               <Clock size={10} />
-                              <span>{Math.floor(item.time_spent_seconds / 60)} daq</span>
+                              <span>{Math.floor((item.time_spent_seconds || 0) / 60)} daq</span>
                             </div>
                           </div>
 

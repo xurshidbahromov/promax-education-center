@@ -389,105 +389,21 @@ export function getTournamentRegistrations(userId?: string): string[] {
   }
 }
 
-// ── National Benchmark Contenders ──
-export function getNationalBenchmarks(tournamentId: string): TournamentLeaderboardEntry[] {
-  return [
-    {
-      id: `bench_${tournamentId}_1`,
-      tournament_id: tournamentId,
-      user_id: 'bench_user_madina',
-      student_name: 'Madina Karimova',
-      student_avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150',
-      score: 15.5,
-      max_score: 15.5,
-      percentage: 100,
-      time_spent_seconds: 1420,
-      rank: 1,
-      prize: "🥇 1-O'rin: 1,000,000 So'm + Oltin Medal & Diplom",
-      completed_at: 'Bugun, 14:20'
-    },
-    {
-      id: `bench_${tournamentId}_2`,
-      tournament_id: tournamentId,
-      user_id: 'bench_user_jasur',
-      student_name: 'Jasur Toshmatov',
-      student_avatar: 'https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?w=150',
-      score: 15.5,
-      max_score: 15.5,
-      percentage: 100,
-      time_spent_seconds: 1680,
-      rank: 2,
-      prize: "🥈 2-O'rin: 300,000 So'm + Kumush Medal",
-      completed_at: 'Bugun, 15:45'
-    },
-    {
-      id: `bench_${tournamentId}_3`,
-      tournament_id: tournamentId,
-      user_id: 'bench_user_rayhona',
-      student_name: 'Rayhona Saidova',
-      student_avatar: 'https://images.unsplash.com/photo-1517841905240-472988babdf9?w=150',
-      score: 12.4,
-      max_score: 15.5,
-      percentage: 80,
-      time_spent_seconds: 1850,
-      rank: 3,
-      prize: "🥉 3-O'rin: 200,000 So'm + Bronza Medal",
-      completed_at: 'Kecha, 18:10'
-    },
-    {
-      id: `bench_${tournamentId}_4`,
-      tournament_id: tournamentId,
-      user_id: 'bench_user_bekzod',
-      student_name: 'Bekzod Aliyev',
-      student_avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150',
-      score: 12.4,
-      max_score: 15.5,
-      percentage: 80,
-      time_spent_seconds: 2100,
-      rank: 4,
-      completed_at: 'Kecha, 19:30'
-    },
-    {
-      id: `bench_${tournamentId}_5`,
-      tournament_id: tournamentId,
-      user_id: 'bench_user_nilufar',
-      student_name: 'Nilufar Qodirova',
-      student_avatar: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150',
-      score: 9.3,
-      max_score: 15.5,
-      percentage: 60,
-      time_spent_seconds: 2350,
-      rank: 5,
-      completed_at: '3 kun oldin'
-    },
-    {
-      id: `bench_${tournamentId}_6`,
-      tournament_id: tournamentId,
-      user_id: 'bench_user_shaxzod',
-      student_name: 'Shaxzod Rahmonov',
-      student_avatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150',
-      score: 9.3,
-      max_score: 15.5,
-      percentage: 60,
-      time_spent_seconds: 2480,
-      rank: 6,
-      completed_at: '4 kun oldin'
-    }
-  ];
+// ── National Benchmark Contenders (Disabled: Real Users Only) ──
+export function getNationalBenchmarks(_tournamentId: string): TournamentLeaderboardEntry[] {
+  return [];
 }
 
-export function mergeWithNationalBenchmarks(entries: TournamentLeaderboardEntry[], tournamentId: string): TournamentLeaderboardEntry[] {
-  const benchmarks = getNationalBenchmarks(tournamentId);
-  const existingUserIds = new Set(entries.map(e => e.user_id));
-  const filteredBenchmarks = benchmarks.filter(b => !existingUserIds.has(b.user_id));
-  const combined = [...entries, ...filteredBenchmarks];
-
-  combined.sort((a, b) => {
+export function mergeWithNationalBenchmarks(entries: TournamentLeaderboardEntry[], _tournamentId: string): TournamentLeaderboardEntry[] {
+  const clean = entries.filter(
+    e => !e.id?.startsWith('bench_') && !e.user_id?.startsWith('bench_')
+  );
+  clean.sort((a, b) => {
     if (b.score !== a.score) return b.score - a.score;
     return a.time_spent_seconds - b.time_spent_seconds;
   });
 
-  return combined.map((entry, idx) => ({
+  return clean.map((entry, idx) => ({
     ...entry,
     rank: idx + 1,
     prize: entry.prize || (idx === 0 ? "🥇 1-O'rin: 1,000,000 So'm + Oltin Medal & Diplom"
@@ -504,13 +420,13 @@ export function getCachedTournamentLeaderboard(tournamentId: string): Tournament
       const local = localStorage.getItem(`promax_leaderboard_${tournamentId}`);
       if (local) {
         const parsed = JSON.parse(local);
-        if (Array.isArray(parsed) && parsed.length > 0) {
-          return parsed;
+        if (Array.isArray(parsed)) {
+          return parsed.filter((e: any) => !e.id?.startsWith('bench_') && !e.user_id?.startsWith('bench_'));
         }
       }
     } catch (e) {}
   }
-  return getNationalBenchmarks(tournamentId);
+  return [];
 }
 
 export function getUserCompletedTournamentIdsSync(userId?: string): string[] {
@@ -525,20 +441,23 @@ export function getUserCompletedTournamentIdsSync(userId?: string): string[] {
 
 // ── LEADERBOARD & SUBMISSION ──
 export async function getTournamentLeaderboard(tournamentId: string): Promise<TournamentLeaderboardEntry[]> {
-  // 1. Fetch from server API first (which reads DB & returns results)
+  // 1. Fetch from server API first (which reads DB & returns real results)
   try {
     const res = await fetch(`/api/tournaments/leaderboard?tournamentId=${encodeURIComponent(tournamentId)}&type=national&_t=${Date.now()}`, {
       cache: 'no-store'
     });
     if (res.ok) {
       const data = await res.json();
-      if (Array.isArray(data.leaderboard) && data.leaderboard.length > 0) {
+      if (Array.isArray(data.leaderboard)) {
+        const clean = data.leaderboard.filter(
+          (e: any) => !e.id?.startsWith('bench_') && !e.user_id?.startsWith('bench_')
+        );
         if (typeof window !== 'undefined') {
           try {
-            localStorage.setItem(`promax_leaderboard_${tournamentId}`, JSON.stringify(data.leaderboard));
+            localStorage.setItem(`promax_leaderboard_${tournamentId}`, JSON.stringify(clean));
           } catch (e) {}
         }
-        return data.leaderboard;
+        return clean;
       }
     }
   } catch (apiErr) {
@@ -555,7 +474,16 @@ export async function getTournamentLeaderboard(tournamentId: string): Promise<To
       .order('score', { ascending: false })
       .order('time_spent_seconds', { ascending: true });
 
-    if (!error && data && data.length > 0) {
+    if (!error && Array.isArray(data)) {
+      if (data.length === 0) {
+        if (typeof window !== 'undefined') {
+          try {
+            localStorage.setItem(`promax_leaderboard_${tournamentId}`, JSON.stringify([]));
+          } catch (e) {}
+        }
+        return [];
+      }
+
       const studentIds = Array.from(new Set(data.map((d: any) => d.student_id).filter(Boolean)));
       let profilesMap: Record<string, { full_name: string; avatar_url: string }> = {};
       if (studentIds.length > 0) {
@@ -600,7 +528,7 @@ export async function getTournamentLeaderboard(tournamentId: string): Promise<To
     }
   } catch (e) {}
 
-  // 3. Instant Cache / Benchmark Fallback (Never empty)
+  // 3. Instant Cache Fallback (Real submissions only, never mock benchmarks)
   return getCachedTournamentLeaderboard(tournamentId);
 }
 
@@ -644,7 +572,10 @@ export async function submitTournamentAttempt(params: {
     completed_at: "Hozirginagina"
   };
 
-  const updatedList = [...currentLeaderboard.filter(e => e.user_id !== params.userId), newEntry];
+  const cleanLeaderboard = currentLeaderboard.filter(
+    e => !e.id?.startsWith('bench_') && !e.user_id?.startsWith('bench_') && e.user_id !== params.userId
+  );
+  const updatedList = [...cleanLeaderboard, newEntry];
   updatedList.sort((a, b) => {
     if (b.score !== a.score) return b.score - a.score;
     return a.time_spent_seconds - b.time_spent_seconds;
@@ -683,9 +614,12 @@ export async function submitTournamentAttempt(params: {
     if (res.ok) {
       const data = await res.json();
       if (data.result && Array.isArray(data.leaderboard)) {
+        const cleanBoard = data.leaderboard.filter(
+          (e: any) => !e.id?.startsWith('bench_') && !e.user_id?.startsWith('bench_')
+        );
         if (typeof window !== 'undefined') {
           try {
-            localStorage.setItem(`promax_leaderboard_${params.tournamentId}`, JSON.stringify(data.leaderboard));
+            localStorage.setItem(`promax_leaderboard_${params.tournamentId}`, JSON.stringify(cleanBoard));
           } catch (e) {}
         }
       }

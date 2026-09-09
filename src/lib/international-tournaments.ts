@@ -187,111 +187,21 @@ export async function getInternationalTournamentById(id: string): Promise<Intern
   return tournaments.find(t => t.id === id) || null;
 }
 
-// ── International Benchmark Contenders ──
-export function getInternationalBenchmarks(tournamentId: string): InternationalLeaderboardEntry[] {
-  return [
-    {
-      id: `intl_bench_${tournamentId}_1`,
-      tournament_id: tournamentId,
-      user_id: 'bench_user_kamron',
-      student_name: 'Kamronbek Alimov',
-      student_avatar: 'https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?w=150',
-      score: 50,
-      max_score: 50,
-      scaled_score: '1580 / 1600',
-      percentage: 100,
-      time_spent_seconds: 2100,
-      rank: 1,
-      prize: "🥇 1-O'rin: 100% Kurs Granti + Rasmiy Sertifikat",
-      completed_at: 'Bugun, 11:30'
-    },
-    {
-      id: `intl_bench_${tournamentId}_2`,
-      tournament_id: tournamentId,
-      user_id: 'bench_user_sevinch',
-      student_name: 'Sevinch Rustamova',
-      student_avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150',
-      score: 50,
-      max_score: 50,
-      scaled_score: '1540 / 1600',
-      percentage: 100,
-      time_spent_seconds: 2450,
-      rank: 2,
-      prize: "🥈 2-O'rin: 500,000 So'm Chegirma Vafcheri",
-      completed_at: 'Kecha, 16:40'
-    },
-    {
-      id: `intl_bench_${tournamentId}_3`,
-      tournament_id: tournamentId,
-      user_id: 'bench_user_azizbek',
-      student_name: 'Azizbek Norov',
-      student_avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150',
-      score: 40,
-      max_score: 50,
-      scaled_score: '1460 / 1600',
-      percentage: 80,
-      time_spent_seconds: 2780,
-      rank: 3,
-      prize: "🥉 3-O'rin: 300,000 So'm Chegirma Vafcheri",
-      completed_at: 'Kecha, 20:15'
-    },
-    {
-      id: `intl_bench_${tournamentId}_4`,
-      tournament_id: tournamentId,
-      user_id: 'bench_user_diana',
-      student_name: 'Diana Kim',
-      student_avatar: 'https://images.unsplash.com/photo-1517841905240-472988babdf9?w=150',
-      score: 40,
-      max_score: 50,
-      scaled_score: '1420 / 1600',
-      percentage: 80,
-      time_spent_seconds: 3100,
-      rank: 4,
-      completed_at: '2 kun oldin'
-    },
-    {
-      id: `intl_bench_${tournamentId}_5`,
-      tournament_id: tournamentId,
-      user_id: 'bench_user_bobur',
-      student_name: 'Bobur Islomov',
-      student_avatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150',
-      score: 30,
-      max_score: 50,
-      scaled_score: '1350 / 1600',
-      percentage: 60,
-      time_spent_seconds: 3320,
-      rank: 5,
-      completed_at: '3 kun oldin'
-    },
-    {
-      id: `intl_bench_${tournamentId}_6`,
-      tournament_id: tournamentId,
-      user_id: 'bench_user_malika',
-      student_name: 'Malika Yusupova',
-      student_avatar: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=150',
-      score: 30,
-      max_score: 50,
-      scaled_score: '1280 / 1600',
-      percentage: 60,
-      time_spent_seconds: 3480,
-      rank: 6,
-      completed_at: '4 kun oldin'
-    }
-  ];
+// ── International Benchmark Contenders (Disabled: Real Users Only) ──
+export function getInternationalBenchmarks(_tournamentId: string): InternationalLeaderboardEntry[] {
+  return [];
 }
 
-export function mergeWithInternationalBenchmarks(entries: InternationalLeaderboardEntry[], tournamentId: string): InternationalLeaderboardEntry[] {
-  const benchmarks = getInternationalBenchmarks(tournamentId);
-  const existingUserIds = new Set(entries.map(e => e.user_id));
-  const filteredBenchmarks = benchmarks.filter(b => !existingUserIds.has(b.user_id));
-  const combined = [...entries, ...filteredBenchmarks];
-
-  combined.sort((a, b) => {
+export function mergeWithInternationalBenchmarks(entries: InternationalLeaderboardEntry[], _tournamentId: string): InternationalLeaderboardEntry[] {
+  const clean = entries.filter(
+    e => !e.id?.startsWith('intl_bench_') && !e.id?.startsWith('bench_') && !e.user_id?.startsWith('bench_')
+  );
+  clean.sort((a, b) => {
     if (b.score !== a.score) return b.score - a.score;
     return a.time_spent_seconds - b.time_spent_seconds;
   });
 
-  return combined.map((entry, idx) => ({
+  return clean.map((entry, idx) => ({
     ...entry,
     rank: idx + 1,
     prize: entry.prize || (idx === 0 ? "🥇 1-O'rin: 100% Kurs Granti + Rasmiy Sertifikat"
@@ -308,13 +218,15 @@ export function getCachedInternationalLeaderboard(tournamentId: string): Interna
       const stored = localStorage.getItem(STORAGE_INTERNATIONAL_LEADERBOARDS);
       if (stored) {
         const map = JSON.parse(stored);
-        if (map[tournamentId] && Array.isArray(map[tournamentId]) && map[tournamentId].length > 0) {
-          return map[tournamentId];
+        if (map[tournamentId] && Array.isArray(map[tournamentId])) {
+          return map[tournamentId].filter(
+            (e: any) => !e.id?.startsWith('intl_bench_') && !e.id?.startsWith('bench_') && !e.user_id?.startsWith('bench_')
+          );
         }
       }
     } catch (e) {}
   }
-  return getInternationalBenchmarks(tournamentId);
+  return [];
 }
 
 export function getUserCompletedInternationalTournamentIdsSync(userId?: string): string[] {
@@ -328,23 +240,26 @@ export function getUserCompletedInternationalTournamentIdsSync(userId?: string):
 }
 
 export async function getInternationalLeaderboard(tournamentId: string): Promise<InternationalLeaderboardEntry[]> {
-  // 1. Fetch from server API first (which reads DB & returns results)
+  // 1. Fetch from server API first (which reads DB & returns real results)
   try {
     const res = await fetch(`/api/tournaments/leaderboard?tournamentId=${encodeURIComponent(tournamentId)}&type=international&_t=${Date.now()}`, {
       cache: 'no-store'
     });
     if (res.ok) {
       const data = await res.json();
-      if (Array.isArray(data.leaderboard) && data.leaderboard.length > 0) {
+      if (Array.isArray(data.leaderboard)) {
+        const clean = data.leaderboard.filter(
+          (e: any) => !e.id?.startsWith('intl_bench_') && !e.id?.startsWith('bench_') && !e.user_id?.startsWith('bench_')
+        );
         if (typeof window !== 'undefined') {
           try {
             const stored = localStorage.getItem(STORAGE_INTERNATIONAL_LEADERBOARDS);
             let map: Record<string, InternationalLeaderboardEntry[]> = stored ? JSON.parse(stored) : {};
-            map[tournamentId] = data.leaderboard;
+            map[tournamentId] = clean;
             localStorage.setItem(STORAGE_INTERNATIONAL_LEADERBOARDS, JSON.stringify(map));
           } catch {}
         }
-        return data.leaderboard;
+        return clean;
       }
     }
   } catch (apiErr) {
@@ -361,7 +276,19 @@ export async function getInternationalLeaderboard(tournamentId: string): Promise
       .order('score', { ascending: false })
       .order('time_spent_seconds', { ascending: true });
 
-    if (!error && data && data.length > 0) {
+    if (!error && Array.isArray(data)) {
+      if (data.length === 0) {
+        if (typeof window !== 'undefined') {
+          try {
+            const stored = localStorage.getItem(STORAGE_INTERNATIONAL_LEADERBOARDS);
+            let map: Record<string, InternationalLeaderboardEntry[]> = stored ? JSON.parse(stored) : {};
+            map[tournamentId] = [];
+            localStorage.setItem(STORAGE_INTERNATIONAL_LEADERBOARDS, JSON.stringify(map));
+          } catch {}
+        }
+        return [];
+      }
+
       const studentIds = Array.from(new Set(data.map((d: any) => d.student_id).filter(Boolean)));
       let profilesMap: Record<string, { full_name: string; avatar_url: string }> = {};
       if (studentIds.length > 0) {
@@ -412,7 +339,7 @@ export async function getInternationalLeaderboard(tournamentId: string): Promise
     console.error("Error fetching intl leaderboard:", e);
   }
 
-  // 3. Instant Cache / Benchmark Fallback (Never empty)
+  // 3. Instant Cache Fallback (Real submissions only, never mock benchmarks)
   return getCachedInternationalLeaderboard(tournamentId);
 }
 
@@ -521,7 +448,9 @@ export async function submitInternationalAttempt(
   };
 
   let currentList = await getInternationalLeaderboard(tournamentId);
-  currentList = currentList.filter(e => e.user_id !== userId);
+  currentList = currentList.filter(
+    e => !e.id?.startsWith('intl_bench_') && !e.id?.startsWith('bench_') && !e.user_id?.startsWith('bench_') && e.user_id !== userId
+  );
   currentList.push(newEntry);
 
   currentList.sort((a, b) => {
@@ -560,11 +489,14 @@ export async function submitInternationalAttempt(
     if (res.ok) {
       const data = await res.json();
       if (data.leaderboard && Array.isArray(data.leaderboard)) {
+        const cleanBoard = data.leaderboard.filter(
+          (e: any) => !e.id?.startsWith('intl_bench_') && !e.id?.startsWith('bench_') && !e.user_id?.startsWith('bench_')
+        );
         if (typeof window !== 'undefined') {
           try {
             const stored = localStorage.getItem(STORAGE_INTERNATIONAL_LEADERBOARDS);
             let map: Record<string, InternationalLeaderboardEntry[]> = stored ? JSON.parse(stored) : {};
-            map[tournamentId] = data.leaderboard;
+            map[tournamentId] = cleanBoard;
             localStorage.setItem(STORAGE_INTERNATIONAL_LEADERBOARDS, JSON.stringify(map));
           } catch {}
         }

@@ -223,7 +223,7 @@ export default function OlympiadsPage() {
         const defaultId = queryId && data.some(t => t.id === queryId) ? queryId : (selectedTournamentId || data[0].id);
         setSelectedTournamentId(defaultId);
         getTournamentLeaderboard(defaultId).then((fresh) => {
-          if (Array.isArray(fresh) && fresh.length > 0) {
+          if (Array.isArray(fresh)) {
             setLeaderboard(fresh);
           }
         }).catch(() => {});
@@ -248,13 +248,11 @@ export default function OlympiadsPage() {
     let isMounted = true;
 
     const cached = getCachedTournamentLeaderboard(selectedTournamentId);
-    if (cached.length > 0) {
-      setLeaderboard(cached);
-    }
+    setLeaderboard(cached);
 
     getTournamentLeaderboard(selectedTournamentId)
       .then((fresh) => {
-        if (isMounted && Array.isArray(fresh) && fresh.length > 0) {
+        if (isMounted && Array.isArray(fresh)) {
           setLeaderboard(fresh);
         }
       })
@@ -268,12 +266,10 @@ export default function OlympiadsPage() {
   const handleTournamentSelectForLeaderboard = async (id: string) => {
     setSelectedTournamentId(id);
     const cached = getCachedTournamentLeaderboard(id);
-    if (cached.length > 0) {
-      setLeaderboard(cached);
-    }
+    setLeaderboard(cached);
     try {
       const lb = await getTournamentLeaderboard(id);
-      if (Array.isArray(lb) && lb.length > 0) {
+      if (Array.isArray(lb)) {
         setLeaderboard(lb);
       }
     } catch (e) {
@@ -885,7 +881,7 @@ export default function OlympiadsPage() {
                     
                     {/* 🥈 2ND PLACE (LEFT - BLUE/INDIGO GLASSY 3D STAND) */}
                     {(() => {
-                      const item = leaderboard[1];
+                      const item = leaderboard.find(e => e.rank === 2) || leaderboard[1];
                       if (!item) {
                         return (
                           <div className="flex flex-col items-center text-center group">
@@ -963,7 +959,7 @@ export default function OlympiadsPage() {
                             </div>
                             <div className="flex items-center justify-center gap-1 text-[10px] text-slate-400 font-medium">
                               <Clock size={10} />
-                              <span>{Math.floor(item.time_spent_seconds / 60)} daq</span>
+                              <span>{Math.floor((item.time_spent_seconds || 0) / 60)} daq</span>
                             </div>
                           </div>
 
@@ -984,7 +980,7 @@ export default function OlympiadsPage() {
 
                     {/* 🥇 1ST PLACE (CENTER - TALL GOLD GLASSY 3D STAND) */}
                     {(() => {
-                      const item = leaderboard[0];
+                      const item = leaderboard.find(e => e.rank === 1) || leaderboard[0];
                       const isSelf = user?.id && item.user_id === user.id;
                       const avatar = isSelf ? (profile?.avatar_url || item.student_avatar) : item.student_avatar;
                       const hasAvatar = avatar && !avatar.includes('dicebear');
@@ -1031,7 +1027,7 @@ export default function OlympiadsPage() {
                             </div>
                             <div className="flex items-center justify-center gap-1 text-[10px] sm:text-[11px] text-slate-400 font-medium">
                               <Clock size={10} />
-                              <span>{Math.floor(item.time_spent_seconds / 60)} daq {item.time_spent_seconds % 60} son</span>
+                              <span>{Math.floor((item.time_spent_seconds || 0) / 60)} daq {(item.time_spent_seconds || 0) % 60} son</span>
                             </div>
                           </div>
 
@@ -1052,7 +1048,7 @@ export default function OlympiadsPage() {
 
                     {/* 🥉 3RD PLACE (RIGHT - ORANGE/BRONZE GLASSY 3D STAND) */}
                     {(() => {
-                      const item = leaderboard[2];
+                      const item = leaderboard.find(e => e.rank === 3) || leaderboard[2];
                       if (!item) {
                         return (
                           <div className="flex flex-col items-center text-center group">
@@ -1130,7 +1126,7 @@ export default function OlympiadsPage() {
                             </div>
                             <div className="flex items-center justify-center gap-1 text-[10px] text-slate-400 font-medium">
                               <Clock size={10} />
-                              <span>{Math.floor(item.time_spent_seconds / 60)} daq</span>
+                              <span>{Math.floor((item.time_spent_seconds || 0) / 60)} daq</span>
                             </div>
                           </div>
 

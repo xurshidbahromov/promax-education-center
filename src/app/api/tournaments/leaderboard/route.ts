@@ -20,194 +20,6 @@ export interface LeaderboardEntryDTO {
   prize?: string;
 }
 
-// ── Default National Benchmark Contenders ──
-function getNationalBenchmarkContenders(tournamentId: string): LeaderboardEntryDTO[] {
-  return [
-    {
-      id: `bench_${tournamentId}_1`,
-      tournament_id: tournamentId,
-      user_id: 'bench_user_madina',
-      student_name: 'Madina Karimova',
-      student_avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150',
-      score: 15.5,
-      max_score: 15.5,
-      percentage: 100,
-      time_spent_seconds: 1420,
-      rank: 1,
-      prize: "🥇 1-O'rin: 1,000,000 So'm + Oltin Medal & Diplom",
-      completed_at: 'Bugun, 14:20'
-    },
-    {
-      id: `bench_${tournamentId}_2`,
-      tournament_id: tournamentId,
-      user_id: 'bench_user_jasur',
-      student_name: 'Jasur Toshmatov',
-      student_avatar: 'https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?w=150',
-      score: 15.5,
-      max_score: 15.5,
-      percentage: 100,
-      time_spent_seconds: 1680,
-      rank: 2,
-      prize: "🥈 2-O'rin: 300,000 So'm + Kumush Medal",
-      completed_at: 'Bugun, 15:45'
-    },
-    {
-      id: `bench_${tournamentId}_3`,
-      tournament_id: tournamentId,
-      user_id: 'bench_user_rayhona',
-      student_name: 'Rayhona Saidova',
-      student_avatar: 'https://images.unsplash.com/photo-1517841905240-472988babdf9?w=150',
-      score: 12.4,
-      max_score: 15.5,
-      percentage: 80,
-      time_spent_seconds: 1850,
-      rank: 3,
-      prize: "🥉 3-O'rin: 200,000 So'm + Bronza Medal",
-      completed_at: 'Kecha, 18:10'
-    },
-    {
-      id: `bench_${tournamentId}_4`,
-      tournament_id: tournamentId,
-      user_id: 'bench_user_bekzod',
-      student_name: 'Bekzod Aliyev',
-      student_avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150',
-      score: 12.4,
-      max_score: 15.5,
-      percentage: 80,
-      time_spent_seconds: 2100,
-      rank: 4,
-      completed_at: 'Kecha, 19:30'
-    },
-    {
-      id: `bench_${tournamentId}_5`,
-      tournament_id: tournamentId,
-      user_id: 'bench_user_nilufar',
-      student_name: 'Nilufar Qodirova',
-      student_avatar: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150',
-      score: 9.3,
-      max_score: 15.5,
-      percentage: 60,
-      time_spent_seconds: 2350,
-      rank: 5,
-      completed_at: '3 kun oldin'
-    },
-    {
-      id: `bench_${tournamentId}_6`,
-      tournament_id: tournamentId,
-      user_id: 'bench_user_shaxzod',
-      student_name: 'Shaxzod Rahmonov',
-      student_avatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150',
-      score: 9.3,
-      max_score: 15.5,
-      percentage: 60,
-      time_spent_seconds: 2480,
-      rank: 6,
-      completed_at: '4 kun oldin'
-    }
-  ];
-}
-
-// ── Default International (SAT) Benchmark Contenders ──
-function getInternationalBenchmarkContenders(tournamentId: string): LeaderboardEntryDTO[] {
-  return [
-    {
-      id: `intl_bench_${tournamentId}_1`,
-      tournament_id: tournamentId,
-      user_id: 'bench_user_kamron',
-      student_name: 'Kamronbek Alimov',
-      student_avatar: 'https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?w=150',
-      score: 50,
-      max_score: 50,
-      scaled_score: '1580 / 1600',
-      percentage: 100,
-      time_spent_seconds: 2100,
-      rank: 1,
-      prize: "🥇 1-O'rin: 100% Kurs Granti + Rasmiy Sertifikat",
-      completed_at: 'Bugun, 11:30'
-    },
-    {
-      id: `intl_bench_${tournamentId}_2`,
-      tournament_id: tournamentId,
-      user_id: 'bench_user_sevinch',
-      student_name: 'Sevinch Rustamova',
-      student_avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150',
-      score: 50,
-      max_score: 50,
-      scaled_score: '1540 / 1600',
-      percentage: 100,
-      time_spent_seconds: 2450,
-      rank: 2,
-      prize: "🥈 2-O'rin: 500,000 So'm Chegirma Vafcheri",
-      completed_at: 'Kecha, 16:40'
-    },
-    {
-      id: `intl_bench_${tournamentId}_3`,
-      tournament_id: tournamentId,
-      user_id: 'bench_user_azizbek',
-      student_name: 'Azizbek Norov',
-      student_avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150',
-      score: 40,
-      max_score: 50,
-      scaled_score: '1460 / 1600',
-      percentage: 80,
-      time_spent_seconds: 2780,
-      rank: 3,
-      prize: "🥉 3-O'rin: 300,000 So'm Chegirma Vafcheri",
-      completed_at: 'Kecha, 20:15'
-    },
-    {
-      id: `intl_bench_${tournamentId}_4`,
-      tournament_id: tournamentId,
-      user_id: 'bench_user_diana',
-      student_name: 'Diana Kim',
-      student_avatar: 'https://images.unsplash.com/photo-1517841905240-472988babdf9?w=150',
-      score: 40,
-      max_score: 50,
-      scaled_score: '1420 / 1600',
-      percentage: 80,
-      time_spent_seconds: 3100,
-      rank: 4,
-      completed_at: '2 kun oldin'
-    },
-    {
-      id: `intl_bench_${tournamentId}_5`,
-      tournament_id: tournamentId,
-      user_id: 'bench_user_bobur',
-      student_name: 'Bobur Islomov',
-      student_avatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150',
-      score: 30,
-      max_score: 50,
-      scaled_score: '1350 / 1600',
-      percentage: 60,
-      time_spent_seconds: 3320,
-      rank: 5,
-      completed_at: '3 kun oldin'
-    },
-    {
-      id: `intl_bench_${tournamentId}_6`,
-      tournament_id: tournamentId,
-      user_id: 'bench_user_malika',
-      student_name: 'Malika Yusupova',
-      student_avatar: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=150',
-      score: 30,
-      max_score: 50,
-      scaled_score: '1280 / 1600',
-      percentage: 60,
-      time_spent_seconds: 3480,
-      rank: 6,
-      completed_at: '4 kun oldin'
-    }
-  ];
-}
-
-// ── Dynamic Benchmark Generator for Custom / Any Tournament ──
-function generateDynamicBenchmarkContenders(tournamentId: string, isIntl: boolean): LeaderboardEntryDTO[] {
-  if (isIntl) {
-    return getInternationalBenchmarkContenders(tournamentId);
-  }
-  return getNationalBenchmarkContenders(tournamentId);
-}
-
 function assignRanksAndPrizes(entries: LeaderboardEntryDTO[], topPrizes: string[] = []): LeaderboardEntryDTO[] {
   entries.sort((a, b) => {
     if (b.score !== a.score) return b.score - a.score;
@@ -331,14 +143,8 @@ export async function GET(request: NextRequest) {
     console.warn('[Leaderboard API] Supabase fetch skipped or errored:', apiErr);
   }
 
-  // 3. If real DB entries exist, use them directly. If 0 entries, fallback to benchmarks.
-  let finalEntries: LeaderboardEntryDTO[] = [];
-  if (dbEntries.length > 0) {
-    finalEntries = assignRanksAndPrizes(dbEntries, topPrizes);
-  } else {
-    const benchmarks = generateDynamicBenchmarkContenders(tournamentId, isIntl);
-    finalEntries = assignRanksAndPrizes(benchmarks, topPrizes);
-  }
+  // 3. Return only real DB submissions (strictly 0 fake benchmarks)
+  const finalEntries = assignRanksAndPrizes(dbEntries, topPrizes);
 
   return NextResponse.json({
     success: true,
@@ -389,9 +195,8 @@ export async function POST(request: NextRequest) {
       completed_at: 'Hozirginagina'
     };
 
-    // 1. Try to persist to Supabase tournament_results table
+    let supabase: any = null;
     try {
-      let supabase: any;
       try {
         supabase = await createTelegramBotClient();
       } catch {
@@ -426,10 +231,78 @@ export async function POST(request: NextRequest) {
       console.warn('[Leaderboard API] DB save skipped or errored:', dbErr);
     }
 
-    // 2. Fetch current leaderboard & merge with new entry
-    const benchmarks = generateDynamicBenchmarkContenders(tournamentId, isIntl);
-    const combined = [newEntry, ...benchmarks.filter(b => b.user_id !== userId)];
-    const rankedLeaderboard = assignRanksAndPrizes(combined);
+    // 2. Fetch existing real DB entries & merge with new entry (NO fake benchmarks)
+    let dbEntries: LeaderboardEntryDTO[] = [];
+    let topPrizes: string[] = [];
+    try {
+      if (supabase) {
+        const { data: tourn } = await supabase
+          .from('tournaments')
+          .select('top_prizes')
+          .eq('id', tournamentId)
+          .maybeSingle();
+        if (tourn && Array.isArray(tourn.top_prizes) && tourn.top_prizes.length > 0) {
+          topPrizes = tourn.top_prizes;
+        }
+
+        const { data: existingData } = await supabase
+          .from('tournament_results')
+          .select('*')
+          .eq('tournament_id', tournamentId)
+          .order('score', { ascending: false })
+          .order('time_spent_seconds', { ascending: true });
+
+        if (existingData && existingData.length > 0) {
+          const studentIds = Array.from(new Set(existingData.map((d: any) => d.student_id).filter(Boolean)));
+          let profilesMap: Record<string, { full_name: string; avatar_url: string }> = {};
+          if (studentIds.length > 0) {
+            try {
+              const { data: profs } = await supabase
+                .from('profiles')
+                .select('id, full_name, avatar_url')
+                .in('id', studentIds);
+              if (profs) {
+                profs.forEach((p: any) => {
+                  profilesMap[p.id] = { full_name: p.full_name, avatar_url: p.avatar_url };
+                });
+              }
+            } catch {}
+          }
+          dbEntries = existingData.map((d: any) => {
+            const prof = profilesMap[d.student_id];
+            return {
+              id: d.id,
+              tournament_id: tournamentId,
+              user_id: d.student_id,
+              student_name: prof?.full_name || d.student_name || "O'quvchi",
+              student_avatar: prof?.avatar_url || d.student_avatar || '',
+              score: Number(d.score),
+              max_score: Number(d.max_score),
+              scaled_score: d.scaled_score,
+              percentage: Number(d.percentage) || Math.round((Number(d.score) / (Number(d.max_score) || 1)) * 100),
+              time_spent_seconds: Number(d.time_spent_seconds) || 0,
+              rank: 1,
+              completed_at: d.completed_at
+                ? new Date(d.completed_at).toLocaleString('uz-UZ', {
+                    month: 'short',
+                    day: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit'
+                  })
+                : 'Yaqinda'
+            };
+          });
+        }
+      }
+    } catch (fetchErr) {
+      console.warn('[Leaderboard API] DB re-fetch skipped or errored:', fetchErr);
+    }
+
+    const cleanExisting = dbEntries.filter(
+      e => !e.id?.startsWith('bench_') && !e.id?.startsWith('intl_bench_') && !e.user_id?.startsWith('bench_') && e.user_id !== userId
+    );
+    const combined = [newEntry, ...cleanExisting];
+    const rankedLeaderboard = assignRanksAndPrizes(combined, topPrizes);
     const myResult = rankedLeaderboard.find(e => e.user_id === userId) || newEntry;
 
     return NextResponse.json({
