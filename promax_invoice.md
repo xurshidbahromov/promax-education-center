@@ -87,9 +87,10 @@ Quyida har bir modul bo'yicha asl bozor narxi, taqdim etilgan do'stona maxsus ch
 
 ## 🌟 4. TO'LOV UCHUN QULAY VARIANTLAR (PAYMENT OPTIONS)
 
-1. 💵 **Bir martalik yakuniy to'lov:** **$1,500** *(17,700,000 UZS)*
-2. 💳 **Bo'lib to'lash (Oyiga $150 dan / ~1,770,000 UZS):** O'quv markazi byudjeti va daromadidan kelib chiqib, 10 oy davomida qulay grafik asosida.
-3. 🤝 **Boshlang'ich $750 (8,850,000 UZS) + Oylik $125 (1,475,000 UZS):** Dastlabki to'lov amalga oshirilib, qolgan qismi 6 oy davomida to'lab boriladi.
+1. 💵 **Bir martalik to'liq to'lov:** **$1,500** *(17,700,000 UZS)* — loyiha to'liq topshirilganda.
+2. 💳 **Bo'lib to'lash (Oyiga $300 dan / 3,540,000 UZS):** 5 oy davomida qulay va teng grafik asosida (5 oy × $300 = $1,500).
+3. 🤝 **Boshlang'ich to'lov + Oyiga $300 dan:** Dastlabki to'lov **$600** *(7,080,000 UZS)*, qolgan qismi esa keyingi 3 oy davomida har oy **$300** dan *(3,540,000 UZS)* to'lanadi ($600 + 3 × $300 = $1,500).
+4. ⚡ **Tezkor grafik (Oyiga $500 dan / 5,900,000 UZS):** 3 oy davomida qisqa muddatli to'lov (3 oy × $500 = $1,500).
 
 ---
 
