@@ -38,9 +38,11 @@ import {
   getCachedAdminTournaments,
   getAdminTournaments,
   getTournamentLeaderboard,
+  getCachedTournamentLeaderboard,
   registerForTournament,
   getTournamentRegistrations,
-  getUserCompletedTournamentIds
+  getUserCompletedTournamentIds,
+  getUserCompletedTournamentIdsSync
 } from "@/lib/tournaments";
 import { getTournamentTimingInfo, formatUzbekDate } from "@/lib/tournament-timing";
 import { useCurrentUser, useUserProfile } from "@/hooks/useDashboardData";
@@ -84,7 +86,18 @@ export default function OlympiadsPage() {
   const [selectedItem, setSelectedItem] = useState<AdminTournament | null>(null);
   const [confirmStartItem, setConfirmStartItem] = useState<AdminTournament | null>(null);
   const [registeredIds, setRegisteredIds] = useState<string[]>([]);
-  const [completedIds, setCompletedIds] = useState<string[]>([]);
+
+  // Determine initial tournament ID synchronously
+  const initialTournamentId = useMemo(() => {
+    const queryId = searchParams.get("id");
+    const cachedList = getCachedAdminTournaments();
+    if (queryId && cachedList.some(t => t.id === queryId)) return queryId;
+    return cachedList[0]?.id || "tourn_grand_respublika_2026";
+  }, [searchParams]);
+
+  const [completedIds, setCompletedIds] = useState<string[]>(() => {
+    return getUserCompletedTournamentIdsSync(user?.id);
+  });
   const hasLoadedRef = useRef(false);
 
   // Precompute timing maps & counts for instant filtering
@@ -132,9 +145,11 @@ export default function OlympiadsPage() {
       });
   }, [tournaments, statusFilter, timingMap]);
 
-  // Leaderboard State
-  const [selectedTournamentId, setSelectedTournamentId] = useState<string>("");
-  const [leaderboard, setLeaderboard] = useState<TournamentLeaderboardEntry[]>([]);
+  // Leaderboard State (Instant synchronous initial state from cache so podium never vanishes)
+  const [selectedTournamentId, setSelectedTournamentId] = useState<string>(initialTournamentId);
+  const [leaderboard, setLeaderboard] = useState<TournamentLeaderboardEntry[]>(() => {
+    return getCachedTournamentLeaderboard(initialTournamentId);
+  });
   const [leaderboardSearch, setLeaderboardSearch] = useState("");
 
   // Comments State (Starts empty, loads real user comments)
@@ -207,7 +222,11 @@ export default function OlympiadsPage() {
         const queryId = searchParams.get("id");
         const defaultId = queryId && data.some(t => t.id === queryId) ? queryId : (selectedTournamentId || data[0].id);
         setSelectedTournamentId(defaultId);
-        getTournamentLeaderboard(defaultId).then(setLeaderboard).catch(() => {});
+        getTournamentLeaderboard(defaultId).then((fresh) => {
+          if (Array.isArray(fresh) && fresh.length > 0) {
+            setLeaderboard(fresh);
+          }
+        }).catch(() => {});
       }
 
       const [regList, compList] = await Promise.all([
@@ -223,11 +242,40 @@ export default function OlympiadsPage() {
     }
   };
 
+  // Reactive leaderboard sync on activeTab or selectedTournamentId change
+  useEffect(() => {
+    if (!selectedTournamentId) return;
+    let isMounted = true;
+
+    const cached = getCachedTournamentLeaderboard(selectedTournamentId);
+    if (cached.length > 0) {
+      setLeaderboard(cached);
+    }
+
+    getTournamentLeaderboard(selectedTournamentId)
+      .then((fresh) => {
+        if (isMounted && Array.isArray(fresh) && fresh.length > 0) {
+          setLeaderboard(fresh);
+        }
+      })
+      .catch(() => {});
+
+    return () => {
+      isMounted = false;
+    };
+  }, [selectedTournamentId, activeTab]);
+
   const handleTournamentSelectForLeaderboard = async (id: string) => {
     setSelectedTournamentId(id);
+    const cached = getCachedTournamentLeaderboard(id);
+    if (cached.length > 0) {
+      setLeaderboard(cached);
+    }
     try {
       const lb = await getTournamentLeaderboard(id);
-      setLeaderboard(lb);
+      if (Array.isArray(lb) && lb.length > 0) {
+        setLeaderboard(lb);
+      }
     } catch (e) {
       console.error("Error loading tournament leaderboard:", e);
     }
@@ -776,7 +824,7 @@ export default function OlympiadsPage() {
         {/* ── TAB 2: REYTING (3D ISOMETRIC PODIUM LEADERBOARD) ── */}
         {/* ══════════════════════════════════════════════════════════════ */}
         {activeTab === "leaderboard" && (
-          loading || leaderboardLoading ? (
+          (loading || leaderboardLoading) && leaderboard.length === 0 ? (
             <LeaderboardSkeleton />
           ) : (
           <div className="space-y-4 sm:space-y-6">
@@ -825,7 +873,7 @@ export default function OlympiadsPage() {
             </div>
 
             {/* ── 3D ISOMETRIC OLYMPIC PODIUM (TOP 3 - PREMIUM GLASSY 3D) ── */}
-            {leaderboard.length >= 3 && (
+            {leaderboard.length >= 1 && leaderboard[0] && (
               <div className="relative w-full bg-gradient-to-b from-white/70 via-slate-50/50 to-white/70 dark:from-slate-900/70 dark:via-slate-850/50 dark:to-slate-900/70 backdrop-blur-xl rounded-[2.5rem] p-5 sm:p-8 border border-white/60 dark:border-slate-800/60 shadow-none overflow-hidden">
                 
                 {/* Luminous Gold Halo & Ray Glow behind Champion */}
@@ -838,6 +886,24 @@ export default function OlympiadsPage() {
                     {/* 🥈 2ND PLACE (LEFT - BLUE/INDIGO GLASSY 3D STAND) */}
                     {(() => {
                       const item = leaderboard[1];
+                      if (!item) {
+                        return (
+                          <div className="flex flex-col items-center text-center opacity-40">
+                            <div className="flex flex-col items-center space-y-1 mb-2.5">
+                              <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-full bg-slate-100 dark:bg-slate-800 border-2 border-dashed border-blue-300 dark:border-blue-500 flex items-center justify-center text-slate-400 text-xs font-bold">
+                                Bo'sh
+                              </div>
+                              <h4 className="font-bold text-xs sm:text-sm text-slate-400">2-O'rin</h4>
+                            </div>
+                            <div className="w-full">
+                              <div className="h-4 sm:h-5 w-full bg-gradient-to-r from-blue-200 via-indigo-200 to-sky-200 dark:from-blue-500 dark:via-indigo-400 dark:to-sky-400 rounded-t-2xl transform -skew-x-2 border-t border-x border-white/80 dark:border-white/30" />
+                              <div className="h-28 sm:h-36 w-full bg-gradient-to-b from-blue-400/40 via-indigo-500/40 to-indigo-600/40 dark:from-blue-600/40 dark:via-indigo-700/40 dark:to-indigo-800/40 backdrop-blur-xl rounded-b-2xl flex items-center justify-center text-white/70">
+                                <span className="text-4xl sm:text-5xl font-black font-fredoka tracking-tighter">2</span>
+                              </div>
+                            </div>
+                          </div>
+                        );
+                      }
                       const isSelf = user?.id && item.user_id === user.id;
                       const avatar = isSelf ? (profile?.avatar_url || item.student_avatar) : item.student_avatar;
                       const hasAvatar = avatar && !avatar.includes('dicebear');
@@ -966,6 +1032,24 @@ export default function OlympiadsPage() {
                     {/* 🥉 3RD PLACE (RIGHT - ORANGE/BRONZE GLASSY 3D STAND) */}
                     {(() => {
                       const item = leaderboard[2];
+                      if (!item) {
+                        return (
+                          <div className="flex flex-col items-center text-center opacity-40">
+                            <div className="flex flex-col items-center space-y-1 mb-2.5">
+                              <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-full bg-slate-100 dark:bg-slate-800 border-2 border-dashed border-orange-300 dark:border-orange-500 flex items-center justify-center text-slate-400 text-xs font-bold">
+                                Bo'sh
+                              </div>
+                              <h4 className="font-bold text-xs sm:text-sm text-slate-400">3-O'rin</h4>
+                            </div>
+                            <div className="w-full">
+                              <div className="h-4 sm:h-5 w-full bg-gradient-to-r from-orange-200 via-amber-200 to-rose-200 dark:from-orange-500 dark:via-amber-400 dark:to-rose-400 rounded-t-2xl transform -skew-x-2 border-t border-x border-white/80 dark:border-white/30" />
+                              <div className="h-24 sm:h-30 w-full bg-gradient-to-b from-orange-400/40 via-orange-500/40 to-amber-600/40 dark:from-orange-600/40 dark:via-orange-700/40 dark:to-amber-800/40 backdrop-blur-xl rounded-b-2xl flex items-center justify-center text-white/70">
+                                <span className="text-4xl sm:text-5xl font-black font-fredoka tracking-tighter">3</span>
+                              </div>
+                            </div>
+                          </div>
+                        );
+                      }
                       const isSelf = user?.id && item.user_id === user.id;
                       const avatar = isSelf ? (profile?.avatar_url || item.student_avatar) : item.student_avatar;
                       const hasAvatar = avatar && !avatar.includes('dicebear');
@@ -1058,7 +1142,7 @@ export default function OlympiadsPage() {
                     Musobaqada qatnashing va birinchi bo'lib reytingga kiring!
                   </p>
                 </div>
-              ) : (leaderboard.length >= 3 && filteredLeaderboard.filter((e) => e.rank > 3).length === 0) ? (
+              ) : (leaderboard.length >= 1 && filteredLeaderboard.filter((e) => e.rank > 3).length === 0) ? (
                 <div className="text-center py-6 space-y-1">
                   <Award className="mx-auto text-slate-300 dark:text-slate-700" size={32} />
                   <p className="font-bold text-slate-600 dark:text-slate-300 text-xs">
@@ -1067,7 +1151,7 @@ export default function OlympiadsPage() {
                 </div>
               ) : (
                 <div className="space-y-2">
-                  {(leaderboard.length >= 3
+                  {(leaderboard.length >= 1
                     ? filteredLeaderboard.filter((entry) => entry.rank > 3)
                     : filteredLeaderboard
                   ).map((entry) => {
