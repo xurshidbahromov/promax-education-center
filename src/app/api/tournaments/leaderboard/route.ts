@@ -21,7 +21,7 @@ export interface LeaderboardEntryDTO {
 }
 
 // ── Default National Benchmark Contenders ──
-export function getNationalBenchmarkContenders(tournamentId: string): LeaderboardEntryDTO[] {
+function getNationalBenchmarkContenders(tournamentId: string): LeaderboardEntryDTO[] {
   return [
     {
       id: `bench_${tournamentId}_1`,
@@ -108,7 +108,7 @@ export function getNationalBenchmarkContenders(tournamentId: string): Leaderboar
 }
 
 // ── Default International (SAT) Benchmark Contenders ──
-export function getInternationalBenchmarkContenders(tournamentId: string): LeaderboardEntryDTO[] {
+function getInternationalBenchmarkContenders(tournamentId: string): LeaderboardEntryDTO[] {
   return [
     {
       id: `intl_bench_${tournamentId}_1`,
@@ -216,16 +216,16 @@ function assignRanksAndPrizes(entries: LeaderboardEntryDTO[], topPrizes: string[
 
   return entries.map((entry, idx) => {
     const rank = idx + 1;
-    let prize = entry.prize;
-    if (topPrizes && topPrizes.length >= rank) {
+    let prize: string | undefined = undefined;
+    if (topPrizes && topPrizes.length >= rank && topPrizes[rank - 1]) {
       prize = topPrizes[rank - 1];
-    } else if (rank === 1 && !prize) {
-      prize = "🥇 1-O'rin";
-    } else if (rank === 2 && !prize) {
-      prize = "🥈 2-O'rin";
-    } else if (rank === 3 && !prize) {
-      prize = "🥉 3-O'rin";
-    } else if (rank > 3) {
+    } else if (rank === 1) {
+      prize = "1-O'rin";
+    } else if (rank === 2) {
+      prize = "2-O'rin";
+    } else if (rank === 3) {
+      prize = "3-O'rin";
+    } else {
       prize = undefined;
     }
     return {
@@ -331,26 +331,20 @@ export async function GET(request: NextRequest) {
     console.warn('[Leaderboard API] Supabase fetch skipped or errored:', apiErr);
   }
 
-  // 3. Merge real DB entries with benchmark contenders so podium never disappears
-  const benchmarks = generateDynamicBenchmarkContenders(tournamentId, isIntl);
-
-  // Real user IDs from database
-  const realUserIds = new Set(dbEntries.map(e => e.user_id));
-
-  // Filter benchmarks so they don't collide with real users
-  const filteredBenchmarks = benchmarks.filter(b => !realUserIds.has(b.user_id));
-
-  // If real DB entries are fewer than 6, append filtered benchmarks
-  const combined = [...dbEntries, ...filteredBenchmarks];
-
-  // Recalculate ranks and prizes cleanly
-  const rankedLeaderboard = assignRanksAndPrizes(combined, topPrizes);
+  // 3. If real DB entries exist, use them directly. If 0 entries, fallback to benchmarks.
+  let finalEntries: LeaderboardEntryDTO[] = [];
+  if (dbEntries.length > 0) {
+    finalEntries = assignRanksAndPrizes(dbEntries, topPrizes);
+  } else {
+    const benchmarks = generateDynamicBenchmarkContenders(tournamentId, isIntl);
+    finalEntries = assignRanksAndPrizes(benchmarks, topPrizes);
+  }
 
   return NextResponse.json({
     success: true,
     tournamentId,
     type,
-    leaderboard: rankedLeaderboard
+    leaderboard: finalEntries
   });
 }
 

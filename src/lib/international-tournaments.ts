@@ -309,9 +309,6 @@ export function getCachedInternationalLeaderboard(tournamentId: string): Interna
       if (stored) {
         const map = JSON.parse(stored);
         if (map[tournamentId] && Array.isArray(map[tournamentId]) && map[tournamentId].length > 0) {
-          if (map[tournamentId].length < 3) {
-            return mergeWithInternationalBenchmarks(map[tournamentId], tournamentId);
-          }
           return map[tournamentId];
         }
       }
@@ -331,7 +328,7 @@ export function getUserCompletedInternationalTournamentIdsSync(userId?: string):
 }
 
 export async function getInternationalLeaderboard(tournamentId: string): Promise<InternationalLeaderboardEntry[]> {
-  // 1. Fetch from server API first (which reads DB & merges benchmarks)
+  // 1. Fetch from server API first (which reads DB & returns results)
   try {
     const res = await fetch(`/api/tournaments/leaderboard?tournamentId=${encodeURIComponent(tournamentId)}&type=international&_t=${Date.now()}`, {
       cache: 'no-store'
@@ -339,16 +336,15 @@ export async function getInternationalLeaderboard(tournamentId: string): Promise
     if (res.ok) {
       const data = await res.json();
       if (Array.isArray(data.leaderboard) && data.leaderboard.length > 0) {
-        const finalLb = data.leaderboard.length < 3 ? mergeWithInternationalBenchmarks(data.leaderboard, tournamentId) : data.leaderboard;
         if (typeof window !== 'undefined') {
           try {
             const stored = localStorage.getItem(STORAGE_INTERNATIONAL_LEADERBOARDS);
             let map: Record<string, InternationalLeaderboardEntry[]> = stored ? JSON.parse(stored) : {};
-            map[tournamentId] = finalLb;
+            map[tournamentId] = data.leaderboard;
             localStorage.setItem(STORAGE_INTERNATIONAL_LEADERBOARDS, JSON.stringify(map));
           } catch {}
         }
-        return finalLb;
+        return data.leaderboard;
       }
     }
   } catch (apiErr) {
@@ -397,23 +393,20 @@ export async function getInternationalLeaderboard(tournamentId: string): Promise
           time_spent_seconds: Number(d.time_spent_seconds) || 0,
           rank: idx + 1,
           completed_at: d.completed_at ? new Date(d.completed_at).toLocaleString('uz-UZ', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }) : "Yaqinda",
-          prize: d.prize || (idx === 0 ? "1-O'rin" : idx === 1 ? "2-O'rin" : idx === 2 ? "3-O'rin" : undefined)
+          prize: idx === 0 ? "1-O'rin" : idx === 1 ? "2-O'rin" : idx === 2 ? "3-O'rin" : undefined
         };
       });
-
-      // ALWAYS merge with benchmark contenders so podium NEVER disappears when real results count is 1 or 2!
-      const merged = mergeWithInternationalBenchmarks(entries, tournamentId);
 
       if (typeof window !== 'undefined') {
         try {
           const stored = localStorage.getItem(STORAGE_INTERNATIONAL_LEADERBOARDS);
           let map: Record<string, InternationalLeaderboardEntry[]> = stored ? JSON.parse(stored) : {};
-          map[tournamentId] = merged;
+          map[tournamentId] = entries;
           localStorage.setItem(STORAGE_INTERNATIONAL_LEADERBOARDS, JSON.stringify(map));
         } catch {}
       }
 
-      return merged;
+      return entries;
     }
   } catch (e) {
     console.error("Error fetching intl leaderboard:", e);

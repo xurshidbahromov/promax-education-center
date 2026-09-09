@@ -888,17 +888,38 @@ export default function OlympiadsPage() {
                       const item = leaderboard[1];
                       if (!item) {
                         return (
-                          <div className="flex flex-col items-center text-center opacity-40">
+                          <div className="flex flex-col items-center text-center group">
+                            {/* Floating Open Slot Info */}
                             <div className="flex flex-col items-center space-y-1 mb-2.5">
-                              <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-full bg-slate-100 dark:bg-slate-800 border-2 border-dashed border-blue-300 dark:border-blue-500 flex items-center justify-center text-slate-400 text-xs font-bold">
-                                Bo'sh
+                              <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-full bg-gradient-to-b from-blue-50 via-indigo-50/60 to-blue-100/80 dark:from-blue-950/60 dark:via-slate-850 dark:to-indigo-950/60 border-2 border-dashed border-blue-400 dark:border-blue-500 flex flex-col items-center justify-center text-blue-600 dark:text-blue-400 shadow-none relative">
+                                <span className="text-xl sm:text-2xl select-none">🥈</span>
+                                <span className="text-[8px] sm:text-[9px] font-black uppercase tracking-wider text-blue-600 dark:text-blue-400 -mt-0.5">
+                                  Ochiq
+                                </span>
                               </div>
-                              <h4 className="font-bold text-xs sm:text-sm text-slate-400">2-O'rin</h4>
+                              <div className="flex items-center justify-center gap-1">
+                                <h4 className="font-black text-xs sm:text-sm text-blue-700 dark:text-blue-300">
+                                  2-O'rin Bo'sh
+                                </h4>
+                              </div>
+                              <div className="text-[10px] font-bold text-blue-600/90 dark:text-blue-300/90 bg-blue-50 dark:bg-blue-950/60 px-2 py-0.5 rounded-full border border-blue-200/60 dark:border-blue-800/60">
+                                Sovrindor kutilmoqda
+                              </div>
+                              <div className="text-[10px] text-slate-400 font-medium">
+                                Bo'sh o'rin
+                              </div>
                             </div>
+
+                            {/* 3D Glassy Isometric Stand 2 */}
                             <div className="w-full">
-                              <div className="h-4 sm:h-5 w-full bg-gradient-to-r from-blue-200 via-indigo-200 to-sky-200 dark:from-blue-500 dark:via-indigo-400 dark:to-sky-400 rounded-t-2xl transform -skew-x-2 border-t border-x border-white/80 dark:border-white/30" />
-                              <div className="h-28 sm:h-36 w-full bg-gradient-to-b from-blue-400/40 via-indigo-500/40 to-indigo-600/40 dark:from-blue-600/40 dark:via-indigo-700/40 dark:to-indigo-800/40 backdrop-blur-xl rounded-b-2xl flex items-center justify-center text-white/70">
-                                <span className="text-4xl sm:text-5xl font-black font-fredoka tracking-tighter">2</span>
+                              <div className="h-4 sm:h-5 w-full bg-gradient-to-r from-blue-200 via-indigo-200 to-sky-200 dark:from-blue-500 dark:via-indigo-400 dark:to-sky-400 rounded-t-2xl transform -skew-x-2 border-t border-x border-white/80 dark:border-white/30 shadow-none" />
+                              <div className="h-28 sm:h-36 w-full bg-gradient-to-b from-blue-500/80 via-indigo-600/80 to-indigo-700/80 dark:from-blue-600/80 dark:via-indigo-700/80 dark:to-indigo-800/80 backdrop-blur-xl rounded-b-2xl shadow-none flex flex-col items-center justify-center text-white relative overflow-hidden">
+                                <span className="text-4xl sm:text-5xl font-black font-fredoka tracking-tighter drop-shadow-md">
+                                  2
+                                </span>
+                                <span className="text-[9px] font-extrabold uppercase tracking-wider text-blue-200/90 -mt-1">
+                                  Kutilmoqda
+                                </span>
                               </div>
                             </div>
                           </div>
@@ -1034,17 +1055,38 @@ export default function OlympiadsPage() {
                       const item = leaderboard[2];
                       if (!item) {
                         return (
-                          <div className="flex flex-col items-center text-center opacity-40">
+                          <div className="flex flex-col items-center text-center group">
+                            {/* Floating Open Slot Info */}
                             <div className="flex flex-col items-center space-y-1 mb-2.5">
-                              <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-full bg-slate-100 dark:bg-slate-800 border-2 border-dashed border-orange-300 dark:border-orange-500 flex items-center justify-center text-slate-400 text-xs font-bold">
-                                Bo'sh
+                              <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-full bg-gradient-to-b from-orange-50 via-amber-50/60 to-orange-100/80 dark:from-orange-950/60 dark:via-slate-850 dark:to-amber-950/60 border-2 border-dashed border-orange-400 dark:border-orange-500 flex flex-col items-center justify-center text-orange-600 dark:text-orange-400 shadow-none relative">
+                                <span className="text-xl sm:text-2xl select-none">🥉</span>
+                                <span className="text-[8px] sm:text-[9px] font-black uppercase tracking-wider text-orange-600 dark:text-orange-400 -mt-0.5">
+                                  Ochiq
+                                </span>
                               </div>
-                              <h4 className="font-bold text-xs sm:text-sm text-slate-400">3-O'rin</h4>
+                              <div className="flex items-center justify-center gap-1">
+                                <h4 className="font-black text-xs sm:text-sm text-orange-700 dark:text-orange-300">
+                                  3-O'rin Bo'sh
+                                </h4>
+                              </div>
+                              <div className="text-[10px] font-bold text-orange-600/90 dark:text-orange-300/90 bg-orange-50 dark:bg-orange-950/60 px-2 py-0.5 rounded-full border border-orange-200/60 dark:border-orange-800/60">
+                                Sovrindor kutilmoqda
+                              </div>
+                              <div className="text-[10px] text-slate-400 font-medium">
+                                Bo'sh o'rin
+                              </div>
                             </div>
+
+                            {/* 3D Glassy Isometric Stand 3 */}
                             <div className="w-full">
-                              <div className="h-4 sm:h-5 w-full bg-gradient-to-r from-orange-200 via-amber-200 to-rose-200 dark:from-orange-500 dark:via-amber-400 dark:to-rose-400 rounded-t-2xl transform -skew-x-2 border-t border-x border-white/80 dark:border-white/30" />
-                              <div className="h-24 sm:h-30 w-full bg-gradient-to-b from-orange-400/40 via-orange-500/40 to-amber-600/40 dark:from-orange-600/40 dark:via-orange-700/40 dark:to-amber-800/40 backdrop-blur-xl rounded-b-2xl flex items-center justify-center text-white/70">
-                                <span className="text-4xl sm:text-5xl font-black font-fredoka tracking-tighter">3</span>
+                              <div className="h-4 sm:h-5 w-full bg-gradient-to-r from-orange-200 via-amber-200 to-rose-200 dark:from-orange-500 dark:via-amber-400 dark:to-rose-400 rounded-t-2xl transform -skew-x-2 border-t border-x border-white/80 dark:border-white/30 shadow-none" />
+                              <div className="h-24 sm:h-30 w-full bg-gradient-to-b from-orange-500/80 via-orange-600/80 to-amber-700/80 dark:from-orange-600/80 dark:via-orange-700/80 dark:to-amber-800/80 backdrop-blur-xl rounded-b-2xl shadow-none flex flex-col items-center justify-center text-white relative overflow-hidden">
+                                <span className="text-4xl sm:text-5xl font-black font-fredoka tracking-tighter drop-shadow-md">
+                                  3
+                                </span>
+                                <span className="text-[9px] font-extrabold uppercase tracking-wider text-amber-200/90 -mt-1">
+                                  Kutilmoqda
+                                </span>
                               </div>
                             </div>
                           </div>
@@ -1112,10 +1154,20 @@ export default function OlympiadsPage() {
 
                 {/* Sub-Podium Update Pill */}
                 <div className="text-center pt-3">
-                  <p className="inline-flex items-center gap-1.5 text-[11px] text-slate-400 font-medium">
-                    <Clock size={12} />
-                    <span>Reyting real-vaqt rejimida yangilanadi • Jami: {filteredLeaderboard.length} ishtirokchi</span>
-                  </p>
+                  {leaderboard.length === 1 ? (
+                    <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-amber-500/10 dark:bg-amber-500/15 border border-amber-500/25 text-[11px] font-bold text-amber-700 dark:text-amber-300">
+                      <span>🏆 1-o'rin egallandi • 2- va 3-o'rinlar ochiq! Musobaqada qatnashing va sovrindor bo'ling</span>
+                    </div>
+                  ) : leaderboard.length === 2 ? (
+                    <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-blue-500/10 dark:bg-blue-500/15 border border-blue-500/25 text-[11px] font-bold text-blue-700 dark:text-blue-300">
+                      <span>🎯 Shoxsupada faqat 1 ta o'rin qoldi! 3-o'rinni egallash uchun sinovdan o'ting</span>
+                    </div>
+                  ) : (
+                    <p className="inline-flex items-center gap-1.5 text-[11px] text-slate-400 font-medium">
+                      <Clock size={12} />
+                      <span>Reyting real-vaqt rejimida yangilanadi • Jami: {filteredLeaderboard.length} ishtirokchi</span>
+                    </p>
+                  )}
                 </div>
 
               </div>
@@ -1142,93 +1194,131 @@ export default function OlympiadsPage() {
                     Musobaqada qatnashing va birinchi bo'lib reytingga kiring!
                   </p>
                 </div>
-              ) : (leaderboard.length >= 1 && filteredLeaderboard.filter((e) => e.rank > 3).length === 0) ? (
-                <div className="text-center py-6 space-y-1">
-                  <Award className="mx-auto text-slate-300 dark:text-slate-700" size={32} />
-                  <p className="font-bold text-slate-600 dark:text-slate-300 text-xs">
-                    Barcha ishtirokchilar yuqoridagi g'oliblar shoxsupasida aks etgan
-                  </p>
-                </div>
               ) : (
                 <div className="space-y-2">
-                  {(leaderboard.length >= 1
-                    ? filteredLeaderboard.filter((entry) => entry.rank > 3)
-                    : filteredLeaderboard
-                  ).map((entry) => {
+                  {filteredLeaderboard.map((entry) => {
                     const isSelf = user?.id && entry.user_id === user.id;
                     const avatar = isSelf ? (profile?.avatar_url || entry.student_avatar) : entry.student_avatar;
                     const hasAvatar = avatar && !avatar.includes('dicebear');
+                    const isRank1 = entry.rank === 1;
+                    const isRank2 = entry.rank === 2;
+                    const isRank3 = entry.rank === 3;
 
-                      return (
-                        <div
-                          key={entry.id}
-                          className={`p-3 sm:p-3.5 rounded-2xl border flex items-center justify-between gap-3 transition-all ${
-                            isSelf
-                              ? "bg-blue-50/80 dark:bg-blue-950/30 border-brand-blue/40 shadow-none"
-                              : "bg-white/40 dark:bg-slate-800/30 hover:bg-white/70 dark:hover:bg-slate-800/60 border-slate-100/60 dark:border-slate-800/60"
-                          }`}
-                        >
-                          {/* Left: Rank + Avatar + Name + Submission Date */}
-                          <div className="flex items-center gap-3 min-w-0">
+                    return (
+                      <div
+                        key={entry.id}
+                        className={`p-3 sm:p-3.5 rounded-2xl border flex items-center justify-between gap-3 transition-all ${
+                          isSelf
+                            ? "bg-blue-50/80 dark:bg-blue-950/30 border-brand-blue/40 shadow-none"
+                            : "bg-white/40 dark:bg-slate-800/30 hover:bg-white/70 dark:hover:bg-slate-800/60 border-slate-100/60 dark:border-slate-800/60"
+                        }`}
+                      >
+                        {/* Left: Rank + Avatar + Name + Submission Date */}
+                        <div className="flex items-center gap-3 min-w-0">
+                          {isRank1 ? (
+                            <span className="w-8 h-8 rounded-xl bg-gradient-to-b from-amber-100 to-amber-200 dark:from-amber-900/50 dark:to-amber-800/40 text-amber-800 dark:text-amber-200 font-black text-sm inline-flex items-center justify-center shrink-0 border border-amber-300 dark:border-amber-700/60 shadow-none">
+                              🥇
+                            </span>
+                          ) : isRank2 ? (
+                            <span className="w-8 h-8 rounded-xl bg-gradient-to-b from-blue-100 to-indigo-200 dark:from-blue-900/50 dark:to-indigo-800/40 text-blue-800 dark:text-blue-200 font-black text-sm inline-flex items-center justify-center shrink-0 border border-blue-300 dark:border-blue-700/60 shadow-none">
+                              🥈
+                            </span>
+                          ) : isRank3 ? (
+                            <span className="w-8 h-8 rounded-xl bg-gradient-to-b from-orange-100 to-amber-200 dark:from-orange-900/50 dark:to-amber-800/40 text-orange-800 dark:text-orange-200 font-black text-sm inline-flex items-center justify-center shrink-0 border border-orange-300 dark:border-orange-700/60 shadow-none">
+                              🥉
+                            </span>
+                          ) : (
                             <span className="w-8 h-8 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 font-black text-xs inline-flex items-center justify-center shrink-0">
                               #{entry.rank}
                             </span>
+                          )}
 
-                            {hasAvatar ? (
-                              <img
-                                src={avatar}
-                                alt={entry.student_name}
-                                className="w-10 h-10 rounded-full bg-slate-200 dark:bg-slate-700 shrink-0 object-cover border border-slate-200/60 dark:border-slate-700"
-                              />
-                            ) : (
-                              <div className="w-10 h-10 rounded-full bg-brand-blue/10 dark:bg-brand-blue/20 text-brand-blue dark:text-blue-400 font-bold text-xs flex items-center justify-center border border-brand-blue/20 shrink-0 select-none uppercase">
-                                {(entry.student_name || "O")[0]}
-                              </div>
-                            )}
-
-                            <div className="min-w-0">
-                              <div className="flex items-center gap-1.5">
-                                <p className="font-bold text-slate-900 dark:text-white text-xs sm:text-sm truncate">
-                                  {entry.student_name}
-                                </p>
-                                {isSelf && (
-                                  <span className="px-1.5 py-0.2 rounded bg-brand-blue text-white text-[9px] font-black uppercase shrink-0">
-                                    Siz
-                                  </span>
-                                )}
-                              </div>
-                              <p className="text-[11px] text-slate-400 truncate">
-                                Topshirildi: {entry.completed_at}
-                              </p>
+                          {hasAvatar ? (
+                            <img
+                              src={avatar}
+                              alt={entry.student_name}
+                              className="w-10 h-10 rounded-full bg-slate-200 dark:bg-slate-700 shrink-0 object-cover border border-slate-200/60 dark:border-slate-700"
+                            />
+                          ) : (
+                            <div className="w-10 h-10 rounded-full bg-brand-blue/10 dark:bg-brand-blue/20 text-brand-blue dark:text-blue-400 font-bold text-xs flex items-center justify-center border border-brand-blue/20 shrink-0 select-none uppercase">
+                              {(entry.student_name || "O")[0]}
                             </div>
-                          </div>
+                          )}
 
-                          {/* Right: Score + Accuracy + Time + Prize */}
-                          <div className="flex items-center gap-2 sm:gap-4 shrink-0">
-                            {entry.prize && (
-                              <span className="hidden sm:inline-flex items-center gap-1 px-2.5 py-0.5 rounded-lg bg-amber-500/15 text-amber-700 dark:text-amber-300 font-bold text-[11px]">
-                                <Gift size={12} className="text-amber-500" />
-                                <span>{entry.prize}</span>
-                              </span>
-                            )}
-
-                            <div className="text-right">
-                              <div className="inline-flex items-center gap-1 text-xs sm:text-sm font-black text-slate-900 dark:text-white">
-                                <span className="text-brand-blue dark:text-blue-400 font-black">{entry.score}</span>
-                                <span className="text-[11px] text-slate-400 font-medium">/ {entry.max_score} ball</span>
-                                <span className="ml-1 text-[10px] font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/40 px-1 py-0.2 rounded">
-                                  {entry.percentage}%
+                          <div className="min-w-0">
+                            <div className="flex items-center gap-1.5">
+                              <p className="font-bold text-slate-900 dark:text-white text-xs sm:text-sm truncate">
+                                {entry.student_name}
+                              </p>
+                              {isSelf && (
+                                <span className="px-1.5 py-0.2 rounded bg-brand-blue text-white text-[9px] font-black uppercase shrink-0">
+                                  Siz
                                 </span>
-                              </div>
-                              <p className="flex items-center justify-end gap-1 text-[10px] text-slate-400 font-medium">
-                                <Clock size={10} />
-                                <span>{Math.floor(entry.time_spent_seconds / 60)} daq {entry.time_spent_seconds % 60} son</span>
-                              </p>
+                              )}
                             </div>
+                            <p className="text-[11px] text-slate-400 truncate">
+                              Topshirildi: {entry.completed_at}
+                            </p>
                           </div>
                         </div>
-                      );
-                    })}
+
+                        {/* Right: Score + Accuracy + Time + Prize */}
+                        <div className="flex items-center gap-2 sm:gap-4 shrink-0">
+                          {entry.prize && (
+                            <span className="hidden sm:inline-flex items-center gap-1 px-2.5 py-0.5 rounded-lg bg-amber-500/15 text-amber-700 dark:text-amber-300 font-bold text-[11px]">
+                              <Gift size={12} className="text-amber-500" />
+                              <span>{entry.prize}</span>
+                            </span>
+                          )}
+
+                          <div className="text-right">
+                            <div className="inline-flex items-center gap-1 text-xs sm:text-sm font-black text-slate-900 dark:text-white">
+                              <span className="text-brand-blue dark:text-blue-400 font-black">{entry.score}</span>
+                              <span className="text-[11px] text-slate-400 font-medium">/ {entry.max_score} ball</span>
+                              <span className="ml-1 text-[10px] font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/40 px-1 py-0.2 rounded">
+                                {entry.percentage}%
+                              </span>
+                            </div>
+                            <p className="flex items-center justify-end gap-1 text-[10px] text-slate-400 font-medium">
+                              <Clock size={10} />
+                              <span>{Math.floor(entry.time_spent_seconds / 60)} daq {entry.time_spent_seconds % 60} son</span>
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })}
+
+                  {/* Encouragement card if podium has open slots */}
+                  {leaderboard.length < 3 && (
+                    <div className="p-3.5 sm:p-4 rounded-2xl border border-dashed border-brand-blue/30 bg-gradient-to-r from-blue-50/50 via-indigo-50/30 to-amber-50/30 dark:from-blue-950/20 dark:via-indigo-950/15 dark:to-amber-950/15 flex items-center justify-between gap-3 mt-2">
+                      <div className="flex items-center gap-3">
+                        <span className="text-2xl select-none">🎯</span>
+                        <div>
+                          <p className="text-xs sm:text-sm font-bold text-slate-800 dark:text-slate-200">
+                            Shoxsupada yana {3 - leaderboard.length} ta sovrinli o'rin ochiq!
+                          </p>
+                          <p className="text-[11px] text-slate-500 dark:text-slate-400">
+                            Musobaqada qatnashib, yuqoridagi 3D g'oliblar shoxsupasidan o'z o'rningizni egallang.
+                          </p>
+                        </div>
+                      </div>
+                      <button
+                        onClick={() => {
+                          const currentTourney = tournaments.find((t) => t.id === selectedTournamentId);
+                          if (currentTourney && currentTourney.status !== "finished") {
+                            setConfirmStartItem(currentTourney);
+                          } else {
+                            setActiveTab("tournaments");
+                          }
+                        }}
+                        className="px-3.5 py-2 rounded-xl bg-brand-blue hover:bg-brand-blue/90 text-white text-xs font-bold shrink-0 transition-all shadow-none flex items-center gap-1.5 cursor-pointer"
+                      >
+                        <Play size={12} className="fill-white" />
+                        <span>Qatnashish</span>
+                      </button>
+                    </div>
+                  )}
                 </div>
               )}
             </div>

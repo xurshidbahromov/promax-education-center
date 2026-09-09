@@ -505,9 +505,6 @@ export function getCachedTournamentLeaderboard(tournamentId: string): Tournament
       if (local) {
         const parsed = JSON.parse(local);
         if (Array.isArray(parsed) && parsed.length > 0) {
-          if (parsed.length < 3) {
-            return mergeWithNationalBenchmarks(parsed, tournamentId);
-          }
           return parsed;
         }
       }
@@ -528,7 +525,7 @@ export function getUserCompletedTournamentIdsSync(userId?: string): string[] {
 
 // ── LEADERBOARD & SUBMISSION ──
 export async function getTournamentLeaderboard(tournamentId: string): Promise<TournamentLeaderboardEntry[]> {
-  // 1. Fetch from server API first (which reads DB & merges benchmarks)
+  // 1. Fetch from server API first (which reads DB & returns results)
   try {
     const res = await fetch(`/api/tournaments/leaderboard?tournamentId=${encodeURIComponent(tournamentId)}&type=national&_t=${Date.now()}`, {
       cache: 'no-store'
@@ -536,13 +533,12 @@ export async function getTournamentLeaderboard(tournamentId: string): Promise<To
     if (res.ok) {
       const data = await res.json();
       if (Array.isArray(data.leaderboard) && data.leaderboard.length > 0) {
-        const finalLb = data.leaderboard.length < 3 ? mergeWithNationalBenchmarks(data.leaderboard, tournamentId) : data.leaderboard;
         if (typeof window !== 'undefined') {
           try {
-            localStorage.setItem(`promax_leaderboard_${tournamentId}`, JSON.stringify(finalLb));
+            localStorage.setItem(`promax_leaderboard_${tournamentId}`, JSON.stringify(data.leaderboard));
           } catch (e) {}
         }
-        return finalLb;
+        return data.leaderboard;
       }
     }
   } catch (apiErr) {
@@ -589,21 +585,18 @@ export async function getTournamentLeaderboard(tournamentId: string): Promise<To
           percentage: Number(d.percentage) || Math.round((Number(d.score) / (Number(d.max_score) || 1)) * 100),
           time_spent_seconds: Number(d.time_spent_seconds) || 0,
           rank: idx + 1,
-          prize: d.prize || (idx === 0 ? "1-O'rin" : idx === 1 ? "2-O'rin" : idx === 2 ? "3-O'rin" : undefined),
+          prize: idx === 0 ? "1-O'rin" : idx === 1 ? "2-O'rin" : idx === 2 ? "3-O'rin" : undefined,
           completed_at: d.completed_at ? new Date(d.completed_at).toLocaleString('uz-UZ', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }) : "Yaqinda"
         };
       });
 
-      // ALWAYS merge with benchmark contenders so podium NEVER disappears when real results count is 1 or 2!
-      const merged = mergeWithNationalBenchmarks(mapped, tournamentId);
-
       if (typeof window !== 'undefined') {
         try {
-          localStorage.setItem(`promax_leaderboard_${tournamentId}`, JSON.stringify(merged));
+          localStorage.setItem(`promax_leaderboard_${tournamentId}`, JSON.stringify(mapped));
         } catch (e) {}
       }
 
-      return merged;
+      return mapped;
     }
   } catch (e) {}
 
