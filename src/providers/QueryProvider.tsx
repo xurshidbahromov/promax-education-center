@@ -1,7 +1,7 @@
 "use client";
 
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 export default function QueryProvider({ children }: { children: React.ReactNode }) {
   const [queryClient] = useState(() => new QueryClient({
@@ -17,6 +17,20 @@ export default function QueryProvider({ children }: { children: React.ReactNode 
       },
     },
   }));
+
+  // Background reminder check for tournaments every 30 seconds
+  useEffect(() => {
+    const checkReminders = () => {
+      fetch('/api/tournaments/reminders', {
+        method: 'GET',
+        cache: 'no-store'
+      }).catch(() => {});
+    };
+
+    checkReminders();
+    const interval = setInterval(checkReminders, 30 * 1000);
+    return () => clearInterval(interval);
+  }, []);
 
   return (
     <QueryClientProvider client={queryClient}>
