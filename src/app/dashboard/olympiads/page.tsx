@@ -371,6 +371,8 @@ export default function OlympiadsPage() {
   const filteredLeaderboard = leaderboard.filter((entry) =>
     entry.student_name.toLowerCase().includes(leaderboardSearch.toLowerCase())
   );
+  // Bottom list only shows participants from 4th place onwards (top 3 are in the 3D podium above)
+  const subsequentLeaderboard = filteredLeaderboard.filter((entry) => entry.rank > 3);
 
   return (
     <div className="relative text-slate-800 dark:text-white font-sans pb-20">
@@ -1172,11 +1174,20 @@ export default function OlympiadsPage() {
             {/* ── RANKED LIST ── */}
             <div className="bg-white/60 dark:bg-slate-900/60 backdrop-blur-xl rounded-[2rem] p-4 sm:p-6 border border-white/60 dark:border-slate-800/60 space-y-3 shadow-none">
               <div className="flex items-center justify-between pb-2 border-b border-slate-100 dark:border-slate-800">
-                <h4 className="font-black font-fredoka text-sm sm:text-base text-slate-900 dark:text-white">
-                  Ishtirokchilar Natijalari
-                </h4>
+                <div className="flex items-center gap-2">
+                  <h4 className="font-black font-fredoka text-sm sm:text-base text-slate-900 dark:text-white">
+                    Ishtirokchilar Natijalari
+                  </h4>
+                  {leaderboard.length > 3 && (
+                    <span className="px-2 py-0.5 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 text-[10px] font-bold">
+                      4-o'rindan boshlab
+                    </span>
+                  )}
+                </div>
                 <span className="text-xs text-slate-400 font-medium">
-                  {leaderboard.length} ta ishtirokchi
+                  {leaderboard.length > 3
+                    ? `${subsequentLeaderboard.length} ta ishtirokchi`
+                    : `${leaderboard.length} ta ishtirokchi`}
                 </span>
               </div>
 
@@ -1190,15 +1201,28 @@ export default function OlympiadsPage() {
                     Musobaqada qatnashing va birinchi bo'lib reytingga kiring!
                   </p>
                 </div>
+              ) : subsequentLeaderboard.length === 0 ? (
+                <div className="text-center py-8 px-4 rounded-2xl bg-slate-50/50 dark:bg-slate-800/30 border border-dashed border-slate-200 dark:border-slate-800 space-y-1.5">
+                  <div className="w-10 h-10 rounded-2xl bg-amber-500/10 dark:bg-amber-500/20 text-amber-500 flex items-center justify-center mx-auto text-lg">
+                    🏆
+                  </div>
+                  <p className="font-bold text-slate-700 dark:text-slate-200 text-xs sm:text-sm">
+                    {leaderboardSearch.trim()
+                      ? "Qidiruv bo'yicha 4-o'rindan boshlab ishtirokchi topilmadi"
+                      : "Barcha sovrindorlar (Top 3) yuqoridagi 3D shoxsupada!"}
+                  </p>
+                  <p className="text-[11px] text-slate-400 max-w-md mx-auto">
+                    {leaderboardSearch.trim()
+                      ? "Dastlabki 3 ta o'rin egalari yuqoridagi 3D shoxsupada ko'rsatilgan."
+                      : "Keyingi topshirgan barcha ishtirokchilar natijalari 4-o'rindan boshlab ushbu ro'yxatda aks etadi."}
+                  </p>
+                </div>
               ) : (
                 <div className="space-y-2">
-                  {filteredLeaderboard.map((entry) => {
+                  {subsequentLeaderboard.map((entry) => {
                     const isSelf = user?.id && entry.user_id === user.id;
                     const avatar = isSelf ? (profile?.avatar_url || entry.student_avatar) : entry.student_avatar;
                     const hasAvatar = avatar && !avatar.includes('dicebear');
-                    const isRank1 = entry.rank === 1;
-                    const isRank2 = entry.rank === 2;
-                    const isRank3 = entry.rank === 3;
 
                     return (
                       <div
@@ -1211,23 +1235,9 @@ export default function OlympiadsPage() {
                       >
                         {/* Left: Rank + Avatar + Name + Submission Date */}
                         <div className="flex items-center gap-3 min-w-0">
-                          {isRank1 ? (
-                            <span className="w-8 h-8 rounded-xl bg-gradient-to-b from-amber-100 to-amber-200 dark:from-amber-900/50 dark:to-amber-800/40 text-amber-800 dark:text-amber-200 font-black text-sm inline-flex items-center justify-center shrink-0 border border-amber-300 dark:border-amber-700/60 shadow-none">
-                              🥇
-                            </span>
-                          ) : isRank2 ? (
-                            <span className="w-8 h-8 rounded-xl bg-gradient-to-b from-blue-100 to-indigo-200 dark:from-blue-900/50 dark:to-indigo-800/40 text-blue-800 dark:text-blue-200 font-black text-sm inline-flex items-center justify-center shrink-0 border border-blue-300 dark:border-blue-700/60 shadow-none">
-                              🥈
-                            </span>
-                          ) : isRank3 ? (
-                            <span className="w-8 h-8 rounded-xl bg-gradient-to-b from-orange-100 to-amber-200 dark:from-orange-900/50 dark:to-amber-800/40 text-orange-800 dark:text-orange-200 font-black text-sm inline-flex items-center justify-center shrink-0 border border-orange-300 dark:border-orange-700/60 shadow-none">
-                              🥉
-                            </span>
-                          ) : (
-                            <span className="w-8 h-8 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 font-black text-xs inline-flex items-center justify-center shrink-0">
-                              #{entry.rank}
-                            </span>
-                          )}
+                          <span className="w-8 h-8 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 font-black text-xs inline-flex items-center justify-center shrink-0">
+                            #{entry.rank}
+                          </span>
 
                           {hasAvatar ? (
                             <img
@@ -1284,37 +1294,37 @@ export default function OlympiadsPage() {
                       </div>
                     );
                   })}
+                </div>
+              )}
 
-                  {/* Encouragement card if podium has open slots */}
-                  {leaderboard.length < 3 && (
-                    <div className="p-3.5 sm:p-4 rounded-2xl border border-dashed border-brand-blue/30 bg-gradient-to-r from-blue-50/50 via-indigo-50/30 to-amber-50/30 dark:from-blue-950/20 dark:via-indigo-950/15 dark:to-amber-950/15 flex items-center justify-between gap-3 mt-2">
-                      <div className="flex items-center gap-3">
-                        <span className="text-2xl select-none">🎯</span>
-                        <div>
-                          <p className="text-xs sm:text-sm font-bold text-slate-800 dark:text-slate-200">
-                            Shoxsupada yana {3 - leaderboard.length} ta sovrinli o'rin ochiq!
-                          </p>
-                          <p className="text-[11px] text-slate-500 dark:text-slate-400">
-                            Musobaqada qatnashib, yuqoridagi 3D g'oliblar shoxsupasidan o'z o'rningizni egallang.
-                          </p>
-                        </div>
-                      </div>
-                      <button
-                        onClick={() => {
-                          const currentTourney = tournaments.find((t) => t.id === selectedTournamentId);
-                          if (currentTourney && currentTourney.status !== "finished") {
-                            setConfirmStartItem(currentTourney);
-                          } else {
-                            setActiveTab("tournaments");
-                          }
-                        }}
-                        className="px-3.5 py-2 rounded-xl bg-brand-blue hover:bg-brand-blue/90 text-white text-xs font-bold shrink-0 transition-all shadow-none flex items-center gap-1.5 cursor-pointer"
-                      >
-                        <Play size={12} className="fill-white" />
-                        <span>Qatnashish</span>
-                      </button>
+              {/* Encouragement card if podium has open slots */}
+              {leaderboard.length < 3 && (
+                <div className="p-3.5 sm:p-4 rounded-2xl border border-dashed border-brand-blue/30 bg-gradient-to-r from-blue-50/50 via-indigo-50/30 to-amber-50/30 dark:from-blue-950/20 dark:via-indigo-950/15 dark:to-amber-950/15 flex items-center justify-between gap-3 mt-2">
+                  <div className="flex items-center gap-3">
+                    <span className="text-2xl select-none">🎯</span>
+                    <div>
+                      <p className="text-xs sm:text-sm font-bold text-slate-800 dark:text-slate-200">
+                        Shoxsupada yana {3 - leaderboard.length} ta sovrinli o'rin ochiq!
+                      </p>
+                      <p className="text-[11px] text-slate-500 dark:text-slate-400">
+                        Musobaqada qatnashib, yuqoridagi 3D g'oliblar shoxsupasidan o'z o'rningizni egallang.
+                      </p>
                     </div>
-                  )}
+                  </div>
+                  <button
+                    onClick={() => {
+                      const currentTourney = tournaments.find((t) => t.id === selectedTournamentId);
+                      if (currentTourney && currentTourney.status !== "finished") {
+                        setConfirmStartItem(currentTourney);
+                      } else {
+                        setActiveTab("tournaments");
+                      }
+                    }}
+                    className="px-3.5 py-2 rounded-xl bg-brand-blue hover:bg-brand-blue/90 text-white text-xs font-bold shrink-0 transition-all shadow-none flex items-center gap-1.5 cursor-pointer"
+                  >
+                    <Play size={12} className="fill-white" />
+                    <span>Qatnashish</span>
+                  </button>
                 </div>
               )}
             </div>
