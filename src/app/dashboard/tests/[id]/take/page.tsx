@@ -90,123 +90,141 @@ export default function TakeTestPage() {
  const [checkingStep, setCheckingStep] = useState(1);
  const [checkingProgress, setCheckingProgress] = useState(0);
  const [showDetailedResults, setShowDetailedResults] = useState(false);
- const [isPracticeMode, setIsPracticeMode] = useState(false);
- const [resultsFilter, setResultsFilter] = useState<"all" | "correct" | "wrong">("all");
- const [calculatedSummary, setCalculatedSummary] = useState<{
-   totalScore: number;
-   maxScore: number;
-   percentage: number;
-   timeSpent: number;
-   correctCount: number;
-   wrongCount: number;
-   unansweredCount: number;
-   scaledScore?: string;
- } | null>(null);
+  const [isPracticeMode, setIsPracticeMode] = useState(() => {
+    if (typeof window !== "undefined") {
+      const params = new URLSearchParams(window.location.search);
+      return params.get("mode") === "practice" || params.get("retake") === "true";
+    }
+    return false;
+  });
+  const [resultsFilter, setResultsFilter] = useState<"all" | "correct" | "wrong">("all");
+  const [calculatedSummary, setCalculatedSummary] = useState<{
+    totalScore: number;
+    maxScore: number;
+    percentage: number;
+    timeSpent: number;
+    correctCount: number;
+    wrongCount: number;
+    unansweredCount: number;
+    scaledScore?: string;
+  } | null>(null);
 
- const autoSaveInterval = useRef<NodeJS.Timeout | null>(null);
- const questionStartTime = useRef<number>(Date.now());
+  const autoSaveInterval = useRef<NodeJS.Timeout | null>(null);
+  const questionStartTime = useRef<number>(Date.now());
 
- // Close image zoom modal with Escape key
- useEffect(() => {
-   const handleKeyDown = (e: KeyboardEvent) => {
-     if (e.key === "Escape" && zoomedImage) {
-       setZoomedImage(null);
-       setZoomScale(1);
-     }
-   };
-   window.addEventListener("keydown", handleKeyDown);
-   return () => window.removeEventListener("keydown", handleKeyDown);
- }, [zoomedImage]);
+  // Close image zoom modal with Escape key
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape" && zoomedImage) {
+        setZoomedImage(null);
+        setZoomScale(1);
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [zoomedImage]);
 
- // Load test and start attempt
- useEffect(() => {
-   async function loadTestAndStart() {
-     try {
-       const supabase = createClient();
+  // Load test and start attempt
+  useEffect(() => {
+    async function loadTestAndStart() {
+      try {
+        const supabase = createClient();
 
-       // 1. Check if it's an International Competition (SAT, AMC, IELTS, etc.)
-       if (isInternationalParam || testId.startsWith("sat-") || testId.startsWith("amc-") || testId.startsWith("ielts-") || testId.startsWith("intl-")) {
-         setIsInternational(true);
-         const currentUser = (await supabase.auth.getUser()).data.user;
-         const completedIntl = await getUserCompletedInternationalTournamentIds(currentUser?.id);
-         const isPractice = searchParams?.get("mode") === "practice" || searchParams?.get("retake") === "true";
-         if (completedIntl.includes(testId) && !isPractice) {
-           toast.success("Siz ushbu xalqaro musobaqani allaqachon topshirgansiz! Natijangiz saqlangan.");
-           router.replace(`/dashboard/international?tab=leaderboard&id=${testId}`);
-           return;
-         }
+        // 1. Check if it's an International Competition (SAT, AMC, IELTS, etc.)
+        if (isInternationalParam || testId.startsWith("sat-") || testId.startsWith("amc-") || testId.startsWith("ielts-") || testId.startsWith("intl-")) {
+          setIsInternational(true);
+          const currentUser = (await supabase.auth.getUser()).data.user;
+          const completedIntl = await getUserCompletedInternationalTournamentIds(currentUser?.id);
+          const isPractice = searchParams?.get("mode") === "practice" || searchParams?.get("retake") === "true";
+          if (completedIntl.includes(testId) && !isPractice) {
+            toast.success("Siz ushbu xalqaro musobaqani allaqachon topshirgansiz! Natijangiz saqlangan.");
+            router.replace(`/dashboard/international?tab=leaderboard&id=${testId}`);
+            return;
+          }
 
-         const intlData = await getInternationalTournamentById(testId);
-         if (intlData) {
-           setTournamentData(intlData);
-           setTest({
-             id: intlData.id,
-             title: intlData.title,
-             duration_minutes: intlData.durationMinutes || 70,
-             subject: intlData.subject
-           });
-           const rawQs = intlData.questions && intlData.questions.length > 0 ? intlData.questions : [];
-           const formattedQs: Question[] = rawQs.map((q: any, idx: number) => ({
-             id: q.id || `intl_q_${idx}`,
-             test_id: testId,
-             question_text: q.question_text,
-             question_type: (q.question_type || "multiple_choice") as any,
-             options: q.options || { A: "", B: "", C: "", D: "" },
-             correct_answer: q.correct_answer || "",
-             explanation: q.explanation || "",
-             points: q.points || 10,
-             image_url: q.image_url || null,
-             order_index: idx
-           }));
-           setQuestions(formattedQs);
-           setAttemptId(`attempt_intl_${testId}`);
-           setTimeRemaining((intlData.durationMinutes || 70) * 60);
-           setLoading(false);
-           return;
-         }
-       }
+          const intlData = await getInternationalTournamentById(testId);
+          if (intlData) {
+            const isFinishedIntl = intlData.status === "finished" || (intlData.endDate && new Date(`${intlData.endDate}T${intlData.endTime || '23:59'}`).getTime() < Date.now());
+            if (isPractice || isFinishedIntl || completedIntl.includes(testId)) {
+              setIsPracticeMode(true);
+              toast("Mashq rejimi: javoblaringiz rasmiy reytingga ta'sir qilmaydi.", { icon: "🎯", duration: 3500 });
+            }
 
-       // 2. Check if it's an Olympiad / Tournament
-       if (isOlympiadParam || testId.startsWith("tournament_") || testId.startsWith("olympiad_") || testId.startsWith("grand_") || testId.startsWith("t_")) {
-         setIsOlympiad(true);
-         const currentUser = (await supabase.auth.getUser()).data.user;
-         const completedOlympiads = await getUserCompletedTournamentIds(currentUser?.id);
-         const isPractice = searchParams?.get("mode") === "practice" || searchParams?.get("retake") === "true";
-         if (completedOlympiads.includes(testId) && !isPractice) {
-           toast.success("Siz ushbu musobaqani allaqachon topshirgansiz! Natijangiz saqlangan.");
-           router.replace(`/dashboard/olympiads?tab=leaderboard&id=${testId}`);
-           return;
-         }
+            setTournamentData(intlData);
+            setTest({
+              id: intlData.id,
+              title: intlData.title,
+              duration_minutes: intlData.durationMinutes || 70,
+              subject: intlData.subject
+            });
+            const rawQs = intlData.questions && intlData.questions.length > 0 ? intlData.questions : [];
+            const formattedQs: Question[] = rawQs.map((q: any, idx: number) => ({
+              id: q.id || `intl_q_${idx}`,
+              test_id: testId,
+              question_text: q.question_text,
+              question_type: (q.question_type || "multiple_choice") as any,
+              options: q.options || { A: "", B: "", C: "", D: "" },
+              correct_answer: q.correct_answer || "",
+              explanation: q.explanation || "",
+              points: q.points || 10,
+              image_url: q.image_url || null,
+              order_index: idx
+            }));
+            setQuestions(formattedQs);
+            setAttemptId(`attempt_intl_${testId}`);
+            setTimeRemaining((intlData.durationMinutes || 70) * 60);
+            setLoading(false);
+            return;
+          }
+        }
 
-         const tData = await getTournamentById(testId);
-         if (tData) {
-           setTournamentData(tData);
-           setTest({
-             id: tData.id,
-             title: tData.title,
-             duration_minutes: tData.durationMinutes || 60,
-             subject: tData.subject
-           });
-           const rawQs = tData.questions && tData.questions.length > 0 ? tData.questions : [];
-           const formattedQs: Question[] = rawQs.map((q: any, idx: number) => ({
-             id: q.id || `q_${idx}`,
-             test_id: testId,
-             question_text: q.question_text,
-             question_type: (q.question_type || "multiple_choice") as any,
-             options: q.options || { A: "", B: "", C: "", D: "" },
-             correct_answer: q.correct_answer || "A",
-             explanation: q.explanation || "",
-             points: q.points || 3.1,
-             image_url: q.image_url || null,
-             order_index: idx
-           }));
-           setQuestions(formattedQs);
-           setAttemptId(`attempt_olympiad_${testId}`);
-           setTimeRemaining((tData.durationMinutes || 60) * 60);
-           setLoading(false);
-           return;
-         }
-       }
+        // 2. Check if it's an Olympiad / Tournament
+        if (isOlympiadParam || testId.startsWith("tournament_") || testId.startsWith("olympiad_") || testId.startsWith("grand_") || testId.startsWith("t_")) {
+          setIsOlympiad(true);
+          const currentUser = (await supabase.auth.getUser()).data.user;
+          const completedOlympiads = await getUserCompletedTournamentIds(currentUser?.id);
+          const isPractice = searchParams?.get("mode") === "practice" || searchParams?.get("retake") === "true";
+          if (completedOlympiads.includes(testId) && !isPractice) {
+            toast.success("Siz ushbu musobaqani allaqachon topshirgansiz! Natijangiz saqlangan.");
+            router.replace(`/dashboard/olympiads?tab=leaderboard&id=${testId}`);
+            return;
+          }
+
+          const tData = await getTournamentById(testId);
+          if (tData) {
+            const isFinishedTourn = tData.status === "finished" || (tData.endDate && new Date(`${tData.endDate}T${tData.endTime || '23:59'}`).getTime() < Date.now());
+            if (isPractice || isFinishedTourn || completedOlympiads.includes(testId)) {
+              setIsPracticeMode(true);
+              toast("Mashq rejimi: javoblaringiz rasmiy reytingga ta'sir qilmaydi.", { icon: "🎯", duration: 3500 });
+            }
+
+            setTournamentData(tData);
+            setTest({
+              id: tData.id,
+              title: tData.title,
+              duration_minutes: tData.durationMinutes || 60,
+              subject: tData.subject
+            });
+            const rawQs = tData.questions && tData.questions.length > 0 ? tData.questions : [];
+            const formattedQs: Question[] = rawQs.map((q: any, idx: number) => ({
+              id: q.id || `q_${idx}`,
+              test_id: testId,
+              question_text: q.question_text,
+              question_type: (q.question_type || "multiple_choice") as any,
+              options: q.options || { A: "", B: "", C: "", D: "" },
+              correct_answer: q.correct_answer || "A",
+              explanation: q.explanation || "",
+              points: q.points || 3.1,
+              image_url: q.image_url || null,
+              order_index: idx
+            }));
+            setQuestions(formattedQs);
+            setAttemptId(`attempt_olympiad_${testId}`);
+            setTimeRemaining((tData.durationMinutes || 60) * 60);
+            setLoading(false);
+            return;
+          }
+        }
 
    // Standard test DB lookup
    const testData = await getTestById(testId);
@@ -340,7 +358,7 @@ export default function TakeTestPage() {
 
   setAutoSaving(true);
   try {
-    if (isOlympiad) {
+    if (isOlympiad || isInternational || isPracticeMode) {
       if (typeof window !== 'undefined') {
         localStorage.setItem(`promax_answers_${testId}`, JSON.stringify(answers));
       }
@@ -354,7 +372,7 @@ export default function TakeTestPage() {
   } finally {
     setAutoSaving(false);
   }
-  }, [attemptId, answers, isOlympiad, testId]);
+  }, [attemptId, answers, isOlympiad, isInternational, isPracticeMode, testId]);
 
   const handleAnswerChange = (questionId: string, answer: string) => {
   setAnswers(prev => ({
@@ -528,10 +546,20 @@ export default function TakeTestPage() {
 
   if (!test || questions.length === 0) {
     return (
-      <div className="text-center py-12">
-        <AlertCircle className="mx-auto text-red-500 mb-4" size={64} />
-        <h2 className="text-2xl font-medium text-slate-800 dark:text-slate-100 mb-2">{t('tests.take.error.title')}</h2>
-        <Link href={isInternational ? "/dashboard/international" : isOlympiad ? "/dashboard/olympiads" : "/dashboard/tests"} className="text-brand-blue active:underline font-bold">
+      <div className="min-h-[70vh] flex flex-col items-center justify-center p-6 text-center space-y-4">
+        <div className="w-16 h-16 rounded-2xl bg-amber-500/10 text-amber-600 dark:text-amber-400 flex items-center justify-center">
+          <AlertCircle size={32} />
+        </div>
+        <h2 className="text-xl sm:text-2xl font-bold font-fredoka text-slate-800 dark:text-slate-100">
+          Savollar topilmadi
+        </h2>
+        <p className="text-sm text-slate-500 max-w-md">
+          Ushbu musobaqa uchun hali savollar kiritilmagan yoki test faol emas.
+        </p>
+        <Link
+          href={isInternational ? "/dashboard/international" : isOlympiad ? "/dashboard/olympiads" : "/dashboard/tests"}
+          className="px-5 py-2.5 rounded-2xl bg-brand-blue hover:bg-blue-600 text-white font-bold text-sm shadow-sm transition-all cursor-pointer"
+        >
           {isInternational ? "Xalqaro musobaqalarga qaytish" : isOlympiad ? "Musobaqalarga qaytish" : t('tests.take.back_to_list')}
         </Link>
       </div>
@@ -609,6 +637,12 @@ export default function TakeTestPage() {
                 }`}>
                   {isExcellent ? "A'lo natija 🔥" : isGood ? "Yaxshi natija 👏" : "Mashq qilish kerak 💪"}
                 </span>
+                {isPracticeMode && (
+                  <span className="inline-flex items-center gap-1 text-[11px] sm:text-xs font-bold px-2.5 sm:px-3 py-0.5 sm:py-1 rounded-full bg-violet-500/10 text-violet-600 dark:text-violet-400 border border-violet-500/20">
+                    <RotateCcw size={11} />
+                    <span>Mashq natijasi</span>
+                  </span>
+                )}
               </div>
 
               <h1 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold font-fredoka text-slate-900 dark:text-white leading-tight">
@@ -1030,6 +1064,12 @@ export default function TakeTestPage() {
                   <span className="text-[10px] font-black uppercase tracking-wider text-amber-500 bg-amber-500/10 px-2 py-0.5 rounded-md flex items-center gap-1 shrink-0">
                     <Trophy size={11} />
                     {tournamentData?.subject || "Musobaqa"}
+                  </span>
+                )}
+                {isPracticeMode && (
+                  <span className="text-[10px] font-black uppercase tracking-wider text-amber-600 dark:text-amber-400 bg-amber-500/10 border border-amber-500/20 px-2 py-0.5 rounded-md flex items-center gap-1 shrink-0">
+                    <RotateCcw size={10} />
+                    Mashq
                   </span>
                 )}
                 <h1 className="text-[14px] font-bold text-slate-800 dark:text-slate-100 truncate">

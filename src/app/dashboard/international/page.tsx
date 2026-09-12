@@ -30,7 +30,8 @@ import {
   FileText,
   AlertCircle,
   Timer,
-  Calendar
+  Calendar,
+  RotateCcw
 } from "lucide-react";
 import {
   InternationalTournament,
@@ -745,64 +746,117 @@ export default function InternationalCompetitionsPage() {
                           </div>
 
                           {/* Bottom Action Buttons */}
-                          <div className="flex items-center gap-3 pt-2">
-                            <button
-                              onClick={() => setSelectedItem(item)}
-                              className="flex-1 py-3 rounded-2xl bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-white font-bold text-xs sm:text-sm active:scale-95 transition-all text-center cursor-pointer"
-                            >
-                              Nizom
-                            </button>
-
+                          <div className="pt-2 space-y-2">
                             {isCompleted ? (
-                              <button
-                                onClick={() => {
-                                  handleTournamentSelectForLeaderboard(item.id);
-                                  setActiveTab("leaderboard");
-                                }}
-                                className="flex-1 py-3 rounded-2xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs sm:text-sm flex items-center justify-center gap-1.5 shadow-sm active:scale-95 transition-all cursor-pointer"
-                              >
-                                <Award size={16} />
-                                <span>Natijangiz</span>
-                              </button>
+                              <>
+                                <div className="flex items-center gap-2">
+                                  <button
+                                    onClick={() => setSelectedItem(item)}
+                                    className="flex-1 py-2.5 sm:py-3 rounded-2xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-800 dark:text-white font-bold text-xs sm:text-sm active:scale-95 transition-all text-center cursor-pointer"
+                                  >
+                                    Nizom
+                                  </button>
+                                  <button
+                                    onClick={() => {
+                                      handleTournamentSelectForLeaderboard(item.id);
+                                      setActiveTab("leaderboard");
+                                    }}
+                                    className="flex-1 py-2.5 sm:py-3 rounded-2xl bg-indigo-50 dark:bg-indigo-950/40 hover:bg-indigo-100 dark:hover:bg-indigo-900/60 text-indigo-700 dark:text-indigo-300 border border-indigo-200/80 dark:border-indigo-800/80 font-bold text-xs sm:text-sm flex items-center justify-center gap-1.5 shadow-xs active:scale-95 transition-all cursor-pointer"
+                                  >
+                                    <Award size={15} />
+                                    <span>Natijangiz</span>
+                                  </button>
+                                </div>
+
+                                <Link
+                                  href={`/dashboard/tests/${item.id}/take?international=true&mode=practice`}
+                                  className="w-full py-2.5 sm:py-3 rounded-2xl bg-brand-blue hover:bg-blue-600 text-white font-bold text-xs sm:text-sm flex items-center justify-center gap-2 shadow-sm active:scale-95 transition-all cursor-pointer"
+                                >
+                                  <RotateCcw size={15} />
+                                  <span>Qayta yechish</span>
+                                </Link>
+                              </>
                             ) : isLive ? (
-                              <button
-                                onClick={() => setConfirmStartItem(item)}
-                                className="flex-1 py-3 rounded-2xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs sm:text-sm flex items-center justify-center gap-1.5 shadow-sm active:scale-95 transition-all text-center cursor-pointer"
-                              >
-                                <Play size={14} className="fill-white" />
-                                <span>Boshlash</span>
-                              </button>
+                              <div className="flex items-center gap-3">
+                                <button
+                                  onClick={() => setSelectedItem(item)}
+                                  className="flex-1 py-3 rounded-2xl bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-white font-bold text-xs sm:text-sm active:scale-95 transition-all text-center cursor-pointer"
+                                >
+                                  Nizom
+                                </button>
+                                <button
+                                  onClick={() => setConfirmStartItem(item)}
+                                  className="flex-1 py-3 rounded-2xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs sm:text-sm flex items-center justify-center gap-1.5 shadow-sm active:scale-95 transition-all text-center cursor-pointer"
+                                >
+                                  <Play size={14} className="fill-white" />
+                                  <span>Boshlash</span>
+                                </button>
+                              </div>
                             ) : isFinished ? (
-                              <button
-                                onClick={() => {
-                                  handleTournamentSelectForLeaderboard(item.id);
-                                  setActiveTab("leaderboard");
-                                }}
-                                className="flex-1 py-3 rounded-2xl bg-brand-blue hover:bg-blue-600 text-white font-bold text-xs sm:text-sm flex items-center justify-center gap-1.5 shadow-sm active:scale-95 transition-all cursor-pointer"
-                              >
-                                <Award size={16} />
-                                <span>Reyting</span>
-                              </button>
+                              <>
+                                <div className="flex items-center gap-2">
+                                  <button
+                                    onClick={() => setSelectedItem(item)}
+                                    className="flex-1 py-2.5 sm:py-3 rounded-2xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-800 dark:text-white font-bold text-xs sm:text-sm active:scale-95 transition-all text-center cursor-pointer"
+                                  >
+                                    Nizom
+                                  </button>
+                                  <button
+                                    onClick={() => {
+                                      handleTournamentSelectForLeaderboard(item.id);
+                                      setActiveTab("leaderboard");
+                                    }}
+                                    className="flex-1 py-2.5 sm:py-3 rounded-2xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 font-bold text-xs sm:text-sm flex items-center justify-center gap-1.5 shadow-xs active:scale-95 transition-all cursor-pointer"
+                                  >
+                                    <Award size={15} />
+                                    <span>Reyting</span>
+                                  </button>
+                                </div>
+
+                                <Link
+                                  href={`/dashboard/tests/${item.id}/take?international=true&mode=practice`}
+                                  className="w-full py-2.5 sm:py-3 rounded-2xl bg-brand-blue hover:bg-blue-600 text-white font-bold text-xs sm:text-sm flex items-center justify-center gap-2 shadow-sm active:scale-95 transition-all cursor-pointer"
+                                >
+                                  <Play size={14} className="fill-white" />
+                                  <span>Mashq qilish</span>
+                                </Link>
+                              </>
                             ) : isRegistered ? (
-                              <button
-                                onClick={() => {
-                                  toast.error(`Musobaqa hali boshlanmagan! Boshlanish vaqti: ${formatUzbekDate(item.startDate)} ${item.startTime || '15:00'}`, {
-                                    duration: 4000
-                                  });
-                                }}
-                                className="flex-1 py-3 rounded-2xl bg-amber-500/10 dark:bg-amber-950/40 text-amber-600 dark:text-amber-400 border border-amber-500/20 font-bold text-xs sm:text-sm flex items-center justify-center gap-1.5 shadow-none active:scale-95 transition-all text-center cursor-pointer"
-                              >
-                                <Clock size={14} />
-                                <span>Kutilmoqda</span>
-                              </button>
+                              <div className="flex items-center gap-3">
+                                <button
+                                  onClick={() => setSelectedItem(item)}
+                                  className="flex-1 py-3 rounded-2xl bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-white font-bold text-xs sm:text-sm active:scale-95 transition-all text-center cursor-pointer"
+                                >
+                                  Nizom
+                                </button>
+                                <button
+                                  onClick={() => {
+                                    toast.error(`Musobaqa hali boshlanmagan! Boshlanish vaqti: ${formatUzbekDate(item.startDate)} ${item.startTime || '15:00'}`, {
+                                      duration: 4000
+                                    });
+                                  }}
+                                  className="flex-1 py-3 rounded-2xl bg-amber-500/10 dark:bg-amber-950/40 text-amber-600 dark:text-amber-400 border border-amber-500/20 font-bold text-xs sm:text-sm flex items-center justify-center gap-1.5 shadow-none active:scale-95 transition-all text-center cursor-pointer"
+                                >
+                                  <Clock size={14} />
+                                  <span>Kutilmoqda</span>
+                                </button>
+                              </div>
                             ) : (
-                              <button
-                                onClick={() => handleRegister(item)}
-                                className="flex-1 py-3 rounded-2xl font-bold text-xs sm:text-sm active:scale-95 flex items-center justify-center gap-1.5 transition-all bg-brand-blue hover:bg-blue-600 text-white shadow-sm cursor-pointer"
-                              >
-                                <span>Qatnashish</span>
-                                <ArrowUpRight size={16} />
-                              </button>
+                              <div className="flex items-center gap-3">
+                                <button
+                                  onClick={() => setSelectedItem(item)}
+                                  className="flex-1 py-3 rounded-2xl bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-white font-bold text-xs sm:text-sm active:scale-95 transition-all text-center cursor-pointer"
+                                >
+                                  Nizom
+                                </button>
+                                <button
+                                  onClick={() => handleRegister(item)}
+                                  className="flex-1 py-3 rounded-2xl font-bold text-xs sm:text-sm active:scale-95 flex items-center justify-center gap-1.5 transition-all bg-brand-blue hover:bg-blue-600 text-white shadow-sm cursor-pointer"
+                                >
+                                  <span>Qatnashish</span>
+                                  <ArrowUpRight size={16} />
+                                </button>
+                              </div>
                             )}
                           </div>
                         </div>
@@ -864,6 +918,16 @@ export default function InternationalCompetitionsPage() {
                     className="w-full sm:w-44 pl-8 pr-3 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-medium text-slate-800 dark:text-slate-100 outline-none"
                   />
                 </div>
+
+                {selectedTournamentId && (
+                  <Link
+                    href={`/dashboard/tests/${selectedTournamentId}/take?international=true&mode=practice`}
+                    className="px-3.5 py-2.5 rounded-xl bg-brand-blue hover:bg-blue-600 text-white font-bold text-xs flex items-center justify-center gap-1.5 shadow-sm active:scale-95 transition-all whitespace-nowrap cursor-pointer"
+                  >
+                    <RotateCcw size={13} />
+                    <span>{completedIds.includes(selectedTournamentId) ? "Qayta yechish" : "Mashq qilish"}</span>
+                  </Link>
+                )}
               </div>
             </div>
 
@@ -1483,18 +1547,51 @@ export default function InternationalCompetitionsPage() {
                 </button>
 
                 {completedIds.includes(selectedItem.id) ? (
-                  <button
-                    onClick={() => {
-                      const id = selectedItem.id;
-                      setSelectedItem(null);
-                      handleTournamentSelectForLeaderboard(id);
-                      setActiveTab("leaderboard");
-                    }}
-                    className="flex-1 py-3 rounded-2xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs sm:text-sm flex items-center justify-center gap-1.5 shadow-sm active:scale-95 transition-all text-center cursor-pointer"
-                  >
-                    <Award size={16} />
-                    <span>Natijani ko'rish</span>
-                  </button>
+                  <>
+                    <button
+                      onClick={() => {
+                        const id = selectedItem.id;
+                        setSelectedItem(null);
+                        handleTournamentSelectForLeaderboard(id);
+                        setActiveTab("leaderboard");
+                      }}
+                      className="flex-1 py-3 rounded-2xl bg-indigo-50 dark:bg-indigo-950/40 text-indigo-700 dark:text-indigo-300 border border-indigo-200/80 dark:border-indigo-800/80 hover:bg-indigo-100 dark:hover:bg-indigo-900/60 font-bold text-xs sm:text-sm flex items-center justify-center gap-1.5 shadow-xs active:scale-95 transition-all text-center cursor-pointer"
+                    >
+                      <Award size={15} />
+                      <span>Natija</span>
+                    </button>
+                    <Link
+                      href={`/dashboard/tests/${selectedItem.id}/take?international=true&mode=practice`}
+                      onClick={() => setSelectedItem(null)}
+                      className="flex-1 py-3 rounded-2xl bg-brand-blue hover:bg-blue-600 text-white font-bold text-xs sm:text-sm flex items-center justify-center gap-1.5 shadow-sm active:scale-95 transition-all text-center cursor-pointer"
+                    >
+                      <RotateCcw size={15} />
+                      <span>Qayta yechish</span>
+                    </Link>
+                  </>
+                ) : selectedItem.status === "finished" ? (
+                  <>
+                    <button
+                      onClick={() => {
+                        const id = selectedItem.id;
+                        setSelectedItem(null);
+                        handleTournamentSelectForLeaderboard(id);
+                        setActiveTab("leaderboard");
+                      }}
+                      className="flex-1 py-3 rounded-2xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 font-bold text-xs sm:text-sm flex items-center justify-center gap-1.5 shadow-xs active:scale-95 transition-all text-center cursor-pointer"
+                    >
+                      <Award size={15} />
+                      <span>Reyting</span>
+                    </button>
+                    <Link
+                      href={`/dashboard/tests/${selectedItem.id}/take?international=true&mode=practice`}
+                      onClick={() => setSelectedItem(null)}
+                      className="flex-1 py-3 rounded-2xl bg-brand-blue hover:bg-blue-600 text-white font-bold text-xs sm:text-sm flex items-center justify-center gap-1.5 shadow-sm active:scale-95 transition-all text-center cursor-pointer"
+                    >
+                      <Play size={14} className="fill-white" />
+                      <span>Mashq qilish</span>
+                    </Link>
+                  </>
                 ) : selectedItem.status === "live" || registeredIds.includes(selectedItem.id) ? (
                   <button
                     onClick={() => {
