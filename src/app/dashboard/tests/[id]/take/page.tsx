@@ -4,23 +4,33 @@ import { useEffect, useState, useCallback, useRef } from "react";
 import { useParams, useRouter, useSearchParams } from "next/navigation";
 import { useLanguage } from "@/context/LanguageContext";
 import Link from "next/link";
+import Image from "next/image";
 import {
- ArrowLeft,
- ArrowRight,
- Clock,
- CheckCircle,
- AlertCircle,
- Flag,
- Save,
- Send,
- Trophy,
- Globe,
- BookOpen,
- X,
- Maximize2,
- ZoomIn,
- ZoomOut
+  ArrowLeft,
+  ArrowRight,
+  Clock,
+  CheckCircle,
+  CheckCircle2,
+  XCircle,
+  AlertCircle,
+  Flag,
+  Save,
+  Send,
+  Trophy,
+  Globe,
+  BookOpen,
+  X,
+  Maximize2,
+  ZoomIn,
+  ZoomOut,
+  Sparkles,
+  FileText,
+  RotateCcw,
+  ListChecks,
+  HelpCircle,
+  Lightbulb
 } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
 import {
  getTestById,
  startTestAttempt,
@@ -75,6 +85,24 @@ export default function TakeTestPage() {
  const [zoomedImage, setZoomedImage] = useState<string | null>(null);
  const [zoomScale, setZoomScale] = useState<number>(1);
 
+ // Minimalist Checking Animation & Detailed Results state
+ const [isCheckingResults, setIsCheckingResults] = useState(false);
+ const [checkingStep, setCheckingStep] = useState(1);
+ const [checkingProgress, setCheckingProgress] = useState(0);
+ const [showDetailedResults, setShowDetailedResults] = useState(false);
+ const [isPracticeMode, setIsPracticeMode] = useState(false);
+ const [resultsFilter, setResultsFilter] = useState<"all" | "correct" | "wrong">("all");
+ const [calculatedSummary, setCalculatedSummary] = useState<{
+   totalScore: number;
+   maxScore: number;
+   percentage: number;
+   timeSpent: number;
+   correctCount: number;
+   wrongCount: number;
+   unansweredCount: number;
+   scaledScore?: string;
+ } | null>(null);
+
  const autoSaveInterval = useRef<NodeJS.Timeout | null>(null);
  const questionStartTime = useRef<number>(Date.now());
 
@@ -101,7 +129,8 @@ export default function TakeTestPage() {
          setIsInternational(true);
          const currentUser = (await supabase.auth.getUser()).data.user;
          const completedIntl = await getUserCompletedInternationalTournamentIds(currentUser?.id);
-         if (completedIntl.includes(testId)) {
+         const isPractice = searchParams?.get("mode") === "practice" || searchParams?.get("retake") === "true";
+         if (completedIntl.includes(testId) && !isPractice) {
            toast.success("Siz ushbu xalqaro musobaqani allaqachon topshirgansiz! Natijangiz saqlangan.");
            router.replace(`/dashboard/international?tab=leaderboard&id=${testId}`);
            return;
@@ -142,7 +171,8 @@ export default function TakeTestPage() {
          setIsOlympiad(true);
          const currentUser = (await supabase.auth.getUser()).data.user;
          const completedOlympiads = await getUserCompletedTournamentIds(currentUser?.id);
-         if (completedOlympiads.includes(testId)) {
+         const isPractice = searchParams?.get("mode") === "practice" || searchParams?.get("retake") === "true";
+         if (completedOlympiads.includes(testId) && !isPractice) {
            toast.success("Siz ushbu musobaqani allaqachon topshirgansiz! Natijangiz saqlangan.");
            router.replace(`/dashboard/olympiads?tab=leaderboard&id=${testId}`);
            return;
@@ -345,184 +375,136 @@ export default function TakeTestPage() {
   });
   };
 
-  const handleAutoSubmit = async () => {
-  if (!attemptId || submitting) return;
+  const runEvaluationAndShowResults = async (timeSpent: number) => {
+    setSubmitting(true);
+    setIsCheckingResults(true);
+    setCheckingStep(1);
+    setCheckingProgress(25);
 
-  setSubmitting(true);
-  toast("Vaqt tugadi! Test avtomatik yakunlanmoqda...", { icon: "⚠️" });
+    try {
+      await saveAnswers();
+    } catch (e) {}
 
-  try {
-    await saveAnswers();
+    // 1. Calculate scores and counts
+    let totalScore = 0;
+    let maxScore = 0;
+    let correctCount = 0;
+    let wrongCount = 0;
+    let unansweredCount = 0;
 
-    if (isInternational) {
-      const timeSpent = test?.duration_minutes ? test.duration_minutes * 60 : 0;
-      const supabase = createClient();
-      const { data: userData } = await supabase.auth.getUser();
-      const { data: profileData } = await supabase
-        .from('profiles')
-        .select('full_name, avatar_url')
-        .eq('id', userData?.user?.id)
-        .maybeSingle();
+    questions.forEach((q) => {
+      const pts = q.points || (isInternational ? 10 : 3.1);
+      maxScore += pts;
+      const studentAns = (answers[q.id] || "").trim().toLowerCase();
+      const correctAns = (q.correct_answer || "").trim().toLowerCase();
 
-      const studentName = profileData?.full_name || userData?.user?.user_metadata?.full_name || "O'quvchi";
-      const studentAvatar = profileData?.avatar_url || userData?.user?.user_metadata?.avatar_url || null;
+      if (!studentAns) {
+        unansweredCount++;
+      } else if (studentAns === correctAns || (q as any).accepted_answers?.some((a: string) => a.toLowerCase() === studentAns)) {
+        totalScore += pts;
+        correctCount++;
+      } else {
+        wrongCount++;
+      }
+    });
 
-      let totalScore = 0;
-      let maxScore = 0;
-      questions.forEach(q => {
-        maxScore += (q.points || 10);
-        const studentAns = (answers[q.id] || "").trim().toLowerCase();
-        const correctAns = (q.correct_answer || "").trim().toLowerCase();
-        if (studentAns && (studentAns === correctAns || (q as any).accepted_answers?.some((a: string) => a.toLowerCase() === studentAns))) {
-          totalScore += (q.points || 10);
+    const percentage = maxScore > 0 ? Math.round((totalScore / maxScore) * 100) : 0;
+    let scaledScoreStr: string | undefined = undefined;
+    if (isInternational && testId.startsWith("sat-")) {
+      scaledScoreStr = `${Math.min(1600, Math.max(400, Math.round(400 + (percentage / 100) * 1200)))} / 1600`;
+    }
+
+    setCalculatedSummary({
+      totalScore: Number(totalScore.toFixed(1)),
+      maxScore: Number(maxScore.toFixed(1)),
+      percentage,
+      timeSpent: Math.max(1, timeSpent),
+      correctCount,
+      wrongCount,
+      unansweredCount,
+      scaledScore: scaledScoreStr
+    });
+
+    // 2. Submit to backend in background (only for official attempts, not practice mode)
+    if (!isPracticeMode) {
+      try {
+        const supabase = createClient();
+        const { data: userData } = await supabase.auth.getUser();
+        const { data: profileData } = await supabase
+          .from('profiles')
+          .select('full_name, avatar_url')
+          .eq('id', userData?.user?.id)
+          .maybeSingle();
+
+        const studentName = profileData?.full_name || userData?.user?.user_metadata?.full_name || "O'quvchi";
+        const studentAvatar = profileData?.avatar_url || userData?.user?.user_metadata?.avatar_url || null;
+
+        if (isInternational) {
+          await submitInternationalAttempt(
+            testId,
+            userData?.user?.id || `anon_${Date.now()}`,
+            studentName,
+            studentAvatar,
+            totalScore,
+            maxScore || (questions.length * 10),
+            timeSpent
+          );
+        } else if (isOlympiad) {
+          await submitTournamentAttempt({
+            tournamentId: testId,
+            userId: userData?.user?.id || `anon_${Date.now()}`,
+            studentName,
+            studentAvatar,
+            answers,
+            timeSpentSeconds: timeSpent
+          });
+        } else {
+          await completeTestAttempt(attemptId || `attempt_${testId}`, timeSpent);
         }
-      });
-
-      await submitInternationalAttempt(
-        testId,
-        userData?.user?.id || `anon_${Date.now()}`,
-        studentName,
-        studentAvatar,
-        totalScore,
-        maxScore || (questions.length * 10),
-        timeSpent
-      );
-      toast.success("Xalqaro musobaqa yakunlandi!", { icon: "🎓" });
-      router.push(`/dashboard/international?tab=leaderboard&id=${testId}`);
-      return;
+      } catch (error) {
+        console.error("Backend submission error:", error);
+      }
     }
 
-    if (isOlympiad) {
-      const timeSpent = test?.duration_minutes ? test.duration_minutes * 60 : 0;
-      const supabase = createClient();
-      const { data: userData } = await supabase.auth.getUser();
-      const { data: profileData } = await supabase
-        .from('profiles')
-        .select('full_name, avatar_url')
-        .eq('id', userData?.user?.id)
-        .maybeSingle();
+    // Smooth, polished transition (1200ms)
+    await new Promise((r) => setTimeout(r, 1200));
+    setIsCheckingResults(false);
+    setShowDetailedResults(true);
+    setSubmitting(false);
+  };
 
-      const studentName = profileData?.full_name || userData?.user?.user_metadata?.full_name || "O'quvchi";
-      const studentAvatar = profileData?.avatar_url || userData?.user?.user_metadata?.avatar_url || null;
-
-      await submitTournamentAttempt({
-        tournamentId: testId,
-        userId: userData?.user?.id || `anon_${Date.now()}`,
-        studentName,
-        studentAvatar,
-        answers,
-        timeSpentSeconds: timeSpent
-      });
-      toast.success("Musobaqa yakunlandi!");
-      router.push(`/dashboard/olympiads?tab=leaderboard&id=${testId}`);
-      return;
-    }
-
-    const success = await completeTestAttempt(attemptId, test?.duration_minutes ? test.duration_minutes * 60 : 0);
-    if (success) {
-      router.push(`/dashboard/tests/${testId}/results/${attemptId}`);
-    }
-  } catch (error) {
-    console.error("Error auto-submitting:", error);
-  }
+  const handleAutoSubmit = async () => {
+    if (!attemptId || submitting || isCheckingResults || showDetailedResults) return;
+    toast("Vaqt tugadi! Natijalar tekshirilmoqda...", { icon: "⏱️" });
+    const timeSpent = test?.duration_minutes ? test.duration_minutes * 60 : 0;
+    await runEvaluationAndShowResults(timeSpent);
   };
 
   const handleSubmitClick = () => {
-  setShowConfirmModal(true);
+    setShowConfirmModal(true);
   };
 
   const handleConfirmSubmit = async () => {
-  if (!attemptId) return;
-
-  setShowConfirmModal(false);
-  setSubmitting(true);
-
-  try {
-    // Save any pending answers
-    await saveAnswers();
-
-    // Calculate time spent
+    if (!attemptId) return;
+    setShowConfirmModal(false);
     const timeSpent = test?.duration_minutes ? (test.duration_minutes * 60 - (timeRemaining || 0)) : 0;
-
-    if (isInternational) {
-      const supabase = createClient();
-      const { data: userData } = await supabase.auth.getUser();
-      const { data: profileData } = await supabase
-        .from('profiles')
-        .select('full_name, avatar_url')
-        .eq('id', userData?.user?.id)
-        .maybeSingle();
-
-      const studentName = profileData?.full_name || userData?.user?.user_metadata?.full_name || "O'quvchi";
-      const studentAvatar = profileData?.avatar_url || userData?.user?.user_metadata?.avatar_url || null;
-
-      let totalScore = 0;
-      let maxScore = 0;
-      questions.forEach(q => {
-        maxScore += (q.points || 10);
-        const studentAns = (answers[q.id] || "").trim().toLowerCase();
-        const correctAns = (q.correct_answer || "").trim().toLowerCase();
-        if (studentAns && (studentAns === correctAns || (q as any).accepted_answers?.some((a: string) => a.toLowerCase() === studentAns))) {
-          totalScore += (q.points || 10);
-        }
-      });
-
-      await submitInternationalAttempt(
-        testId,
-        userData?.user?.id || `anon_${Date.now()}`,
-        studentName,
-        studentAvatar,
-        totalScore,
-        maxScore || (questions.length * 10),
-        Math.max(1, timeSpent)
-      );
-      toast.success("Xalqaro musobaqa muvaffaqiyatli yakunlandi! Natijangiz reytingga qo'shildi.", { icon: "🎓" });
-      router.push(`/dashboard/international?tab=leaderboard&id=${testId}`);
-      return;
-    }
-
-    if (isOlympiad) {
-      const supabase = createClient();
-      const { data: userData } = await supabase.auth.getUser();
-      const { data: profileData } = await supabase
-        .from('profiles')
-        .select('full_name, avatar_url')
-        .eq('id', userData?.user?.id)
-        .maybeSingle();
-
-      const studentName = profileData?.full_name || userData?.user?.user_metadata?.full_name || "O'quvchi";
-      const studentAvatar = profileData?.avatar_url || userData?.user?.user_metadata?.avatar_url || null;
-
-      await submitTournamentAttempt({
-        tournamentId: testId,
-        userId: userData?.user?.id || `anon_${Date.now()}`,
-        studentName,
-        studentAvatar,
-        answers,
-        timeSpentSeconds: Math.max(1, timeSpent)
-      });
-      toast.success("Musobaqa muvaffaqiyatli yakunlandi! Natijangiz reytingga qo'shildi.");
-      router.push(`/dashboard/olympiads?tab=leaderboard&id=${testId}`);
-      return;
-    }
-
-    // Complete standard attempt
-    const success = await completeTestAttempt(attemptId, timeSpent);
-
-    if (success) {
-      toast.success("Test muvaffaqiyatli yakunlandi!");
-      // Redirect to results page
-      router.push(`/dashboard/tests/${testId}/results/${attemptId}`);
-    } else {
-      toast.error("Testni yakunlashda xatolik yuz berdi");
-      setSubmitting(false);
-    }
-  } catch (error) {
-    console.error("Error submitting test:", error);
-    toast.error("Kutilmagan xatolik yuz berdi");
-    setSubmitting(false);
-  }
+    await runEvaluationAndShowResults(timeSpent);
   };
+
+  const handlePracticeRetake = () => {
+    setIsPracticeMode(true);
+    setAnswers({});
+    setMarkedForReview(new Set());
+    setCurrentQuestionIndex(0);
+    setShowDetailedResults(false);
+    setCalculatedSummary(null);
+    setTimeRemaining(test?.duration_minutes ? test.duration_minutes * 60 : null);
+    if (typeof window !== "undefined") {
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+    toast.success("Mashq rejimi boshlandi! O'zingizni sinab ko'ring.", { icon: "🎯" });
+  };
+
 
   const formatTime = (seconds: number) => {
   const mins = Math.floor(seconds / 60);
@@ -556,6 +538,458 @@ export default function TakeTestPage() {
     );
   }
 
+  const renderDetailedResults = () => {
+    if (!calculatedSummary) return null;
+
+    const isExcellent = calculatedSummary.percentage >= 80;
+    const isGood = calculatedSummary.percentage >= 60 && calculatedSummary.percentage < 80;
+
+    const filteredQuestions = questions.filter((q) => {
+      const studentAns = (answers[q.id] || "").trim().toLowerCase();
+      const correctAns = (q.correct_answer || "").trim().toLowerCase();
+      const isCorrect = studentAns && (studentAns === correctAns || (q as any).accepted_answers?.some((a: string) => a.toLowerCase() === studentAns));
+      
+      if (resultsFilter === "correct") return isCorrect;
+      if (resultsFilter === "wrong") return !isCorrect;
+      return true;
+    });
+
+    const radius = 44;
+    const circumference = 2 * Math.PI * radius;
+    const strokeDashoffset = circumference - (calculatedSummary.percentage / 100) * circumference;
+
+    return (
+      <div className="relative z-10 w-full max-w-6xl mx-auto px-3 sm:px-6 lg:px-8 py-6 sm:py-10 space-y-6 sm:space-y-8">
+        {/* Navigation Bar */}
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4">
+          <button
+            type="button"
+            onClick={() => router.push(isInternational ? '/dashboard/international' : isOlympiad ? '/dashboard/olympiads' : '/dashboard/tests')}
+            className="inline-flex items-center gap-2 text-xs sm:text-sm font-bold text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white transition-colors cursor-pointer group self-start"
+          >
+            <ArrowLeft size={16} className="group-hover:-translate-x-0.5 transition-transform shrink-0" />
+            <span className="truncate">{isInternational ? "Xalqaro musobaqalarga qaytish" : isOlympiad ? "Musobaqalarga qaytish" : "Testlar ro'yxatiga qaytish"}</span>
+          </button>
+
+          <div className="flex items-center gap-2 sm:gap-3 w-full sm:w-auto">
+            <button
+              type="button"
+              onClick={handlePracticeRetake}
+              className="flex-1 sm:flex-initial justify-center px-3.5 sm:px-4 py-2 sm:py-2.5 rounded-xl sm:rounded-2xl bg-white/80 hover:bg-slate-100 dark:bg-slate-800/80 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 text-xs sm:text-sm font-bold flex items-center gap-1.5 sm:gap-2 border border-slate-200/80 dark:border-slate-700/80 shadow-xs transition-all cursor-pointer active:scale-95"
+            >
+              <RotateCcw size={14} className="shrink-0" />
+              <span>Qayta yechish</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => router.push(isInternational ? '/dashboard/international' : isOlympiad ? '/dashboard/olympiads' : '/dashboard/results')}
+              className="flex-1 sm:flex-initial justify-center px-4 sm:px-5 py-2 sm:py-2.5 rounded-xl sm:rounded-2xl bg-slate-900 hover:bg-slate-800 dark:bg-white dark:hover:bg-slate-100 text-white dark:text-slate-900 text-xs sm:text-sm font-bold flex items-center gap-1.5 sm:gap-2 transition-all cursor-pointer shadow-md hover:shadow-lg active:scale-95"
+            >
+              <Trophy size={14} className="shrink-0" />
+              <span>Reyting</span>
+            </button>
+          </div>
+        </div>
+
+        {/* Hero Performance Card */}
+        <div className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-2xl rounded-[24px] sm:rounded-[32px] border border-slate-200/70 dark:border-slate-800/80 p-5 sm:p-8 lg:p-12 shadow-sm relative overflow-hidden">
+          <div className="flex flex-col-reverse md:flex-row items-center justify-between gap-6 sm:gap-8">
+            <div className="flex-1 space-y-2.5 sm:space-y-3.5 text-center md:text-left w-full">
+              <div className="flex flex-wrap items-center justify-center md:justify-start gap-2">
+                <span className="text-[11px] sm:text-xs font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">
+                  {isInternational ? (tournamentData?.categoryLabel || "Xalqaro Musobaqa") : isOlympiad ? (tournamentData?.subject || "Olimpiada") : "Test"}
+                </span>
+                <span className="text-slate-300 dark:text-slate-700">•</span>
+                <span className={`inline-flex items-center gap-1.5 text-[11px] sm:text-xs font-bold px-2.5 sm:px-3 py-0.5 sm:py-1 rounded-full ${
+                  isExcellent
+                    ? "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20"
+                    : isGood
+                    ? "bg-blue-500/10 text-brand-blue border border-blue-500/20"
+                    : "bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20"
+                }`}>
+                  {isExcellent ? "A'lo natija 🔥" : isGood ? "Yaxshi natija 👏" : "Mashq qilish kerak 💪"}
+                </span>
+              </div>
+
+              <h1 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold font-fredoka text-slate-900 dark:text-white leading-tight">
+                {test.title}
+              </h1>
+
+              <div className="flex items-baseline justify-center md:justify-start gap-2 pt-0.5 sm:pt-1">
+                <span className="font-fredoka text-4xl sm:text-5xl lg:text-6xl font-black text-slate-900 dark:text-white leading-none tracking-tight">
+                  {calculatedSummary.totalScore}
+                </span>
+                <span className="text-base sm:text-xl lg:text-2xl font-bold text-slate-400 dark:text-slate-500">
+                  / {calculatedSummary.maxScore} ball
+                </span>
+              </div>
+
+              {calculatedSummary.scaledScore && (
+                <div className="inline-flex items-center gap-1.5 sm:gap-2 px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-xl bg-slate-100/80 dark:bg-slate-800/80 text-[11px] sm:text-xs font-bold text-slate-600 dark:text-slate-300">
+                  <span>Digital SAT balli:</span>
+                  <span className="font-black text-slate-900 dark:text-white">{calculatedSummary.scaledScore}</span>
+                </div>
+              )}
+            </div>
+
+            {/* Circular Percentage Dial */}
+            <div className="shrink-0 flex flex-col items-center">
+              <div className="relative w-28 h-28 sm:w-36 sm:h-36 flex items-center justify-center">
+                <svg className="w-28 h-28 sm:w-36 sm:h-36 -rotate-90" viewBox="0 0 100 100">
+                  <circle
+                    cx="50"
+                    cy="50"
+                    r={radius}
+                    stroke="currentColor"
+                    strokeWidth="7"
+                    className="text-slate-100 dark:text-slate-800"
+                    fill="none"
+                  />
+                  <circle
+                    cx="50"
+                    cy="50"
+                    r={radius}
+                    stroke="currentColor"
+                    strokeWidth="7"
+                    strokeDasharray={circumference}
+                    strokeDashoffset={strokeDashoffset}
+                    strokeLinecap="round"
+                    className={isExcellent ? "text-emerald-500" : isGood ? "text-brand-blue" : "text-amber-500"}
+                    fill="none"
+                    style={{ transition: "stroke-dashoffset 0.8s cubic-bezier(0.4, 0, 0.2, 1)" }}
+                  />
+                </svg>
+                <div className="absolute inset-0 flex flex-col items-center justify-center text-center">
+                  <span className="font-fredoka text-2xl sm:text-4xl font-bold text-slate-900 dark:text-white leading-none">
+                    {calculatedSummary.percentage}%
+                  </span>
+                  <span className="text-[9px] sm:text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-0.5 sm:mt-1">
+                    Natija
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Stats 4-Column Grid */}
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 sm:gap-4 pt-6 sm:pt-8 mt-6 sm:mt-8 border-t border-slate-100 dark:border-slate-800/80">
+            <div className="p-3 sm:p-4 rounded-xl sm:rounded-2xl bg-emerald-50/50 dark:bg-emerald-950/20 border border-emerald-100/80 dark:border-emerald-900/30">
+              <div className="flex items-center justify-between mb-1">
+                <span className="text-[10px] sm:text-[11px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-400">To'g'ri</span>
+                <CheckCircle2 size={14} className="text-emerald-500 shrink-0" />
+              </div>
+              <span className="font-fredoka text-xl sm:text-2xl font-bold text-emerald-600 dark:text-emerald-400">
+                {calculatedSummary.correctCount} <span className="text-xs font-sans text-slate-400 font-medium">savol</span>
+              </span>
+            </div>
+
+            <div className="p-3 sm:p-4 rounded-xl sm:rounded-2xl bg-rose-50/50 dark:bg-rose-950/20 border border-rose-100/80 dark:border-rose-900/30">
+              <div className="flex items-center justify-between mb-1">
+                <span className="text-[10px] sm:text-[11px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-400">Noto'g'ri</span>
+                <XCircle size={14} className="text-rose-500 shrink-0" />
+              </div>
+              <span className="font-fredoka text-xl sm:text-2xl font-bold text-rose-600 dark:text-rose-400">
+                {calculatedSummary.wrongCount} <span className="text-xs font-sans text-slate-400 font-medium">savol</span>
+              </span>
+            </div>
+
+            <div className="p-3 sm:p-4 rounded-xl sm:rounded-2xl bg-slate-50 dark:bg-slate-800/40 border border-slate-200/60 dark:border-slate-800/60">
+              <div className="flex items-center justify-between mb-1">
+                <span className="text-[10px] sm:text-[11px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-400">O'tkazilgan</span>
+                <HelpCircle size={14} className="text-slate-400 shrink-0" />
+              </div>
+              <span className="font-fredoka text-xl sm:text-2xl font-bold text-slate-600 dark:text-slate-300">
+                {calculatedSummary.unansweredCount} <span className="text-xs font-sans text-slate-400 font-medium">savol</span>
+              </span>
+            </div>
+
+            <div className="p-3 sm:p-4 rounded-xl sm:rounded-2xl bg-blue-50/50 dark:bg-blue-950/20 border border-blue-100/80 dark:border-blue-900/30">
+              <div className="flex items-center justify-between mb-1">
+                <span className="text-[10px] sm:text-[11px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-400">Vaqt</span>
+                <Clock size={14} className="text-brand-blue shrink-0" />
+              </div>
+              <span className="font-fredoka text-lg sm:text-2xl font-bold text-slate-800 dark:text-slate-100 font-mono">
+                {formatTime(calculatedSummary.timeSpent)}
+              </span>
+            </div>
+          </div>
+        </div>
+
+        {/* Filter Strip & Fast Jump */}
+        <div className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-2xl rounded-[20px] sm:rounded-[28px] border border-slate-200/70 dark:border-slate-800/80 p-4 sm:p-6 space-y-3.5 sm:space-y-4 shadow-sm">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <h2 className="text-sm sm:text-base font-bold text-slate-900 dark:text-white flex items-center gap-2">
+              <ListChecks size={18} className="text-brand-blue shrink-0" />
+              <span>Savollar tahlili</span>
+            </h2>
+
+            {/* Responsive Filter Segmented Control */}
+            <div className="grid grid-cols-3 sm:flex items-center gap-1 sm:gap-1.5 p-1 bg-slate-100 dark:bg-slate-800/80 rounded-xl sm:rounded-2xl w-full sm:w-auto">
+              <button
+                type="button"
+                onClick={() => setResultsFilter("all")}
+                className={`px-2 sm:px-3.5 py-1.5 rounded-lg sm:rounded-xl text-[11px] sm:text-xs font-bold transition-all cursor-pointer text-center truncate ${
+                  resultsFilter === "all"
+                    ? "bg-white dark:bg-slate-700 text-slate-900 dark:text-white shadow-xs"
+                    : "text-slate-500 hover:text-slate-800 dark:hover:text-slate-200"
+                }`}
+              >
+                Barchasi ({questions.length})
+              </button>
+              <button
+                type="button"
+                onClick={() => setResultsFilter("correct")}
+                className={`px-2 sm:px-3.5 py-1.5 rounded-lg sm:rounded-xl text-[11px] sm:text-xs font-bold transition-all cursor-pointer text-center truncate ${
+                  resultsFilter === "correct"
+                    ? "bg-white dark:bg-slate-700 text-emerald-600 dark:text-emerald-400 shadow-xs"
+                    : "text-slate-500 hover:text-emerald-600 dark:hover:text-emerald-400"
+                }`}
+              >
+                To'g'ri ({calculatedSummary.correctCount})
+              </button>
+              <button
+                type="button"
+                onClick={() => setResultsFilter("wrong")}
+                className={`px-2 sm:px-3.5 py-1.5 rounded-lg sm:rounded-xl text-[11px] sm:text-xs font-bold transition-all cursor-pointer text-center truncate ${
+                  resultsFilter === "wrong"
+                    ? "bg-white dark:bg-slate-700 text-rose-600 dark:text-rose-400 shadow-xs"
+                    : "text-slate-500 hover:text-rose-600 dark:hover:text-rose-400"
+                }`}
+              >
+                Xatolar ({calculatedSummary.wrongCount + calculatedSummary.unansweredCount})
+              </button>
+            </div>
+          </div>
+
+          {/* Jump To Question Numbers */}
+          <div className="flex flex-wrap gap-1.5 sm:gap-2 pt-2 border-t border-slate-100 dark:border-slate-800">
+            {questions.map((q, idx) => {
+              const studentAns = (answers[q.id] || "").trim().toLowerCase();
+              const correctAns = (q.correct_answer || "").trim().toLowerCase();
+              const isCorrect = studentAns && (studentAns === correctAns || (q as any).accepted_answers?.some((a: string) => a.toLowerCase() === studentAns));
+              const isUnanswered = !studentAns;
+
+              return (
+                <button
+                  key={q.id}
+                  type="button"
+                  onClick={() => {
+                    const el = document.getElementById(`review-q-${q.id}`);
+                    if (el) {
+                      el.scrollIntoView({ behavior: "smooth", block: "center" });
+                    }
+                  }}
+                  className={`w-7 h-7 sm:w-8 sm:h-8 rounded-lg sm:rounded-xl text-[11px] sm:text-xs font-bold flex items-center justify-center transition-all cursor-pointer active:scale-95 shadow-xs ${
+                    isCorrect
+                      ? "bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600 dark:text-emerald-400 border border-emerald-200/80 dark:border-emerald-800/60"
+                      : isUnanswered
+                      ? "bg-slate-50 dark:bg-slate-800/60 text-slate-400 border border-slate-200/80 dark:border-slate-700/60"
+                      : "bg-rose-50 dark:bg-rose-950/40 text-rose-600 dark:text-rose-400 border border-rose-200/80 dark:border-rose-800/60"
+                  }`}
+                  title={`Savol #${idx + 1}`}
+                >
+                  {idx + 1}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* Questions Cards List */}
+        <div className="space-y-4 sm:space-y-6">
+          {filteredQuestions.map((q) => {
+            const studentAns = (answers[q.id] || "").trim().toLowerCase();
+            const correctAns = (q.correct_answer || "").trim().toLowerCase();
+            const isCorrect = studentAns && (studentAns === correctAns || (q as any).accepted_answers?.some((a: string) => a.toLowerCase() === studentAns));
+            const isUnanswered = !studentAns;
+            const isWrong = !isCorrect && !isUnanswered;
+            const qPoints = q.points || (isInternational ? 10 : 3.1);
+            const originalIndex = questions.findIndex(item => item.id === q.id);
+
+            return (
+              <div
+                key={q.id}
+                id={`review-q-${q.id}`}
+                className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-2xl rounded-[20px] sm:rounded-[28px] border border-slate-200/70 dark:border-slate-800/80 p-4 sm:p-7 lg:p-9 space-y-4 sm:space-y-5 shadow-sm"
+              >
+                {/* Header */}
+                <div className="flex items-center justify-between gap-2">
+                  <div className="flex items-center gap-2">
+                    <span className="w-7 h-7 sm:w-8 sm:h-8 rounded-lg sm:rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-bold text-xs flex items-center justify-center shadow-xs">
+                      #{originalIndex + 1}
+                    </span>
+                    <span className="text-[11px] sm:text-xs font-bold text-slate-400 dark:text-slate-500">
+                      {qPoints} ball
+                    </span>
+                  </div>
+
+                  <div className="flex items-center gap-1.5 sm:gap-2">
+                    {isCorrect && (
+                      <span className="inline-flex items-center gap-1 sm:gap-1.5 px-2.5 sm:px-3 py-0.5 sm:py-1 rounded-full text-[11px] sm:text-xs font-bold bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
+                        <CheckCircle2 size={13} />
+                        <span>To'g'ri</span>
+                      </span>
+                    )}
+                    {isWrong && (
+                      <span className="inline-flex items-center gap-1 sm:gap-1.5 px-2.5 sm:px-3 py-0.5 sm:py-1 rounded-full text-[11px] sm:text-xs font-bold bg-rose-500/10 text-rose-600 dark:text-rose-400 border border-rose-500/20">
+                        <XCircle size={13} />
+                        <span>Noto'g'ri</span>
+                      </span>
+                    )}
+                    {isUnanswered && (
+                      <span className="inline-flex items-center gap-1 sm:gap-1.5 px-2.5 sm:px-3 py-0.5 sm:py-1 rounded-full text-[11px] sm:text-xs font-bold bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 border border-slate-200 dark:border-slate-700">
+                        <span>Javobsiz</span>
+                      </span>
+                    )}
+
+                    {q.image_url && (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setZoomedImage(q.image_url);
+                          setZoomScale(1);
+                        }}
+                        className="p-1.5 rounded-lg sm:rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-500 hover:text-slate-900 dark:hover:text-white transition-colors cursor-pointer"
+                        title="Rasmni kattalashtirish"
+                      >
+                        <Maximize2 size={14} />
+                      </button>
+                    )}
+                  </div>
+                </div>
+
+                {/* Question Image (if any) */}
+                {q.image_url && (
+                  <div className="pt-1">
+                    <div
+                      onClick={() => {
+                        setZoomedImage(q.image_url);
+                        setZoomScale(1);
+                      }}
+                      className="w-full flex items-center justify-center cursor-zoom-in bg-slate-50 dark:bg-slate-950/40 p-2 sm:p-3 rounded-xl sm:rounded-2xl border border-slate-100 dark:border-slate-800"
+                    >
+                      <img
+                        src={q.image_url}
+                        alt={`Savol #${originalIndex + 1}`}
+                        className="w-auto max-w-full max-h-[300px] sm:max-h-[460px] rounded-lg sm:rounded-xl object-contain"
+                      />
+                    </div>
+                  </div>
+                )}
+
+                {/* Question Text */}
+                <div className="text-[15px] sm:text-[17px] font-medium text-slate-900 dark:text-slate-100 leading-relaxed overflow-x-auto">
+                  <MathRenderer content={q.question_text} />
+                </div>
+
+                {/* Options Review */}
+                {q.options && typeof q.options === "object" && (
+                  <div className="space-y-2 sm:space-y-2.5 pt-1">
+                    {Object.entries(q.options).map(([optKey, optVal]) => {
+                      const isUserChoice = (answers[q.id] || "").toLowerCase() === optKey.toLowerCase();
+                      const isAnswerCorrectKey = (q.correct_answer || "").toLowerCase() === optKey.toLowerCase();
+
+                      let containerStyle = "border-slate-200/70 dark:border-slate-800/80 bg-slate-50/50 dark:bg-slate-900/40 text-slate-700 dark:text-slate-300";
+                      let badge = null;
+
+                      if (isUserChoice && isAnswerCorrectKey) {
+                        containerStyle = "border-emerald-500 bg-emerald-50/70 dark:bg-emerald-950/30 text-emerald-950 dark:text-emerald-100 shadow-xs";
+                        badge = (
+                          <span className="text-[11px] sm:text-xs font-bold text-emerald-600 dark:text-emerald-400 flex items-center gap-1 shrink-0">
+                            <CheckCircle2 size={13} />
+                            <span>Sizning javobingiz</span>
+                          </span>
+                        );
+                      } else if (isUserChoice && !isAnswerCorrectKey) {
+                        containerStyle = "border-rose-400/80 dark:border-rose-600/80 bg-rose-50/70 dark:bg-rose-950/30 text-rose-950 dark:text-rose-100 shadow-xs";
+                        badge = (
+                          <span className="text-[11px] sm:text-xs font-bold text-rose-600 dark:text-rose-400 flex items-center gap-1 shrink-0">
+                            <XCircle size={13} />
+                            <span>Sizning javobingiz</span>
+                          </span>
+                        );
+                      } else if (!isUserChoice && isAnswerCorrectKey) {
+                        containerStyle = "border-emerald-500/70 border-dashed bg-emerald-50/40 dark:bg-emerald-950/20 text-emerald-900 dark:text-emerald-200";
+                        badge = (
+                          <span className="text-[11px] sm:text-xs font-bold text-emerald-600 dark:text-emerald-400 flex items-center gap-1 shrink-0">
+                            <CheckCircle2 size={13} />
+                            <span>To'g'ri javob</span>
+                          </span>
+                        );
+                      }
+
+                      return (
+                        <div
+                          key={optKey}
+                          className={`flex flex-col sm:flex-row sm:items-center justify-between gap-2 sm:gap-3.5 p-3 sm:p-4 rounded-xl sm:rounded-2xl border transition-colors ${containerStyle}`}
+                        >
+                          <div className="flex items-start sm:items-center gap-2.5 sm:gap-3.5 flex-1 min-w-0">
+                            <div
+                              className={`w-6 h-6 sm:w-7 sm:h-7 rounded-md sm:rounded-lg flex items-center justify-center font-bold text-xs shrink-0 mt-0.5 sm:mt-0 ${
+                                isUserChoice && isAnswerCorrectKey
+                                  ? "bg-emerald-500 text-white shadow-xs"
+                                  : isUserChoice && !isAnswerCorrectKey
+                                  ? "bg-rose-500 text-white shadow-xs"
+                                  : isAnswerCorrectKey
+                                  ? "bg-emerald-500/20 text-emerald-600 dark:text-emerald-400"
+                                  : "bg-slate-200 dark:bg-slate-800 text-slate-500"
+                              }`}
+                            >
+                              {optKey.toUpperCase()}
+                            </div>
+                            <div className="text-sm sm:text-[15px] font-medium leading-normal break-words min-w-0 overflow-x-auto">
+                              <MathRenderer content={String(optVal || "")} inline />
+                            </div>
+                          </div>
+                          {badge && (
+                            <div className="self-end sm:self-auto pl-8 sm:pl-0">
+                              {badge}
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
+
+                {/* Text input comparison (if no options) */}
+                {!q.options && (
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 sm:gap-3 p-3 sm:p-4 rounded-xl sm:rounded-2xl bg-slate-50 dark:bg-slate-900/40 border border-slate-200/80 dark:border-slate-800/80">
+                    <div>
+                      <span className="text-[11px] sm:text-xs font-bold text-slate-400 block mb-0.5 sm:mb-1">Sizning javobingiz:</span>
+                      <span className={`text-xs sm:text-sm font-bold break-all ${isCorrect ? "text-emerald-600" : isUnanswered ? "text-slate-400 italic" : "text-rose-500"}`}>
+                        {studentAns || "(Javob berilmagan)"}
+                      </span>
+                    </div>
+                    <div>
+                      <span className="text-[11px] sm:text-xs font-bold text-emerald-600 dark:text-emerald-400 block mb-0.5 sm:mb-1">To'g'ri javob:</span>
+                      <span className="text-xs sm:text-sm font-bold text-emerald-700 dark:text-emerald-300 break-all">
+                        {q.correct_answer}
+                      </span>
+                    </div>
+                  </div>
+                )}
+
+                {/* Explanation / Solution */}
+                {q.explanation && (
+                  <div className="p-3.5 sm:p-5 rounded-xl sm:rounded-2xl bg-amber-500/5 dark:bg-amber-500/10 border border-amber-500/20 space-y-1.5 sm:space-y-2">
+                    <div className="flex items-center gap-1.5 sm:gap-2 text-[11px] sm:text-xs font-bold uppercase tracking-wider text-amber-700 dark:text-amber-400">
+                      <Lightbulb size={14} className="text-amber-500 shrink-0" />
+                      <span>Yechim va tushuntirish</span>
+                    </div>
+                    <div className="text-xs sm:text-sm text-slate-700 dark:text-slate-300 leading-relaxed font-sans overflow-x-auto">
+                      <MathRenderer content={q.explanation} />
+                    </div>
+                  </div>
+                )}
+              </div>
+            );
+          })}
+        </div>
+      </div>
+    );
+  };
+
   const currentQuestion = questions[currentQuestionIndex];
   const progress = ((currentQuestionIndex+ 1) / questions.length) * 100;
 
@@ -566,9 +1000,13 @@ export default function TakeTestPage() {
         <div className="absolute bottom-[-15%] right-[-10%] w-[45%] h-[45%] rounded-full bg-violet-300/20 dark:bg-purple-500/10 blur-[130px]" />
       </div>
 
-      {/* Floating Header Island */}
-      <div className="fixed top-4 left-4 right-4 md:left-auto md:right-1/2 md:translate-x-1/2 md:w-full md:max-w-3xl z-50 pointer-events-none">
-        <div className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-2xl border border-white/80 dark:border-slate-800/80 rounded-[32px] p-3 shadow-[0_8px_24px_rgba(0,0,0,0.05)] dark:shadow-[0_8px_24px_rgba(0,0,0,0.3)] pointer-events-auto flex flex-col gap-2 transition-all">
+      {showDetailedResults && calculatedSummary ? (
+        renderDetailedResults()
+      ) : (
+        <>
+          {/* Floating Header Island */}
+          <div className="fixed top-4 left-4 right-4 md:left-auto md:right-1/2 md:translate-x-1/2 md:w-full md:max-w-3xl z-50 pointer-events-none">
+            <div className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-2xl border border-white/80 dark:border-slate-800/80 rounded-[32px] p-3 shadow-[0_8px_24px_rgba(0,0,0,0.05)] dark:shadow-[0_8px_24px_rgba(0,0,0,0.3)] pointer-events-auto flex flex-col gap-2 transition-all">
           <div className="flex items-center justify-between px-2">
             <div className="flex items-center gap-2.5 sm:gap-3 truncate flex-1 pr-4">
               <button
@@ -1122,6 +1560,8 @@ export default function TakeTestPage() {
  )}
  </div>
  </div>
+ </>
+ )}
 
       {/* ── IMAGE ZOOM LIGHTBOX MODAL ── */}
       {zoomedImage && (
@@ -1224,6 +1664,126 @@ export default function TakeTestPage() {
           </div>
         </div>
       )}
+
+      {/* ── PROMAX SIGNATURE CHECKING OVERLAY ── */}
+      <AnimatePresence>
+        {isCheckingResults && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.25, ease: [0.16, 1, 0.3, 1] }}
+            className="fixed inset-0 z-[200] flex items-center justify-center p-4 bg-slate-900/40 dark:bg-black/70 backdrop-blur-md select-none"
+          >
+            {/* Modal Card */}
+            <motion.div
+              initial={{ scale: 0.94, opacity: 0, y: 12 }}
+              animate={{ scale: 1, opacity: 1, y: 0 }}
+              exit={{ scale: 0.96, opacity: 0, y: -10 }}
+              transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
+              className="relative w-full max-w-[320px] sm:max-w-sm bg-white dark:bg-slate-900/95 backdrop-blur-2xl rounded-[28px] sm:rounded-[32px] p-6 sm:p-8 border border-slate-200/80 dark:border-slate-800 shadow-[0_25px_60px_rgba(0,0,0,0.12)] dark:shadow-[0_25px_60px_rgba(0,0,0,0.6)] flex flex-col items-center text-center overflow-hidden"
+            >
+              {/* Subtle Ambient Radial Glows inside card */}
+              <div className="absolute -top-16 -right-16 w-36 h-36 bg-brand-blue/10 dark:bg-brand-blue/20 rounded-full blur-3xl pointer-events-none" />
+              <div className="absolute -bottom-16 -left-16 w-36 h-36 bg-brand-orange/10 dark:bg-brand-orange/20 rounded-full blur-3xl pointer-events-none" />
+
+              {/* Promax Logo Emblem */}
+              <div className="relative w-12 h-12 sm:w-16 sm:h-16 flex items-center justify-center mb-1 drop-shadow-[0_6px_16px_rgba(0,86,210,0.2)]">
+                <Image
+                  src="/Logo_without_sentence.png"
+                  alt="Promax"
+                  width={64}
+                  height={64}
+                  priority
+                  className="object-contain"
+                />
+              </div>
+
+              {/* Smooth Stylus Ink Wave Canvas */}
+              <div className="w-full max-w-[220px] sm:max-w-[260px] h-16 sm:h-20 relative flex items-center justify-center my-1 sm:my-2">
+                <svg viewBox="0 0 250 70" className="w-full h-full overflow-visible">
+                  <defs>
+                    <linearGradient id="checkPenInk" x1="0%" y1="0%" x2="100%" y2="0%">
+                      <stop offset="0%" stopColor="#0056D2" />
+                      <stop offset="60%" stopColor="#0284C7" />
+                      <stop offset="100%" stopColor="#F97316" />
+                    </linearGradient>
+                  </defs>
+
+                  {/* Clean Guidelines */}
+                  <line x1="10" y1="14" x2="240" y2="14" stroke="currentColor" className="text-slate-100 dark:text-slate-800" strokeWidth="1.5" strokeDasharray="3 3" />
+                  <line x1="10" y1="35" x2="240" y2="35" stroke="currentColor" className="text-slate-100 dark:text-slate-800" strokeWidth="1.5" />
+                  <line x1="10" y1="56" x2="240" y2="56" stroke="currentColor" className="text-slate-100 dark:text-slate-800" strokeWidth="1.5" strokeDasharray="3 3" />
+
+                  {/* Drawn Ink Wave */}
+                  <motion.path
+                    d="M 15 35 Q 45 15, 80 35 T 150 35 T 205 35 Q 220 22, 230 35"
+                    fill="none"
+                    stroke="url(#checkPenInk)"
+                    strokeWidth="3.5"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    initial={{ pathLength: 0 }}
+                    animate={{ pathLength: [0, 0.25, 0.55, 0.85, 1, 1, 0] }}
+                    transition={{
+                      duration: 1.8,
+                      times: [0, 0.2, 0.5, 0.75, 0.9, 0.96, 1],
+                      repeat: Infinity,
+                      ease: "easeInOut"
+                    }}
+                  />
+
+                  {/* Fountain Pen */}
+                  <motion.g
+                    initial={{ x: 15, y: 35, opacity: 0 }}
+                    animate={{
+                      x: [15, 45, 80, 115, 150, 178, 205, 230, 15],
+                      y: [35, 15, 35, 15, 35, 15, 35, 35, 35],
+                      opacity: [0, 1, 1, 1, 1, 1, 1, 0, 0]
+                    }}
+                    transition={{
+                      duration: 1.8,
+                      times: [0, 0.15, 0.35, 0.5, 0.65, 0.78, 0.88, 0.95, 1],
+                      repeat: Infinity,
+                      ease: "easeInOut"
+                    }}
+                  >
+                    <g transform="rotate(40)">
+                      <polygon points="0,0 -4,-12 4,-12" fill="#F59E0B" />
+                      <line x1="0" y1="0" x2="0" y2="-7" stroke="#78350F" strokeWidth="0.8" />
+                      <circle cx="0" cy="-7" r="0.9" fill="#0056D2" />
+                      <rect x="-4.5" y="-15" width="9" height="3" fill="#0F172A" rx="0.5" />
+                      <polygon points="-4.5,-15 4.5,-15 5.5,-45 -5.5,-45" fill="#0056D2" />
+                      <rect x="-5" y="-30" width="10" height="2.5" fill="#E2E8F0" />
+                      <rect x="-5.5" y="-42" width="11" height="3.5" fill="#F97316" rx="0.5" />
+                    </g>
+                  </motion.g>
+                </svg>
+              </div>
+
+              {/* Matched Typography */}
+              <div className="space-y-1">
+                <h3 className="font-fredoka text-lg sm:text-2xl font-bold text-slate-900 dark:text-white leading-tight">
+                  Natijalar hisoblanmoqda
+                </h3>
+                <p className="text-xs sm:text-[13px] font-medium text-slate-500 dark:text-slate-400 leading-relaxed">
+                  Javoblaringiz tekshirilmoqda, iltimos kuting...
+                </p>
+              </div>
+
+              {/* Hairline Brand Gradient Progress */}
+              <div className="w-36 sm:w-44 h-1.5 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden mt-4 sm:mt-5">
+                <motion.div
+                  className="h-full bg-gradient-to-r from-brand-blue via-sky-500 to-brand-orange rounded-full"
+                  initial={{ width: "0%" }}
+                  animate={{ width: "100%" }}
+                  transition={{ duration: 1.2, ease: [0.16, 1, 0.3, 1] }}
+                />
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
  </div>
  );
 }
