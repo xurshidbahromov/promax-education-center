@@ -170,6 +170,14 @@ export async function getAdminTournaments(): Promise<AdminTournament[]> {
 
 // ── GET SINGLE TOURNAMENT ──
 export async function getTournamentById(id: string): Promise<AdminTournament | null> {
+  // 1. Instant check from local cache
+  const cached = getCachedAdminTournaments();
+  const cachedItem = cached.find((t) => t.id === id);
+  if (cachedItem && cachedItem.questions && cachedItem.questions.length > 0) {
+    return cachedItem;
+  }
+
+  // 2. Fetch from API
   try {
     const res = await fetch(`/api/tournaments?type=national&id=${id}&_t=${Date.now()}`, {
       cache: 'no-store'
@@ -180,8 +188,12 @@ export async function getTournamentById(id: string): Promise<AdminTournament | n
     }
   } catch (e) {}
 
+  // 3. Fallback to getAdminTournaments
   const tournaments = await getAdminTournaments();
-  return tournaments.find((t) => t.id === id) || null;
+  const match = tournaments.find((t) => t.id === id);
+  if (match) return match;
+
+  return cachedItem || null;
 }
 
 // ── SAVE TOURNAMENT ──

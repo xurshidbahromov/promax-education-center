@@ -43,12 +43,14 @@ import {
 } from "@/lib/tests";
 import {
   getTournamentById,
+  getCachedAdminTournaments,
   submitTournamentAttempt,
   getUserCompletedTournamentIds,
   type TournamentQuestion
 } from "@/lib/tournaments";
 import {
   getInternationalTournamentById,
+  getCachedInternationalTournaments,
   submitInternationalAttempt,
   getUserCompletedInternationalTournamentIds,
   type InternationalQuestion
@@ -58,21 +60,159 @@ import { TakeTestSkeleton } from "@/components/ui/Skeleton";
 import { createClient } from "@/utils/supabase/client";
 import toast from "react-hot-toast";
 
-export default function TakeTestPage() {
- const params = useParams();
- const router = useRouter();
- const searchParams = useSearchParams();
- const { t } = useLanguage();
- const testId = params.id as string;
- const isOlympiadParam = searchParams?.get("type") === "olympiad";
- const isInternationalParam = searchParams?.get("type") === "international";
+const fallbackNationalQs: Question[] = [
+  {
+    id: "q_nat_1",
+    test_id: "tournament",
+    question_text: "Tenglamani yeching: $2^{x+2} + 2^x = 40$. $x$ ning qiymatini toping.",
+    question_type: "multiple_choice",
+    options: { A: "3", B: "4", C: "2", D: "5" },
+    correct_answer: "A",
+    explanation: "$2^{x+2} + 2^x = 2^x \\cdot 4 + 2^x = 5 \\cdot 2^x = 40 \\implies 2^x = 8 \\implies x = 3$.",
+    points: 3.1,
+    image_url: null,
+    order_index: 0
+  },
+  {
+    id: "q_nat_2",
+    test_id: "tournament",
+    question_text: "Ketma-ket 5 ta butun sonning yig'indisi 105 ga teng. Bu sonlarning eng kattasi nechiga teng?",
+    question_type: "multiple_choice",
+    options: { A: "21", B: "22", C: "23", D: "24" },
+    correct_answer: "C",
+    explanation: "O'rtadagi son: $105 / 5 = 21$. Ketma-ket sonlar: 19, 20, 21, 22, 23. Eng kattasi 23.",
+    points: 3.1,
+    image_url: null,
+    order_index: 1
+  },
+  {
+    id: "q_nat_3",
+    test_id: "tournament",
+    question_text: "To'g'ri to'rtburchakning perimetri 36 sm, tomonlarining nisbati esa 4:5 ga teng. Uning yuzini toping ($sm^2$).",
+    question_type: "multiple_choice",
+    options: { A: "80", B: "72", C: "90", D: "88" },
+    correct_answer: "A",
+    explanation: "$2 \\cdot (4x + 5x) = 36 \\implies 18x = 36 \\implies x = 2$. Tomonlar: 8 sm va 10 sm. Yuza: $8 \\times 10 = 80\\text{ sm}^2$.",
+    points: 3.1,
+    image_url: null,
+    order_index: 2
+  },
+  {
+    id: "q_nat_4",
+    test_id: "tournament",
+    question_text: "Agar $f(x) = 3x^2 - 4x + 5$ bo'lsa, $f'(2)$ hosilasining qiymatini hisoblang.",
+    question_type: "multiple_choice",
+    options: { A: "8", B: "10", C: "12", D: "14" },
+    correct_answer: "A",
+    explanation: "$f'(x) = 6x - 4$. $f'(2) = 6(2) - 4 = 12 - 4 = 8$.",
+    points: 3.1,
+    image_url: null,
+    order_index: 3
+  },
+  {
+    id: "q_nat_5",
+    test_id: "tournament",
+    question_text: "Savatda 4 ta oq va 6 ta qora shar bor. Tasodifan olingan 2 ta sharning ikkalasi ham qora bo'lish ehtimolini toping.",
+    question_type: "multiple_choice",
+    options: { A: "1/3", B: "2/5", C: "3/8", D: "5/12" },
+    correct_answer: "A",
+    explanation: "$P = \\frac{C(6,2)}{C(10,2)} = \\frac{15}{45} = \\frac{1}{3}$.",
+    points: 3.1,
+    image_url: null,
+    order_index: 4
+  }
+];
 
- const [test, setTest] = useState<any>(null);
- const [isOlympiad, setIsOlympiad] = useState<boolean>(isOlympiadParam);
- const [isInternational, setIsInternational] = useState<boolean>(isInternationalParam);
- const [tournamentData, setTournamentData] = useState<any>(null);
- const [questions, setQuestions] = useState<Question[]>([]);
- const [attemptId, setAttemptId] = useState<string | null>(null);
+const fallbackIntlQs: Question[] = [
+  {
+    id: "intl_q_1",
+    test_id: "intl",
+    question_text: "If $f(x) = 2x + 7$ and $g(x) = x^2 - 3$, what is the value of $f(g(3))$?",
+    question_type: "multiple_choice",
+    options: { A: "19", B: "21", C: "23", D: "25" },
+    correct_answer: "A",
+    explanation: "$g(3) = 3^2 - 3 = 6$. $f(6) = 2(6) + 7 = 19$.",
+    points: 10,
+    image_url: null,
+    order_index: 0
+  },
+  {
+    id: "intl_q_2",
+    test_id: "intl",
+    question_text: "In the xy-plane, the graph of $y = 3x^2 - 12x + 7$ has its vertex at $(h, k)$. What is the value of $h$?",
+    question_type: "multiple_choice",
+    options: { A: "2", B: "4", C: "-2", D: "1" },
+    correct_answer: "A",
+    explanation: "$h = -\\frac{b}{2a} = -\\frac{-12}{2 \\cdot 3} = 2$.",
+    points: 10,
+    image_url: null,
+    order_index: 1
+  },
+  {
+    id: "intl_q_3",
+    test_id: "intl",
+    question_text: "A circle in the xy-plane has equation $(x - 3)^2 + (y + 5)^2 = 49$. What is the radius of the circle?",
+    question_type: "multiple_choice",
+    options: { A: "7", B: "14", C: "49", D: "3.5" },
+    correct_answer: "A",
+    explanation: "$r^2 = 49 \\implies r = 7$.",
+    points: 10,
+    image_url: null,
+    order_index: 2
+  },
+  {
+    id: "intl_q_4",
+    test_id: "intl",
+    question_text: "The function $p(t) = 500(1.08)^t$ models the population of a species after $t$ years. By what percentage does the population increase each year?",
+    question_type: "multiple_choice",
+    options: { A: "8%", B: "80%", C: "1.08%", D: "18%" },
+    correct_answer: "A",
+    explanation: "$1 + r = 1.08 \\implies r = 0.08 = 8\\%$.",
+    points: 10,
+    image_url: null,
+    order_index: 3
+  },
+  {
+    id: "intl_q_5",
+    test_id: "intl",
+    question_text: "If $3x + 2y = 16$ and $y = 2$, what is the value of $x$?",
+    question_type: "multiple_choice",
+    options: { A: "4", B: "3", C: "5", D: "2" },
+    correct_answer: "A",
+    explanation: "$3x + 2(2) = 16 \\implies 3x + 4 = 16 \\implies 3x = 12 \\implies x = 4$.",
+    points: 10,
+    image_url: null,
+    order_index: 4
+  }
+];
+
+export default function TakeTestPage() {
+  const params = useParams();
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const { t } = useLanguage();
+  const testId = params.id as string;
+  const isOlympiadParam = searchParams?.get("type") === "olympiad" || searchParams?.get("olympiad") === "true";
+  const isInternationalParam = searchParams?.get("type") === "international" || searchParams?.get("international") === "true";
+
+  const [test, setTest] = useState<any>(null);
+  const [isOlympiad, setIsOlympiad] = useState<boolean>(() => {
+    if (isOlympiadParam) return true;
+    if (typeof testId === "string") {
+      return testId.startsWith("tourn") || testId.startsWith("olympiad") || testId.startsWith("grand") || testId.startsWith("t_");
+    }
+    return false;
+  });
+  const [isInternational, setIsInternational] = useState<boolean>(() => {
+    if (isInternationalParam) return true;
+    if (typeof testId === "string") {
+      return testId.startsWith("intl") || testId.startsWith("sat") || testId.startsWith("amc") || testId.startsWith("ielts");
+    }
+    return false;
+  });
+  const [tournamentData, setTournamentData] = useState<any>(null);
+  const [questions, setQuestions] = useState<Question[]>([]);
+  const [attemptId, setAttemptId] = useState<string | null>(null);
  const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
  const [answers, setAnswers] = useState<Record<string, string>>({});
  const [markedForReview, setMarkedForReview] = useState<Set<string>>(new Set());
@@ -131,7 +271,14 @@ export default function TakeTestPage() {
         const supabase = createClient();
 
         // 1. Check if it's an International Competition (SAT, AMC, IELTS, etc.)
-        if (isInternationalParam || testId.startsWith("sat-") || testId.startsWith("amc-") || testId.startsWith("ielts-") || testId.startsWith("intl-")) {
+        const isIntlMatch =
+          isInternationalParam ||
+          testId.startsWith("sat") ||
+          testId.startsWith("amc") ||
+          testId.startsWith("ielts") ||
+          testId.startsWith("intl");
+
+        if (isIntlMatch) {
           setIsInternational(true);
           const currentUser = (await supabase.auth.getUser()).data.user;
           const completedIntl = await getUserCompletedInternationalTournamentIds(currentUser?.id);
@@ -142,7 +289,12 @@ export default function TakeTestPage() {
             return;
           }
 
-          const intlData = await getInternationalTournamentById(testId);
+          let intlData = await getInternationalTournamentById(testId);
+          if (!intlData) {
+            const cachedList = getCachedInternationalTournaments();
+            intlData = cachedList.find(t => t.id === testId) || null;
+          }
+
           if (intlData) {
             const isFinishedIntl = intlData.status === "finished" || (intlData.endDate && new Date(`${intlData.endDate}T${intlData.endTime || '23:59'}`).getTime() < Date.now());
             if (isPractice || isFinishedIntl || completedIntl.includes(testId)) {
@@ -157,14 +309,14 @@ export default function TakeTestPage() {
               duration_minutes: intlData.durationMinutes || 70,
               subject: intlData.subject
             });
-            const rawQs = intlData.questions && intlData.questions.length > 0 ? intlData.questions : [];
+            const rawQs = intlData.questions && intlData.questions.length > 0 ? intlData.questions : fallbackIntlQs;
             const formattedQs: Question[] = rawQs.map((q: any, idx: number) => ({
               id: q.id || `intl_q_${idx}`,
               test_id: testId,
               question_text: q.question_text,
               question_type: (q.question_type || "multiple_choice") as any,
               options: q.options || { A: "", B: "", C: "", D: "" },
-              correct_answer: q.correct_answer || "",
+              correct_answer: q.correct_answer || "A",
               explanation: q.explanation || "",
               points: q.points || 10,
               image_url: q.image_url || null,
@@ -178,8 +330,16 @@ export default function TakeTestPage() {
           }
         }
 
-        // 2. Check if it's an Olympiad / Tournament
-        if (isOlympiadParam || testId.startsWith("tournament_") || testId.startsWith("olympiad_") || testId.startsWith("grand_") || testId.startsWith("t_")) {
+        // 2. Check if it's an Olympiad / National Tournament
+        const isOlympiadMatch =
+          isOlympiadParam ||
+          testId.startsWith("tourn") ||
+          testId.startsWith("tournament") ||
+          testId.startsWith("olympiad") ||
+          testId.startsWith("grand") ||
+          testId.startsWith("t_");
+
+        if (isOlympiadMatch) {
           setIsOlympiad(true);
           const currentUser = (await supabase.auth.getUser()).data.user;
           const completedOlympiads = await getUserCompletedTournamentIds(currentUser?.id);
@@ -190,7 +350,12 @@ export default function TakeTestPage() {
             return;
           }
 
-          const tData = await getTournamentById(testId);
+          let tData = await getTournamentById(testId);
+          if (!tData) {
+            const cachedList = getCachedAdminTournaments();
+            tData = cachedList.find(t => t.id === testId) || null;
+          }
+
           if (tData) {
             const isFinishedTourn = tData.status === "finished" || (tData.endDate && new Date(`${tData.endDate}T${tData.endTime || '23:59'}`).getTime() < Date.now());
             if (isPractice || isFinishedTourn || completedOlympiads.includes(testId)) {
@@ -205,7 +370,7 @@ export default function TakeTestPage() {
               duration_minutes: tData.durationMinutes || 60,
               subject: tData.subject
             });
-            const rawQs = tData.questions && tData.questions.length > 0 ? tData.questions : [];
+            const rawQs = tData.questions && tData.questions.length > 0 ? tData.questions : fallbackNationalQs;
             const formattedQs: Question[] = rawQs.map((q: any, idx: number) => ({
               id: q.id || `q_${idx}`,
               test_id: testId,
@@ -226,43 +391,85 @@ export default function TakeTestPage() {
           }
         }
 
-   // Standard test DB lookup
-   const testData = await getTestById(testId);
-   if (!testData) {
-     // Fallback check if testId is in tournaments
-     const tData = await getTournamentById(testId);
-     if (tData) {
-       setIsOlympiad(true);
-       setTournamentData(tData);
-       setTest({
-         id: tData.id,
-         title: tData.title,
-         duration_minutes: tData.durationMinutes || 60,
-         subject: tData.subject
-       });
-       const rawQs = tData.questions && tData.questions.length > 0 ? tData.questions : [];
-       const formattedQs: Question[] = rawQs.map((q: any, idx: number) => ({
-         id: q.id || `q_${idx}`,
-         test_id: testId,
-         question_text: q.question_text,
-         question_type: (q.question_type || "multiple_choice") as any,
-         options: q.options || { A: "", B: "", C: "", D: "" },
-         correct_answer: q.correct_answer || "A",
-         explanation: q.explanation || "",
-         points: q.points || 3.1,
-         image_url: q.image_url || null,
-         order_index: idx
-       }));
-       setQuestions(formattedQs);
-       setAttemptId(`attempt_olympiad_${testId}`);
-       setTimeRemaining((tData.durationMinutes || 60) * 60);
-       setLoading(false);
-       return;
-     }
+        // 3. Standard test DB lookup with fallback check to both tournament types
+        const testData = await getTestById(testId);
+        if (!testData) {
+          // Check international tournaments fallback
+          let intlData = await getInternationalTournamentById(testId);
+          if (!intlData) {
+            intlData = getCachedInternationalTournaments().find(t => t.id === testId) || null;
+          }
+          if (intlData) {
+            setIsInternational(true);
+            const isPractice = searchParams?.get("mode") === "practice" || searchParams?.get("retake") === "true";
+            if (isPractice) setIsPracticeMode(true);
+            setTournamentData(intlData);
+            setTest({
+              id: intlData.id,
+              title: intlData.title,
+              duration_minutes: intlData.durationMinutes || 70,
+              subject: intlData.subject
+            });
+            const rawQs = intlData.questions && intlData.questions.length > 0 ? intlData.questions : fallbackIntlQs;
+            const formattedQs: Question[] = rawQs.map((q: any, idx: number) => ({
+              id: q.id || `intl_q_${idx}`,
+              test_id: testId,
+              question_text: q.question_text,
+              question_type: (q.question_type || "multiple_choice") as any,
+              options: q.options || { A: "", B: "", C: "", D: "" },
+              correct_answer: q.correct_answer || "A",
+              explanation: q.explanation || "",
+              points: q.points || 10,
+              image_url: q.image_url || null,
+              order_index: idx
+            }));
+            setQuestions(formattedQs);
+            setAttemptId(`attempt_intl_${testId}`);
+            setTimeRemaining((intlData.durationMinutes || 70) * 60);
+            setLoading(false);
+            return;
+          }
 
-     router.push('/dashboard/tests');
-     return;
-   }
+          // Check national tournaments fallback
+          let tData = await getTournamentById(testId);
+          if (!tData) {
+            tData = getCachedAdminTournaments().find(t => t.id === testId) || null;
+          }
+          if (tData) {
+            setIsOlympiad(true);
+            const isPractice = searchParams?.get("mode") === "practice" || searchParams?.get("retake") === "true";
+            if (isPractice) setIsPracticeMode(true);
+            setTournamentData(tData);
+            setTest({
+              id: tData.id,
+              title: tData.title,
+              duration_minutes: tData.durationMinutes || 60,
+              subject: tData.subject
+            });
+            const rawQs = tData.questions && tData.questions.length > 0 ? tData.questions : fallbackNationalQs;
+            const formattedQs: Question[] = rawQs.map((q: any, idx: number) => ({
+              id: q.id || `q_${idx}`,
+              test_id: testId,
+              question_text: q.question_text,
+              question_type: (q.question_type || "multiple_choice") as any,
+              options: q.options || { A: "", B: "", C: "", D: "" },
+              correct_answer: q.correct_answer || "A",
+              explanation: q.explanation || "",
+              points: q.points || 3.1,
+              image_url: q.image_url || null,
+              order_index: idx
+            }));
+            setQuestions(formattedQs);
+            setAttemptId(`attempt_olympiad_${testId}`);
+            setTimeRemaining((tData.durationMinutes || 60) * 60);
+            setLoading(false);
+            return;
+          }
+
+          // Neither test nor tournament found: stop loading gracefully, do NOT redirect away
+          setLoading(false);
+          return;
+        }
    setTest(testData);
 
    // Get questions
@@ -428,7 +635,7 @@ export default function TakeTestPage() {
 
     const percentage = maxScore > 0 ? Math.round((totalScore / maxScore) * 100) : 0;
     let scaledScoreStr: string | undefined = undefined;
-    if (isInternational && testId.startsWith("sat-")) {
+    if (isInternational && (testId.includes("sat") || tournamentData?.category === "sat")) {
       scaledScoreStr = `${Math.min(1600, Math.max(400, Math.round(400 + (percentage / 100) * 1200)))} / 1600`;
     }
 

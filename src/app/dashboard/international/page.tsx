@@ -769,7 +769,7 @@ export default function InternationalCompetitionsPage() {
                                 </div>
 
                                 <Link
-                                  href={`/dashboard/tests/${item.id}/take?international=true&mode=practice`}
+                                  href={`/dashboard/tests/${item.id}/take?type=international&international=true&mode=practice`}
                                   className="w-full py-2.5 sm:py-3 rounded-2xl bg-brand-blue hover:bg-blue-600 text-white font-bold text-xs sm:text-sm flex items-center justify-center gap-2 shadow-sm active:scale-95 transition-all cursor-pointer"
                                 >
                                   <RotateCcw size={15} />
@@ -814,7 +814,7 @@ export default function InternationalCompetitionsPage() {
                                 </div>
 
                                 <Link
-                                  href={`/dashboard/tests/${item.id}/take?international=true&mode=practice`}
+                                  href={`/dashboard/tests/${item.id}/take?type=international&international=true&mode=practice`}
                                   className="w-full py-2.5 sm:py-3 rounded-2xl bg-brand-blue hover:bg-blue-600 text-white font-bold text-xs sm:text-sm flex items-center justify-center gap-2 shadow-sm active:scale-95 transition-all cursor-pointer"
                                 >
                                   <Play size={14} className="fill-white" />
@@ -921,7 +921,7 @@ export default function InternationalCompetitionsPage() {
 
                 {selectedTournamentId && (
                   <Link
-                    href={`/dashboard/tests/${selectedTournamentId}/take?international=true&mode=practice`}
+                    href={`/dashboard/tests/${selectedTournamentId}/take?type=international&international=true&mode=practice`}
                     className="px-3.5 py-2.5 rounded-xl bg-brand-blue hover:bg-blue-600 text-white font-bold text-xs flex items-center justify-center gap-1.5 shadow-sm active:scale-95 transition-all whitespace-nowrap cursor-pointer"
                   >
                     <RotateCcw size={13} />
@@ -1561,7 +1561,7 @@ export default function InternationalCompetitionsPage() {
                       <span>Natija</span>
                     </button>
                     <Link
-                      href={`/dashboard/tests/${selectedItem.id}/take?international=true&mode=practice`}
+                      href={`/dashboard/tests/${selectedItem.id}/take?type=international&international=true&mode=practice`}
                       onClick={() => setSelectedItem(null)}
                       className="flex-1 py-3 rounded-2xl bg-brand-blue hover:bg-blue-600 text-white font-bold text-xs sm:text-sm flex items-center justify-center gap-1.5 shadow-sm active:scale-95 transition-all text-center cursor-pointer"
                     >
@@ -1584,7 +1584,7 @@ export default function InternationalCompetitionsPage() {
                       <span>Reyting</span>
                     </button>
                     <Link
-                      href={`/dashboard/tests/${selectedItem.id}/take?international=true&mode=practice`}
+                      href={`/dashboard/tests/${selectedItem.id}/take?type=international&international=true&mode=practice`}
                       onClick={() => setSelectedItem(null)}
                       className="flex-1 py-3 rounded-2xl bg-brand-blue hover:bg-blue-600 text-white font-bold text-xs sm:text-sm flex items-center justify-center gap-1.5 shadow-sm active:scale-95 transition-all text-center cursor-pointer"
                     >

@@ -173,6 +173,14 @@ export async function getInternationalTournaments(): Promise<InternationalTourna
 }
 
 export async function getInternationalTournamentById(id: string): Promise<InternationalTournament | null> {
+  // 1. Instant check from local cache
+  const cached = getCachedInternationalTournaments();
+  const cachedItem = cached.find(t => t.id === id);
+  if (cachedItem && cachedItem.questions && cachedItem.questions.length > 0) {
+    return cachedItem;
+  }
+
+  // 2. Fetch from API
   try {
     const res = await fetch(`/api/tournaments?type=international&id=${id}&_t=${Date.now()}`, {
       cache: 'no-store'
@@ -183,8 +191,12 @@ export async function getInternationalTournamentById(id: string): Promise<Intern
     }
   } catch (e) {}
 
+  // 3. Fallback to getInternationalTournaments
   const tournaments = await getInternationalTournaments();
-  return tournaments.find(t => t.id === id) || null;
+  const match = tournaments.find(t => t.id === id);
+  if (match) return match;
+
+  return cachedItem || null;
 }
 
 // ── International Benchmark Contenders (Disabled: Real Users Only) ──
