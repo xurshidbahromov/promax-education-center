@@ -24,6 +24,9 @@ import Image from "next/image";
 import { usePathname } from "next/navigation";
 import NotificationBell from "@/components/NotificationBell";
 import DashboardReveal from "@/components/ui/DashboardReveal";
+import StreakPill from "@/components/dashboard/StreakPill";
+import { checkAndUpdateDailyStreak } from "@/lib/streak";
+import toast from "react-hot-toast";
 
 import { motion } from "framer-motion";
 import SidebarBetaWidget from "@/components/ui/SidebarBetaWidget";
@@ -72,6 +75,18 @@ export default function DashboardLayout({
   }
 
  setLoading(false);
+
+ // Check and update daily streak
+ checkAndUpdateDailyStreak(user.id).then((res) => {
+   if (res.newlyAwarded) {
+     window.dispatchEvent(new CustomEvent("promax_streak_updated"));
+     window.dispatchEvent(new CustomEvent("promax_coins_updated"));
+     toast.success(`🔥 Kunlik faollik! +${res.rewardCoins} tanga qo'shildi!`, {
+       icon: "🔥",
+       duration: 4000,
+     });
+   }
+ });
  } catch (err) {
  console.error('Auth check error:', err);
  router.push("/login");
@@ -178,7 +193,9 @@ export default function DashboardLayout({
   {/* Desktop Header (Island Style) */}
   {!isTakeTestPage && (
   <div className="hidden lg:flex absolute top-4 right-6 z-50 justify-end pointer-events-none">
-  <div className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-2xl border border-gray-200/50 dark:border-slate-800/50 rounded-full flex items-center gap-3 px-4 py-2 shadow-xl shadow-brand-blue/5 pointer-events-auto transition-all duration-300">
+  <div className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-2xl border border-gray-200/50 dark:border-slate-800/50 rounded-full flex items-center gap-2.5 px-4 py-2 shadow-xl shadow-brand-blue/5 pointer-events-auto transition-all duration-300">
+  <StreakPill />
+  <div className="w-px h-5 bg-slate-200 dark:bg-slate-800" />
   <SidebarBetaWidget variant="pill" />
   <div className="w-px h-5 bg-slate-200 dark:bg-slate-800" />
   <NotificationBell />
@@ -204,8 +221,9 @@ export default function DashboardLayout({
   </div>
   </Link>
   
-  {/* Bell & Test Rejimi Island */}
+  {/* Bell, Streak & Test Rejimi Island */}
   <div className="h-12 bg-white/80 dark:bg-slate-900/80 backdrop-blur-2xl border border-gray-200/50 dark:border-slate-800/50 rounded-full flex items-center justify-center gap-2 px-3 shadow-lg shadow-brand-blue/5 pointer-events-auto">
+  <StreakPill />
   <SidebarBetaWidget variant="pill" />
   <NotificationBell />
   </div>

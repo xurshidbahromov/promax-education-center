@@ -12,9 +12,11 @@ import {
   Trophy,
   Coins,
   Swords,
-  Clock
+  Clock,
+  Play
 } from "lucide-react";
 import { GamesPageSkeleton } from "@/components/ui/Skeleton";
+import MathSpeedBlitzModal from "@/components/games/MathSpeedBlitzModal";
 
 interface GameCard {
   id: string;
@@ -29,14 +31,25 @@ interface GameCard {
 
 export default function GameZonePage() {
   const { t } = useLanguage();
-  const { data: profile, isLoading } = useSWR('userProfileGame', getUserProfile);
+  const { data: profile, isLoading, mutate } = useSWR('userProfileGame', getUserProfile);
   const [coins, setCoins] = useState(0);
+  const [isMathModalOpen, setIsMathModalOpen] = useState(false);
 
   useEffect(() => {
     if (profile) {
       setCoins(profile.coins || 0);
     }
   }, [profile]);
+
+  useEffect(() => {
+    const handleCoinsUpdate = () => {
+      mutate();
+    };
+    window.addEventListener("promax_coins_updated", handleCoinsUpdate);
+    return () => {
+      window.removeEventListener("promax_coins_updated", handleCoinsUpdate);
+    };
+  }, [mutate]);
 
   const games: GameCard[] = [
     {
@@ -166,10 +179,21 @@ export default function GameZonePage() {
                       {game.rewardText}
                     </span>
 
-                    <span className="px-3 py-1.5 bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 rounded-xl text-xs font-bold flex items-center gap-1">
-                      <Clock size={13} />
-                      <span>Tez kunda</span>
-                    </span>
+                    {game.id === 'math' ? (
+                      <button
+                        type="button"
+                        onClick={() => setIsMathModalOpen(true)}
+                        className="px-4 py-1.5 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white rounded-xl text-xs font-bold flex items-center gap-1.5 shadow-md shadow-amber-500/20 active:scale-95 transition-all cursor-pointer"
+                      >
+                        <Play size={12} className="fill-white" />
+                        <span>O'ynash</span>
+                      </button>
+                    ) : (
+                      <span className="px-3 py-1.5 bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 rounded-xl text-xs font-bold flex items-center gap-1">
+                        <Clock size={13} />
+                        <span>Tez kunda</span>
+                      </span>
+                    )}
                   </div>
                 </div>
               );
@@ -177,6 +201,16 @@ export default function GameZonePage() {
           </div>
         )}
       </div>
+
+      {/* Math Speed Blitz Game Modal */}
+      <MathSpeedBlitzModal
+        isOpen={isMathModalOpen}
+        onClose={() => setIsMathModalOpen(false)}
+        onCoinsEarned={(newCoins) => {
+          setCoins((prev) => prev + newCoins);
+          mutate();
+        }}
+      />
     </div>
   );
 }

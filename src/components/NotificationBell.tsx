@@ -14,6 +14,7 @@ import { useLanguage } from "@/context/LanguageContext";
 import { formatDistanceToNow } from "date-fns";
 import { uz, enUS, ru } from "date-fns/locale";
 import Link from "next/link";
+import toast from "react-hot-toast";
 
 interface Notification {
  id: string;
@@ -78,32 +79,44 @@ export default function NotificationBell() {
  setUnreadCount(count);
  };
 
- useEffect(() => {
- fetchUnreadCount();
+  useEffect(() => {
+    let activeChannel: any = null;
 
- // Subscribe to realtime changes
- const channel = supabase
- .channel('notifications_changes')
- .on(
- 'postgres_changes',
- {
- event: 'INSERT',
- schema: 'public',
- table: 'notifications',
- filter: `user_id=eq.${(async () => (await supabase.auth.getUser()).data.user?.id)()}` // This is tricky in realtime, usually handled by filtering on client or secure channel
- },
- (payload) => {
- // Simple refresh on any change for now
- fetchUnreadCount();
- if (isOpen) fetchNotifications(false);
- }
- )
- .subscribe();
+    async function initRealtime() {
+      await fetchUnreadCount();
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
 
- return () => {
- supabase.removeChannel(channel);
- };
- }, [supabase, isOpen]);
+      activeChannel = supabase
+        .channel(`user_notifications_${user.id}`)
+        .on(
+          'postgres_changes',
+          {
+            event: 'INSERT',
+            schema: 'public',
+            table: 'notifications',
+            filter: `user_id=eq.${user.id}`
+          },
+          (payload: any) => {
+            fetchUnreadCount();
+            if (isOpen) {
+              fetchNotifications(false);
+            } else if (payload?.new?.title) {
+              toast(payload.new.title, { icon: "🔔", duration: 4000 });
+            }
+          }
+        )
+        .subscribe();
+    }
+
+    initRealtime();
+
+    return () => {
+      if (activeChannel) {
+        supabase.removeChannel(activeChannel);
+      }
+    };
+  }, [supabase, isOpen]);
 
  // Fetch list when opening dropdown
  useEffect(() => {

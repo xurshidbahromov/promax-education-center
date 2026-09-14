@@ -27,6 +27,7 @@ import { getSubjects, type Subject } from "@/lib/supabase-queries";
 import { DashboardHomeSkeleton } from "@/components/ui/Skeleton";
 import { OlympiadBannerTeaser } from "@/components/dashboard/OlympiadSection";
 import { InternationalBannerTeaser } from "@/components/dashboard/InternationalSection";
+import DailyStreakCard from "@/components/dashboard/DailyStreakCard";
 
 // Subject colors & icons
 const subjectMeta: Record<string, { color: string; bg: string; icon: any }> = {
@@ -145,14 +146,18 @@ export default function DashboardPage() {
         {isLoading ? (
           <DashboardHomeSkeleton />
         ) : (<>
-          {/* ── 1. HERO GREETING ── */}
-          <div className="flex flex-col gap-1">
-            <p className="text-sm text-slate-500 dark:text-slate-400 font-medium">
-              {greeting}, <span className="font-semibold text-slate-700 dark:text-slate-200">{firstName}!</span>
-            </p>
-            <h1 className="text-2xl sm:text-3xl font-bold font-fredoka text-slate-800 dark:text-slate-100 leading-tight">
-              Bugun nima o'rganamiz?
-            </h1>
+          {/* ── 1. HERO GREETING & COMPACT STREAK ── */}
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+            <div className="flex flex-col gap-0.5">
+              <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 font-medium">
+                {greeting}, <span className="font-semibold text-slate-700 dark:text-slate-200">{firstName}!</span>
+              </p>
+              <h1 className="text-2xl sm:text-3xl font-bold font-fredoka text-slate-800 dark:text-slate-100 leading-tight">
+                Bugun nima o'rganamiz?
+              </h1>
+            </div>
+
+            <DailyStreakCard userId={user?.id} />
           </div>
 
           {/* ── 2. ONLAYN OLIMPIADALAR BANNER (Tepada - Fanlardan avval) ── */}
