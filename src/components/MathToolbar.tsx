@@ -9,8 +9,19 @@ interface MathToolbarProps {
   currentValue?: string;
 }
 
+export interface FormulaItem {
+  label: string;
+  formula: string;
+  display: string;
+  insertText?: string;
+}
+
 // Common Formula Dataset
-export const FORMULA_CATEGORIES = {
+export const FORMULA_CATEGORIES: Record<string, {
+  label: string;
+  icon: any;
+  items: FormulaItem[];
+}> = {
   basic: {
     label: "Asosiy Formulalar",
     icon: Calculator,
@@ -29,6 +40,8 @@ export const FORMULA_CATEGORIES = {
     label: "Matematik Belgilar",
     icon: Variable,
     items: [
+      { label: "Dollar ($)", formula: "\\$", display: "$", insertText: "$" },
+      { label: "Yevro (€)", formula: "€", display: "€", insertText: "€" },
       { label: "Plyus-Minus", formula: "\\pm", display: "±" },
       { label: "Ko'paytirish", formula: "\\times", display: "×" },
       { label: "Bo'lish", formula: "\\div", display: "÷" },
@@ -148,12 +161,16 @@ export function InlineMathPanel({ isOpen, onClose, onInsert, title = "Formulani 
           <button
             key={idx}
             type="button"
-            onClick={() => onInsert(`$${item.formula}$`)}
+            onClick={() => onInsert(item.insertText ?? `$${item.formula}$`)}
             className="flex flex-col items-center justify-center p-2 rounded-xl border border-slate-100 dark:border-slate-800 bg-slate-50/70 dark:bg-slate-800/50 hover:bg-brand-blue/10 hover:border-brand-blue/30 dark:hover:border-brand-blue/40 transition-all group cursor-pointer"
-            title={`Qo'shish: ${item.formula}`}
+            title={`Qo'shish: ${item.insertText ?? item.formula}`}
           >
             <div className="text-sm font-bold text-slate-800 dark:text-slate-100 group-hover:text-brand-blue transition-colors">
-              <MathRenderer content={`$${item.formula}$`} inline />
+              {item.insertText ? (
+                <span>{item.display}</span>
+              ) : (
+                <MathRenderer content={`$${item.formula}$`} inline />
+              )}
             </div>
             <span className="text-[10px] font-semibold text-slate-400 mt-1 truncate max-w-full">
               {item.label}
@@ -230,12 +247,16 @@ export default function MathToolbar({ onInsert, currentValue = "" }: MathToolbar
               <button
                 key={idx}
                 type="button"
-                onClick={() => onInsert(`$${item.formula}$`)}
+                onClick={() => onInsert(item.insertText ?? `$${item.formula}$`)}
                 className="flex flex-col items-center justify-center p-2 rounded-xl border border-slate-100 dark:border-slate-800 bg-slate-50/70 dark:bg-slate-800/50 hover:bg-brand-blue/10 hover:border-brand-blue/30 dark:hover:border-brand-blue/40 transition-all group cursor-pointer"
-                title={`Kiriting: ${item.formula}`}
+                title={`Kiriting: ${item.insertText ?? item.formula}`}
               >
                 <div className="text-sm font-bold text-slate-800 dark:text-slate-100 group-hover:text-brand-blue transition-colors">
-                  <MathRenderer content={`$${item.formula}$`} inline />
+                  {item.insertText ? (
+                    <span>{item.display}</span>
+                  ) : (
+                    <MathRenderer content={`$${item.formula}$`} inline />
+                  )}
                 </div>
                 <span className="text-[10px] font-semibold text-slate-400 mt-1 truncate max-w-full">
                   {item.label}
