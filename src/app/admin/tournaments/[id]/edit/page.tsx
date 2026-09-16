@@ -251,22 +251,22 @@ export default function EditTournamentPage({ params }: PageProps) {
   }
 
   return (
-    <div className="w-full max-w-[1400px] mx-auto space-y-6 pb-20">
-      {/* Page Header (1:1 with EditTestPage) */}
-      <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 pb-2 border-b border-slate-200/50 dark:border-slate-800/50">
+    <div className="w-full max-w-[1400px] mx-auto space-y-4 pb-4">
+      {/* Page Header (Sticky) */}
+      <div className="sticky top-0 z-20 -mt-4 sm:-mt-6 lg:-mt-8 pt-4 sm:pt-6 lg:pt-8 pb-3 bg-slate-50/95 dark:bg-slate-950/95 backdrop-blur-md border-b border-slate-200/60 dark:border-slate-800/60 flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div className="flex items-center gap-3">
           <Link
             href={`/admin/tournaments/${tournamentId}`}
-            className="p-2 text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 transition-colors"
+            className="p-2 text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 transition-colors cursor-pointer"
             title="Orqaga"
           >
             <ArrowLeft size={20} />
           </Link>
           <div>
-            <h1 className="text-3xl font-black text-slate-800 dark:text-slate-100 tracking-tight font-sans-pro">
+            <h1 className="text-2xl sm:text-3xl font-black text-slate-800 dark:text-slate-100 tracking-tight font-sans-pro">
               Musobaqani Tahrirlash
             </h1>
-            <p className="text-xs sm:text-sm font-medium text-slate-400 dark:text-slate-500 mt-1">
+            <p className="text-xs sm:text-sm font-medium text-slate-400 dark:text-slate-500 mt-0.5">
               Musobaqa parametrlari va savollarini tahrirlash
             </p>
           </div>
@@ -468,8 +468,8 @@ export default function EditTournamentPage({ params }: PageProps) {
 
         {/* STEP 2: Questions Editor (1:1 with EditTestPage) */}
         {currentStep === "questions" && (
-          <div className="bg-white/70 dark:bg-slate-900/70 backdrop-blur-xl border border-slate-200/60 dark:border-slate-800/60 rounded-3xl p-6 sm:p-8 space-y-6">
-            <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-4">
+          <div className="bg-white/70 dark:bg-slate-900/70 backdrop-blur-xl border border-slate-200/60 dark:border-slate-800/60 rounded-3xl p-6 sm:p-8 space-y-4">
+            <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-4 shrink-0">
               <div className="flex items-center gap-2.5">
                 <HelpCircle size={22} className="text-brand-blue" />
                 <div>
@@ -484,7 +484,7 @@ export default function EditTournamentPage({ params }: PageProps) {
 
               <button
                 onClick={addQuestion}
-                className="inline-flex items-center gap-2 px-4 py-2.5 bg-brand-blue text-white rounded-xl text-xs sm:text-sm font-bold hover:bg-blue-600 transition-colors shadow-sm"
+                className="inline-flex items-center gap-2 px-4 py-2.5 bg-brand-blue text-white rounded-xl text-xs sm:text-sm font-bold hover:bg-blue-600 transition-colors shadow-sm cursor-pointer"
               >
                 <Plus size={16} />
                 <span>Yangi Savol Qo'shish</span>
@@ -504,7 +504,7 @@ export default function EditTournamentPage({ params }: PageProps) {
                 </button>
               </div>
             ) : (
-              <div className="space-y-3 max-h-[52vh] sm:max-h-[500px] overflow-y-auto pr-1.5 custom-scrollbar">
+              <div className="space-y-3 max-h-[calc(100vh-390px)] min-h-[220px] overflow-y-auto pr-1.5 custom-scrollbar">
                 {questions.map((q, idx) => (
                   <div
                     key={q.id}
@@ -537,13 +537,13 @@ export default function EditTournamentPage({ params }: PageProps) {
                     <div className="flex items-center gap-2 shrink-0">
                       <button
                         onClick={() => setEditingQuestion(q)}
-                        className="px-3 py-1.5 text-xs font-bold text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl hover:bg-slate-100 transition-colors"
+                        className="px-3 py-1.5 text-xs font-bold text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl hover:bg-slate-100 transition-colors cursor-pointer"
                       >
                         Tahrirlash
                       </button>
                       <button
                         onClick={() => deleteQuestion(q.id)}
-                        className="p-1.5 text-slate-400 hover:text-red-500 transition-colors"
+                        className="p-1.5 text-slate-400 hover:text-red-500 transition-colors cursor-pointer"
                         title="O'chirish"
                       >
                         <Trash2 size={16} />
@@ -555,10 +555,10 @@ export default function EditTournamentPage({ params }: PageProps) {
             )}
 
             {/* Sequential Step Controls (1:1 with EditTestPage) */}
-            <div className="flex items-center justify-between pt-4 border-t border-slate-100 dark:border-slate-800/50">
+            <div className="flex items-center justify-between pt-4 border-t border-slate-100 dark:border-slate-800/50 shrink-0">
               <button
                 onClick={() => setCurrentStep("basic")}
-                className="px-4 py-2.5 text-xs sm:text-sm font-bold text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-200"
+                className="px-4 py-2.5 text-xs sm:text-sm font-bold text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-200 cursor-pointer"
               >
                 ← 1-Bosqichga Qaytish
               </button>
@@ -568,7 +568,7 @@ export default function EditTournamentPage({ params }: PageProps) {
                   setCurrentStep("preview");
                 }}
                 disabled={questions.length === 0}
-                className="inline-flex items-center gap-2 px-5 py-2.5 bg-brand-blue text-white rounded-xl text-xs sm:text-sm font-bold hover:bg-blue-600 transition-colors disabled:opacity-50 shadow-md shadow-brand-blue/10"
+                className="inline-flex items-center gap-2 px-5 py-2.5 bg-brand-blue text-white rounded-xl text-xs sm:text-sm font-bold hover:bg-blue-600 transition-colors disabled:opacity-50 shadow-md shadow-brand-blue/10 cursor-pointer"
               >
                 <span>3-Bosqich: Tasdiqlash</span>
                 <ArrowRight size={16} />

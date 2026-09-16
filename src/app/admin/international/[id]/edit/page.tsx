@@ -273,24 +273,24 @@ export default function EditInternationalTournamentPage({ params }: PageProps) {
   }
 
   return (
-    <div className="w-full max-w-[1400px] mx-auto space-y-6 pb-20">
+    <div className="w-full max-w-[1400px] mx-auto space-y-4 pb-4">
       
-      {/* ── HEADER (1:1 with /admin/tournaments/[id]/edit) ── */}
-      <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 pb-2 border-b border-slate-200/50 dark:border-slate-800/50">
+      {/* ── HEADER (Sticky) ── */}
+      <div className="sticky top-0 z-20 -mt-4 sm:-mt-6 lg:-mt-8 pt-4 sm:pt-6 lg:pt-8 pb-3 bg-slate-50/95 dark:bg-slate-950/95 backdrop-blur-md border-b border-slate-200/60 dark:border-slate-800/60 flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div className="flex items-center gap-3">
           <Link
             href="/admin/international"
-            className="p-2 text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 transition-colors"
+            className="p-2 text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 transition-colors cursor-pointer"
             title="Orqaga"
           >
             <ArrowLeft size={20} />
           </Link>
           <div>
-            <h1 className="text-3xl font-black text-slate-800 dark:text-slate-100 tracking-tight font-sans-pro">
+            <h1 className="text-2xl sm:text-3xl font-black text-slate-800 dark:text-slate-100 tracking-tight font-sans-pro">
               Xalqaro Musobaqani Tahrirlash
             </h1>
-            <p className="text-xs sm:text-sm font-medium text-slate-400 dark:text-slate-500 mt-1">
-              Bosqichma-bosqich musobaqa parametrlari va savollar quruvchisi
+            <p className="text-xs sm:text-sm font-medium text-slate-400 dark:text-slate-500 mt-0.5">
+              Musobaqa parametrlari va savollarini tahrirlash
             </p>
           </div>
         </div>
@@ -497,8 +497,8 @@ export default function EditInternationalTournamentPage({ params }: PageProps) {
 
         {/* STEP 2: Questions Editor */}
         {currentStep === "questions" && (
-          <div className="bg-white/70 dark:bg-slate-900/70 backdrop-blur-xl border border-slate-200/60 dark:border-slate-800/60 rounded-3xl p-6 sm:p-8 space-y-6">
-            <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-4">
+          <div className="bg-white/70 dark:bg-slate-900/70 backdrop-blur-xl border border-slate-200/60 dark:border-slate-800/60 rounded-3xl p-6 sm:p-8 space-y-4">
+            <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-4 shrink-0">
               <div className="flex items-center gap-2.5">
                 <HelpCircle size={22} className="text-brand-blue" />
                 <div>
@@ -535,7 +535,7 @@ export default function EditInternationalTournamentPage({ params }: PageProps) {
                 </button>
               </div>
             ) : (
-              <div className="space-y-3 max-h-[52vh] sm:max-h-[500px] overflow-y-auto pr-1.5 custom-scrollbar">
+              <div className="space-y-3 max-h-[calc(100vh-390px)] min-h-[220px] overflow-y-auto pr-1.5 custom-scrollbar">
                 {questions.map((q, idx) => (
                   <div
                     key={q.id}
@@ -594,7 +594,7 @@ export default function EditInternationalTournamentPage({ params }: PageProps) {
             )}
 
             {/* Step Controls */}
-            <div className="flex items-center justify-between pt-4 border-t border-slate-100 dark:border-slate-800/50">
+            <div className="flex items-center justify-between pt-4 border-t border-slate-100 dark:border-slate-800/50 shrink-0">
               <button
                 onClick={() => setCurrentStep("basic")}
                 className="px-4 py-2.5 text-xs sm:text-sm font-bold text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-200 cursor-pointer"
