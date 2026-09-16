@@ -513,7 +513,7 @@ export default function CreateInternationalTournamentPage() {
                 </button>
               </div>
             ) : (
-              <div className="space-y-3">
+              <div className="space-y-3 max-h-[52vh] sm:max-h-[500px] overflow-y-auto pr-1.5 custom-scrollbar">
                 {questions.map((q, idx) => (
                   <div
                     key={q.id}

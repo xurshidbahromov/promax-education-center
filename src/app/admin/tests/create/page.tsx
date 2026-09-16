@@ -388,13 +388,13 @@ export default function CreateTestPage() {
                 <p className="text-sm font-semibold">Hali savollar qo'shilmadi</p>
                 <button
                   onClick={addQuestion}
-                  className="mt-2 px-4 py-2 text-xs font-bold text-brand-blue hover:underline"
+                  className="mt-2 px-4 py-2 text-xs font-bold text-brand-blue hover:underline cursor-pointer"
                 >
                   + Birinchi savolni qo'shish
                 </button>
               </div>
             ) : (
-              <div className="space-y-3">
+              <div className="space-y-3 max-h-[52vh] sm:max-h-[500px] overflow-y-auto pr-1.5 custom-scrollbar">
                 {questions.map((q, idx) => (
                   <div
                     key={q.id}
