@@ -34,7 +34,10 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'text is required' }, { status: 400 });
     }
 
-    const validPhotoUrl = (imageUrl || photoUrl || '').startsWith('http') ? (imageUrl || photoUrl) : null;
+    const rawPhoto = (imageUrl || photoUrl || '').trim();
+    const validPhotoUrl = (rawPhoto.startsWith('http://') || rawPhoto.startsWith('https://') || rawPhoto.startsWith('data:image/'))
+      ? rawPhoto
+      : null;
 
     if (targetAll) {
       const botClient = await createTelegramBotClient();

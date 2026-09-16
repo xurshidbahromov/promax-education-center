@@ -213,7 +213,20 @@ export function mergeWithInternationalBenchmarks(entries: InternationalLeaderboa
     return a.time_spent_seconds - b.time_spent_seconds;
   });
 
-  return clean.map((entry, idx) => ({
+  // Deduplicate entries by user so each student appears only once with their best attempt!
+  const seen = new Set<string>();
+  const unique: InternationalLeaderboardEntry[] = [];
+  for (const entry of clean) {
+    const key = (entry.user_id && entry.user_id !== 'anonymous_user' && entry.user_id !== 'current_user' && entry.user_id !== 'guest')
+      ? entry.user_id
+      : (entry.student_name ? entry.student_name.trim().toLowerCase() : entry.id);
+
+    if (seen.has(key)) continue;
+    seen.add(key);
+    unique.push(entry);
+  }
+
+  return unique.map((entry, idx) => ({
     ...entry,
     rank: idx + 1,
     prize: entry.prize || (idx === 0 ? "🥇 1-O'rin: 100% Kurs Granti + Rasmiy Sertifikat"
@@ -231,9 +244,33 @@ export function getCachedInternationalLeaderboard(tournamentId: string): Interna
       if (stored) {
         const map = JSON.parse(stored);
         if (map[tournamentId] && Array.isArray(map[tournamentId])) {
-          return map[tournamentId].filter(
+          const list = map[tournamentId].filter(
             (e: any) => !e.id?.startsWith('intl_bench_') && !e.id?.startsWith('bench_') && !e.user_id?.startsWith('bench_')
           );
+          // Strictly deduplicate by student: Keep only best attempt
+          list.sort((a: any, b: any) => {
+            if (b.score !== a.score) return b.score - a.score;
+            return (a.time_spent_seconds || 0) - (b.time_spent_seconds || 0);
+          });
+          const seen = new Set<string>();
+          const unique: InternationalLeaderboardEntry[] = [];
+          for (const e of list) {
+            const key = (e.user_id && e.user_id !== 'anonymous_user' && e.user_id !== 'current_user' && e.user_id !== 'guest')
+              ? e.user_id
+              : (e.student_name ? e.student_name.trim().toLowerCase() : e.id);
+            if (!key || seen.has(key)) continue;
+            seen.add(key);
+            unique.push(e);
+          }
+          const ranked = unique.map((entry, idx) => ({ ...entry, rank: idx + 1 }));
+
+          // Resave clean deduplicated list back to cache
+          if (ranked.length !== map[tournamentId].length) {
+            map[tournamentId] = ranked;
+            localStorage.setItem(STORAGE_INTERNATIONAL_LEADERBOARDS, JSON.stringify(map));
+          }
+
+          return ranked;
         }
       }
     } catch (e) {}
@@ -263,15 +300,27 @@ export async function getInternationalLeaderboard(tournamentId: string): Promise
         const clean = data.leaderboard.filter(
           (e: any) => !e.id?.startsWith('intl_bench_') && !e.id?.startsWith('bench_') && !e.user_id?.startsWith('bench_')
         );
+        const seen = new Set<string>();
+        const uniqueClean: InternationalLeaderboardEntry[] = [];
+        for (const e of clean) {
+          const key = (e.user_id && e.user_id !== 'anonymous_user' && e.user_id !== 'current_user' && e.user_id !== 'guest')
+            ? e.user_id
+            : (e.student_name ? e.student_name.trim().toLowerCase() : e.id);
+          if (!key || seen.has(key)) continue;
+          seen.add(key);
+          uniqueClean.push(e);
+        }
+        const finalClean = uniqueClean.map((entry, idx) => ({ ...entry, rank: idx + 1 }));
+
         if (typeof window !== 'undefined') {
           try {
             const stored = localStorage.getItem(STORAGE_INTERNATIONAL_LEADERBOARDS);
             let map: Record<string, InternationalLeaderboardEntry[]> = stored ? JSON.parse(stored) : {};
-            map[tournamentId] = clean;
+            map[tournamentId] = finalClean;
             localStorage.setItem(STORAGE_INTERNATIONAL_LEADERBOARDS, JSON.stringify(map));
           } catch {}
         }
-        return clean;
+        return finalClean;
       }
     }
   } catch (apiErr) {
@@ -301,7 +350,18 @@ export async function getInternationalLeaderboard(tournamentId: string): Promise
         return [];
       }
 
-      const studentIds = Array.from(new Set(data.map((d: any) => d.student_id).filter(Boolean)));
+      // Deduplicate so each user only has their single BEST score
+      const seenUsers = new Set<string>();
+      const uniqueData = data.filter((d: any) => {
+        const uid = (d.student_id && d.student_id !== 'anonymous_user')
+          ? d.student_id
+          : (d.student_name ? d.student_name.trim().toLowerCase() : d.id);
+        if (!uid || seenUsers.has(uid)) return false;
+        seenUsers.add(uid);
+        return true;
+      });
+
+      const studentIds = Array.from(new Set(uniqueData.map((d: any) => d.student_id).filter(Boolean)));
       let profilesMap: Record<string, { full_name: string; avatar_url: string }> = {};
       if (studentIds.length > 0) {
         try {
@@ -317,7 +377,7 @@ export async function getInternationalLeaderboard(tournamentId: string): Promise
         } catch {}
       }
 
-      const entries: InternationalLeaderboardEntry[] = data.map((d: any, idx: number) => {
+      const entries: InternationalLeaderboardEntry[] = uniqueData.map((d: any, idx: number) => {
         const prof = profilesMap[d.student_id];
         return {
           id: d.id,
@@ -461,7 +521,7 @@ export async function submitInternationalAttempt(
 
   let currentList = await getInternationalLeaderboard(tournamentId);
   currentList = currentList.filter(
-    e => !e.id?.startsWith('intl_bench_') && !e.id?.startsWith('bench_') && !e.user_id?.startsWith('bench_') && e.user_id !== userId
+    e => !e.id?.startsWith('intl_bench_') && !e.id?.startsWith('bench_') && !e.user_id?.startsWith('bench_') && e.user_id !== userId && (userName ? e.student_name !== userName : true)
   );
   currentList.push(newEntry);
 

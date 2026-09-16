@@ -40,12 +40,12 @@ interface AnnouncementModalProps {
 }
 
 const PRESET_BANNER_IMAGES = [
-  { name: "MOCK Exam", badge: "MOCK EXAM", url: "https://images.unsplash.com/photo-1434030216411-0b793f4b4173?w=600&auto=format&fit=crop&q=80" },
-  { name: "Yangi Kurs", badge: "YANGI KURS", url: "https://images.unsplash.com/photo-1635070041078-e363dbe005cb?w=600&auto=format&fit=crop&q=80" },
-  { name: "To'garak", badge: "TO'GARAK", url: "https://images.unsplash.com/photo-1507668077129-56e32842fceb?w=600&auto=format&fit=crop&q=80" },
-  { name: "Speaking Club", badge: "SPEAKING CLUB", url: "https://images.unsplash.com/photo-1529156069898-49953e39b3ac?w=600&auto=format&fit=crop&q=80" },
-  { name: "G'oliblar", badge: "G'OLIBLAR", url: "https://images.unsplash.com/photo-1531545514256-b1400bc00f31?w=600&auto=format&fit=crop&q=80" },
-  { name: "Dasturlash", badge: "DASTURLASH", url: "https://images.unsplash.com/photo-1555066931-4365d14bab8c?w=600&auto=format&fit=crop&q=80" },
+  { name: "MOCK Exam", badge: "MOCK EXAM", url: "https://images.unsplash.com/photo-1434030216411-0b793f4b4173?w=800&fm=jpg&fit=crop&q=80" },
+  { name: "Yangi Kurs", badge: "YANGI KURS", url: "https://images.unsplash.com/photo-1635070041078-e363dbe005cb?w=800&fm=jpg&fit=crop&q=80" },
+  { name: "To'garak", badge: "TO'GARAK", url: "https://images.unsplash.com/photo-1507668077129-56e32842fceb?w=800&fm=jpg&fit=crop&q=80" },
+  { name: "Speaking Club", badge: "SPEAKING CLUB", url: "https://images.unsplash.com/photo-1529156069898-49953e39b3ac?w=800&fm=jpg&fit=crop&q=80" },
+  { name: "G'oliblar", badge: "G'OLIBLAR", url: "https://images.unsplash.com/photo-1531545514256-b1400bc00f31?w=800&fm=jpg&fit=crop&q=80" },
+  { name: "Dasturlash", badge: "DASTURLASH", url: "https://images.unsplash.com/photo-1555066931-4365d14bab8c?w=800&fm=jpg&fit=crop&q=80" },
 ];
 
 export default function AnnouncementModal({
@@ -84,7 +84,19 @@ export default function AnnouncementModal({
       const fileName = `announcement_${Date.now()}_${Math.random().toString(36).substring(7)}.${fileExt}`;
       const filePath = `announcements/${fileName}`;
 
-      // 1. Try 'test-images' bucket
+      // 1. Try 'course-images' bucket (Public bucket with admin/teacher upload policy)
+      const { error: errCourse } = await supabase.storage
+        .from('course-images')
+        .upload(filePath, file, { upsert: true });
+
+      if (!errCourse) {
+        const { data } = supabase.storage.from('course-images').getPublicUrl(filePath);
+        setFormData((prev: any) => ({ ...prev, image_url: data.publicUrl, is_featured: true }));
+        toast.success("Rasm muvaffaqiyatli yuklandi", { id: toastId });
+        return;
+      }
+
+      // 2. Try 'test-images' bucket
       const { error: err1 } = await supabase.storage
         .from('test-images')
         .upload(filePath, file, { upsert: true });
@@ -96,19 +108,23 @@ export default function AnnouncementModal({
         return;
       }
 
-      // 2. Try 'avatars' bucket
-      const { error: err2 } = await supabase.storage
-        .from('avatars')
-        .upload(filePath, file, { upsert: true });
+      // 3. Try 'avatars' bucket (with user id folder to respect RLS policy)
+      const { data: userData } = await supabase.auth.getUser();
+      if (userData?.user?.id) {
+        const userFilePath = `${userData.user.id}/${fileName}`;
+        const { error: err2 } = await supabase.storage
+          .from('avatars')
+          .upload(userFilePath, file, { upsert: true });
 
-      if (!err2) {
-        const { data } = supabase.storage.from('avatars').getPublicUrl(filePath);
-        setFormData((prev: any) => ({ ...prev, image_url: data.publicUrl, is_featured: true }));
-        toast.success("Rasm muvaffaqiyatli yuklandi", { id: toastId });
-        return;
+        if (!err2) {
+          const { data } = supabase.storage.from('avatars').getPublicUrl(userFilePath);
+          setFormData((prev: any) => ({ ...prev, image_url: data.publicUrl, is_featured: true }));
+          toast.success("Rasm muvaffaqiyatli yuklandi", { id: toastId });
+          return;
+        }
       }
 
-      // 3. Fallback to base64 DataURL
+      // 4. Fallback to base64 DataURL (Server now natively converts base64 for Telegram)
       const reader = new FileReader();
       reader.onloadend = () => {
         setFormData((prev: any) => ({ ...prev, image_url: reader.result as string, is_featured: true }));

@@ -406,7 +406,7 @@ export function getNationalBenchmarks(_tournamentId: string): TournamentLeaderbo
   return [];
 }
 
-export function mergeWithNationalBenchmarks(entries: TournamentLeaderboardEntry[], _tournamentId: string): TournamentLeaderboardEntry[] {
+export function assignRanksAndPrizes(entries: TournamentLeaderboardEntry[]): TournamentLeaderboardEntry[] {
   const clean = entries.filter(
     e => !e.id?.startsWith('bench_') && !e.user_id?.startsWith('bench_')
   );
@@ -415,7 +415,20 @@ export function mergeWithNationalBenchmarks(entries: TournamentLeaderboardEntry[
     return a.time_spent_seconds - b.time_spent_seconds;
   });
 
-  return clean.map((entry, idx) => ({
+  // Deduplicate: Each student appears only once with their single best score
+  const seen = new Set<string>();
+  const unique: TournamentLeaderboardEntry[] = [];
+  for (const entry of clean) {
+    const key = (entry.user_id && entry.user_id !== 'anonymous_user' && entry.user_id !== 'current_user' && entry.user_id !== 'guest')
+      ? entry.user_id
+      : (entry.student_name ? entry.student_name.trim().toLowerCase() : entry.id);
+
+    if (seen.has(key)) continue;
+    seen.add(key);
+    unique.push(entry);
+  }
+
+  return unique.map((entry, idx) => ({
     ...entry,
     rank: idx + 1,
     prize: entry.prize || (idx === 0 ? "🥇 1-O'rin: 1,000,000 So'm + Oltin Medal & Diplom"
@@ -433,7 +446,26 @@ export function getCachedTournamentLeaderboard(tournamentId: string): Tournament
       if (local) {
         const parsed = JSON.parse(local);
         if (Array.isArray(parsed)) {
-          return parsed.filter((e: any) => !e.id?.startsWith('bench_') && !e.user_id?.startsWith('bench_'));
+          const list = parsed.filter((e: any) => !e.id?.startsWith('bench_') && !e.user_id?.startsWith('bench_'));
+          list.sort((a: any, b: any) => {
+            if (b.score !== a.score) return b.score - a.score;
+            return (a.time_spent_seconds || 0) - (b.time_spent_seconds || 0);
+          });
+          const seen = new Set<string>();
+          const unique: TournamentLeaderboardEntry[] = [];
+          for (const e of list) {
+            const key = (e.user_id && e.user_id !== 'anonymous_user' && e.user_id !== 'current_user' && e.user_id !== 'guest')
+              ? e.user_id
+              : (e.student_name ? e.student_name.trim().toLowerCase() : e.id);
+            if (!key || seen.has(key)) continue;
+            seen.add(key);
+            unique.push(e);
+          }
+          const ranked = unique.map((entry, idx) => ({ ...entry, rank: idx + 1 }));
+          if (ranked.length !== list.length) {
+            localStorage.setItem(`promax_leaderboard_${tournamentId}`, JSON.stringify(ranked));
+          }
+          return ranked;
         }
       }
     } catch (e) {}
@@ -464,12 +496,24 @@ export async function getTournamentLeaderboard(tournamentId: string): Promise<To
         const clean = data.leaderboard.filter(
           (e: any) => !e.id?.startsWith('bench_') && !e.user_id?.startsWith('bench_')
         );
+        const seen = new Set<string>();
+        const uniqueClean: TournamentLeaderboardEntry[] = [];
+        for (const e of clean) {
+          const key = (e.user_id && e.user_id !== 'anonymous_user' && e.user_id !== 'current_user' && e.user_id !== 'guest')
+            ? e.user_id
+            : (e.student_name ? e.student_name.trim().toLowerCase() : e.id);
+          if (!key || seen.has(key)) continue;
+          seen.add(key);
+          uniqueClean.push(e);
+        }
+        const finalClean = uniqueClean.map((entry, idx) => ({ ...entry, rank: idx + 1 }));
+
         if (typeof window !== 'undefined') {
           try {
-            localStorage.setItem(`promax_leaderboard_${tournamentId}`, JSON.stringify(clean));
+            localStorage.setItem(`promax_leaderboard_${tournamentId}`, JSON.stringify(finalClean));
           } catch (e) {}
         }
-        return clean;
+        return finalClean;
       }
     }
   } catch (apiErr) {
@@ -496,7 +540,18 @@ export async function getTournamentLeaderboard(tournamentId: string): Promise<To
         return [];
       }
 
-      const studentIds = Array.from(new Set(data.map((d: any) => d.student_id).filter(Boolean)));
+      // Deduplicate: each unique student only appears once with their best attempt
+      const seenUsers = new Set<string>();
+      const uniqueData = data.filter((d: any) => {
+        const uid = (d.student_id && d.student_id !== 'anonymous_user')
+          ? d.student_id
+          : (d.student_name ? d.student_name.trim().toLowerCase() : d.id);
+        if (!uid || seenUsers.has(uid)) return false;
+        seenUsers.add(uid);
+        return true;
+      });
+
+      const studentIds = Array.from(new Set(uniqueData.map((d: any) => d.student_id).filter(Boolean)));
       let profilesMap: Record<string, { full_name: string; avatar_url: string }> = {};
       if (studentIds.length > 0) {
         try {
@@ -512,7 +567,7 @@ export async function getTournamentLeaderboard(tournamentId: string): Promise<To
         } catch {}
       }
 
-      const mapped: TournamentLeaderboardEntry[] = data.map((d: any, idx: number) => {
+      const mapped: TournamentLeaderboardEntry[] = uniqueData.map((d: any, idx: number) => {
         const prof = profilesMap[d.student_id];
         return {
           id: d.id,

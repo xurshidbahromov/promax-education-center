@@ -38,6 +38,13 @@ const AnnouncementModal = dynamic(() => import('./components/AnnouncementModal')
   loading: () => null
 });
 
+function escapeTelegramHtml(text: string): string {
+  return (text || '')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;');
+}
+
 export default function AdminAnnouncementsPage() {
   const queryClient = useQueryClient();
 
@@ -161,9 +168,11 @@ export default function AdminAnnouncementsPage() {
         try {
           const typeEmoji = formData.type === 'error' ? '🚨' : formData.type === 'warning' ? '⚠️' : formData.type === 'success' ? '🎉' : '📢';
           const categoryTitle = formData.is_featured ? "📌 KABINET E'LONI" : "🔔 YANGI BILDIRISHNOMA";
-          const badgeText = formData.badge ? ` [${formData.badge}]` : '';
+          const safeTitle = escapeTelegramHtml(formData.title);
+          const safeMessage = escapeTelegramHtml(formData.message);
+          const safeBadge = formData.badge ? ` [${escapeTelegramHtml(formData.badge)}]` : '';
 
-          const telegramText = `<b>${typeEmoji} ${categoryTitle}${badgeText}</b>\n\n<b>${formData.title}</b>\n\n${formData.message}\n\n<i>PROMAX Ta'lim Markazi</i>`;
+          const telegramText = `<b>${typeEmoji} ${categoryTitle}${safeBadge}</b>\n\n<b>${safeTitle}</b>\n\n${safeMessage}\n\n<i>PROMAX Ta'lim Markazi</i>`;
 
           await fetch('/api/telegram/send', {
             method: 'POST',
@@ -247,9 +256,11 @@ export default function AdminAnnouncementsPage() {
     try {
       const typeEmoji = announcement.type === 'error' ? '🚨' : announcement.type === 'warning' ? '⚠️' : announcement.type === 'success' ? '🎉' : '📢';
       const categoryTitle = announcement.is_featured ? "📌 KABINET E'LONI" : "🔔 YANGI BILDIRISHNOMA";
-      const badgeText = announcement.badge ? ` [${announcement.badge}]` : '';
+      const safeTitle = escapeTelegramHtml(announcement.title);
+      const safeMessage = escapeTelegramHtml(announcement.message);
+      const safeBadge = announcement.badge ? ` [${escapeTelegramHtml(announcement.badge)}]` : '';
 
-      const telegramText = `<b>${typeEmoji} ${categoryTitle}${badgeText}</b>\n\n<b>${announcement.title}</b>\n\n${announcement.message}\n\n<i>PROMAX Ta'lim Markazi</i>`;
+      const telegramText = `<b>${typeEmoji} ${categoryTitle}${safeBadge}</b>\n\n<b>${safeTitle}</b>\n\n${safeMessage}\n\n<i>PROMAX Ta'lim Markazi</i>`;
 
       const res = await fetch('/api/telegram/send', {
         method: 'POST',

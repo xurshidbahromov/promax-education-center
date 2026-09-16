@@ -369,11 +369,37 @@ export default function OlympiadsPage() {
   };
 
   const selectedTournament = tournaments.find((t) => t.id === selectedTournamentId) || tournaments[0];
-  const filteredLeaderboard = leaderboard.filter((entry) =>
-    entry.student_name.toLowerCase().includes(leaderboardSearch.toLowerCase())
-  );
+  
+  // Deduplicate leaderboard: Each unique student appears only once with their highest score
+  const uniqueLeaderboard = useMemo(() => {
+    const sorted = [...leaderboard].sort((a, b) => {
+      if (b.score !== a.score) return b.score - a.score;
+      return (a.time_spent_seconds || 0) - (b.time_spent_seconds || 0);
+    });
+    const seen = new Set<string>();
+    const unique: TournamentLeaderboardEntry[] = [];
+    for (const entry of sorted) {
+      const key = (entry.user_id && entry.user_id !== 'anonymous_user' && entry.user_id !== 'current_user' && entry.user_id !== 'guest')
+        ? entry.user_id
+        : (entry.student_name ? entry.student_name.trim().toLowerCase() : entry.id);
+
+      if (seen.has(key)) continue;
+      seen.add(key);
+      unique.push(entry);
+    }
+    return unique.map((entry, idx) => ({ ...entry, rank: idx + 1 }));
+  }, [leaderboard]);
+
+  const filteredLeaderboard = useMemo(() => {
+    return uniqueLeaderboard.filter((entry) =>
+      entry.student_name.toLowerCase().includes(leaderboardSearch.toLowerCase())
+    );
+  }, [uniqueLeaderboard, leaderboardSearch]);
+
   // Bottom list only shows participants from 4th place onwards (top 3 are in the 3D podium above)
-  const subsequentLeaderboard = filteredLeaderboard.filter((entry) => entry.rank > 3);
+  const subsequentLeaderboard = useMemo(() => {
+    return filteredLeaderboard.filter((entry) => entry.rank > 3);
+  }, [filteredLeaderboard]);
 
   return (
     <div className="relative text-slate-800 dark:text-white font-sans pb-20">
@@ -935,7 +961,7 @@ export default function OlympiadsPage() {
             </div>
 
             {/* ── 3D ISOMETRIC OLYMPIC PODIUM (TOP 3 - PREMIUM GLASSY 3D) ── */}
-            {leaderboard.length >= 1 && leaderboard[0] && (
+            {uniqueLeaderboard.length >= 1 && uniqueLeaderboard[0] && (
               <div className="relative w-full bg-gradient-to-b from-white/70 via-slate-50/50 to-white/70 dark:from-slate-900/70 dark:via-slate-850/50 dark:to-slate-900/70 backdrop-blur-xl rounded-[2.5rem] p-5 sm:p-8 border border-white/60 dark:border-slate-800/60 shadow-none overflow-hidden">
                 
                 {/* Luminous Gold Halo & Ray Glow behind Champion */}
@@ -947,7 +973,7 @@ export default function OlympiadsPage() {
                     
                     {/* 🥈 2ND PLACE (LEFT - BLUE/INDIGO GLASSY 3D STAND) */}
                     {(() => {
-                      const item = leaderboard.find(e => e.rank === 2) || leaderboard[1];
+                      const item = uniqueLeaderboard.find(e => e.rank === 2) || uniqueLeaderboard[1];
                       if (!item) {
                         return (
                           <div className="flex flex-col items-center text-center group">
@@ -1046,7 +1072,7 @@ export default function OlympiadsPage() {
 
                     {/* 🥇 1ST PLACE (CENTER - TALL GOLD GLASSY 3D STAND) */}
                     {(() => {
-                      const item = leaderboard.find(e => e.rank === 1) || leaderboard[0];
+                      const item = uniqueLeaderboard.find(e => e.rank === 1) || uniqueLeaderboard[0];
                       const isSelf = user?.id && item.user_id === user.id;
                       const avatar = isSelf ? (profile?.avatar_url || item.student_avatar) : item.student_avatar;
                       const hasAvatar = avatar && !avatar.includes('dicebear');
@@ -1114,7 +1140,7 @@ export default function OlympiadsPage() {
 
                     {/* 🥉 3RD PLACE (RIGHT - ORANGE/BRONZE GLASSY 3D STAND) */}
                     {(() => {
-                      const item = leaderboard.find(e => e.rank === 3) || leaderboard[2];
+                      const item = uniqueLeaderboard.find(e => e.rank === 3) || uniqueLeaderboard[2];
                       if (!item) {
                         return (
                           <div className="flex flex-col items-center text-center group">
@@ -1216,11 +1242,11 @@ export default function OlympiadsPage() {
 
                 {/* Sub-Podium Update Pill */}
                 <div className="text-center pt-3">
-                  {leaderboard.length === 1 ? (
+                  {uniqueLeaderboard.length === 1 ? (
                     <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-amber-500/10 dark:bg-amber-500/15 border border-amber-500/25 text-[11px] font-bold text-amber-700 dark:text-amber-300">
                       <span>🏆 1-o'rin egallandi • 2- va 3-o'rinlar ochiq! Musobaqada qatnashing va sovrindor bo'ling</span>
                     </div>
-                  ) : leaderboard.length === 2 ? (
+                  ) : uniqueLeaderboard.length === 2 ? (
                     <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-blue-500/10 dark:bg-blue-500/15 border border-blue-500/25 text-[11px] font-bold text-blue-700 dark:text-blue-300">
                       <span>🎯 Shoxsupada faqat 1 ta o'rin qoldi! 3-o'rinni egallash uchun sinovdan o'ting</span>
                     </div>
@@ -1242,20 +1268,20 @@ export default function OlympiadsPage() {
                   <h4 className="font-black font-fredoka text-sm sm:text-base text-slate-900 dark:text-white">
                     Ishtirokchilar Natijalari
                   </h4>
-                  {leaderboard.length > 3 && (
+                  {uniqueLeaderboard.length > 3 && (
                     <span className="px-2 py-0.5 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 text-[10px] font-bold">
                       4-o'rindan boshlab
                     </span>
                   )}
                 </div>
                 <span className="text-xs text-slate-400 font-medium">
-                  {leaderboard.length > 3
+                  {uniqueLeaderboard.length > 3
                     ? `${subsequentLeaderboard.length} ta ishtirokchi`
-                    : `${leaderboard.length} ta ishtirokchi`}
+                    : `${uniqueLeaderboard.length} ta ishtirokchi`}
                 </span>
               </div>
 
-              {leaderboard.length === 0 ? (
+              {uniqueLeaderboard.length === 0 ? (
                 <div className="text-center py-10 space-y-2">
                   <Award className="mx-auto text-slate-300 dark:text-slate-700" size={40} />
                   <p className="font-bold text-slate-700 dark:text-slate-200 text-sm">
@@ -1362,13 +1388,13 @@ export default function OlympiadsPage() {
               )}
 
               {/* Encouragement card if podium has open slots */}
-              {leaderboard.length < 3 && (
+              {uniqueLeaderboard.length < 3 && (
                 <div className="p-3.5 sm:p-4 rounded-2xl border border-dashed border-brand-blue/30 bg-gradient-to-r from-blue-50/50 via-indigo-50/30 to-amber-50/30 dark:from-blue-950/20 dark:via-indigo-950/15 dark:to-amber-950/15 flex items-center justify-between gap-3 mt-2">
                   <div className="flex items-center gap-3">
                     <span className="text-2xl select-none">🎯</span>
                     <div>
                       <p className="text-xs sm:text-sm font-bold text-slate-800 dark:text-slate-200">
-                        Shoxsupada yana {3 - leaderboard.length} ta sovrinli o'rin ochiq!
+                        Shoxsupada yana {3 - uniqueLeaderboard.length} ta sovrinli o'rin ochiq!
                       </p>
                       <p className="text-[11px] text-slate-500 dark:text-slate-400">
                         Musobaqada qatnashib, yuqoridagi 3D g'oliblar shoxsupasidan o'z o'rningizni egallang.

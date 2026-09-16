@@ -21,12 +21,26 @@ export interface LeaderboardEntryDTO {
 }
 
 function assignRanksAndPrizes(entries: LeaderboardEntryDTO[], topPrizes: string[] = []): LeaderboardEntryDTO[] {
+  // 1. Sort by highest score first, then fastest time
   entries.sort((a, b) => {
     if (b.score !== a.score) return b.score - a.score;
     return a.time_spent_seconds - b.time_spent_seconds;
   });
 
-  return entries.map((entry, idx) => {
+  // 2. Strictly deduplicate: Each student appears ONLY ONCE with their single best score
+  const seen = new Set<string>();
+  const uniqueEntries: LeaderboardEntryDTO[] = [];
+  for (const entry of entries) {
+    const key = (entry.user_id && entry.user_id !== 'anonymous_user' && entry.user_id !== 'current_user' && entry.user_id !== 'guest')
+      ? entry.user_id
+      : (entry.student_name ? entry.student_name.trim().toLowerCase() : entry.id);
+
+    if (seen.has(key)) continue;
+    seen.add(key);
+    uniqueEntries.push(entry);
+  }
+
+  return uniqueEntries.map((entry, idx) => {
     const rank = idx + 1;
     let prize: string | undefined = undefined;
     if (topPrizes && topPrizes.length >= rank && topPrizes[rank - 1]) {
