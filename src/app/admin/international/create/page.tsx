@@ -475,7 +475,7 @@ export default function CreateInternationalTournamentPage() {
 
         {/* STEP 2: Questions Editor */}
         {currentStep === "questions" && (
-          <div className="bg-white/70 dark:bg-slate-900/70 backdrop-blur-xl border border-slate-200/60 dark:border-slate-800/60 rounded-3xl p-6 sm:p-8 space-y-4">
+          <div className="bg-white/70 dark:bg-slate-900/70 backdrop-blur-xl border border-slate-200/60 dark:border-slate-800/60 rounded-3xl p-5 sm:p-7 flex flex-col h-[calc(100vh-280px)] md:h-[calc(100vh-240px)] min-h-[460px] overflow-hidden">
             <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-4 shrink-0">
               <div className="flex items-center gap-2.5">
                 <HelpCircle size={22} className="text-brand-blue" />
@@ -502,7 +502,7 @@ export default function CreateInternationalTournamentPage() {
 
             {/* Questions List */}
             {questions.length === 0 ? (
-              <div className="py-16 text-center text-slate-400 bg-slate-50/50 dark:bg-slate-800/30 rounded-3xl border border-dashed border-slate-200 dark:border-slate-800 space-y-2">
+              <div className="flex-1 flex flex-col items-center justify-center py-12 text-center text-slate-400 bg-slate-50/50 dark:bg-slate-800/30 rounded-2xl border border-dashed border-slate-200 dark:border-slate-800 space-y-2 my-auto">
                 <HelpCircle size={32} className="mx-auto mb-1 opacity-40 text-slate-400" />
                 <p className="text-sm font-semibold">Hali savollar qo'shilmadi</p>
                 <button
@@ -513,7 +513,7 @@ export default function CreateInternationalTournamentPage() {
                 </button>
               </div>
             ) : (
-              <div className="space-y-3 max-h-[calc(100vh-390px)] min-h-[220px] overflow-y-auto pr-1.5 custom-scrollbar">
+              <div className="flex-1 min-h-0 overflow-y-auto pr-1.5 space-y-3 custom-scrollbar overscroll-contain py-2">
                 {questions.map((q, idx) => (
                   <div
                     key={q.id}
@@ -572,7 +572,7 @@ export default function CreateInternationalTournamentPage() {
             )}
 
             {/* Sequential Step Controls */}
-            <div className="flex items-center justify-between pt-4 border-t border-slate-100 dark:border-slate-800/50 shrink-0">
+            <div className="flex items-center justify-between pt-4 border-t border-slate-100 dark:border-slate-800/50 shrink-0 mt-auto">
               <button
                 onClick={() => setCurrentStep("basic")}
                 className="px-4 py-2.5 text-xs sm:text-sm font-bold text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-200 cursor-pointer"
@@ -591,405 +591,6 @@ export default function CreateInternationalTournamentPage() {
                 <ArrowRight size={16} />
               </button>
             </div>
-
-            {/* Question Editor Modal (1:1 with /admin/tournaments/create) */}
-            {editingQuestion && (
-              <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-sm">
-                <div className="bg-white dark:bg-slate-900 rounded-3xl shadow-xl w-full max-w-lg overflow-hidden border border-slate-200/80 dark:border-slate-800 p-6 space-y-4">
-                  <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-3">
-                    <h3 className="font-bold text-base text-slate-800 dark:text-slate-100">
-                      Savolni Tahrirlash
-                    </h3>
-                    <button
-                      onClick={() => setEditingQuestion(null)}
-                      className="text-slate-400 hover:text-slate-700 cursor-pointer"
-                    >
-                      <X size={18} />
-                    </button>
-                  </div>
-
-                  {/* Savol Turi Tanlash (Variantli yoki Yopiq Grid-In) */}
-                  <div className="flex items-center gap-2 p-1 bg-slate-100 dark:bg-slate-800 rounded-xl">
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setEditingQuestion({
-                          ...editingQuestion,
-                          question_type: "multiple_choice",
-                          options: editingQuestion.options || { A: "", B: "", C: "", D: "" },
-                          correct_answer: (["A", "B", "C", "D"].includes(editingQuestion.correct_answer) ? editingQuestion.correct_answer : "A")
-                        });
-                      }}
-                      className={`flex-1 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
-                        editingQuestion.question_type === "multiple_choice"
-                          ? "bg-white dark:bg-slate-900 text-brand-blue shadow-sm"
-                          : "text-slate-500 hover:text-slate-800 dark:hover:text-slate-200"
-                      }`}
-                    >
-                      🔘 4-Variantli Savol
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setEditingQuestion({
-                          ...editingQuestion,
-                          question_type: "grid_in",
-                          correct_answer: editingQuestion.correct_answer === "A" ? "" : editingQuestion.correct_answer
-                        });
-                      }}
-                      className={`flex-1 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
-                        editingQuestion.question_type === "grid_in"
-                          ? "bg-white dark:bg-slate-900 text-brand-blue shadow-sm"
-                          : "text-slate-500 hover:text-slate-800 dark:hover:text-slate-200"
-                      }`}
-                    >
-                      🔢 SAT Yopiq (Grid-In)
-                    </button>
-                  </div>
-
-                  <div className="space-y-3.5 max-h-[70vh] overflow-y-auto custom-scrollbar pr-1">
-                    <div>
-                      <div className="flex items-center justify-between mb-1.5">
-                        <label className="text-xs font-bold text-slate-600 dark:text-slate-300 uppercase tracking-wider">
-                          Savol Matni *
-                        </label>
-                        <button
-                          type="button"
-                          onClick={() =>
-                            setActiveMathField(activeMathField === "question" ? null : "question")
-                          }
-                          className={`px-2.5 py-1 rounded-lg font-black text-[11px] transition-all flex items-center gap-1 border cursor-pointer ${
-                            activeMathField === "question"
-                              ? "bg-brand-blue text-white border-brand-blue shadow-sm"
-                              : "bg-brand-blue/10 hover:bg-brand-blue hover:text-white text-brand-blue dark:text-blue-300 border-brand-blue/20"
-                          }`}
-                        >
-                          <Calculator size={13} />
-                          <span>Formula ∑</span>
-                        </button>
-                      </div>
-                      <textarea
-                        value={editingQuestion.question_text}
-                        onChange={(e) =>
-                          setEditingQuestion({
-                            ...editingQuestion,
-                            question_text: e.target.value
-                          })
-                        }
-                        className="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs sm:text-sm font-medium outline-none resize-none h-24"
-                        placeholder="Savol matnini kiriting (masalan: $x^2 + y^2 = z^2$)..."
-                      />
-
-                      {/* Inline Expandable Formula Panel for Question */}
-                      <InlineMathPanel
-                        isOpen={activeMathField === "question"}
-                        onClose={() => setActiveMathField(null)}
-                        title="Savol uchun formulalar"
-                        onInsert={(formulaText) => {
-                          const current = editingQuestion.question_text || "";
-                          setEditingQuestion({
-                            ...editingQuestion,
-                            question_text: current ? `${current} ${formulaText}` : formulaText
-                          });
-                        }}
-                      />
-
-                      {editingQuestion.question_text && (
-                        <div className="mt-2 p-3 bg-brand-blue/5 dark:bg-brand-blue/10 border border-brand-blue/20 rounded-xl space-y-1">
-                          <span className="text-[10px] uppercase font-bold text-brand-blue tracking-wider block">
-                            Savol Matni Ko'rinishi (Formula Live Preview):
-                          </span>
-                          <div className="text-xs sm:text-sm font-bold text-slate-800 dark:text-slate-100">
-                            <MathRenderer content={editingQuestion.question_text} />
-                          </div>
-                        </div>
-                      )}
-                    </div>
-
-                    {/* Question Image Upload Section */}
-                    <div>
-                      <div className="flex items-center justify-between mb-1.5">
-                        <label className="text-xs font-bold text-slate-600 dark:text-slate-300 uppercase tracking-wider flex items-center gap-1.5">
-                          <ImageIcon size={14} className="text-brand-blue" />
-                          Savol Rasmi (Ixtiyoriy)
-                        </label>
-                        {editingQuestion.image_url && (
-                          <button
-                            type="button"
-                            onClick={() =>
-                              setEditingQuestion({ ...editingQuestion, image_url: null })
-                            }
-                            className="text-[11px] font-bold text-red-500 hover:underline cursor-pointer"
-                          >
-                            Rasmni o'chirish
-                          </button>
-                        )}
-                      </div>
-
-                      {editingQuestion.image_url ? (
-                        <div className="relative rounded-2xl overflow-hidden border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 p-2 group max-h-48 flex items-center justify-center">
-                          <img
-                            src={editingQuestion.image_url}
-                            alt="Savol rasmi"
-                            className="max-h-44 w-auto rounded-xl object-contain shadow-sm"
-                          />
-                        </div>
-                      ) : (
-                        <label className="flex flex-col items-center justify-center p-3.5 border-2 border-dashed border-slate-200 dark:border-slate-700 rounded-2xl bg-slate-50/50 dark:bg-slate-800/30 hover:bg-slate-100/50 dark:hover:bg-slate-800/60 cursor-pointer transition-colors text-center">
-                          {uploadingImg ? (
-                            <div className="flex items-center gap-2 text-xs font-bold text-brand-blue py-1.5">
-                              <Loader2 size={16} className="animate-spin" />
-                              <span>Rasm yuklanmoqda...</span>
-                            </div>
-                          ) : (
-                            <>
-                              <UploadCloud size={22} className="text-brand-blue mb-1" />
-                              <span className="text-xs font-bold text-slate-700 dark:text-slate-200">
-                                Savol uchun rasm yuklang
-                              </span>
-                              <span className="text-[10px] text-slate-400 font-medium mt-0.5">
-                                PNG, JPG, WEBP (Maks: 5MB)
-                              </span>
-                            </>
-                          )}
-                          <input
-                            type="file"
-                            accept="image/*"
-                            disabled={uploadingImg}
-                            onChange={async (e) => {
-                              const file = e.target.files?.[0];
-                              if (!file) return;
-                              setUploadingImg(true);
-                              const url = await uploadQuestionImage(file);
-                              setUploadingImg(false);
-                              if (url) {
-                                setEditingQuestion({ ...editingQuestion, image_url: url });
-                                toast.success("Rasm yuklandi!");
-                              } else {
-                                toast.error("Rasm yuklashda xatolik yuz berdi");
-                              }
-                            }}
-                            className="hidden"
-                          />
-                        </label>
-                      )}
-                    </div>
-
-                    {/* Options A, B, C, D (if Multiple Choice 1:1 with /admin/tournaments/create) */}
-                    {editingQuestion.question_type === "multiple_choice" && (
-                      <div className="space-y-2.5">
-                        <label className="block text-xs font-bold text-slate-600 dark:text-slate-300 uppercase tracking-wider">
-                          Javob Variantlari
-                        </label>
-                        {(["A", "B", "C", "D"] as const).map((optKey) => {
-                          const optVal = editingQuestion.options?.[optKey] || "";
-                          return (
-                            <div key={optKey} className="space-y-1">
-                              <div className="flex items-center gap-2">
-                                <span className="text-xs font-bold text-slate-400 w-5 text-center">
-                                  {optKey}:
-                                </span>
-                                <input
-                                  type="text"
-                                  value={optVal}
-                                  onChange={(e) =>
-                                    setEditingQuestion({
-                                      ...editingQuestion,
-                                      options: {
-                                        ...(editingQuestion.options || { A: "", B: "", C: "", D: "" }),
-                                        [optKey]: e.target.value
-                                      }
-                                    })
-                                  }
-                                  className="flex-1 px-3.5 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs sm:text-sm font-medium outline-none"
-                                  placeholder={`Variant ${optKey}`}
-                                />
-                                <button
-                                  type="button"
-                                  onClick={() =>
-                                    setActiveMathField(
-                                      activeMathField === optKey ? null : optKey
-                                    )
-                                  }
-                                  className={`px-2.5 py-1.5 rounded-lg font-black text-[11px] transition-all flex items-center gap-1 border cursor-pointer shrink-0 ${
-                                    activeMathField === optKey
-                                      ? "bg-brand-blue text-white border-brand-blue shadow-sm"
-                                      : "bg-brand-blue/10 hover:bg-brand-blue hover:text-white text-brand-blue dark:text-blue-300 border-brand-blue/20"
-                                  }`}
-                                >
-                                  <Calculator size={13} />
-                                  <span>∑</span>
-                                </button>
-                                <label className="flex items-center gap-1 cursor-pointer shrink-0">
-                                  <input
-                                    type="radio"
-                                    name="correct_opt"
-                                    checked={editingQuestion.correct_answer === optKey}
-                                    onChange={() =>
-                                      setEditingQuestion({
-                                        ...editingQuestion,
-                                        correct_answer: optKey as "A" | "B" | "C" | "D"
-                                      })
-                                    }
-                                    className="w-4 h-4 text-emerald-500 focus:ring-emerald-500"
-                                  />
-                                  <span className="text-[11px] font-bold text-slate-500">To'g'ri</span>
-                                </label>
-                              </div>
-
-                              {/* Inline Expandable Formula Panel for Options */}
-                              <InlineMathPanel
-                                isOpen={activeMathField === optKey}
-                                onClose={() => setActiveMathField(null)}
-                                title={`Variant ${optKey} uchun formulalar`}
-                                onInsert={(formulaText) => {
-                                  const prevVal = editingQuestion.options?.[optKey] || "";
-                                  setEditingQuestion({
-                                    ...editingQuestion,
-                                    options: {
-                                      ...(editingQuestion.options || { A: "", B: "", C: "", D: "" }),
-                                      [optKey]: prevVal ? `${prevVal} ${formulaText}` : formulaText
-                                    }
-                                  });
-                                }}
-                              />
-
-                              {/* Live Option Formula Preview */}
-                              {optVal &&
-                                (optVal.includes("$") ||
-                                  optVal.includes("\\") ||
-                                  optVal.includes("^") ||
-                                  optVal.includes("_")) && (
-                                  <div className="ml-7 text-xs font-semibold text-slate-500 flex items-center gap-2 bg-slate-50 dark:bg-slate-800/40 px-3 py-1 rounded-lg border border-slate-200/50 dark:border-slate-700/50">
-                                    <span className="text-[10px] text-brand-blue uppercase font-bold">
-                                      Ko'rinishi:
-                                    </span>
-                                    <MathRenderer content={optVal} inline />
-                                  </div>
-                                )}
-                            </div>
-                          );
-                        })}
-                      </div>
-                    )}
-
-                    {/* Grid-In Closed Answer Fields (if Grid-In) */}
-                    {editingQuestion.question_type === "grid_in" && (
-                      <div className="space-y-3 p-3.5 bg-indigo-50/50 dark:bg-indigo-950/20 border border-indigo-500/20 rounded-2xl">
-                        <div>
-                          <div className="flex items-center justify-between mb-1">
-                            <label className="text-xs font-bold text-indigo-800 dark:text-indigo-300 uppercase tracking-wider">
-                              To'g'ri Javob (Aniq son yoki kasr) *
-                            </label>
-                            <button
-                              type="button"
-                              onClick={() => setActiveMathField(activeMathField === "grid_in" ? null : "grid_in")}
-                              className="text-[11px] font-bold text-indigo-600 dark:text-indigo-400 flex items-center gap-1"
-                            >
-                              <Calculator size={12} />
-                              <span>Formula</span>
-                            </button>
-                          </div>
-                          <input
-                            type="text"
-                            value={editingQuestion.correct_answer}
-                            onChange={(e) =>
-                              setEditingQuestion({
-                                ...editingQuestion,
-                                correct_answer: e.target.value
-                              })
-                            }
-                            placeholder="Masalan: 24 yoki 3/4"
-                            className="w-full px-3.5 py-2 bg-white dark:bg-slate-900 border border-indigo-500/30 rounded-xl text-sm font-bold font-mono text-indigo-700 dark:text-indigo-300 outline-none"
-                          />
-
-                          <InlineMathPanel
-                            isOpen={activeMathField === "grid_in"}
-                            onClose={() => setActiveMathField(null)}
-                            title="Javob uchun formulalar"
-                            onInsert={(formulaText) => {
-                              setEditingQuestion({
-                                ...editingQuestion,
-                                correct_answer: formulaText
-                              });
-                            }}
-                          />
-                        </div>
-
-                        <div>
-                          <label className="block text-xs font-bold text-slate-600 dark:text-slate-300 uppercase tracking-wider mb-1">
-                            Muqobil qabul qilinadigan javoblar (Vergul bilan ajrating)
-                          </label>
-                          <input
-                            type="text"
-                            value={acceptedAnswersInput}
-                            onChange={(e) => setAcceptedAnswersInput(e.target.value)}
-                            placeholder="Masalan: 3/4, 0.75, .75"
-                            className="w-full px-3.5 py-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-mono text-slate-800 dark:text-slate-200 outline-none"
-                          />
-                        </div>
-                      </div>
-                    )}
-
-                    {/* Points & Explanation (1:1 with /admin/tournaments/create) */}
-                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                      <div className="space-y-1.5">
-                        <label className="text-xs font-bold text-slate-600 dark:text-slate-300 uppercase tracking-wider">
-                          Savol Bali
-                        </label>
-                        <input
-                          type="number"
-                          step="0.1"
-                          value={editingQuestion.points}
-                          onChange={(e) =>
-                            setEditingQuestion({
-                              ...editingQuestion,
-                              points: Number(e.target.value)
-                            })
-                          }
-                          className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-medium outline-none"
-                        />
-                      </div>
-
-                      <div className="sm:col-span-2 space-y-1.5">
-                        <label className="text-xs font-bold text-slate-600 dark:text-slate-300 uppercase tracking-wider">
-                          Tushuntirish / Izoh (Ixtiyoriy)
-                        </label>
-                        <input
-                          type="text"
-                          value={editingQuestion.explanation || ""}
-                          onChange={(e) =>
-                            setEditingQuestion({
-                              ...editingQuestion,
-                              explanation: e.target.value
-                            })
-                          }
-                          placeholder="Nima uchun bu javob to'g'ri?"
-                          className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-medium outline-none"
-                        />
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="flex items-center justify-end gap-3 pt-3 border-t border-slate-100 dark:border-slate-800">
-                    <button
-                      type="button"
-                      onClick={() => setEditingQuestion(null)}
-                      className="px-4 py-2 text-xs font-bold text-slate-500 hover:text-slate-800 cursor-pointer"
-                    >
-                      Bekor qilish
-                    </button>
-                    <button
-                      type="button"
-                      onClick={saveQuestion}
-                      className="px-4 py-2.5 text-xs font-bold text-white bg-brand-blue hover:bg-blue-600 rounded-xl cursor-pointer"
-                    >
-                      Saqlash
-                    </button>
-                  </div>
-                </div>
-              </div>
-            )}
           </div>
         )}
 
@@ -1059,6 +660,406 @@ export default function CreateInternationalTournamentPage() {
           </div>
         )}
       </div>
+
+      {/* Question Editor Modal - Root level with z-[100] so it overlays sticky headers & backdrop-blur cards */}
+      {editingQuestion && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-950/60 backdrop-blur-sm overflow-y-auto">
+          <div className="bg-white dark:bg-slate-900 rounded-3xl shadow-2xl w-full max-w-lg overflow-hidden border border-slate-200/80 dark:border-slate-800 p-6 space-y-4 my-auto">
+            <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-3">
+              <h3 className="font-bold text-base text-slate-800 dark:text-slate-100">
+                Savolni Tahrirlash
+              </h3>
+              <button
+                onClick={() => setEditingQuestion(null)}
+                className="text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 cursor-pointer"
+              >
+                <X size={18} />
+              </button>
+            </div>
+
+            {/* Savol Turi Tanlash (Variantli yoki Yopiq Grid-In) */}
+            <div className="flex items-center gap-2 p-1 bg-slate-100 dark:bg-slate-800 rounded-xl">
+              <button
+                type="button"
+                onClick={() => {
+                  setEditingQuestion({
+                    ...editingQuestion,
+                    question_type: "multiple_choice",
+                    options: editingQuestion.options || { A: "", B: "", C: "", D: "" },
+                    correct_answer: (["A", "B", "C", "D"].includes(editingQuestion.correct_answer) ? editingQuestion.correct_answer : "A")
+                  });
+                }}
+                className={`flex-1 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                  editingQuestion.question_type === "multiple_choice"
+                    ? "bg-white dark:bg-slate-900 text-brand-blue shadow-sm"
+                    : "text-slate-500 hover:text-slate-800 dark:hover:text-slate-200"
+                }`}
+              >
+                🔘 4-Variantli Savol
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setEditingQuestion({
+                    ...editingQuestion,
+                    question_type: "grid_in",
+                    correct_answer: editingQuestion.correct_answer === "A" ? "" : editingQuestion.correct_answer
+                  });
+                }}
+                className={`flex-1 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                  editingQuestion.question_type === "grid_in"
+                    ? "bg-white dark:bg-slate-900 text-brand-blue shadow-sm"
+                    : "text-slate-500 hover:text-slate-800 dark:hover:text-slate-200"
+                }`}
+              >
+                🔢 SAT Yopiq (Grid-In)
+              </button>
+            </div>
+
+            <div className="space-y-3.5 max-h-[70vh] overflow-y-auto custom-scrollbar pr-1">
+              <div>
+                <div className="flex items-center justify-between mb-1.5">
+                  <label className="text-xs font-bold text-slate-600 dark:text-slate-300 uppercase tracking-wider">
+                    Savol Matni *
+                  </label>
+                  <button
+                    type="button"
+                    onClick={() =>
+                      setActiveMathField(activeMathField === "question" ? null : "question")
+                    }
+                    className={`px-2.5 py-1 rounded-lg font-black text-[11px] transition-all flex items-center gap-1 border cursor-pointer ${
+                      activeMathField === "question"
+                        ? "bg-brand-blue text-white border-brand-blue shadow-sm"
+                        : "bg-brand-blue/10 hover:bg-brand-blue hover:text-white text-brand-blue dark:text-blue-300 border-brand-blue/20"
+                    }`}
+                  >
+                    <Calculator size={13} />
+                    <span>Formula ∑</span>
+                  </button>
+                </div>
+                <textarea
+                  value={editingQuestion.question_text}
+                  onChange={(e) =>
+                    setEditingQuestion({
+                      ...editingQuestion,
+                      question_text: e.target.value
+                    })
+                  }
+                  className="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs sm:text-sm font-medium outline-none resize-none h-24"
+                  placeholder="Savol matnini kiriting (masalan: $x^2 + y^2 = z^2$)..."
+                />
+
+                {/* Inline Expandable Formula Panel for Question */}
+                <InlineMathPanel
+                  isOpen={activeMathField === "question"}
+                  onClose={() => setActiveMathField(null)}
+                  title="Savol uchun formulalar"
+                  onInsert={(formulaText) => {
+                    const current = editingQuestion.question_text || "";
+                    setEditingQuestion({
+                      ...editingQuestion,
+                      question_text: current ? `${current} ${formulaText}` : formulaText
+                    });
+                  }}
+                />
+
+                {editingQuestion.question_text && (
+                  <div className="mt-2 p-3 bg-brand-blue/5 dark:bg-brand-blue/10 border border-brand-blue/20 rounded-xl space-y-1">
+                    <span className="text-[10px] uppercase font-bold text-brand-blue tracking-wider block">
+                      Savol Matni Ko'rinishi (Formula Live Preview):
+                    </span>
+                    <div className="text-xs sm:text-sm font-bold text-slate-800 dark:text-slate-100">
+                      <MathRenderer content={editingQuestion.question_text} />
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* Question Image Upload Section */}
+              <div>
+                <div className="flex items-center justify-between mb-1.5">
+                  <label className="text-xs font-bold text-slate-600 dark:text-slate-300 uppercase tracking-wider flex items-center gap-1.5">
+                    <ImageIcon size={14} className="text-brand-blue" />
+                    Savol Rasmi (Ixtiyoriy)
+                  </label>
+                  {editingQuestion.image_url && (
+                    <button
+                      type="button"
+                      onClick={() =>
+                        setEditingQuestion({ ...editingQuestion, image_url: null })
+                      }
+                      className="text-[11px] font-bold text-red-500 hover:underline cursor-pointer"
+                    >
+                      Rasmni o'chirish
+                    </button>
+                  )}
+                </div>
+
+                {editingQuestion.image_url ? (
+                  <div className="relative rounded-2xl overflow-hidden border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 p-2 group max-h-48 flex items-center justify-center">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img
+                      src={editingQuestion.image_url}
+                      alt="Savol rasmi"
+                      className="max-h-44 w-auto rounded-xl object-contain shadow-sm"
+                    />
+                  </div>
+                ) : (
+                  <label className="flex flex-col items-center justify-center p-3.5 border-2 border-dashed border-slate-200 dark:border-slate-700 rounded-2xl bg-slate-50/50 dark:bg-slate-800/30 hover:bg-slate-100/50 dark:hover:bg-slate-800/60 cursor-pointer transition-colors text-center">
+                    {uploadingImg ? (
+                      <div className="flex items-center gap-2 text-xs font-bold text-brand-blue py-1.5">
+                        <Loader2 size={16} className="animate-spin" />
+                        <span>Rasm yuklanmoqda...</span>
+                      </div>
+                    ) : (
+                      <>
+                        <UploadCloud size={22} className="text-brand-blue mb-1" />
+                        <span className="text-xs font-bold text-slate-700 dark:text-slate-200">
+                          Savol uchun rasm yuklang
+                        </span>
+                        <span className="text-[10px] text-slate-400 font-medium mt-0.5">
+                          PNG, JPG, WEBP (Maks: 5MB)
+                        </span>
+                      </>
+                    )}
+                    <input
+                      type="file"
+                      accept="image/*"
+                      disabled={uploadingImg}
+                      onChange={async (e) => {
+                        const file = e.target.files?.[0];
+                        if (!file) return;
+                        setUploadingImg(true);
+                        const url = await uploadQuestionImage(file);
+                        setUploadingImg(false);
+                        if (url) {
+                          setEditingQuestion({ ...editingQuestion, image_url: url });
+                          toast.success("Rasm yuklandi!");
+                        } else {
+                          toast.error("Rasm yuklashda xatolik yuz berdi");
+                        }
+                      }}
+                      className="hidden"
+                    />
+                  </label>
+                )}
+              </div>
+
+              {/* Options A, B, C, D (if Multiple Choice 1:1 with /admin/tournaments/create) */}
+              {editingQuestion.question_type === "multiple_choice" && (
+                <div className="space-y-2.5">
+                  <label className="block text-xs font-bold text-slate-600 dark:text-slate-300 uppercase tracking-wider">
+                    Javob Variantlari
+                  </label>
+                  {(["A", "B", "C", "D"] as const).map((optKey) => {
+                    const optVal = editingQuestion.options?.[optKey] || "";
+                    return (
+                      <div key={optKey} className="space-y-1">
+                        <div className="flex items-center gap-2">
+                          <span className="text-xs font-bold text-slate-400 w-5 text-center">
+                            {optKey}:
+                          </span>
+                          <input
+                            type="text"
+                            value={optVal}
+                            onChange={(e) =>
+                              setEditingQuestion({
+                                ...editingQuestion,
+                                options: {
+                                  ...(editingQuestion.options || { A: "", B: "", C: "", D: "" }),
+                                  [optKey]: e.target.value
+                                }
+                              })
+                            }
+                            className="flex-1 px-3.5 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs sm:text-sm font-medium outline-none"
+                            placeholder={`Variant ${optKey}`}
+                          />
+                          <button
+                            type="button"
+                            onClick={() =>
+                              setActiveMathField(
+                                activeMathField === optKey ? null : optKey
+                              )
+                            }
+                            className={`px-2.5 py-1.5 rounded-lg font-black text-[11px] transition-all flex items-center gap-1 border cursor-pointer shrink-0 ${
+                              activeMathField === optKey
+                                ? "bg-brand-blue text-white border-brand-blue shadow-sm"
+                                : "bg-brand-blue/10 hover:bg-brand-blue hover:text-white text-brand-blue dark:text-blue-300 border-brand-blue/20"
+                            }`}
+                          >
+                            <Calculator size={13} />
+                            <span>∑</span>
+                          </button>
+                          <label className="flex items-center gap-1 cursor-pointer shrink-0">
+                            <input
+                              type="radio"
+                              name="correct_opt"
+                              checked={editingQuestion.correct_answer === optKey}
+                              onChange={() =>
+                                setEditingQuestion({
+                                  ...editingQuestion,
+                                  correct_answer: optKey as "A" | "B" | "C" | "D"
+                                })
+                              }
+                              className="w-4 h-4 text-emerald-500 focus:ring-emerald-500"
+                            />
+                            <span className="text-[11px] font-bold text-slate-500">To'g'ri</span>
+                          </label>
+                        </div>
+
+                        {/* Inline Expandable Formula Panel for Options */}
+                        <InlineMathPanel
+                          isOpen={activeMathField === optKey}
+                          onClose={() => setActiveMathField(null)}
+                          title={`Variant ${optKey} uchun formulalar`}
+                          onInsert={(formulaText) => {
+                            const prevVal = editingQuestion.options?.[optKey] || "";
+                            setEditingQuestion({
+                              ...editingQuestion,
+                              options: {
+                                ...(editingQuestion.options || { A: "", B: "", C: "", D: "" }),
+                                [optKey]: prevVal ? `${prevVal} ${formulaText}` : formulaText
+                              }
+                            });
+                          }}
+                        />
+
+                        {/* Live Option Formula Preview */}
+                        {optVal &&
+                          (optVal.includes("$") ||
+                            optVal.includes("\\") ||
+                            optVal.includes("^") ||
+                            optVal.includes("_")) && (
+                            <div className="ml-7 text-xs font-semibold text-slate-500 flex items-center gap-2 bg-slate-50 dark:bg-slate-800/40 px-3 py-1 rounded-lg border border-slate-200/50 dark:border-slate-700/50">
+                              <span className="text-[10px] text-brand-blue uppercase font-bold">
+                                Ko'rinishi:
+                              </span>
+                              <MathRenderer content={optVal} inline />
+                            </div>
+                          )}
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+
+              {/* Grid-In Closed Answer Fields (if Grid-In) */}
+              {editingQuestion.question_type === "grid_in" && (
+                <div className="space-y-3 p-3.5 bg-indigo-50/50 dark:bg-indigo-950/20 border border-indigo-500/20 rounded-2xl">
+                  <div>
+                    <div className="flex items-center justify-between mb-1">
+                      <label className="text-xs font-bold text-indigo-800 dark:text-indigo-300 uppercase tracking-wider">
+                        To'g'ri Javob (Aniq son yoki kasr) *
+                      </label>
+                      <button
+                        type="button"
+                        onClick={() => setActiveMathField(activeMathField === "grid_in" ? null : "grid_in")}
+                        className="text-[11px] font-bold text-indigo-600 dark:text-indigo-400 flex items-center gap-1"
+                      >
+                        <Calculator size={12} />
+                        <span>Formula</span>
+                      </button>
+                    </div>
+                    <input
+                      type="text"
+                      value={editingQuestion.correct_answer}
+                      onChange={(e) =>
+                        setEditingQuestion({
+                          ...editingQuestion,
+                          correct_answer: e.target.value
+                        })
+                      }
+                      placeholder="Masalan: 24 yoki 3/4"
+                      className="w-full px-3.5 py-2 bg-white dark:bg-slate-900 border border-indigo-500/30 rounded-xl text-sm font-bold font-mono text-indigo-700 dark:text-indigo-300 outline-none"
+                    />
+
+                    <InlineMathPanel
+                      isOpen={activeMathField === "grid_in"}
+                      onClose={() => setActiveMathField(null)}
+                      title="Javob uchun formulalar"
+                      onInsert={(formulaText) => {
+                        setEditingQuestion({
+                          ...editingQuestion,
+                          correct_answer: formulaText
+                        });
+                      }}
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-bold text-slate-600 dark:text-slate-300 uppercase tracking-wider mb-1">
+                      Muqobil qabul qilinadigan javoblar (Vergul bilan ajrating)
+                    </label>
+                    <input
+                      type="text"
+                      value={acceptedAnswersInput}
+                      onChange={(e) => setAcceptedAnswersInput(e.target.value)}
+                      placeholder="Masalan: 3/4, 0.75, .75"
+                      className="w-full px-3.5 py-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-mono text-slate-800 dark:text-slate-200 outline-none"
+                    />
+                  </div>
+                </div>
+              )}
+
+              {/* Points & Explanation (1:1 with /admin/tournaments/create) */}
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                <div className="space-y-1.5">
+                  <label className="text-xs font-bold text-slate-600 dark:text-slate-300 uppercase tracking-wider">
+                    Savol Bali
+                  </label>
+                  <input
+                    type="number"
+                    step="0.1"
+                    value={editingQuestion.points}
+                    onChange={(e) =>
+                      setEditingQuestion({
+                        ...editingQuestion,
+                        points: Number(e.target.value)
+                      })
+                    }
+                    className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-medium outline-none"
+                  />
+                </div>
+
+                <div className="sm:col-span-2 space-y-1.5">
+                  <label className="text-xs font-bold text-slate-600 dark:text-slate-300 uppercase tracking-wider">
+                    Tushuntirish / Izoh (Ixtiyoriy)
+                  </label>
+                  <input
+                    type="text"
+                    value={editingQuestion.explanation || ""}
+                    onChange={(e) =>
+                      setEditingQuestion({
+                        ...editingQuestion,
+                        explanation: e.target.value
+                      })
+                    }
+                    placeholder="Nima uchun bu javob to'g'ri?"
+                    className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-medium outline-none"
+                  />
+                </div>
+              </div>
+            </div>
+
+            <div className="flex items-center justify-end gap-3 pt-3 border-t border-slate-100 dark:border-slate-800">
+              <button
+                type="button"
+                onClick={() => setEditingQuestion(null)}
+                className="px-4 py-2 text-xs font-bold text-slate-500 hover:text-slate-800 cursor-pointer"
+              >
+                Bekor qilish
+              </button>
+              <button
+                type="button"
+                onClick={saveQuestion}
+                className="px-4 py-2.5 text-xs font-bold text-white bg-brand-blue hover:bg-blue-600 rounded-xl cursor-pointer"
+              >
+                Saqlash
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

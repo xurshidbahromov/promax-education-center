@@ -52,3 +52,6 @@ next-env.d.ts
 scratch/
 temp/
 tmp/
+
+# Runtime Data & Trackers
+src/data/tournament_reminders.json
