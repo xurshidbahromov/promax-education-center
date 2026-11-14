@@ -18,19 +18,6 @@ export default function QueryProvider({ children }: { children: React.ReactNode 
     },
   }));
 
-  // Background reminder check for tournaments every 30 seconds
-  useEffect(() => {
-    const checkReminders = () => {
-      fetch('/api/tournaments/reminders', {
-        method: 'GET',
-        cache: 'no-store'
-      }).catch(() => {});
-    };
-
-    checkReminders();
-    const interval = setInterval(checkReminders, 30 * 1000);
-    return () => clearInterval(interval);
-  }, []);
 
   return (
     <QueryClientProvider client={queryClient}>
