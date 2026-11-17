@@ -1,59 +1,64 @@
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { createClient } from '@/utils/supabase/client';
-import { getDashboardStats, getRecentResultsForChart, getStudentActivity, getLeaderboard, getAvailableExams, getUserRank } from '@/lib/supabase-queries';
+import { getDashboardStats, getRecentResultsForChart, getStudentActivity, getLeaderboard, getAvailableExams, getUserRank, getSubjects } from '@/lib/supabase-queries';
 import { getActiveStudentAnnouncements } from '@/lib/announcements';
 
 // Hook to get current user ID
 export const useCurrentUser = () => {
- return useQuery({
- queryKey: ['currentUser'],
- queryFn: async () => {
- const supabase = createClient();
- const { data: { user } } = await supabase.auth.getUser();
- return user;
- },
- staleTime: Infinity, // User session doesn't change often
- });
+  return useQuery({
+    queryKey: ['currentUser'],
+    queryFn: async () => {
+      const supabase = createClient();
+      const { data: { user } } = await supabase.auth.getUser();
+      return user;
+    },
+    staleTime: Infinity, // User session doesn't change often
+  });
 };
 
-// Hook to get user profile
+// Hook to get user profile (event-driven invalidation instead of 30s polling)
 export const useUserProfile = (userId: string | undefined) => {
- return useQuery({
- queryKey: ['userProfile', userId],
- queryFn: async () => {
- if (!userId) return null;
- const supabase = createClient();
- const { data: profile } = await supabase
- .from('profiles')
- .select('full_name, coins, role, avatar_url')
- .eq('id', userId)
- .single();
- return profile;
- },
- enabled: !!userId,
-    staleTime: 30 * 1000,
-    refetchOnWindowFocus: true,
-    refetchInterval: 30 * 1000, // Sync balance smoothly every 30 seconds
- });
+  return useQuery({
+    queryKey: ['userProfile', userId],
+    queryFn: async () => {
+      if (!userId) return null;
+      const supabase = createClient();
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('full_name, coins, role, avatar_url')
+        .eq('id', userId)
+        .single();
+      return profile;
+    },
+    enabled: !!userId,
+    staleTime: 2 * 60 * 1000,
+    refetchOnWindowFocus: false,
+  });
 };
 
 // Hook to get FULL user profile (used on Profile and Settings pages)
 export const useFullUserProfile = (userId: string | undefined) => {
- return useQuery({
- queryKey: ['fullUserProfile', userId],
- queryFn: async () => {
- if (!userId) return null;
- const supabase = createClient();
+  const queryClient = useQueryClient();
 
- // First get the email from auth
- const { data: { user } } = await supabase.auth.getUser();
+  return useQuery({
+    queryKey: ['fullUserProfile', userId],
+    queryFn: async () => {
+      if (!userId) return null;
+      const supabase = createClient();
 
- // Then get the profile from public.profiles
- const { data: profile, error } = await supabase
- .from('profiles')
- .select('*')
- .eq('id', userId)
- .single();
+      // Reuse cached currentUser if available to avoid extra auth.getUser() call
+      let user = queryClient.getQueryData<any>(['currentUser']);
+      if (!user) {
+        const { data } = await supabase.auth.getUser();
+        user = data.user;
+      }
+
+      // Then get the profile from public.profiles
+      const { data: profile, error } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', userId)
+        .single();
 
  if (error && error.code !== 'PGRST116') { // PGRST116 is no rows found
  console.error('Error fetching profile:', error);
@@ -140,5 +145,13 @@ export const useAnnouncements = () => {
     queryFn: async () => {
       return getActiveStudentAnnouncements();
     },
+  });
+};
+
+export const useStudentSubjects = () => {
+  return useQuery({
+    queryKey: ['studentSubjects'],
+    queryFn: () => getSubjects(),
+    staleTime: 5 * 60 * 1000,
   });
 };

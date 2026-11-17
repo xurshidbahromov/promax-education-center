@@ -740,34 +740,37 @@ export async function getAdminStats() {
   const supabase = createClient();
 
   try {
-    const { count: totalStudents } = await supabase
-      .from('profiles')
-      .select('*', { count: 'exact', head: true })
-      .neq('role', 'teacher')
-      .neq('role', 'admin');
-
-    const { count: activeTeachers } = await supabase
-      .from('profiles')
-      .select('*', { count: 'exact', head: true })
-      .eq('role', 'teacher');
-
-    const { count: totalGroups } = await supabase
-      .from('groups')
-      .select('*', { count: 'exact', head: true })
-      .eq('status', 'active');
-
-    const { count: totalTests } = await supabase
-      .from('exams')
-      .select('*', { count: 'exact', head: true });
-
-    // Calculate current month's revenue
     const today = new Date();
     const currentMonth = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}`;
-    
-    const { data: paymentsData } = await supabase
-      .from('payments')
-      .select('amount')
-      .eq('month_year', currentMonth);
+
+    const [
+      { count: totalStudents },
+      { count: activeTeachers },
+      { count: totalGroups },
+      { count: totalTests },
+      { data: paymentsData }
+    ] = await Promise.all([
+      supabase
+        .from('profiles')
+        .select('*', { count: 'exact', head: true })
+        .neq('role', 'teacher')
+        .neq('role', 'admin'),
+      supabase
+        .from('profiles')
+        .select('*', { count: 'exact', head: true })
+        .eq('role', 'teacher'),
+      supabase
+        .from('groups')
+        .select('*', { count: 'exact', head: true })
+        .eq('status', 'active'),
+      supabase
+        .from('exams')
+        .select('*', { count: 'exact', head: true }),
+      supabase
+        .from('payments')
+        .select('amount')
+        .eq('month_year', currentMonth)
+    ]);
 
     const monthlyRevenueRaw = (paymentsData || []).reduce((acc, curr) => acc + (Number(curr.amount) || 0), 0);
 
@@ -794,28 +797,28 @@ export async function getAdminStats() {
 
 // Admin Dashboard Recent Activity
 export async function getRecentActivity() {
- const supabase = createClient();
+  const supabase = createClient();
 
- try {
- // 1. Latest Results (Completed Mock Exam)
- const { data: recentResults } = await supabase
- .from('results')
- .select(`
- id,
- created_at,
- total_score,
- student:profiles!results_student_id_fkey(full_name)
- `)
- .order('created_at', { ascending: false })
- .limit(5);
-
- // 2. Latest Registrations (New Student)
- const { data: recentUsers } = await supabase
- .from('profiles')
- .select('id, full_name, created_at, role')
- .eq('role', 'student')
- .order('created_at', { ascending: false })
- .limit(5);
+  try {
+    // Fetch latest results and latest student registrations in parallel
+    const [{ data: recentResults }, { data: recentUsers }] = await Promise.all([
+      supabase
+        .from('results')
+        .select(`
+          id,
+          created_at,
+          total_score,
+          student:profiles!results_student_id_fkey(full_name)
+        `)
+        .order('created_at', { ascending: false })
+        .limit(5),
+      supabase
+        .from('profiles')
+        .select('id, full_name, created_at, role')
+        .eq('role', 'student')
+        .order('created_at', { ascending: false })
+        .limit(5)
+    ]);
 
  // Normalize and merge
  const activities = [

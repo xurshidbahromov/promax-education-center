@@ -29,72 +29,93 @@ import { checkAndUpdateDailyStreak } from "@/lib/streak";
 import toast from "react-hot-toast";
 
 import { motion } from "framer-motion";
+import { useQueryClient } from "@tanstack/react-query";
 import SidebarBetaWidget from "@/components/ui/SidebarBetaWidget";
 import { Background } from "@/components/Background";
 
 export default function DashboardLayout({
- children,
+  children,
 }: {
- children: React.ReactNode;
+  children: React.ReactNode;
 }) {
- const [loading, setLoading] = useState(true);
- const router = useRouter();
- const supabase = createClient();
- const pathname = usePathname();
- const { t } = useLanguage();
+  const [loading, setLoading] = useState(true);
+  const router = useRouter();
+  const [supabase] = useState(() => createClient());
+  const queryClient = useQueryClient();
+  const pathname = usePathname();
+  const { t } = useLanguage();
 
- useEffect(() => {
- const checkUser = async () => {
- try {
- const { data: { user }, error } = await supabase.auth.getUser();
+  // Global event-driven cache invalidation for coins and profile updates
+  useEffect(() => {
+    const handleSync = () => {
+      queryClient.invalidateQueries({ queryKey: ['userProfile'] });
+      queryClient.invalidateQueries({ queryKey: ['fullUserProfile'] });
+      queryClient.invalidateQueries({ queryKey: ['dashboardStats'] });
+    };
+    window.addEventListener("promax_coins_updated", handleSync);
+    window.addEventListener("promax_profile_updated", handleSync);
+    return () => {
+      window.removeEventListener("promax_coins_updated", handleSync);
+      window.removeEventListener("promax_profile_updated", handleSync);
+    };
+  }, [queryClient]);
 
- if (error || !user) {
- router.push("/login");
- return;
- }
+  useEffect(() => {
+    const checkUser = async () => {
+      try {
+        const { data: { user }, error } = await supabase.auth.getUser();
 
- // Check user's role from profile
- const { data: profile, error: profileError } = await supabase
- .from('profiles')
- .select('role')
- .eq('id', user.id)
- .single();
+        if (error || !user) {
+          router.push("/login");
+          return;
+        }
 
- if (profileError || !profile) {
- console.error('Profile error:', profileError);
- await supabase.auth.signOut();
- router.push("/login");
- return;
- }
+        // Fetch profile once and seed React Query cache to eliminate double-fetch waterfall
+        const { data: profile, error: profileError } = await supabase
+          .from('profiles')
+          .select('full_name, coins, role, avatar_url')
+          .eq('id', user.id)
+          .single();
 
-  // Students, teachers, and staff can all access the dashboard
-  // Only redirect to admin if they are ONLY admin (not student/teacher using dashboard)
-  if (profile.role === 'admin') {
-    router.push("/admin");
-    return;
-  }
+        if (profileError || !profile) {
+          console.error('Profile error:', profileError);
+          await supabase.auth.signOut();
+          router.push("/login");
+          return;
+        }
 
- setLoading(false);
+        // Students, teachers, and staff can all access the dashboard
+        // Only redirect to admin if they are ONLY admin (not student/teacher using dashboard)
+        if (profile.role === 'admin') {
+          router.push("/admin");
+          return;
+        }
 
- // Check and update daily streak
- checkAndUpdateDailyStreak(user.id).then((res) => {
-   if (res.newlyAwarded) {
-     window.dispatchEvent(new CustomEvent("promax_streak_updated"));
-     window.dispatchEvent(new CustomEvent("promax_coins_updated"));
-     toast.success(`🔥 Kunlik faollik! +${res.rewardCoins} tanga qo'shildi!`, {
-       icon: "🔥",
-       duration: 4000,
-     });
-   }
- });
- } catch (err) {
- console.error('Auth check error:', err);
- router.push("/login");
- }
- };
+        // Seed React Query cache so child pages render immediately with 0 extra requests
+        queryClient.setQueryData(['currentUser'], user);
+        queryClient.setQueryData(['userProfile', user.id], profile);
 
- checkUser();
- }, [router, supabase]);
+        setLoading(false);
+
+        // Check and update daily streak
+        checkAndUpdateDailyStreak(user.id).then((res) => {
+          if (res.newlyAwarded) {
+            window.dispatchEvent(new CustomEvent("promax_streak_updated"));
+            window.dispatchEvent(new CustomEvent("promax_coins_updated"));
+            toast.success(`🔥 Kunlik faollik! +${res.rewardCoins} tanga qo'shildi!`, {
+              icon: "🔥",
+              duration: 4000,
+            });
+          }
+        });
+      } catch (err) {
+        console.error('Auth check error:', err);
+        router.push("/login");
+      }
+    };
+
+    checkUser();
+  }, [router, supabase, queryClient]);
 
  const handleLogout = async () => {
  await supabase.auth.signOut();
@@ -190,43 +211,32 @@ export default function DashboardLayout({
 
  {/* Main Content */}
  <div className="flex-1 flex flex-col min-w-0 relative z-10 h-screen overflow-hidden">
-  {/* Desktop Header (Island Style) */}
+  {/* Unified Responsive Top Bar (mounts NotificationBell & StreakPill only ONCE) */}
   {!isTakeTestPage && (
-  <div className="hidden lg:flex absolute top-4 right-6 z-50 justify-end pointer-events-none">
-  <div className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-2xl border border-gray-200/50 dark:border-slate-800/50 rounded-full flex items-center gap-2.5 px-4 py-2 shadow-xl shadow-brand-blue/5 pointer-events-auto transition-all duration-300">
-  <StreakPill />
-  <div className="w-px h-5 bg-slate-200 dark:bg-slate-800" />
-  <SidebarBetaWidget variant="pill" />
-  <div className="w-px h-5 bg-slate-200 dark:bg-slate-800" />
-  <NotificationBell />
-  </div>
-  </div>
-  )}
+  <div className="absolute top-4 left-4 right-4 lg:left-auto lg:right-6 z-50 flex items-center justify-between lg:justify-end pointer-events-none">
+    {/* Mobile Logo Island */}
+    <Link href="/dashboard" className="lg:hidden h-12 bg-white/80 dark:bg-slate-900/80 backdrop-blur-2xl border border-gray-200/50 dark:border-slate-800/50 rounded-full flex items-center justify-center gap-2.5 px-4 shadow-lg shadow-brand-blue/5 pointer-events-auto">
+      <div className="relative w-5 h-5 flex-shrink-0">
+        <Image src="/favicon.ico" alt="Logo" fill className="object-contain" />
+      </div>
+      <div className="flex flex-col">
+        <span className="font-sans-pro font-black text-sm text-slate-800 dark:text-slate-100 uppercase tracking-wider leading-none">
+          Promax
+        </span>
+        <span className="text-[6px] font-semibold text-brand-orange dark:text-brand-orange tracking-[0.2em] uppercase leading-none mt-0.5 pl-[0.5px]">
+          Education
+        </span>
+      </div>
+    </Link>
 
-  {/* Mobile Top Bar (Split Islands) */}
-  {!isTakeTestPage && (
-  <div className="lg:hidden absolute top-4 left-4 right-4 z-50 flex items-center justify-between pointer-events-none">
-  {/* Logo Island */}
-  <Link href="/dashboard" className="h-12 bg-white/80 dark:bg-slate-900/80 backdrop-blur-2xl border border-gray-200/50 dark:border-slate-800/50 rounded-full flex items-center justify-center gap-2.5 px-4 shadow-lg shadow-brand-blue/5 pointer-events-auto">
-  <div className="relative w-5 h-5 flex-shrink-0">
-  <Image src="/favicon.ico" alt="Logo" fill className="object-contain" />
-  </div>
-  <div className="flex flex-col">
-  <span className="font-sans-pro font-black text-sm text-slate-800 dark:text-slate-100 uppercase tracking-wider leading-none">
-  Promax
-  </span>
-  <span className="text-[6px] font-semibold text-brand-orange dark:text-brand-orange tracking-[0.2em] uppercase leading-none mt-0.5 pl-[0.5px]">
-  Education
-  </span>
-  </div>
-  </Link>
-  
-  {/* Bell, Streak & Test Rejimi Island */}
-  <div className="h-12 bg-white/80 dark:bg-slate-900/80 backdrop-blur-2xl border border-gray-200/50 dark:border-slate-800/50 rounded-full flex items-center justify-center gap-2 px-3 shadow-lg shadow-brand-blue/5 pointer-events-auto">
-  <StreakPill />
-  <SidebarBetaWidget variant="pill" />
-  <NotificationBell />
-  </div>
+    {/* Unified Status Island (Streak, Test Rejimi & Notifications) */}
+    <div className="h-12 lg:h-auto bg-white/80 dark:bg-slate-900/80 backdrop-blur-2xl border border-gray-200/50 dark:border-slate-800/50 rounded-full flex items-center justify-center gap-2 lg:gap-2.5 px-3 lg:px-4 lg:py-2 shadow-lg lg:shadow-xl shadow-brand-blue/5 pointer-events-auto transition-all duration-300">
+      <StreakPill />
+      <div className="hidden lg:block w-px h-5 bg-slate-200 dark:bg-slate-800" />
+      <SidebarBetaWidget variant="pill" />
+      <div className="hidden lg:block w-px h-5 bg-slate-200 dark:bg-slate-800" />
+      <NotificationBell />
+    </div>
   </div>
   )}
 

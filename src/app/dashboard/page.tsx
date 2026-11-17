@@ -1,7 +1,7 @@
 "use client";
 
 import { useLanguage } from "@/context/LanguageContext";
-import { useCurrentUser, useUserProfile, useDashboardStats, useUpcomingTests, useAnnouncements } from "@/hooks/useDashboardData";
+import { useCurrentUser, useUserProfile, useDashboardStats, useUpcomingTests, useAnnouncements, useStudentSubjects } from "@/hooks/useDashboardData";
 import Link from "next/link";
 import Image from "next/image";
 import { 
@@ -22,8 +22,7 @@ import {
 } from "lucide-react";
 import { useState, useMemo, useEffect } from "react";
 import { useQueryClient } from "@tanstack/react-query";
-import useSWR from "swr";
-import { getSubjects, type Subject } from "@/lib/supabase-queries";
+import { type Subject } from "@/lib/supabase-queries";
 import { DashboardHomeSkeleton } from "@/components/ui/Skeleton";
 import { OlympiadBannerTeaser } from "@/components/dashboard/OlympiadSection";
 import { InternationalBannerTeaser } from "@/components/dashboard/InternationalSection";
@@ -106,8 +105,7 @@ export default function DashboardPage() {
     };
   }, [queryClient]);
 
-  const fetcher = () => getSubjects();
-  const { data: subjects = [], isLoading: subjectsLoading } = useSWR('subjects', fetcher);
+  const { data: subjects = [], isLoading: subjectsLoading } = useStudentSubjects();
 
   const activeBannerAnnouncements = useMemo(() => {
     if (dbAnnouncements && dbAnnouncements.length > 0) {

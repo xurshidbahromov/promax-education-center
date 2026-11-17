@@ -49,45 +49,42 @@ export interface DashboardStats {
 export async function getStudentResults(studentId: string): Promise<ExamResult[]> {
   const supabase = createClient();
 
-  // 1. Get DTM results
-  const { data: results } = await supabase
-    .from('results')
-    .select('*')
-    .eq('student_id', studentId)
-    .order('created_at', { ascending: false });
+  // 1 & 2. Fetch DTM results and completed online test attempts in parallel
+  const [{ data: results }, { data: attempts }] = await Promise.all([
+    supabase
+      .from('results')
+      .select('*')
+      .eq('student_id', studentId)
+      .order('created_at', { ascending: false }),
+    supabase
+      .from('test_attempts')
+      .select('id, student_id, test_id, score, max_score, completed_at, created_at, test:tests(id, title)')
+      .eq('student_id', studentId)
+      .eq('status', 'completed')
+      .order('completed_at', { ascending: false })
+  ]);
 
-  // 2. Get completed online test attempts
-  const { data: attempts } = await supabase
-    .from('test_attempts')
-    .select('id, student_id, test_id, score, max_score, completed_at, created_at, test:tests(id, title)')
-    .eq('student_id', studentId)
-    .eq('status', 'completed')
-    .order('completed_at', { ascending: false });
-
-  // 3. Map DTM exams
+  // 3 & 4. Map DTM exams and directions in parallel
   const examIds = [...new Set((results || []).map(r => r.exam_id).filter(Boolean))];
-  let examsMap: Record<string, ExamResult['exam']> = {};
-  if (examIds.length > 0) {
-    const { data: exams } = await supabase
-      .from('exams')
-      .select('id, title, date, type, max_score')
-      .in('id', examIds);
-    if (exams) {
-      exams.forEach(e => { examsMap[e.id] = e; });
-    }
+  const dirIds = [...new Set((results || []).map(r => r.direction_id).filter(Boolean))];
+
+  const [examsRes, directionsRes] = await Promise.all([
+    examIds.length > 0
+      ? supabase.from('exams').select('id, title, date, type, max_score').in('id', examIds)
+      : Promise.resolve({ data: null }),
+    dirIds.length > 0
+      ? supabase.from('directions').select('id, title, code').in('id', dirIds)
+      : Promise.resolve({ data: null })
+  ]);
+
+  const examsMap: Record<string, ExamResult['exam']> = {};
+  if (examsRes.data) {
+    examsRes.data.forEach((e: any) => { examsMap[e.id] = e; });
   }
 
-  // 4. Map DTM directions
-  const dirIds = [...new Set((results || []).map(r => r.direction_id).filter(Boolean))];
-  let directionsMap: Record<string, ExamResult['direction']> = {};
-  if (dirIds.length > 0) {
-    const { data: directions } = await supabase
-      .from('directions')
-      .select('id, title, code')
-      .in('id', dirIds);
-    if (directions) {
-      directions.forEach(d => { directionsMap[d.id] = d; });
-    }
+  const directionsMap: Record<string, ExamResult['direction']> = {};
+  if (directionsRes.data) {
+    directionsRes.data.forEach((d: any) => { directionsMap[d.id] = d; });
   }
 
   const dtmResults = (results || []).map(r => ({
@@ -195,38 +192,41 @@ export async function getAvailableExams(): Promise<Exam[]> {
  * Get dashboard statistics for a student
  */
 export async function getDashboardStats(studentId: string): Promise<DashboardStats> {
- const supabase = createClient();
+  const supabase = createClient();
 
- const { data: results, error } = await supabase
- .from('results')
- .select('total_score')
- .eq('student_id', studentId);
+  const [
+    { data: results, error },
+    { data: attempts, error: attemptsError },
+    { data: profile }
+  ] = await Promise.all([
+    supabase
+      .from('results')
+      .select('total_score')
+      .eq('student_id', studentId),
+    supabase
+      .from('test_attempts')
+      .select('score')
+      .eq('student_id', studentId)
+      .eq('status', 'completed'),
+    supabase
+      .from('profiles')
+      .select('coins')
+      .eq('id', studentId)
+      .maybeSingle()
+  ]);
 
- const { data: attempts, error: attemptsError } = await supabase
- .from('test_attempts')
- .select('score')
- .eq('student_id', studentId)
- .eq('status', 'completed');
+  if (error && attemptsError) {
+    return {
+      totalTests: 0,
+      averageScore: 0,
+      bestScore: 0,
+      totalCoins: profile?.coins || 0
+    };
+  }
 
- if (error && attemptsError) {
- return {
- totalTests: 0,
- averageScore: 0,
- bestScore: 0,
- totalCoins: 0
- };
- }
-
- const resultScores = results?.map(r => r.total_score) || [];
- const attemptScores = attempts?.map(a => a.score) || [];
- const allScores = [...resultScores, ...attemptScores];
-
-  // Fetch profile coins
-  const { data: profile } = await supabase
-    .from('profiles')
-    .select('coins')
-    .eq('id', studentId)
-    .maybeSingle();
+  const resultScores = results?.map(r => r.total_score) || [];
+  const attemptScores = attempts?.map(a => a.score) || [];
+  const allScores = [...resultScores, ...attemptScores];
 
   if (allScores.length === 0) {
     return {
@@ -485,38 +485,46 @@ export async function getUserRank(userId: string) {
 /**
  * Notification System Queries
  */
-export async function getNotifications(limit: number = 20) {
- const supabase = createClient();
- const { data: { user } } = await supabase.auth.getUser();
- if (!user) return [];
+export async function getNotifications(limit: number = 20, userId?: string) {
+  const supabase = createClient();
+  let targetUserId = userId;
+  if (!targetUserId) {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return [];
+    targetUserId = user.id;
+  }
 
- const { data, error } = await supabase
- .from('notifications')
- .select('*')
- .eq('user_id', user.id)
- .order('created_at', { ascending: false })
- .limit(limit);
+  const { data, error } = await supabase
+    .from('notifications')
+    .select('*')
+    .eq('user_id', targetUserId)
+    .order('created_at', { ascending: false })
+    .limit(limit);
 
- if (error) {
- console.error('Error fetching notifications:', error);
- return [];
- }
- return data;
+  if (error) {
+    console.error('Error fetching notifications:', error);
+    return [];
+  }
+  return data;
 }
 
-export async function getUnreadNotificationCount() {
- const supabase = createClient();
- const { data: { user } } = await supabase.auth.getUser();
- if (!user) return 0;
+export async function getUnreadNotificationCount(userId?: string) {
+  const supabase = createClient();
+  let targetUserId = userId;
+  if (!targetUserId) {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return 0;
+    targetUserId = user.id;
+  }
 
- const { count, error } = await supabase
- .from('notifications')
- .select('*', { count: 'exact', head: true })
- .eq('user_id', user.id)
- .eq('is_read', false);
+  const { count, error } = await supabase
+    .from('notifications')
+    .select('*', { count: 'exact', head: true })
+    .eq('user_id', targetUserId)
+    .eq('is_read', false);
 
- if (error) return 0;
- return count || 0;
+  if (error) return 0;
+  return count || 0;
 }
 
 export async function markNotificationAsRead(id: string) {
@@ -703,6 +711,37 @@ export async function getMaterialsByLessonId(lessonId: string): Promise<Material
     return [];
   }
   return data || [];
+}
+
+/**
+ * Batch fetch materials for multiple lessons in a single query (prevents N+1 requests)
+ */
+export async function getMaterialsByLessonIds(lessonIds: string[]): Promise<Record<string, Material[]>> {
+  const grouped: Record<string, Material[]> = {};
+  for (const id of lessonIds) {
+    grouped[id] = [];
+  }
+  if (!lessonIds.length) return grouped;
+
+  const supabase = createClient();
+  const { data, error } = await supabase
+    .from('materials')
+    .select('*')
+    .in('lesson_id', lessonIds)
+    .order('created_at', { ascending: true });
+
+  if (error) {
+    console.error('Error batch fetching materials:', error);
+    return grouped;
+  }
+
+  for (const item of data || []) {
+    if (!grouped[item.lesson_id]) {
+      grouped[item.lesson_id] = [];
+    }
+    grouped[item.lesson_id].push(item);
+  }
+  return grouped;
 }
 
 // -------------------------------------------------------------

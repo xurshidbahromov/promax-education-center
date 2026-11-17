@@ -3,24 +3,24 @@ import { useEffect } from 'react';
 import { createClient } from '@/utils/supabase/client';
 import { getAdminStats, getRecentActivity, getTeachers, getStudents, getAllResults, getExamsList, Student, getGroups, getGroupStudents, getStudentsNotInGroup } from '@/lib/admin-queries';
 import { getPaymentSummariesForStudents } from '@/lib/payments';
-import { getSubjects, getAllSubjects, getSubjectById, getLessonsBySubjectId, getMaterialsByLessonId } from '@/lib/supabase-queries';
+import { getSubjects, getAllSubjects, getSubjectById, getLessonsBySubjectId, getMaterialsByLessonIds } from '@/lib/supabase-queries';
 import { getAllTests, getTestWithQuestions, getTestResults, getTestGroups } from '@/lib/tests';
 
 
 export const useAdminStats = () => {
- return useQuery({
- queryKey: ['adminStats'],
- queryFn: () => getAdminStats(),
- staleTime: 5 * 60 * 1000,
- });
+  return useQuery({
+    queryKey: ['adminStats'],
+    queryFn: () => getAdminStats(),
+    staleTime: 5 * 60 * 1000,
+  });
 };
 
 export const useRecentActivity = () => {
- return useQuery({
- queryKey: ['recentActivity'],
- queryFn: () => getRecentActivity(),
- refetchInterval: 30 * 1000,
- });
+  return useQuery({
+    queryKey: ['recentActivity'],
+    queryFn: () => getRecentActivity(),
+    staleTime: 2 * 60 * 1000,
+  });
 };
 
 export const useTeachers = (searchTerm: string = "") => {
@@ -94,18 +94,13 @@ export const useLessons = (subjectId: string) => {
 };
 
 export const useMaterialsByLessons = (lessons: any[]) => {
- const lessonIds = lessons.map(l => l.id).sort().join(',');
- return useQuery({
-   queryKey: ['materials', lessonIds],
-   queryFn: async () => {
-     const mats: Record<string, any[]> = {};
-     for (const l of lessons) {
-       mats[l.id] = await getMaterialsByLessonId(l.id);
-     }
-     return mats;
-   },
-   enabled: lessons.length > 0,
- });
+  const sortedIds = lessons.map(l => l.id).filter(Boolean).sort();
+  const lessonIdsKey = sortedIds.join(',');
+  return useQuery({
+    queryKey: ['materials', lessonIdsKey],
+    queryFn: () => getMaterialsByLessonIds(sortedIds),
+    enabled: sortedIds.length > 0,
+  });
 };
 
 export const useGroupStudents = (groupId: string) => {
@@ -160,48 +155,89 @@ export const useTestGroups = (testId: string) => {
 
 /**
  * A hook to automatically invalidate relevant queries when Supabase data changes.
- * This provides true Realtime updates across multiple active sessions.
+ * Uses per-key debouncing to prevent query storms during bulk operations or student streak updates.
  */
 export const useSupabaseRealtimeSync = () => {
   const queryClient = useQueryClient();
 
   useEffect(() => {
     const supabase = createClient();
-    
+    const timers: Record<string, ReturnType<typeof setTimeout>> = {};
+
+    const debouncedInvalidate = (key: string, delayMs = 800) => {
+      if (timers[key]) clearTimeout(timers[key]);
+      timers[key] = setTimeout(() => {
+        queryClient.invalidateQueries({ queryKey: [key] });
+        delete timers[key];
+      }, delayMs);
+    };
+
     const channel = supabase.channel('schema-db-changes')
       .on(
         'postgres_changes',
         { event: '*', schema: 'public' },
         (payload) => {
           const table = payload.table;
-          // Invalidate relevant queries based on which table changed
-          if (table === 'subjects') queryClient.invalidateQueries({ queryKey: ['subjects'] });
-          if (table === 'subjects') queryClient.invalidateQueries({ queryKey: ['subject'] });
-          if (table === 'groups') queryClient.invalidateQueries({ queryKey: ['groups'] });
-          if (table === 'lessons') queryClient.invalidateQueries({ queryKey: ['lessons'] });
-          if (table === 'materials') queryClient.invalidateQueries({ queryKey: ['materials'] });
-          if (table === 'group_students') {
-            queryClient.invalidateQueries({ queryKey: ['groupStudents'] });
-            queryClient.invalidateQueries({ queryKey: ['availableStudents'] });
-            queryClient.invalidateQueries({ queryKey: ['groups'] });
-          }
-          if (table === 'profiles') {
-            queryClient.invalidateQueries({ queryKey: ['teachers'] });
-            queryClient.invalidateQueries({ queryKey: ['students'] });
-            queryClient.invalidateQueries({ queryKey: ['availableStudents'] });
-          }
-          if (table === 'tests') queryClient.invalidateQueries({ queryKey: ['tests'] });
-          if (table === 'questions') queryClient.invalidateQueries({ queryKey: ['testDetail'] });
-          if (table === 'test_attempts') queryClient.invalidateQueries({ queryKey: ['testResults'] });
-          if (table === 'group_tests') {
-            queryClient.invalidateQueries({ queryKey: ['testGroups'] });
-            queryClient.invalidateQueries({ queryKey: ['tests'] });
+          const eventType = payload.eventType;
+
+          if (table === 'subjects') {
+            debouncedInvalidate('subjects');
+            debouncedInvalidate('subject');
+          } else if (table === 'groups') {
+            debouncedInvalidate('groups');
+            debouncedInvalidate('adminStats', 1500);
+          } else if (table === 'lessons') {
+            debouncedInvalidate('lessons');
+          } else if (table === 'materials') {
+            debouncedInvalidate('materials');
+          } else if (table === 'group_students') {
+            debouncedInvalidate('groupStudents');
+            debouncedInvalidate('availableStudents');
+            debouncedInvalidate('groups');
+          } else if (table === 'profiles') {
+            if (eventType === 'INSERT' || eventType === 'DELETE') {
+              debouncedInvalidate('teachers');
+              debouncedInvalidate('students');
+              debouncedInvalidate('availableStudents');
+              debouncedInvalidate('recentActivity', 1200);
+              debouncedInvalidate('adminStats', 1500);
+            } else {
+              // On UPDATE: check if core identity fields changed vs minor coin/streak updates
+              const oldRow = (payload as any).old || {};
+              const newRow = (payload as any).new || {};
+              const identityChanged =
+                oldRow.role !== undefined &&
+                (oldRow.role !== newRow.role ||
+                 oldRow.full_name !== newRow.full_name ||
+                 oldRow.phone !== newRow.phone);
+
+              if (identityChanged || newRow.role === 'teacher') {
+                debouncedInvalidate('teachers', 1000);
+                debouncedInvalidate('availableStudents', 1000);
+              }
+              debouncedInvalidate('students', 1500);
+            }
+          } else if (table === 'tests') {
+            debouncedInvalidate('tests');
+          } else if (table === 'questions') {
+            debouncedInvalidate('testDetail');
+          } else if (table === 'test_attempts') {
+            debouncedInvalidate('testResults', 1200);
+          } else if (table === 'results') {
+            debouncedInvalidate('allResults', 1200);
+            debouncedInvalidate('recentActivity', 1200);
+          } else if (table === 'payments') {
+            debouncedInvalidate('adminStats', 1500);
+          } else if (table === 'group_tests') {
+            debouncedInvalidate('testGroups');
+            debouncedInvalidate('tests');
           }
         }
       )
       .subscribe();
 
     return () => {
+      Object.values(timers).forEach(clearTimeout);
       supabase.removeChannel(channel);
     };
   }, [queryClient]);

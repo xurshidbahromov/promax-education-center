@@ -27,65 +27,75 @@ interface Notification {
 }
 
 export default function NotificationBell() {
- const [notifications, setNotifications] = useState<Notification[]>([]);
- const [unreadCount, setUnreadCount] = useState(0);
- const [isOpen, setIsOpen] = useState(false);
- const [loading, setLoading] = useState(false);
- const dropdownRef = useRef<HTMLDivElement>(null);
- const { t, language } = useLanguage();
- const supabase = createClient();
+  const [notifications, setNotifications] = useState<Notification[]>([]);
+  const [unreadCount, setUnreadCount] = useState(0);
+  const [isOpen, setIsOpen] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
+  const isOpenRef = useRef(isOpen);
+  const userIdRef = useRef<string | undefined>(undefined);
+  const { t, language } = useLanguage();
+  const [supabase] = useState(() => createClient());
 
- // Close dropdown on click outside
- useEffect(() => {
- const handleClickOutside = (event: MouseEvent) => {
- if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
- setIsOpen(false);
- }
- };
- document.addEventListener("mousedown", handleClickOutside);
- return () => document.removeEventListener("mousedown", handleClickOutside);
- }, []);
+  useEffect(() => {
+    isOpenRef.current = isOpen;
+  }, [isOpen]);
 
- const fetchNotifications = async (showLoading = true) => {
- if (showLoading) setLoading(true);
- const [notifsData, announcementsData] = await Promise.all([
- getNotifications(20),
- getAnnouncements(10)
- ]);
- 
- // Only include announcements that are intended for the bell (not cabinet banners)
- const mappedAnnouncements: Notification[] = (announcementsData || [])
-  .filter((a: any) => !a.is_featured)
-  .map((a: any) => ({
- id: `announcement-${a.id}`,
- title: a.title,
- message: a.message,
- type: a.type || 'info',
- is_read: true, // Announcements don't have read status per user in DB
- created_at: a.created_at,
- is_announcement: true
- }));
+  // Close dropdown on click outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setIsOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
 
- const combined = [...(notifsData as Notification[]), ...mappedAnnouncements].sort(
- (a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
- );
+  const fetchNotifications = async (showLoading = true) => {
+    if (showLoading) setLoading(true);
+    const [notifsData, announcementsData] = await Promise.all([
+      getNotifications(20, userIdRef.current),
+      getAnnouncements(10)
+    ]);
 
- setNotifications(combined);
- if (showLoading) setLoading(false);
- };
+    // Only include announcements that are intended for the bell (not cabinet banners)
+    const mappedAnnouncements: Notification[] = (announcementsData || [])
+      .filter((a: any) => !a.is_featured)
+      .map((a: any) => ({
+        id: `announcement-${a.id}`,
+        title: a.title,
+        message: a.message,
+        type: a.type || 'info',
+        is_read: true, // Announcements don't have read status per user in DB
+        created_at: a.created_at,
+        is_announcement: true
+      }));
 
- const fetchUnreadCount = async () => {
- const count = await getUnreadNotificationCount();
- setUnreadCount(count);
- };
+    const combined = [...(notifsData as Notification[]), ...mappedAnnouncements].sort(
+      (a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+    );
+
+    setNotifications(combined);
+    if (showLoading) setLoading(false);
+  };
+
+  const fetchUnreadCount = async (uid?: string) => {
+    const count = await getUnreadNotificationCount(uid || userIdRef.current);
+    setUnreadCount(count);
+  };
 
   useEffect(() => {
     let activeChannel: any = null;
+    let isMounted = true;
 
     async function initRealtime() {
-      await fetchUnreadCount();
       const { data: { user } } = await supabase.auth.getUser();
-      if (!user) return;
+      if (!user || !isMounted) return;
+      userIdRef.current = user.id;
+
+      await fetchUnreadCount(user.id);
+      if (!isMounted) return;
 
       activeChannel = supabase
         .channel(`user_notifications_${user.id}`)
@@ -98,8 +108,11 @@ export default function NotificationBell() {
             filter: `user_id=eq.${user.id}`
           },
           (payload: any) => {
-            fetchUnreadCount();
-            if (isOpen) {
+            fetchUnreadCount(user.id);
+            if (payload?.new?.type === 'coin_credit') {
+              window.dispatchEvent(new CustomEvent('promax_coins_updated'));
+            }
+            if (isOpenRef.current) {
               fetchNotifications(false);
             } else if (payload?.new?.title) {
               toast(payload.new.title, { icon: "🔔", duration: 4000 });
@@ -112,11 +125,12 @@ export default function NotificationBell() {
     initRealtime();
 
     return () => {
+      isMounted = false;
       if (activeChannel) {
         supabase.removeChannel(activeChannel);
       }
     };
-  }, [supabase, isOpen]);
+  }, [supabase]);
 
  // Fetch list when opening dropdown
  useEffect(() => {

@@ -93,34 +93,36 @@ export default function ProfilePage() {
 
  setIsUploadingAvatar(true);
  const url = await uploadAvatar(file);
- if (url) {
- const { success } = await updateUserProfile({ avatar_url: url });
- if (success) {
- setAvatarUrl(url);
- toast.success(t("profile.success_update") || "Rasm muvaffaqiyatli yuklandi");
- } else {
- toast.error(t("profile.error_update") || "Rasmni saqlashda xatolik");
- }
- } else {
- toast.error(t("profile.error_update") || "Rasmni yuklashda xatolik");
- }
- setIsUploadingAvatar(false);
- };
+  if (url) {
+    const { success } = await updateUserProfile({ avatar_url: url });
+    if (success) {
+      setAvatarUrl(url);
+      window.dispatchEvent(new CustomEvent("promax_profile_updated"));
+      toast.success(t("profile.success_update") || "Rasm muvaffaqiyatli yuklandi");
+    } else {
+      toast.error(t("profile.error_update") || "Rasmni saqlashda xatolik");
+    }
+  } else {
+    toast.error(t("profile.error_update") || "Rasmni yuklashda xatolik");
+  }
+  setIsUploadingAvatar(false);
+  };
 
- const handleProfileSubmit = async (e: React.FormEvent) => {
- e.preventDefault();
- setSavingProfile(true);
+  const handleProfileSubmit = async (e: React.FormEvent) => {
+  e.preventDefault();
+  setSavingProfile(true);
 
- try {
- const fullName = `${formData.firstName} ${formData.lastName}`.trim();
- const result = await updateUserProfile({
- full_name: fullName,
- phone: formData.phone,
- });
+  try {
+  const fullName = `${formData.firstName} ${formData.lastName}`.trim();
+  const result = await updateUserProfile({
+  full_name: fullName,
+  phone: formData.phone,
+  });
 
- if (result.success) {
- toast.success(t("profile.success_update") || "Saqlandi");
- setActiveView('main');
+  if (result.success) {
+  window.dispatchEvent(new CustomEvent("promax_profile_updated"));
+  toast.success(t("profile.success_update") || "Saqlandi");
+  setActiveView('main');
  } else {
  toast.error(t("profile.error_update") || "Xatolik yuz berdi");
  }
