@@ -720,6 +720,50 @@ export default function CreateTestPage() {
                   );
                 })}
               </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-1">
+                <div className="space-y-1.5">
+                  <label className="text-xs font-bold text-slate-600 dark:text-slate-300 uppercase tracking-wider">
+                    Ball
+                  </label>
+                  <input
+                    type="number"
+                    step="0.1"
+                    value={editingQuestion.points}
+                    onChange={(e) =>
+                      setEditingQuestion({
+                        ...editingQuestion,
+                        points: Number(e.target.value)
+                      })
+                    }
+                    className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-medium outline-none"
+                  />
+                </div>
+
+                <div className="sm:col-span-2 space-y-1.5">
+                  <label className="text-xs font-bold text-slate-600 dark:text-slate-300 uppercase tracking-wider">
+                    Tushuntirish / Izoh (Ixtiyoriy)
+                  </label>
+                  <input
+                    type="text"
+                    value={editingQuestion.explanation || ""}
+                    onChange={(e) =>
+                      setEditingQuestion({
+                        ...editingQuestion,
+                        explanation: e.target.value
+                      })
+                    }
+                    placeholder="Nima uchun bu javob to'g'ri? ($formula$ qo'llab-quvvatlanadi)"
+                    className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-medium outline-none"
+                  />
+                  {editingQuestion.explanation && (editingQuestion.explanation.includes('$') || editingQuestion.explanation.includes('\\')) && (
+                    <div className="text-xs font-semibold text-slate-500 flex items-center gap-2 bg-slate-50 dark:bg-slate-800/40 px-3 py-1 rounded-lg border border-slate-200/50 dark:border-slate-700/50">
+                      <span className="text-[10px] text-brand-blue uppercase font-bold">Ko'rinishi:</span>
+                      <MathRenderer content={editingQuestion.explanation} inline />
+                    </div>
+                  )}
+                </div>
+              </div>
             </div>
 
             <div className="flex items-center justify-end gap-3 pt-3 border-t border-slate-100 dark:border-slate-800">

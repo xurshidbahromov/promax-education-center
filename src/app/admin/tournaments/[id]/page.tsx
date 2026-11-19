@@ -398,9 +398,10 @@ export default function TournamentDetailPage({ params }: PageProps) {
                     )}
 
                     {q.explanation && (
-                      <p className="text-xs text-slate-500 bg-slate-50 dark:bg-slate-800/50 rounded-xl px-3.5 py-2.5 border border-slate-100 dark:border-slate-800">
-                        💡 {q.explanation}
-                      </p>
+                      <div className="text-xs text-slate-500 bg-slate-50 dark:bg-slate-800/50 rounded-xl px-3.5 py-2.5 border border-slate-100 dark:border-slate-800 flex items-start gap-1.5">
+                        <span>💡</span>
+                        <MathRenderer content={q.explanation} inline />
+                      </div>
                     )}
                   </div>
                 )}

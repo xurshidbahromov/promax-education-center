@@ -308,8 +308,38 @@ export async function submitAnswer(
 }
 
 /**
- * Complete test attempt
+ * Batch submit multiple question answers in a single database round-trip
  */
+export async function submitAnswersBatch(
+  attemptId: string,
+  answersMap: Record<string, string>
+): Promise<boolean> {
+  const entries = Object.entries(answersMap);
+  if (entries.length === 0) return true;
+
+  const supabase = createClient();
+  const rows = entries.map(([questionId, answer]) => ({
+    attempt_id: attemptId,
+    question_id: questionId,
+    student_answer: answer,
+  }));
+
+  const { error } = await supabase
+    .from('question_responses')
+    .upsert(rows, { onConflict: 'attempt_id,question_id' });
+
+  if (error) {
+    if (error.message?.includes('row-level security')) {
+      console.warn('Batch answer submission blocked by RLS:', error.message);
+    } else {
+      console.error('Error batch submitting answers:', error.message, error);
+    }
+    return false;
+  }
+
+  return true;
+}
+
 /**
  * Complete test attempt and calculate score
  */

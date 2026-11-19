@@ -419,7 +419,9 @@ export default function InternationalTournamentDetailPage({ params }: PageProps)
                         {q.explanation && (
                           <div className="p-3 rounded-xl bg-slate-50 dark:bg-slate-800/50 text-xs space-y-1">
                             <span className="font-bold text-slate-700 dark:text-slate-300 block">Yechim / Tushuntirish:</span>
-                            <p className="text-slate-600 dark:text-slate-400">{q.explanation}</p>
+                            <div className="text-slate-600 dark:text-slate-400">
+                              <MathRenderer content={q.explanation} />
+                            </div>
                           </div>
                         )}
                       </div>

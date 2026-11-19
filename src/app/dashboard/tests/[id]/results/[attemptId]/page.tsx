@@ -7,9 +7,11 @@ import Link from "next/link";
 import {
   ArrowLeft, CheckCircle2, XCircle, Clock, Award, 
   TrendingUp, Star, RotateCcw, Target, ListChecks,
-  AlertCircle, Medal, Check, Info, BarChart3, ChevronRight, X
+  AlertCircle, Medal, Check, Info, BarChart3, ChevronRight, X,
+  Maximize2, ZoomIn, ZoomOut, Lightbulb
 } from "lucide-react";
 import { getAttemptResults } from "@/lib/tests";
+import MathRenderer from "@/components/MathRenderer";
 import { AttemptResultSkeleton } from "@/components/ui/Skeleton";
 
 export default function TestResultsPage() {
@@ -21,7 +23,10 @@ export default function TestResultsPage() {
 
   const [results, setResults] = useState<any>(null);
   const [loading, setLoading] = useState(true);
-  const [showReview, setShowReview] = useState(false);
+  const [showReview, setShowReview] = useState(true);
+  const [reviewFilter, setReviewFilter] = useState<"all" | "correct" | "wrong">("all");
+  const [zoomedImage, setZoomedImage] = useState<string | null>(null);
+  const [zoomScale, setZoomScale] = useState<number>(1);
 
   useEffect(() => {
     async function loadResults() {
@@ -192,19 +197,72 @@ export default function TestResultsPage() {
         {/* Detailed Review Section */}
         {showReview && (
           <div className="pt-8 space-y-6 animate-in slide-in-from-bottom-4 fade-in duration-500">
-            <div className="flex items-center gap-3 mb-2">
-              <div className="w-10 h-10 rounded-xl bg-brand-blue/10 flex items-center justify-center text-brand-blue">
-                <BarChart3 size={20} />
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-2">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-brand-blue/10 flex items-center justify-center text-brand-blue">
+                  <BarChart3 size={20} />
+                </div>
+                <h2 className="text-2xl font-bold font-fredoka text-slate-800 dark:text-slate-100">
+                  {t('tests.result.review') || "Natijalar tahlili"}
+                </h2>
               </div>
-              <h2 className="text-2xl font-bold font-fredoka text-slate-800 dark:text-slate-100">
-                {t('tests.result.review') || "Natijalar tahlili"}
-              </h2>
+
+              {/* Filter Tabs */}
+              <div className="grid grid-cols-3 sm:flex items-center gap-1.5 p-1 bg-slate-100 dark:bg-slate-800/80 rounded-2xl w-full sm:w-auto">
+                <button
+                  type="button"
+                  onClick={() => setReviewFilter("all")}
+                  className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+                    reviewFilter === "all"
+                      ? "bg-white dark:bg-slate-700 text-slate-900 dark:text-white shadow-xs"
+                      : "text-slate-500 hover:text-slate-800 dark:hover:text-slate-200"
+                  }`}
+                >
+                  Barchasi ({totalQuestions})
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setReviewFilter("correct")}
+                  className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+                    reviewFilter === "correct"
+                      ? "bg-white dark:bg-slate-700 text-emerald-600 dark:text-emerald-400 shadow-xs"
+                      : "text-slate-500 hover:text-emerald-600 dark:hover:text-emerald-400"
+                  }`}
+                >
+                  To'g'ri ({correctCount})
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setReviewFilter("wrong")}
+                  className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+                    reviewFilter === "wrong"
+                      ? "bg-white dark:bg-slate-700 text-rose-600 dark:text-rose-400 shadow-xs"
+                      : "text-slate-500 hover:text-rose-600 dark:hover:text-rose-400"
+                  }`}
+                >
+                  Xatolar ({totalQuestions - correctCount})
+                </button>
+              </div>
             </div>
 
             <div className="space-y-4">
-              {responses.map((response: any, index: number) => {
+              {responses
+                .map((r: any, idx: number) => ({ ...r, originalIndex: idx }))
+                .filter((r: any) => {
+                  if (reviewFilter === "correct") return Boolean(r.is_correct);
+                  if (reviewFilter === "wrong") return !r.is_correct;
+                  return true;
+                })
+                .map((response: any) => {
                 const isCorrect = response.is_correct;
-                const question = response.question;
+                const question = response.question || {};
+                const index = response.originalIndex;
+                const studentOptVal = question.options && response.student_answer
+                  ? question.options[response.student_answer]
+                  : null;
+                const correctOptVal = question.options && question.correct_answer
+                  ? question.options[question.correct_answer]
+                  : null;
 
                 return (
                   <div
@@ -218,7 +276,7 @@ export default function TestResultsPage() {
                     {/* Header */}
                     <div className="flex flex-wrap items-center gap-3 mb-5">
                       <span className="flex items-center justify-center w-8 h-8 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 rounded-lg font-bold text-sm">
-                        {index + 1}
+                        #{index + 1}
                       </span>
                       {isCorrect ? (
                         <div className="flex items-center gap-1.5 px-3 py-1.5 bg-emerald-50 dark:bg-emerald-900/20 text-emerald-600 rounded-lg text-xs font-bold uppercase tracking-wider">
@@ -234,12 +292,45 @@ export default function TestResultsPage() {
                       <span className="px-3 py-1.5 bg-slate-50 dark:bg-slate-800 text-slate-500 rounded-lg text-xs font-bold uppercase tracking-wider ml-auto">
                         {response.points_earned}/{question.points} ball
                       </span>
+                      {question.image_url && (
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setZoomedImage(question.image_url);
+                            setZoomScale(1);
+                          }}
+                          className="p-1.5 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-500 hover:text-slate-900 dark:hover:text-white transition-colors cursor-pointer"
+                          title="Rasmni kattalashtirish"
+                        >
+                          <Maximize2 size={15} />
+                        </button>
+                      )}
                     </div>
 
-                    {/* Question Text */}
-                    <h3 className="text-lg font-medium text-slate-800 dark:text-slate-100 mb-5 leading-relaxed">
-                      {question.question_text}
-                    </h3>
+                    {/* Question Image (if any) */}
+                    {question.image_url && (
+                      <div className="mb-5">
+                        <div
+                          onClick={() => {
+                            setZoomedImage(question.image_url);
+                            setZoomScale(1);
+                          }}
+                          className="w-full flex items-center justify-center cursor-zoom-in bg-slate-50 dark:bg-slate-950/40 p-3 rounded-2xl border border-slate-100 dark:border-slate-800"
+                        >
+                          {/* eslint-disable-next-line @next/next/no-img-element */}
+                          <img
+                            src={question.image_url}
+                            alt={`Savol #${index + 1}`}
+                            className="w-auto max-w-full max-h-[360px] rounded-xl object-contain"
+                          />
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Question Text with MathRenderer */}
+                    <div className="text-base sm:text-lg font-medium text-slate-800 dark:text-slate-100 mb-5 leading-relaxed overflow-x-auto">
+                      <MathRenderer content={question.question_text || ""} />
+                    </div>
 
                     {/* Answers Comparison */}
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
@@ -256,9 +347,16 @@ export default function TestResultsPage() {
                           <div className="mt-0.5 shrink-0">
                             {isCorrect ? <Check size={18} /> : <X size={18} />}
                           </div>
-                          <span className="font-medium">
-                            {response.student_answer || (t('tests.result.no_answer') || "Javob berilmagan")}
-                          </span>
+                          <div className="font-medium overflow-x-auto">
+                            {response.student_answer ? (
+                              <>
+                                <span className="font-bold mr-1.5">{response.student_answer}.</span>
+                                {studentOptVal && <MathRenderer content={String(studentOptVal)} inline />}
+                              </>
+                            ) : (
+                              <span>{t('tests.result.no_answer') || "Javob berilmagan"}</span>
+                            )}
+                          </div>
                         </div>
                       </div>
 
@@ -272,25 +370,26 @@ export default function TestResultsPage() {
                             <div className="mt-0.5 shrink-0">
                               <CheckCircle2 size={18} />
                             </div>
-                            <span className="font-medium">
-                              {question.correct_answer}
-                            </span>
+                            <div className="font-medium overflow-x-auto">
+                              <span className="font-bold mr-1.5">{question.correct_answer}.</span>
+                              {correctOptVal && <MathRenderer content={String(correctOptVal)} inline />}
+                            </div>
                           </div>
                         </div>
                       )}
                     </div>
 
-                    {/* Explanation */}
+                    {/* Explanation with MathRenderer */}
                     {question.explanation && (
-                      <div className="mt-4 p-4 bg-brand-blue/5 dark:bg-brand-blue/10 border border-brand-blue/10 dark:border-brand-blue/20 rounded-xl flex gap-3">
-                        <Info size={20} className="text-brand-blue shrink-0 mt-0.5" />
-                        <div>
-                          <h4 className="text-sm font-bold text-brand-blue mb-1">
-                            {t('tests.result.explanation') || "Izoh"}
+                      <div className="mt-4 p-4 bg-amber-500/5 dark:bg-amber-500/10 border border-amber-500/20 rounded-xl flex gap-3">
+                        <Lightbulb size={20} className="text-amber-500 shrink-0 mt-0.5" />
+                        <div className="min-w-0 flex-1 overflow-x-auto">
+                          <h4 className="text-xs font-bold uppercase tracking-wider text-amber-700 dark:text-amber-400 mb-1">
+                            {t('tests.result.explanation') || "Yechim va tushuntirish"}
                           </h4>
-                          <p className="text-sm text-slate-600 dark:text-slate-300 leading-relaxed">
-                            {question.explanation}
-                          </p>
+                          <div className="text-sm text-slate-700 dark:text-slate-300 leading-relaxed">
+                            <MathRenderer content={question.explanation} />
+                          </div>
                         </div>
                       </div>
                     )}
@@ -301,6 +400,70 @@ export default function TestResultsPage() {
           </div>
         )}
       </div>
+
+      {/* Image Zoom Lightbox Modal */}
+      {zoomedImage && (
+        <div
+          className="fixed inset-0 z-[100] bg-black/90 backdrop-blur-md flex flex-col items-center justify-between p-4 sm:p-6"
+          onClick={() => {
+            setZoomedImage(null);
+            setZoomScale(1);
+          }}
+        >
+          <div
+            className="w-full max-w-4xl flex items-center justify-between z-10 py-2 text-white"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <span className="text-sm font-bold tracking-wide text-white/90">Savol rasmi</span>
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                onClick={() => setZoomScale((prev) => Math.max(0.75, prev - 0.25))}
+                className="p-2 rounded-xl bg-white/10 hover:bg-white/20 text-white transition-colors cursor-pointer"
+              >
+                <ZoomOut size={18} />
+              </button>
+              <button
+                type="button"
+                onClick={() => setZoomScale(1)}
+                className="px-2.5 py-1 text-xs font-bold rounded-lg bg-white/10 hover:bg-white/20 text-white/90 transition-colors cursor-pointer"
+              >
+                {Math.round(zoomScale * 100)}%
+              </button>
+              <button
+                type="button"
+                onClick={() => setZoomScale((prev) => Math.min(3, prev + 0.25))}
+                className="p-2 rounded-xl bg-white/10 hover:bg-white/20 text-white transition-colors cursor-pointer"
+              >
+                <ZoomIn size={18} />
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setZoomedImage(null);
+                  setZoomScale(1);
+                }}
+                className="p-2 rounded-xl bg-white/10 hover:bg-rose-500/80 text-white transition-colors ml-2 cursor-pointer"
+              >
+                <X size={20} />
+              </button>
+            </div>
+          </div>
+          <div className="flex-1 w-full max-w-5xl flex items-center justify-center overflow-auto p-2">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src={zoomedImage}
+              alt="Savol rasmi"
+              style={{ transform: `scale(${zoomScale})` }}
+              className="max-h-[85vh] max-w-full rounded-2xl object-contain shadow-2xl transition-transform duration-200 select-none cursor-pointer"
+              onClick={(e) => {
+                e.stopPropagation();
+                setZoomScale((prev) => (prev > 1.2 ? 1 : 1.5));
+              }}
+            />
+          </div>
+        </div>
+      )}
     </div>
   );
 }

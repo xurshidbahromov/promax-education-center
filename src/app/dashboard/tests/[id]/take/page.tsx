@@ -32,14 +32,15 @@ import {
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
- getTestById,
- startTestAttempt,
- submitAnswer,
- completeTestAttempt,
- getActiveAttempt,
- getAttemptResponses,
- type Test,
- type Question
+  getTestById,
+  startTestAttempt,
+  submitAnswer,
+  submitAnswersBatch,
+  completeTestAttempt,
+  getActiveAttempt,
+  getAttemptResponses,
+  type Test,
+  type Question
 } from "@/lib/tests";
 import {
   getTournamentById,
@@ -251,18 +252,82 @@ export default function TakeTestPage() {
 
   const autoSaveInterval = useRef<NodeJS.Timeout | null>(null);
   const questionStartTime = useRef<number>(Date.now());
+  const lastSavedAnswersRef = useRef<Record<string, string>>({});
+  const tabSwitchesRef = useRef<number>(0);
 
-  // Close image zoom modal with Escape key
+  // Close image zoom modal with Escape key & handle keyboard shortcuts during test
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === "Escape" && zoomedImage) {
-        setZoomedImage(null);
-        setZoomScale(1);
+      if (e.key === "Escape") {
+        if (zoomedImage) {
+          setZoomedImage(null);
+          setZoomScale(1);
+        } else if (showFormulaModal) {
+          setShowFormulaModal(false);
+        } else if (showConfirmModal) {
+          setShowConfirmModal(false);
+        }
+        return;
+      }
+
+      // Disable question shortcuts if modals are open, results are showing, or user is typing in an input/textarea
+      if (zoomedImage || showFormulaModal || showConfirmModal || showDetailedResults || isCheckingResults || loading) {
+        return;
+      }
+      const target = e.target as HTMLElement | null;
+      if (target && (target.tagName === "INPUT" || target.tagName === "TEXTAREA" || target.isContentEditable)) {
+        return;
+      }
+
+      const activeQ = questions[currentQuestionIndex];
+      if (!activeQ) return;
+
+      if (e.key === "ArrowRight") {
+        e.preventDefault();
+        setCurrentQuestionIndex((prev) => Math.min(questions.length - 1, prev + 1));
+      } else if (e.key === "ArrowLeft") {
+        e.preventDefault();
+        setCurrentQuestionIndex((prev) => Math.max(0, prev - 1));
+      } else if (e.key.toLowerCase() === "f" && !e.ctrlKey && !e.metaKey) {
+        e.preventDefault();
+        setMarkedForReview((prev) => {
+          const next = new Set(prev);
+          if (next.has(activeQ.id)) next.delete(activeQ.id);
+          else next.add(activeQ.id);
+          return next;
+        });
+      } else if (activeQ.question_type === "multiple_choice" && activeQ.options && !e.ctrlKey && !e.metaKey) {
+        const keyMap: Record<string, string> = {
+          a: "A", b: "B", c: "C", d: "D",
+          "1": "A", "2": "B", "3": "C", "4": "D"
+        };
+        const mapped = keyMap[e.key.toLowerCase()];
+        if (mapped && activeQ.options[mapped as keyof typeof activeQ.options] !== undefined) {
+          e.preventDefault();
+          setAnswers((prev) => ({ ...prev, [activeQ.id]: mapped }));
+        }
       }
     };
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [zoomedImage]);
+  }, [zoomedImage, showFormulaModal, showConfirmModal, showDetailedResults, isCheckingResults, loading, questions, currentQuestionIndex]);
+
+  // Anti-cheat tab switch detector for official Olympiad / International competitions
+  useEffect(() => {
+    if (loading || showDetailedResults || isCheckingResults || isPracticeMode || (!isOlympiad && !isInternational)) {
+      return;
+    }
+    const handleVisibilityChange = () => {
+      if (document.hidden) {
+        tabSwitchesRef.current += 1;
+        toast(`⚠️ Musobaqa vaqtida oynadan chiqish qayd etildi (${tabSwitchesRef.current}-marta). Diqqatni testda saqlang!`, {
+          duration: 4000,
+        });
+      }
+    };
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+    return () => document.removeEventListener("visibilitychange", handleVisibilityChange);
+  }, [loading, showDetailedResults, isCheckingResults, isPracticeMode, isOlympiad, isInternational]);
 
   // Load test and start attempt
   useEffect(() => {
@@ -494,6 +559,7 @@ export default function TakeTestPage() {
    }
    });
    setAnswers(savedAnswers);
+   lastSavedAnswersRef.current = { ...savedAnswers };
 
    // Calculate remaining time if timed test
    if (testData.duration_minutes) {
@@ -560,25 +626,37 @@ export default function TakeTestPage() {
  };
  }, [attemptId, answers, submitting]);
 
- const saveAnswers = useCallback(async () => {
-  if (!attemptId || Object.keys(answers).length === 0) return;
+  const saveAnswers = useCallback(async () => {
+    if (!attemptId || Object.keys(answers).length === 0) return;
 
-  setAutoSaving(true);
-  try {
-    if (isOlympiad || isInternational || isPracticeMode) {
-      if (typeof window !== 'undefined') {
-        localStorage.setItem(`promax_answers_${testId}`, JSON.stringify(answers));
-      }
-    } else {
-      for (const [questionId, answer] of Object.entries(answers)) {
-        await submitAnswer(attemptId, questionId, answer);
+    // Compute only answers that changed since last save (prevents N+1 polling storm)
+    const dirtyAnswers: Record<string, string> = {};
+    for (const [qId, ans] of Object.entries(answers)) {
+      if (lastSavedAnswersRef.current[qId] !== ans) {
+        dirtyAnswers[qId] = ans;
       }
     }
-  } catch (error) {
-    console.error("Error auto-saving:", error);
-  } finally {
-    setAutoSaving(false);
-  }
+
+    if (Object.keys(dirtyAnswers).length === 0) return;
+
+    setAutoSaving(true);
+    try {
+      if (isOlympiad || isInternational || isPracticeMode) {
+        if (typeof window !== 'undefined') {
+          localStorage.setItem(`promax_answers_${testId}`, JSON.stringify(answers));
+        }
+        lastSavedAnswersRef.current = { ...answers };
+      } else {
+        const ok = await submitAnswersBatch(attemptId, dirtyAnswers);
+        if (ok) {
+          lastSavedAnswersRef.current = { ...lastSavedAnswersRef.current, ...dirtyAnswers };
+        }
+      }
+    } catch (error) {
+      console.error("Error auto-saving:", error);
+    } finally {
+      setAutoSaving(false);
+    }
   }, [attemptId, answers, isOlympiad, isInternational, isPracticeMode, testId]);
 
   const handleAnswerChange = (questionId: string, answer: string) => {
@@ -719,6 +797,7 @@ export default function TakeTestPage() {
   const handlePracticeRetake = () => {
     setIsPracticeMode(true);
     setAnswers({});
+    lastSavedAnswersRef.current = {};
     setMarkedForReview(new Set());
     setCurrentQuestionIndex(0);
     setShowDetailedResults(false);
@@ -1552,17 +1631,36 @@ export default function TakeTestPage() {
  <button
  onClick={() => setCurrentQuestionIndex(prev => Math.max(0, prev - 1))}
  disabled={currentQuestionIndex === 0}
- className="px-6 py-3 bg-white/60 dark:bg-slate-900/60 backdrop-blur-xl border border-white/60 dark:border-slate-800/60 text-slate-600 dark:text-slate-300 rounded-[20px] font-bold flex items-center gap-2 active:bg-slate-100 dark:active:bg-slate-800 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-none"
+ className="px-6 py-3 bg-white/60 dark:bg-slate-900/60 backdrop-blur-xl border border-white/60 dark:border-slate-800/60 text-slate-600 dark:text-slate-300 rounded-[20px] font-bold flex items-center gap-2 active:bg-slate-100 dark:active:bg-slate-800 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-none cursor-pointer"
  >
  <ArrowLeft size={18} />
  {t('tests.take.prev')}
  </button>
 
+ {/* Keyboard Shortcuts Hint Bar */}
+ <div className="hidden xl:flex items-center gap-3 px-4 py-2 rounded-full bg-white/40 dark:bg-slate-900/40 border border-slate-200/50 dark:border-slate-800/50 text-[11px] font-semibold text-slate-400 select-none">
+   <span className="flex items-center gap-1">
+     <kbd className="px-1.5 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 font-mono text-[10px]">←</kbd>
+     <kbd className="px-1.5 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 font-mono text-[10px]">→</kbd>
+     <span>Savollar</span>
+   </span>
+   <span>•</span>
+   <span className="flex items-center gap-1">
+     <kbd className="px-1.5 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 font-mono text-[10px]">A–D</kbd>
+     <span>Variant</span>
+   </span>
+   <span>•</span>
+   <span className="flex items-center gap-1">
+     <kbd className="px-1.5 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 font-mono text-[10px]">F</kbd>
+     <span>Belgilash</span>
+   </span>
+ </div>
+
  {currentQuestionIndex === questions.length - 1 ? (
  <button
  onClick={handleSubmitClick}
  disabled={submitting}
- className="px-8 py-3 bg-emerald-500 hover:bg-emerald-600 text-white rounded-[20px] font-bold flex items-center gap-2 active:scale-95 transition-all disabled:opacity-50 shadow-sm"
+ className="px-8 py-3 bg-emerald-500 hover:bg-emerald-600 text-white rounded-[20px] font-bold flex items-center gap-2 active:scale-95 transition-all disabled:opacity-50 shadow-sm cursor-pointer"
  >
  <Send size={18} />
  {submitting ? t('tests.take.submitting') : t('tests.take.finish')}
@@ -1570,7 +1668,7 @@ export default function TakeTestPage() {
  ) : (
  <button
  onClick={() => setCurrentQuestionIndex(prev => Math.min(questions.length - 1, prev+ 1))}
- className="px-8 py-3 bg-brand-blue hover:bg-blue-600 text-white rounded-[20px] font-bold flex items-center gap-2 active:scale-95 transition-all shadow-sm"
+ className="px-8 py-3 bg-brand-blue hover:bg-blue-600 text-white rounded-[20px] font-bold flex items-center gap-2 active:scale-95 transition-all shadow-sm cursor-pointer"
  >
  {t('tests.take.next')}
  <ArrowRight size={18} />
@@ -1743,14 +1841,50 @@ export default function TakeTestPage() {
  Siz <span className="font-bold text-brand-blue px-2 py-1 bg-brand-blue/10 rounded-md mx-1">{Object.keys(answers).length}/{questions.length}</span> ta savolga javob berdingiz.
  </p>
  {Object.keys(answers).length < questions.length && (
- <div className="flex items-start gap-3 p-4 bg-amber-50 dark:bg-amber-500/10 rounded-[20px] border border-amber-200/50 dark:border-amber-500/20">
- <AlertCircle className="text-amber-500 shrink-0 mt-0.5" size={18} />
- <p className="text-[13px] text-amber-700 dark:text-amber-400 font-medium leading-relaxed">
- <span className="font-bold">{questions.length - Object.keys(answers).length}</span> ta savol javobsiz qoldi! Agar ishonchingiz komil bo'lsa, yakunlashingiz mumkin.
- </p>
+ <div className="flex flex-col gap-2.5 p-4 bg-amber-50 dark:bg-amber-500/10 rounded-[20px] border border-amber-200/50 dark:border-amber-500/20">
+   <div className="flex items-start gap-3">
+     <AlertCircle className="text-amber-500 shrink-0 mt-0.5" size={18} />
+     <p className="text-[13px] text-amber-700 dark:text-amber-400 font-medium leading-relaxed">
+       <span className="font-bold">{questions.length - Object.keys(answers).length}</span> ta savol javobsiz qoldi! Agar ishonchingiz komil bo'lsa, yakunlashingiz mumkin.
+     </p>
+   </div>
+   <button
+     type="button"
+     onClick={() => {
+       const firstUnansweredIdx = questions.findIndex((q) => !answers[q.id]);
+       if (firstUnansweredIdx !== -1) {
+         setCurrentQuestionIndex(firstUnansweredIdx);
+         setShowConfirmModal(false);
+       }
+     }}
+     className="self-start text-xs font-bold text-amber-700 dark:text-amber-300 underline hover:no-underline cursor-pointer ml-7"
+   >
+     Javobsiz savolga o'tish →
+   </button>
  </div>
  )}
- <p className="text-[13px] text-slate-500 dark:text-slate-400 mt-2 font-medium">
+ {markedForReview.size > 0 && (
+ <div className="flex items-center justify-between gap-3 p-3.5 bg-blue-50/70 dark:bg-blue-950/30 rounded-[18px] border border-blue-200/50 dark:border-blue-800/40">
+   <div className="flex items-center gap-2.5 text-[13px] text-brand-blue font-semibold">
+     <Flag size={16} className="fill-brand-blue/20 shrink-0" />
+     <span>{markedForReview.size} ta savol qayta ko'rish uchun belgilangan</span>
+   </div>
+   <button
+     type="button"
+     onClick={() => {
+       const firstMarkedIdx = questions.findIndex((q) => markedForReview.has(q.id));
+       if (firstMarkedIdx !== -1) {
+         setCurrentQuestionIndex(firstMarkedIdx);
+         setShowConfirmModal(false);
+       }
+     }}
+     className="text-xs font-bold text-brand-blue underline hover:no-underline shrink-0 cursor-pointer"
+   >
+     Ko'rish →
+   </button>
+ </div>
+ )}
+ <p className="text-[13px] text-slate-500 dark:text-slate-400 mt-1 font-medium">
  Testni yakunlagandan keyin qayta tahrirlash imkoniyati bo'lmaydi.
  </p>
  </div>
