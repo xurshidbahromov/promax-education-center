@@ -591,3 +591,82 @@ export function buildTournamentLiveMessage({
   );
 }
 
+export interface WeeklyDigestStudentStats {
+  parentName?: string;
+  studentName: string;
+  weekRangeLabel: string;
+  attendance: {
+    present: number;
+    late: number;
+    absent: number;
+  };
+  tests: {
+    count: number;
+    averagePercent: number;
+    bestPercent: number;
+  };
+  paymentStatus: 'paid' | 'partial' | 'unpaid';
+  paidAmountUzs: number;
+  currentMonthLabel: string;
+  coins: number;
+}
+
+export function buildWeeklyParentDigestMessage(stats: WeeklyDigestStudentStats): string {
+  const {
+    parentName,
+    studentName,
+    weekRangeLabel,
+    attendance,
+    tests,
+    paymentStatus,
+    paidAmountUzs,
+    currentMonthLabel,
+    coins,
+  } = stats;
+
+  const totalLessons = attendance.present + attendance.late + attendance.absent;
+  const attendancePct =
+    totalLessons > 0
+      ? Math.round(((attendance.present + attendance.late) / totalLessons) * 100)
+      : null;
+
+  const attendanceBlock =
+    totalLessons > 0
+      ? `📅 <b>Davomat (${attendancePct}%):</b>\n` +
+        `   ✅ Qatnashdi: <b>${attendance.present} ta</b>\n` +
+        (attendance.late > 0 ? `   ⏰ Kechikdi: <b>${attendance.late} ta</b>\n` : '') +
+        (attendance.absent > 0 ? `   ❌ Qoldirdi: <b>${attendance.absent} ta</b>\n` : '')
+      : `📅 <b>Davomat:</b> Shu hafta davomat qaydi kiritilmagan\n`;
+
+  const testsBlock =
+    tests.count > 0
+      ? `📝 <b>Test va Imtihonlar:</b>\n` +
+        `   • Ishlangan testlar: <b>${tests.count} ta</b>\n` +
+        `   • O'rtacha natija: <b>${tests.averagePercent}%</b>\n` +
+        `   • Eng yuqori natija: <b>${tests.bestPercent}%</b>\n`
+      : `📝 <b>Test va Imtihonlar:</b> Shu hafta yangi test topshirilmagan\n`;
+
+  const paymentLine =
+    paymentStatus === 'paid'
+      ? `💳 <b>To'lov (${currentMonthLabel}):</b> ✅ To'langan (${paidAmountUzs.toLocaleString('uz-UZ')} so'm)`
+      : paymentStatus === 'partial'
+      ? `💳 <b>To'lov (${currentMonthLabel}):</b> ⏳ Qisman to'langan (${paidAmountUzs.toLocaleString('uz-UZ')} so'm)`
+      : `💳 <b>To'lov (${currentMonthLabel}):</b> ⏳ To'lov kutilmoqda`;
+
+  const greeting = parentName ? `Assalomu alaykum, <b>${parentName}</b>!` : `Assalomu alaykum, hurmatli ota-ona!`;
+
+  return (
+    `📊 <b>HAFTALIK O'ZLASHTIRISH HISOBOTI</b>\n` +
+    `🗓 <i>${weekRangeLabel}</i>\n\n` +
+    `${greeting}\n` +
+    `🎓 Farzandingiz: <b>${studentName}</b>\n\n` +
+    `${attendanceBlock}\n` +
+    `${testsBlock}\n` +
+    `${paymentLine}\n` +
+    `💎 <b>Jami coin balansi:</b> ${coins} coin\n\n` +
+    `✨ <i>Farzandingizning ta'limiga e'tiboringiz uchun rahmat!</i>\n` +
+    `🏫 <b>Promax Education Center</b>`
+  );
+}
+
+

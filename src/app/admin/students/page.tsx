@@ -117,6 +117,70 @@ export default function AdminStudentsPage() {
   } | null>(null);
   const [isSavingStudent, setIsSavingStudent] = useState(false);
 
+  // Weekly Parent Telegram Digest Modal states
+  const [digestModalOpen, setDigestModalOpen] = useState(false);
+  const [digestLoading, setDigestLoading] = useState(false);
+  const [digestSending, setDigestSending] = useState(false);
+  const [digestPreview, setDigestPreview] = useState<{
+    totalLinks: number;
+    uniqueParents: number;
+    sampleMessage: string | null;
+  } | null>(null);
+
+  const openWeeklyDigestModal = async () => {
+    setDigestModalOpen(true);
+    setDigestLoading(true);
+    setDigestPreview(null);
+    try {
+      const res = await fetch('/api/telegram/weekly-digest', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ dryRun: true }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        toast.error(data.error || "Hisobot ma'lumotlarini yuklashda xatolik");
+        setDigestModalOpen(false);
+        return;
+      }
+      setDigestPreview({
+        totalLinks: data.totalLinks || 0,
+        uniqueParents: data.uniqueParents || 0,
+        sampleMessage: data.sampleMessage || null,
+      });
+    } catch (err: any) {
+      toast.error("Tarmoq xatosi: " + (err.message || ""));
+      setDigestModalOpen(false);
+    } finally {
+      setDigestLoading(false);
+    }
+  };
+
+  const handleSendWeeklyDigest = async () => {
+    setDigestSending(true);
+    try {
+      const res = await fetch('/api/telegram/weekly-digest', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ dryRun: false }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        toast.error(data.error || "Hisobot yuborishda xatolik");
+        return;
+      }
+      toast.success(
+        `✅ ${data.sentCount} ta ota-onaga haftalik hisobot muvaffaqiyatli yuborildi!` +
+          (data.failedCount > 0 ? ` (${data.failedCount} ta yetib bormadi)` : '')
+      );
+      setDigestModalOpen(false);
+    } catch (err: any) {
+      toast.error("Xatolik yuz berdi: " + (err.message || ""));
+    } finally {
+      setDigestSending(false);
+    }
+  };
+
   // Load Groups and Subjects on mount
   useEffect(() => {
     getGroups().then(setAllGroups).catch(console.error);
@@ -341,37 +405,48 @@ export default function AdminStudentsPage() {
           </p>
         </div>
 
-        <button
-          type="button"
-          onClick={() => {
-            if (filteredStudents.length === 0) {
-              toast.error("Eksport qilish uchun o'quvchilar topilmadi");
-              return;
-            }
-            exportToExcel(
-              filteredStudents,
-              [
-                { header: "№", key: "idx", width: 6, format: (_r, idx) => idx + 1 },
-                { header: "F.I.SH", key: "full_name", width: 28, format: (r) => r.full_name || "Ism kiritilmagan" },
-                { header: "Telefon", key: "phone", width: 18, format: (r) => formatUzPhone(r.phone || "") || "-" },
-                { header: "Ota-ona ismi", key: "parent_name", width: 24, format: (r) => r.parent_name || "-" },
-                { header: "Ota-ona telefoni", key: "parent_phone", width: 18, format: (r) => formatUzPhone(r.parent_phone || "") || "-" },
-                { header: "Guruhlari", key: "course", width: 28, format: (r) => (r.groups || []).map((g) => g.name).join(", ") || "Guruhsiz" },
-                { header: "Holati", key: "status", width: 14, format: (r) => r.is_enrolled ? "Faol (Guruhda)" : "Guruhsiz" },
-                { header: "Telegram", key: "telegram_id", width: 16, format: (r) => r.telegram_id ? "Ulangan" : "Ulanmagan" },
-                { header: "Coinlar", key: "coins", width: 12, format: (r) => Number(r.coins || 0) },
-                { header: "Qo'shilgan sana", key: "joined_at", width: 16, format: (r) => r.joined_at ? new Date(r.joined_at).toLocaleDateString("uz-UZ") : "-" },
-              ],
-              `Promax_Oquvchilar_${new Date().toISOString().slice(0, 10)}.xlsx`,
-              "Oquvchilar"
-            );
-            toast.success(`${filteredStudents.length} ta o'quvchi Excel (.xlsx) formatda yuklab olindi!`);
-          }}
-          className="inline-flex items-center gap-2 px-4 py-2.5 rounded-2xl bg-emerald-500/10 hover:bg-emerald-500 text-emerald-600 dark:text-emerald-400 hover:text-white border border-emerald-500/20 text-xs font-extrabold transition-all cursor-pointer self-start md:self-auto active:scale-95"
-        >
-          <Download size={15} />
-          <span>Excel yuklash ({filteredStudents.length})</span>
-        </button>
+        <div className="flex flex-wrap items-center gap-2.5 self-start md:self-auto">
+          <button
+            type="button"
+            onClick={openWeeklyDigestModal}
+            className="inline-flex items-center gap-2 px-4 py-2.5 rounded-2xl bg-sky-500/10 hover:bg-sky-500 text-sky-600 dark:text-sky-400 hover:text-white border border-sky-500/20 text-xs font-extrabold transition-all cursor-pointer active:scale-95"
+          >
+            <Send size={14} />
+            <span>Haftalik Hisobot (Telegram)</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => {
+              if (filteredStudents.length === 0) {
+                toast.error("Eksport qilish uchun o'quvchilar topilmadi");
+                return;
+              }
+              exportToExcel(
+                filteredStudents,
+                [
+                  { header: "№", key: "idx", width: 6, format: (_r, idx) => idx + 1 },
+                  { header: "F.I.SH", key: "full_name", width: 28, format: (r) => r.full_name || "Ism kiritilmagan" },
+                  { header: "Telefon", key: "phone", width: 18, format: (r) => formatUzPhone(r.phone || "") || "-" },
+                  { header: "Ota-ona ismi", key: "parent_name", width: 24, format: (r) => r.parent_name || "-" },
+                  { header: "Ota-ona telefoni", key: "parent_phone", width: 18, format: (r) => formatUzPhone(r.parent_phone || "") || "-" },
+                  { header: "Guruhlari", key: "course", width: 28, format: (r) => (r.groups || []).map((g) => g.name).join(", ") || "Guruhsiz" },
+                  { header: "Holati", key: "status", width: 14, format: (r) => r.is_enrolled ? "Faol (Guruhda)" : "Guruhsiz" },
+                  { header: "Telegram", key: "telegram_id", width: 16, format: (r) => r.telegram_id ? "Ulangan" : "Ulanmagan" },
+                  { header: "Coinlar", key: "coins", width: 12, format: (r) => Number(r.coins || 0) },
+                  { header: "Qo'shilgan sana", key: "joined_at", width: 16, format: (r) => r.joined_at ? new Date(r.joined_at).toLocaleDateString("uz-UZ") : "-" },
+                ],
+                `Promax_Oquvchilar_${new Date().toISOString().slice(0, 10)}.xlsx`,
+                "Oquvchilar"
+              );
+              toast.success(`${filteredStudents.length} ta o'quvchi Excel (.xlsx) formatda yuklab olindi!`);
+            }}
+            className="inline-flex items-center gap-2 px-4 py-2.5 rounded-2xl bg-emerald-500/10 hover:bg-emerald-500 text-emerald-600 dark:text-emerald-400 hover:text-white border border-emerald-500/20 text-xs font-extrabold transition-all cursor-pointer active:scale-95"
+          >
+            <Download size={15} />
+            <span>Excel yuklash ({filteredStudents.length})</span>
+          </button>
+        </div>
       </div>
 
       {/* ── GLOBAL KPI SUMMARY CARDS ── */}
@@ -898,6 +973,104 @@ export default function AdminStudentsPage() {
                 className="px-4 py-2 text-xs font-bold text-white bg-emerald-500 hover:bg-emerald-600 rounded-xl transition-colors disabled:opacity-50"
               >
                 {isPromoting ? 'Saqlanmoqda...' : 'Saqlash'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ── WEEKLY PARENT TELEGRAM DIGEST MODAL ── */}
+      {digestModalOpen && (
+        <div className="fixed inset-0 z-[100] bg-slate-950/60 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl max-w-lg w-full shadow-2xl overflow-hidden">
+            <div className="flex items-center justify-between px-6 py-4 border-b border-slate-100 dark:border-slate-800">
+              <div className="flex items-center gap-2.5">
+                <div className="w-9 h-9 rounded-xl bg-sky-500/10 text-sky-600 dark:text-sky-400 flex items-center justify-center">
+                  <Send size={17} />
+                </div>
+                <div>
+                  <h3 className="text-sm font-black text-slate-800 dark:text-slate-100">
+                    Ota-onalarga Haftalik Hisobot
+                  </h3>
+                  <p className="text-[11px] font-medium text-slate-400">
+                    Oxirgi 7 kunlik davomat, test natijalari va to&apos;lov holati
+                  </p>
+                </div>
+              </div>
+              <button
+                onClick={() => setDigestModalOpen(false)}
+                className="p-1.5 rounded-xl text-slate-400 hover:text-slate-700 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer"
+              >
+                <X size={18} />
+              </button>
+            </div>
+
+            <div className="p-6 space-y-4">
+              {digestLoading ? (
+                <div className="py-10 text-center space-y-2">
+                  <div className="w-8 h-8 border-2 border-sky-500/30 border-t-sky-500 rounded-full animate-spin mx-auto" />
+                  <p className="text-xs font-semibold text-slate-400">Hisobot tayyorlanmoqda...</p>
+                </div>
+              ) : !digestPreview || digestPreview.totalLinks === 0 ? (
+                <div className="p-5 rounded-2xl bg-amber-50 dark:bg-amber-950/30 border border-amber-200/70 dark:border-amber-800/50 text-center space-y-1.5">
+                  <p className="text-sm font-bold text-amber-700 dark:text-amber-400">
+                    Telegram botga ulangan ota-onalar topilmadi
+                  </p>
+                  <p className="text-xs text-amber-600/80 dark:text-amber-400/70">
+                    Ota-onalar Telegram botda &ldquo;Ota-ona sifatida ulanish&rdquo; tugmasi orqali kontaktini ulashgach, bu ro&apos;yxatda paydo bo&apos;ladi.
+                  </p>
+                </div>
+              ) : (
+                <>
+                  <div className="grid grid-cols-2 gap-3">
+                    <div className="p-3.5 rounded-2xl bg-sky-500/5 border border-sky-500/20">
+                      <span className="text-[10px] font-extrabold uppercase tracking-wider text-sky-600 dark:text-sky-400 block">
+                        Qabul qiluvchi ota-onalar
+                      </span>
+                      <span className="text-xl font-black text-slate-800 dark:text-slate-100">
+                        {digestPreview.uniqueParents} nafar
+                      </span>
+                    </div>
+                    <div className="p-3.5 rounded-2xl bg-emerald-500/5 border border-emerald-500/20">
+                      <span className="text-[10px] font-extrabold uppercase tracking-wider text-emerald-600 dark:text-emerald-400 block">
+                        Jami hisobotlar
+                      </span>
+                      <span className="text-xl font-black text-slate-800 dark:text-slate-100">
+                        {digestPreview.totalLinks} ta
+                      </span>
+                    </div>
+                  </div>
+
+                  {digestPreview.sampleMessage && (
+                    <div className="space-y-1.5">
+                      <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400">
+                        Xabar namunasi (Telegram ko&apos;rinishi):
+                      </span>
+                      <div
+                        className="p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/70 border border-slate-200/70 dark:border-slate-700/70 text-xs text-slate-700 dark:text-slate-200 leading-relaxed whitespace-pre-line max-h-60 overflow-y-auto"
+                        dangerouslySetInnerHTML={{ __html: digestPreview.sampleMessage }}
+                      />
+                    </div>
+                  )}
+                </>
+              )}
+            </div>
+
+            <div className="flex items-center justify-end gap-3 px-6 py-4 border-t border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/50">
+              <button
+                onClick={() => setDigestModalOpen(false)}
+                disabled={digestSending}
+                className="px-4 py-2 text-xs font-bold text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-100 transition-colors cursor-pointer"
+              >
+                Yopish
+              </button>
+              <button
+                onClick={handleSendWeeklyDigest}
+                disabled={digestLoading || digestSending || !digestPreview || digestPreview.totalLinks === 0}
+                className="inline-flex items-center gap-2 px-5 py-2.5 text-xs font-extrabold text-white bg-sky-500 hover:bg-sky-600 rounded-xl transition-all disabled:opacity-50 cursor-pointer shadow-sm active:scale-95"
+              >
+                <Send size={14} />
+                <span>{digestSending ? 'Yuborilmoqda...' : 'Barcha ota-onalarga yuborish'}</span>
               </button>
             </div>
           </div>
