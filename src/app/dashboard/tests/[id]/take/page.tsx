@@ -28,7 +28,9 @@ import {
   RotateCcw,
   ListChecks,
   HelpCircle,
-  Lightbulb
+  Lightbulb,
+  Award,
+  Printer
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
@@ -254,6 +256,16 @@ export default function TakeTestPage() {
   const questionStartTime = useRef<number>(Date.now());
   const lastSavedAnswersRef = useRef<Record<string, string>>({});
   const tabSwitchesRef = useRef<number>(0);
+  const allQuestionsRef = useRef<Question[]>([]);
+  const [showCertificateModal, setShowCertificateModal] = useState(false);
+  const [studentDisplayName, setStudentDisplayName] = useState("Promax O'quvchisi");
+
+  // Keep a backup of the full question set for full retakes after a mistakes-only session
+  useEffect(() => {
+    if (questions.length > 0 && allQuestionsRef.current.length === 0) {
+      allQuestionsRef.current = questions;
+    }
+  }, [questions]);
 
   // Close image zoom modal with Escape key & handle keyboard shortcuts during test
   useEffect(() => {
@@ -728,20 +740,21 @@ export default function TakeTestPage() {
       scaledScore: scaledScoreStr
     });
 
-    // 2. Submit to backend in background (only for official attempts, not practice mode)
-    if (!isPracticeMode) {
-      try {
-        const supabase = createClient();
-        const { data: userData } = await supabase.auth.getUser();
-        const { data: profileData } = await supabase
-          .from('profiles')
-          .select('full_name, avatar_url')
-          .eq('id', userData?.user?.id)
-          .maybeSingle();
+    // 2. Fetch user profile for certificate & submit to backend (only official attempts saved to DB)
+    try {
+      const supabase = createClient();
+      const { data: userData } = await supabase.auth.getUser();
+      const { data: profileData } = await supabase
+        .from('profiles')
+        .select('full_name, avatar_url')
+        .eq('id', userData?.user?.id)
+        .maybeSingle();
 
-        const studentName = profileData?.full_name || userData?.user?.user_metadata?.full_name || "O'quvchi";
-        const studentAvatar = profileData?.avatar_url || userData?.user?.user_metadata?.avatar_url || null;
+      const studentName = profileData?.full_name || userData?.user?.user_metadata?.full_name || "O'quvchi";
+      const studentAvatar = profileData?.avatar_url || userData?.user?.user_metadata?.avatar_url || null;
+      setStudentDisplayName(studentName);
 
+      if (!isPracticeMode) {
         if (isInternational) {
           await submitInternationalAttempt(
             testId,
@@ -764,9 +777,9 @@ export default function TakeTestPage() {
         } else {
           await completeTestAttempt(attemptId || `attempt_${testId}`, timeSpent);
         }
-      } catch (error) {
-        console.error("Backend submission error:", error);
       }
+    } catch (error) {
+      console.error("Backend submission error:", error);
     }
 
     // Smooth, polished transition (1200ms)
@@ -795,6 +808,9 @@ export default function TakeTestPage() {
   };
 
   const handlePracticeRetake = () => {
+    if (allQuestionsRef.current.length > 0) {
+      setQuestions(allQuestionsRef.current);
+    }
     setIsPracticeMode(true);
     setAnswers({});
     lastSavedAnswersRef.current = {};
@@ -807,6 +823,37 @@ export default function TakeTestPage() {
       window.scrollTo({ top: 0, behavior: "smooth" });
     }
     toast.success("Mashq rejimi boshlandi! O'zingizni sinab ko'ring.", { icon: "🎯" });
+  };
+
+  const handleMistakesRetake = () => {
+    const mistakeQs = questions.filter((q) => {
+      const studentAns = (answers[q.id] || "").trim().toLowerCase();
+      const correctAns = (q.correct_answer || "").trim().toLowerCase();
+      const isCorrect =
+        studentAns &&
+        (studentAns === correctAns ||
+          (q as any).accepted_answers?.some((a: string) => a.toLowerCase() === studentAns));
+      return !isCorrect;
+    });
+
+    if (mistakeQs.length === 0) {
+      toast.success("Sizda xato savollar yo'q! Barcha savollar to'g'ri topilgan.");
+      return;
+    }
+
+    setQuestions(mistakeQs);
+    setIsPracticeMode(true);
+    setAnswers({});
+    lastSavedAnswersRef.current = {};
+    setMarkedForReview(new Set());
+    setCurrentQuestionIndex(0);
+    setShowDetailedResults(false);
+    setCalculatedSummary(null);
+    setTimeRemaining(Math.max(10, mistakeQs.length * 2) * 60);
+    if (typeof window !== "undefined") {
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+    toast.success(`Xatolar ustida ishlash (${mistakeQs.length} ta savol) boshlandi!`, { icon: "🧠" });
   };
 
 
@@ -885,7 +932,17 @@ export default function TakeTestPage() {
             <span className="truncate">{isInternational ? "Xalqaro musobaqalarga qaytish" : isOlympiad ? "Musobaqalarga qaytish" : "Testlar ro'yxatiga qaytish"}</span>
           </button>
 
-          <div className="flex items-center gap-2 sm:gap-3 w-full sm:w-auto">
+          <div className="flex flex-wrap items-center gap-2 sm:gap-2.5 w-full sm:w-auto">
+            {(calculatedSummary.wrongCount + calculatedSummary.unansweredCount) > 0 && (
+              <button
+                type="button"
+                onClick={handleMistakesRetake}
+                className="flex-1 sm:flex-initial justify-center px-3.5 sm:px-4 py-2 sm:py-2.5 rounded-xl sm:rounded-2xl bg-rose-500/10 hover:bg-rose-500 hover:text-white text-rose-600 dark:text-rose-400 text-xs sm:text-sm font-bold flex items-center gap-1.5 sm:gap-2 border border-rose-500/20 shadow-xs transition-all cursor-pointer active:scale-95"
+              >
+                <Sparkles size={14} className="shrink-0" />
+                <span>Xatolarni ishlash ({calculatedSummary.wrongCount + calculatedSummary.unansweredCount})</span>
+              </button>
+            )}
             <button
               type="button"
               onClick={handlePracticeRetake}
@@ -894,6 +951,16 @@ export default function TakeTestPage() {
               <RotateCcw size={14} className="shrink-0" />
               <span>Qayta yechish</span>
             </button>
+            {calculatedSummary.percentage >= 60 && (
+              <button
+                type="button"
+                onClick={() => setShowCertificateModal(true)}
+                className="flex-1 sm:flex-initial justify-center px-3.5 sm:px-4 py-2 sm:py-2.5 rounded-xl sm:rounded-2xl bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white text-xs sm:text-sm font-bold flex items-center gap-1.5 sm:gap-2 shadow-md shadow-amber-500/20 transition-all cursor-pointer active:scale-95"
+              >
+                <Award size={15} className="shrink-0" />
+                <span>Sertifikat</span>
+              </button>
+            )}
             <button
               type="button"
               onClick={() => router.push(isInternational ? '/dashboard/international' : isOlympiad ? '/dashboard/olympiads' : '/dashboard/results')}
@@ -1306,6 +1373,91 @@ export default function TakeTestPage() {
             );
           })}
         </div>
+
+        {/* Official Promax Certificate / Diploma Modal */}
+        {showCertificateModal && (
+          <div className="fixed inset-0 z-[150] bg-slate-950/75 backdrop-blur-md flex items-center justify-center p-4 overflow-y-auto">
+            <div className="bg-white dark:bg-slate-900 rounded-[28px] max-w-2xl w-full p-5 sm:p-8 border-2 border-amber-400/60 shadow-2xl space-y-6 relative overflow-hidden">
+              <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-3">
+                <div className="flex items-center gap-2 text-amber-600 dark:text-amber-400 font-bold text-sm">
+                  <Award size={18} />
+                  <span>Rasmiy Elektron Sertifikat</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={() => window.print()}
+                    className="px-3.5 py-1.5 rounded-xl bg-brand-blue hover:bg-blue-600 text-white text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer"
+                  >
+                    <Printer size={14} />
+                    <span>Chop etish / PDF</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setShowCertificateModal(false)}
+                    className="w-8 h-8 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-500 hover:text-slate-900 dark:hover:text-white cursor-pointer"
+                  >
+                    <X size={16} />
+                  </button>
+                </div>
+              </div>
+
+              {/* Certificate Printable Canvas */}
+              <div className="relative p-6 sm:p-10 rounded-2xl border-4 border-double border-amber-500/40 bg-gradient-to-br from-amber-50/40 via-white to-blue-50/40 dark:from-slate-900 dark:via-slate-900 dark:to-slate-800/90 text-center space-y-5">
+                <div className="flex flex-col items-center gap-2">
+                  <div className="w-14 h-14 rounded-2xl bg-gradient-to-tr from-brand-blue to-indigo-600 text-white flex items-center justify-center shadow-lg shadow-brand-blue/20">
+                    <Trophy size={28} />
+                  </div>
+                  <span className="text-[11px] font-black uppercase tracking-[0.3em] text-brand-orange">
+                    Promax Education Center
+                  </span>
+                  <h2 className="text-2xl sm:text-3xl font-black font-fredoka uppercase tracking-wide text-slate-900 dark:text-white">
+                    S E R T I F I K A T
+                  </h2>
+                </div>
+
+                <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400">
+                  Ushbu sertifikat quyidagi ishtirokchiga muvaffaqiyatli natijasi uchun taqdim etildi:
+                </p>
+
+                <div className="py-2 border-b-2 border-amber-500/30 max-w-md mx-auto">
+                  <span className="text-xl sm:text-3xl font-black font-fredoka text-brand-blue dark:text-blue-400">
+                    {studentDisplayName}
+                  </span>
+                </div>
+
+                <div className="space-y-1.5">
+                  <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-300 font-medium">
+                    <strong className="text-slate-900 dark:text-white">&ldquo;{test.title}&rdquo;</strong> sinovida ishtirok etib,
+                  </p>
+                  <div className="inline-flex flex-wrap items-center justify-center gap-2 pt-1">
+                    <span className="px-3 py-1 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 text-xs sm:text-sm font-black">
+                      {calculatedSummary.totalScore} / {calculatedSummary.maxScore} ball ({calculatedSummary.percentage}%)
+                    </span>
+                    <span className="px-3 py-1 rounded-full bg-amber-500/15 text-amber-700 dark:text-amber-300 border border-amber-500/30 text-xs sm:text-sm font-black">
+                      {calculatedSummary.percentage >= 90
+                        ? "🥇 Oltin Daraja"
+                        : calculatedSummary.percentage >= 75
+                        ? "🥈 Kumush Daraja"
+                        : "🥉 Bronza Daraja"}
+                    </span>
+                  </div>
+                </div>
+
+                <div className="pt-6 flex items-center justify-between text-[11px] text-slate-400 border-t border-slate-200/60 dark:border-slate-800">
+                  <div className="text-left">
+                    <span className="block font-bold text-slate-600 dark:text-slate-300">Sana:</span>
+                    <span>{new Date().toLocaleDateString("uz-UZ")}</span>
+                  </div>
+                  <div className="text-right">
+                    <span className="block font-bold text-slate-600 dark:text-slate-300">ID Raqami:</span>
+                    <span className="font-mono">PMX-{String(testId).slice(0, 5).toUpperCase()}-{calculatedSummary.percentage}</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     );
   };

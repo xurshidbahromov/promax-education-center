@@ -32,10 +32,12 @@ import {
   LayoutGrid,
   List,
   Sparkles,
-  Send
+  Send,
+  Download
 } from 'lucide-react';
 import { useSubjects } from '@/hooks/useAdminData';
 import { useExpectedPayments, processPayment, deletePayment, ExpectedPayment } from '@/hooks/usePayments';
+import { exportToExcel } from '@/lib/excel-export';
 import toast from 'react-hot-toast';
 
 function getSubjectMeta(subjectName: string = '') {
@@ -824,15 +826,59 @@ function PaymentsContent() {
           </p>
         </div>
 
-        {/* Month Selector */}
-        <div className="flex items-center gap-2 bg-white/60 dark:bg-slate-900/60 backdrop-blur-xl px-3.5 py-2 rounded-2xl border border-slate-200/70 dark:border-slate-800/70 self-start md:self-auto">
-          <Calendar size={15} className="text-emerald-500 shrink-0" />
-          <input
-            type="month"
-            value={currentMonth}
-            onChange={(e) => setCurrentMonth(e.target.value)}
-            className="bg-transparent text-xs font-bold text-slate-700 dark:text-slate-200 outline-none cursor-pointer"
-          />
+        {/* Month Selector & Excel Export */}
+        <div className="flex flex-wrap items-center gap-2.5 self-start md:self-auto">
+          <button
+            type="button"
+            onClick={() => {
+              if (payments.length === 0) {
+                toast.error("Eksport qilish uchun to'lov ma'lumotlari yo'q");
+                return;
+              }
+              exportToExcel(
+                payments,
+                [
+                  { header: "№", key: "idx", width: 6, format: (_r, idx) => idx + 1 },
+                  { header: "O'quvchi F.I.SH", key: "studentName", width: 28, format: (r) => r.studentName || "-" },
+                  { header: "Telefon", key: "studentPhone", width: 18, format: (r) => r.studentPhone || "-" },
+                  { header: "Guruh", key: "groupName", width: 24, format: (r) => r.groupName || "-" },
+                  { header: "Fan", key: "subjectTitle", width: 20, format: (r) => r.subjectTitle || "-" },
+                  { header: "Oy", key: "month", width: 12, format: () => currentMonth },
+                  { header: "Oylik to'lov (UZS)", key: "groupPrice", width: 18, format: (r) => Number(r.groupPrice || 0) },
+                  { header: "To'langan (UZS)", key: "paid", width: 18, format: (r) => Number(r.payment?.amount || 0) },
+                  { header: "Qoldiq qarz (UZS)", key: "debt", width: 18, format: (r) => Math.max(0, Number(r.groupPrice || 0) - Number(r.payment?.amount || 0)) },
+                  {
+                    header: "Holati",
+                    key: "status",
+                    width: 16,
+                    format: (r) =>
+                      r.payment?.status === "completed"
+                        ? "To'liq to'langan"
+                        : (r.payment?.amount || 0) > 0
+                        ? "Qisman to'langan"
+                        : "To'lanmagan (Qarzdor)",
+                  },
+                ],
+                `Promax_Tolovlar_${currentMonth}.xlsx`,
+                `Tolovlar_${currentMonth}`
+              );
+              toast.success(`${currentMonth} oyi to'lov hisoboti Excel (.xlsx) formatda yuklab olindi!`);
+            }}
+            className="inline-flex items-center gap-2 px-3.5 py-2 rounded-2xl bg-emerald-500/10 hover:bg-emerald-500 text-emerald-600 dark:text-emerald-400 hover:text-white border border-emerald-500/20 text-xs font-extrabold transition-all cursor-pointer active:scale-95"
+          >
+            <Download size={14} />
+            <span>Excel hisobot (.xlsx)</span>
+          </button>
+
+          <div className="flex items-center gap-2 bg-white/60 dark:bg-slate-900/60 backdrop-blur-xl px-3.5 py-2 rounded-2xl border border-slate-200/70 dark:border-slate-800/70">
+            <Calendar size={15} className="text-emerald-500 shrink-0" />
+            <input
+              type="month"
+              value={currentMonth}
+              onChange={(e) => setCurrentMonth(e.target.value)}
+              className="bg-transparent text-xs font-bold text-slate-700 dark:text-slate-200 outline-none cursor-pointer"
+            />
+          </div>
         </div>
       </div>
 

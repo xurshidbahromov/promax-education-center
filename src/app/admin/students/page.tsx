@@ -23,8 +23,10 @@ import {
   Plus,
   Globe,
   Layers,
-  Send
+  Send,
+  Download
 } from 'lucide-react';
+import { exportToExcel } from '@/lib/excel-export';
 import {
   getStudents,
   getGroups,
@@ -338,6 +340,38 @@ export default function AdminStudentsPage() {
             Markaz o'quvchilari va onlayn ro'yxatdan o'tgan barcha foydalanuvchilar ({studentsList.length} nafar)
           </p>
         </div>
+
+        <button
+          type="button"
+          onClick={() => {
+            if (filteredStudents.length === 0) {
+              toast.error("Eksport qilish uchun o'quvchilar topilmadi");
+              return;
+            }
+            exportToExcel(
+              filteredStudents,
+              [
+                { header: "№", key: "idx", width: 6, format: (_r, idx) => idx + 1 },
+                { header: "F.I.SH", key: "full_name", width: 28, format: (r) => r.full_name || "Ism kiritilmagan" },
+                { header: "Telefon", key: "phone", width: 18, format: (r) => formatUzPhone(r.phone || "") || "-" },
+                { header: "Ota-ona ismi", key: "parent_name", width: 24, format: (r) => r.parent_name || "-" },
+                { header: "Ota-ona telefoni", key: "parent_phone", width: 18, format: (r) => formatUzPhone(r.parent_phone || "") || "-" },
+                { header: "Guruhlari", key: "course", width: 28, format: (r) => (r.groups || []).map((g) => g.name).join(", ") || "Guruhsiz" },
+                { header: "Holati", key: "status", width: 14, format: (r) => r.is_enrolled ? "Faol (Guruhda)" : "Guruhsiz" },
+                { header: "Telegram", key: "telegram_id", width: 16, format: (r) => r.telegram_id ? "Ulangan" : "Ulanmagan" },
+                { header: "Coinlar", key: "coins", width: 12, format: (r) => Number(r.coins || 0) },
+                { header: "Qo'shilgan sana", key: "joined_at", width: 16, format: (r) => r.joined_at ? new Date(r.joined_at).toLocaleDateString("uz-UZ") : "-" },
+              ],
+              `Promax_Oquvchilar_${new Date().toISOString().slice(0, 10)}.xlsx`,
+              "Oquvchilar"
+            );
+            toast.success(`${filteredStudents.length} ta o'quvchi Excel (.xlsx) formatda yuklab olindi!`);
+          }}
+          className="inline-flex items-center gap-2 px-4 py-2.5 rounded-2xl bg-emerald-500/10 hover:bg-emerald-500 text-emerald-600 dark:text-emerald-400 hover:text-white border border-emerald-500/20 text-xs font-extrabold transition-all cursor-pointer self-start md:self-auto active:scale-95"
+        >
+          <Download size={15} />
+          <span>Excel yuklash ({filteredStudents.length})</span>
+        </button>
       </div>
 
       {/* ── GLOBAL KPI SUMMARY CARDS ── */}
