@@ -13,9 +13,10 @@ const NO_CACHE_HEADERS = {
 };
 
 // Helper to convert Supabase row to frontend AdminTournament
-function mapDbToTournament(row: any, liveCount?: number): AdminTournament {
+function mapDbToTournament(row: any, liveCount?: number, includeQuestions = true): AdminTournament {
   const storedCount = Number(row.participants_count) || 0;
   const count = liveCount !== undefined ? Math.max(storedCount, liveCount) : storedCount;
+  const rawQuestions = Array.isArray(row.questions) ? row.questions : [];
   return {
     id: row.id,
     title: row.title || 'Musobaqa',
@@ -27,22 +28,23 @@ function mapDbToTournament(row: any, liveCount?: number): AdminTournament {
     endDate: row.end_date || '',
     endTime: row.end_time || '20:00',
     durationMinutes: Number(row.duration_minutes) || 60,
-    totalQuestions: Number(row.total_questions) || (Array.isArray(row.questions) ? row.questions.length : 0),
+    totalQuestions: Number(row.total_questions) || rawQuestions.length,
     entryCoins: Number(row.entry_coins) || 0,
     prizePool: row.prize_pool || '',
     topPrizes: Array.isArray(row.top_prizes) ? row.top_prizes : [],
     rules: Array.isArray(row.rules) ? row.rules : [],
     participantsCount: count,
-    questions: Array.isArray(row.questions) ? row.questions : [],
+    questions: includeQuestions ? rawQuestions : [],
     isPublished: row.is_published ?? true,
     created_at: row.created_at || new Date().toISOString()
   };
 }
 
 // Helper to convert Supabase row to frontend InternationalTournament
-function mapDbToIntlTournament(row: any, liveCount?: number): InternationalTournament {
+function mapDbToIntlTournament(row: any, liveCount?: number, includeQuestions = true): InternationalTournament {
   const storedCount = Number(row.participants_count) || 0;
   const count = liveCount !== undefined ? Math.max(storedCount, liveCount) : storedCount;
+  const rawQuestions = Array.isArray(row.questions) ? row.questions : [];
   return {
     id: row.id,
     title: row.title || 'Xalqaro Musobaqa',
@@ -58,13 +60,13 @@ function mapDbToIntlTournament(row: any, liveCount?: number): InternationalTourn
     endDate: row.end_date || '',
     endTime: row.end_time || '20:00',
     durationMinutes: Number(row.duration_minutes) || 60,
-    totalQuestions: Number(row.total_questions) || (Array.isArray(row.questions) ? row.questions.length : 0),
+    totalQuestions: Number(row.total_questions) || rawQuestions.length,
     entryCoins: Number(row.entry_coins) || 0,
     prizePool: row.prize_pool || '',
     topPrizes: Array.isArray(row.top_prizes) ? row.top_prizes : [],
     rules: Array.isArray(row.rules) ? row.rules : [],
     participantsCount: count,
-    questions: Array.isArray(row.questions) ? row.questions : [],
+    questions: includeQuestions ? rawQuestions : [],
     scoringScale: row.scoring_scale || (row.category === 'sat' ? '1600 Ballik SAT Shkalasi' : '100 Ballik Shkala'),
     isPublished: row.is_published ?? true,
     created_at: row.created_at || new Date().toISOString()
@@ -251,9 +253,16 @@ export async function GET(request: NextRequest) {
       resQuery = resQuery.eq('tournament_id', id);
     }
 
+    const includeQuestions = Boolean(id) || searchParams.get('includeQuestions') === 'true';
+
+    // Select lightweight columns on list queries (excludes multi-MB base64 question images!)
+    const selectColumns = includeQuestions
+      ? '*'
+      : 'id, type, title, category, category_label, subject, description, badge, badge_bg, status, start_date, start_time, end_date, end_time, duration_minutes, total_questions, entry_coins, prize_pool, top_prizes, rules, participants_count, scoring_scale, is_published, created_at';
+
     const baseTournamentQuery = supabase
       .from('tournaments')
-      .select('*')
+      .select(selectColumns)
       .eq('type', type);
 
     const [tournRes, regRes, resultsRes] = await Promise.all([
@@ -305,8 +314,8 @@ export async function GET(request: NextRequest) {
         const mapped = data.map((row: any) => {
           const liveCount = participantMap.get(row.id)?.size || 0;
           return type === 'international'
-            ? mapDbToIntlTournament(row, liveCount)
-            : mapDbToTournament(row, liveCount);
+            ? mapDbToIntlTournament(row, liveCount, includeQuestions)
+            : mapDbToTournament(row, liveCount, includeQuestions);
         });
 
         // Sync participant counts back to tournaments table in background if needed

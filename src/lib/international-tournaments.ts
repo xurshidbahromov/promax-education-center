@@ -104,7 +104,12 @@ export async function getInternationalTournaments(): Promise<InternationalTourna
       const data = await res.json();
       if (Array.isArray(data.tournaments)) {
         if (typeof window !== 'undefined') {
-          localStorage.setItem(STORAGE_INTERNATIONAL_TOURNAMENTS, JSON.stringify(data.tournaments));
+          try {
+            const lightList = data.tournaments.map((t: InternationalTournament) => ({ ...t, questions: [] }));
+            localStorage.setItem(STORAGE_INTERNATIONAL_TOURNAMENTS, JSON.stringify(lightList));
+          } catch (storageErr) {
+            console.warn('localStorage cache skipped (quota):', storageErr);
+          }
         }
         return data.tournaments;
       }
@@ -711,16 +716,19 @@ export async function saveInternationalTournament(
   }
 
   if (typeof window !== 'undefined') {
-    const stored = localStorage.getItem(STORAGE_INTERNATIONAL_TOURNAMENTS);
-    let list: InternationalTournament[] = [];
-    try { if (stored) list = JSON.parse(stored); } catch (e) {}
-    const existingIndex = list.findIndex(t => t.id === id);
-    if (existingIndex >= 0) {
-      list[existingIndex] = resJson.data;
-    } else {
-      list = [resJson.data, ...list];
-    }
-    localStorage.setItem(STORAGE_INTERNATIONAL_TOURNAMENTS, JSON.stringify(list));
+    try {
+      const stored = localStorage.getItem(STORAGE_INTERNATIONAL_TOURNAMENTS);
+      let list: InternationalTournament[] = [];
+      try { if (stored) list = JSON.parse(stored); } catch (e) {}
+      const lightSaved = { ...resJson.data, questions: [] };
+      const existingIndex = list.findIndex(t => t.id === id);
+      if (existingIndex >= 0) {
+        list[existingIndex] = lightSaved;
+      } else {
+        list = [lightSaved, ...list];
+      }
+      localStorage.setItem(STORAGE_INTERNATIONAL_TOURNAMENTS, JSON.stringify(list));
+    } catch {}
   }
   return resJson.data;
 }

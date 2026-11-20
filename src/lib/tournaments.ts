@@ -106,7 +106,13 @@ export async function getAdminTournaments(): Promise<AdminTournament[]> {
       const data = await res.json();
       if (Array.isArray(data.tournaments)) {
         if (typeof window !== 'undefined') {
-          localStorage.setItem('promax_tournaments_v3', JSON.stringify(data.tournaments));
+          try {
+            // Store lightweight list without heavy question payloads to avoid WKWebView QuotaExceededError
+            const lightList = data.tournaments.map((t: AdminTournament) => ({ ...t, questions: [] }));
+            localStorage.setItem('promax_tournaments_v3', JSON.stringify(lightList));
+          } catch (storageErr) {
+            console.warn('localStorage cache skipped (quota):', storageErr);
+          }
         }
         return data.tournaments;
       }
@@ -228,16 +234,19 @@ export async function saveAdminTournament(
     const resJson = await res.json().catch(() => ({}));
     if (res.ok && resJson.success && resJson.data) {
       if (typeof window !== 'undefined') {
-        const local = localStorage.getItem('promax_tournaments_v3');
-        let list: AdminTournament[] = [];
-        try { if (local) list = JSON.parse(local); } catch (e) {}
-        const existingIndex = list.findIndex(t => t.id === id);
-        if (existingIndex >= 0) {
-          list[existingIndex] = resJson.data;
-        } else {
-          list = [resJson.data, ...list];
-        }
-        localStorage.setItem('promax_tournaments_v3', JSON.stringify(list));
+        try {
+          const local = localStorage.getItem('promax_tournaments_v3');
+          let list: AdminTournament[] = [];
+          try { if (local) list = JSON.parse(local); } catch (e) {}
+          const lightSaved = { ...resJson.data, questions: [] };
+          const existingIndex = list.findIndex(t => t.id === id);
+          if (existingIndex >= 0) {
+            list[existingIndex] = lightSaved;
+          } else {
+            list = [lightSaved, ...list];
+          }
+          localStorage.setItem('promax_tournaments_v3', JSON.stringify(list));
+        } catch {}
       }
       return { success: true, data: resJson.data };
     }
