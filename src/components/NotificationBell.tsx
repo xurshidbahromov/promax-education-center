@@ -1,7 +1,9 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import { Bell, Check, Info, AlertCircle, CheckCircle, XCircle } from "lucide-react";
+import { createPortal } from "react-dom";
+import { motion, AnimatePresence } from "framer-motion";
+import { Bell, Check, Info, AlertCircle, CheckCircle, XCircle, X } from "lucide-react";
 import { createClient } from "@/utils/supabase/client";
 import {
  getNotifications,
@@ -13,7 +15,6 @@ import {
 import { useLanguage } from "@/context/LanguageContext";
 import { formatDistanceToNow } from "date-fns";
 import { uz, enUS, ru } from "date-fns/locale";
-import Link from "next/link";
 import toast from "react-hot-toast";
 
 interface Notification {
@@ -30,27 +31,32 @@ export default function NotificationBell() {
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [unreadCount, setUnreadCount] = useState(0);
   const [isOpen, setIsOpen] = useState(false);
+  const [mounted, setMounted] = useState(false);
   const [loading, setLoading] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const isOpenRef = useRef(isOpen);
   const userIdRef = useRef<string | undefined>(undefined);
-  const { t, language } = useLanguage();
+  const { language } = useLanguage();
   const [supabase] = useState(() => createClient());
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   useEffect(() => {
     isOpenRef.current = isOpen;
   }, [isOpen]);
 
-  // Close dropdown on click outside
+  // Close on Escape key
   useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
-        setIsOpen(false);
-      }
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setIsOpen(false);
     };
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, []);
+    if (isOpen) {
+      document.addEventListener("keydown", handleKeyDown);
+    }
+    return () => document.removeEventListener("keydown", handleKeyDown);
+  }, [isOpen]);
 
   const fetchNotifications = async (showLoading = true) => {
     if (showLoading) setLoading(true);
@@ -153,140 +159,196 @@ export default function NotificationBell() {
  setUnreadCount(0);
  };
 
- const getIcon = (type: string) => {
- switch (type) {
- case "success": return <CheckCircle size={18} className="text-green-500" />;
- case "warning": return <AlertCircle size={18} className="text-yellow-500" />;
- case "error": return <XCircle size={18} className="text-red-500" />;
- default: return <Info size={18} className="text-blue-500" />;
- }
+ const getIconTile = (type: string) => {
+   switch (type) {
+     case "success":
+       return (
+         <div className="w-8 h-8 rounded-xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shrink-0">
+           <CheckCircle size={16} />
+         </div>
+       );
+     case "warning":
+       return (
+         <div className="w-8 h-8 rounded-xl bg-amber-500/10 text-amber-500 flex items-center justify-center shrink-0">
+           <AlertCircle size={16} />
+         </div>
+       );
+     case "error":
+       return (
+         <div className="w-8 h-8 rounded-xl bg-red-500/10 text-red-500 flex items-center justify-center shrink-0">
+           <XCircle size={16} />
+         </div>
+       );
+     default:
+       return (
+         <div className="w-8 h-8 rounded-xl bg-blue-500/10 text-blue-600 dark:text-blue-400 flex items-center justify-center shrink-0">
+           <Info size={16} />
+         </div>
+       );
+   }
  };
 
  const getDateLocale = () => {
- switch (language) {
- case 'UZ': return uz;
- case 'RU': return ru;
- default: return enUS;
- }
+   switch (language) {
+     case 'UZ': return uz;
+     case 'RU': return ru;
+     default: return enUS;
+   }
  };
 
-  return (
-    <div className="relative" ref={dropdownRef}>
-      <button
-        onClick={() => setIsOpen(!isOpen)}
-        className="p-2 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-slate-800 rounded-full relative transition-all duration-300 flex items-center justify-center cursor-pointer"
-        aria-label="Notifications"
-      >
-        {/* Ringing Sound Wave lines (vibration marks) */}
-        {unreadCount > 0 && (
-          <>
-            {/* Left sound wave */}
-            <span className="absolute -left-1 top-1/2 -translate-y-1/2 pointer-events-none text-amber-500 dark:text-amber-400">
-              <svg className="w-2.5 h-4.5 animate-[soundWaveLeft_1.5s_infinite]" viewBox="0 0 10 16" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
-                <path d="M8 2 C3 5, 3 11, 8 14" />
-              </svg>
-            </span>
+  const notificationSheet = (
+    <AnimatePresence>
+      {isOpen && (
+        <div
+          onClick={(e) => { if (e.target === e.currentTarget) setIsOpen(false); }}
+          className="fixed inset-0 z-[99999] flex items-end sm:items-center justify-center sm:p-4 bg-slate-950/60 backdrop-blur-sm"
+        >
+          <motion.div
+            ref={dropdownRef}
+            initial={{ opacity: 0, y: 36, scale: 0.98 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: 36, scale: 0.98 }}
+            transition={{ duration: 0.24, ease: "easeOut" }}
+            className="bg-white dark:bg-slate-900 border-t border-x sm:border border-slate-200/80 dark:border-slate-800 rounded-t-[32px] sm:rounded-[32px] max-w-md w-full shadow-2xl relative flex flex-col max-h-[82vh] overflow-hidden text-left text-slate-800 dark:text-white"
+          >
+            {/* Sticky Header (Shop / Streak style) */}
+            <div className="sticky top-0 z-20 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md px-6 pt-3.5 pb-3 border-b border-slate-100 dark:border-slate-800/80 flex flex-col gap-2">
+              <div className="w-12 h-1.5 bg-slate-300 dark:bg-slate-700 rounded-full mx-auto sm:hidden" />
+              <div className="flex items-center justify-between gap-2">
+                <div className="flex items-center gap-2.5 min-w-0">
+                  <div className="w-9 h-9 rounded-xl bg-amber-500/10 text-amber-500 flex items-center justify-center shrink-0">
+                    <Bell size={18} />
+                  </div>
+                  <div className="min-w-0">
+                    <h3 className="font-extrabold text-slate-900 dark:text-slate-100 text-base font-fredoka leading-tight truncate">
+                      Xabarlar
+                    </h3>
+                    <p className="text-[11px] text-slate-500 dark:text-slate-400 font-medium">
+                      {unreadCount > 0 ? `${unreadCount} ta o'qilmagan xabar` : "Barcha xabarlar o'qilgan"}
+                    </p>
+                  </div>
+                </div>
 
-            {/* Right sound wave */}
-            <span className="absolute -right-1 top-1/2 -translate-y-1/2 pointer-events-none text-amber-500 dark:text-amber-400">
-              <svg className="w-2.5 h-4.5 animate-[soundWaveRight_1.5s_infinite]" viewBox="0 0 10 16" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
-                <path d="M2 2 C7 5, 7 11, 2 14" />
-              </svg>
-            </span>
-          </>
-        )}
+                <div className="flex items-center gap-1.5 shrink-0">
+                  {unreadCount > 0 && (
+                    <button
+                      type="button"
+                      onClick={handleMarkAllRead}
+                      className="px-2.5 py-1.5 rounded-xl bg-amber-500/10 hover:bg-amber-500/15 text-amber-600 dark:text-amber-400 text-[11px] font-bold flex items-center gap-1 transition-colors cursor-pointer"
+                    >
+                      <Check size={13} strokeWidth={2.5} />
+                      <span>O&apos;qildi</span>
+                    </button>
+                  )}
+                  <button
+                    type="button"
+                    onClick={() => setIsOpen(false)}
+                    className="w-8 h-8 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 flex items-center justify-center transition-colors cursor-pointer"
+                    aria-label="Yopish"
+                  >
+                    <X size={16} />
+                  </button>
+                </div>
+              </div>
+            </div>
 
-        {/* Bell Icon with Swing Animation */}
-        <div className={unreadCount > 0 ? "origin-top animate-[bellRing_2s_ease-in-out_infinite]" : ""}>
-          <Bell
-            size={20}
-            className={unreadCount > 0 ? "text-amber-600 dark:text-amber-400 fill-amber-500/20" : ""}
-          />
+            {/* Body */}
+            <div className="p-4 sm:p-5 overflow-y-auto space-y-2.5 custom-scrollbar">
+              {loading ? (
+                <div className="space-y-2.5">
+                  {[1, 2, 3].map((i) => (
+                    <div key={i} className="p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-700/50 flex gap-3 animate-pulse">
+                      <div className="w-8 h-8 bg-slate-200 dark:bg-slate-700 rounded-xl shrink-0" />
+                      <div className="flex-1 space-y-2 py-0.5">
+                        <div className="h-3.5 bg-slate-200 dark:bg-slate-700 rounded w-2/3" />
+                        <div className="h-3 bg-slate-200 dark:bg-slate-700 rounded w-full" />
+                        <div className="h-2.5 bg-slate-200 dark:bg-slate-700 rounded w-1/4" />
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : notifications.length === 0 ? (
+                <div className="py-10 px-4 text-center flex flex-col items-center gap-2.5">
+                  <div className="w-12 h-12 rounded-2xl bg-slate-100 dark:bg-slate-800 text-slate-400 flex items-center justify-center">
+                    <Bell size={22} />
+                  </div>
+                  <div>
+                    <p className="text-sm font-bold text-slate-700 dark:text-slate-200">
+                      Yangi xabarlar yo&apos;q
+                    </p>
+                    <p className="text-xs text-slate-400 mt-0.5">
+                      Muhim yangiliklar va mukofotlar shu yerda ko&apos;rinadi
+                    </p>
+                  </div>
+                </div>
+              ) : (
+                notifications.map((notification) => {
+                  const isUnread = !notification.is_read && !notification.is_announcement;
+                  return (
+                    <div
+                      key={notification.id}
+                      onClick={() => { if (isUnread) handleMarkAsRead(notification.id); }}
+                      className={`p-3.5 rounded-2xl border transition-colors ${
+                        isUnread
+                          ? "bg-amber-50/70 dark:bg-amber-500/10 border-amber-200/70 dark:border-amber-500/20 cursor-pointer hover:bg-amber-50 dark:hover:bg-amber-500/15"
+                          : "bg-slate-50 dark:bg-slate-800/50 border-slate-100 dark:border-slate-700/50"
+                      }`}
+                    >
+                      <div className="flex gap-3 items-start">
+                        {getIconTile(notification.type)}
+                        <div className="flex-1 min-w-0">
+                          <div className="flex justify-between items-start gap-2">
+                            <h4 className={`text-xs sm:text-[13px] font-bold leading-snug ${isUnread ? "text-slate-900 dark:text-white" : "text-slate-700 dark:text-slate-300"}`}>
+                              {notification.title}
+                            </h4>
+                            {isUnread && (
+                              <span
+                                className="w-2 h-2 mt-1.5 rounded-full bg-amber-500 shrink-0"
+                                title="O'qilmagan"
+                              />
+                            )}
+                          </div>
+                          <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 leading-relaxed line-clamp-3">
+                            {notification.message}
+                          </p>
+                          <p className="text-[10px] font-semibold text-slate-400 mt-2">
+                            {formatDistanceToNow(new Date(notification.created_at), { addSuffix: true, locale: getDateLocale() })}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })
+              )}
+            </div>
+          </motion.div>
         </div>
+      )}
+    </AnimatePresence>
+  );
 
-        {/* Unread Counter Badge */}
+  return (
+    <div className="relative">
+      <button
+        type="button"
+        onClick={() => setIsOpen(!isOpen)}
+        className={`w-7 h-7 sm:w-8 sm:h-8 rounded-full relative transition-colors active:scale-95 flex items-center justify-center cursor-pointer shrink-0 ${
+          unreadCount > 0
+            ? "bg-amber-500/10 hover:bg-amber-500/15 border border-amber-500/20 text-amber-600 dark:text-amber-400"
+            : "text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-800 dark:hover:text-slate-200"
+        }`}
+        aria-label="Xabarlar"
+      >
+        <Bell size={16} />
+
         {unreadCount > 0 && (
-          <span className="absolute top-0.5 right-0.5 min-w-[17px] h-[17px] px-1 bg-red-500 text-white text-[9px] font-black rounded-full border-2 border-white dark:border-slate-900 flex items-center justify-center shadow-sm animate-pulse">
+          <span className="absolute -top-1 -right-1 min-w-[16px] h-4 px-1 bg-amber-500 text-white text-[9px] font-extrabold rounded-full border-2 border-white dark:border-slate-900 flex items-center justify-center tabular-nums leading-none">
             {unreadCount > 9 ? '9+' : unreadCount}
           </span>
         )}
       </button>
 
- {isOpen && (
- <div className="absolute right-0 mt-2 w-80 sm:w-96 bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-800 rounded-2xl shadow-xl z-50 overflow-hidden">
- <div className="p-4 border-b border-gray-100 dark:border-slate-800 flex items-center justify-between">
- <h3 className="font-semibold text-slate-800 dark:text-slate-100">Xabarlar</h3>
- {unreadCount > 0 && (
- <button
- onClick={handleMarkAllRead}
- className="text-xs text-brand-blue active:text-blue-600 font-medium flex items-center gap-1"
- >
- <Check size={14} />
- Barchasini o'qish
- </button>
- )}
- </div>
-
- <div className="max-h-[400px] overflow-y-auto custom-scrollbar">
- {loading ? (
- <div className="p-4 space-y-4">
- {[1, 2, 3].map((i) => (
- <div key={i} className="flex gap-3 animate-pulse">
- <div className="w-9 h-9 bg-gray-200 dark:bg-slate-800 rounded-full shrink-0"></div>
- <div className="flex-1 space-y-2 py-1">
- <div className="h-4 bg-gray-200 dark:bg-slate-800 rounded w-3/4"></div>
- <div className="h-3 bg-gray-200 dark:bg-slate-800 rounded w-full"></div>
- <div className="h-2 bg-gray-200 dark:bg-slate-800 rounded w-1/4 mt-2"></div>
- </div>
- </div>
- ))}
- </div>
- ) : notifications.length === 0 ? (
- <div className="p-8 text-center text-gray-500 dark:text-gray-400">
- <Bell className="w-8 h-8 mx-auto mb-2 opacity-50" />
- <p className="text-sm">Yangi xabarlar yo'q</p>
- </div>
- ) : (
- <div className="divide-y divide-gray-100 dark:divide-slate-800">
- {notifications.map((notification) => (
- <div
- key={notification.id}
- className={`p-4 active:bg-gray-50 dark:active:bg-slate-800/50 transition-colors ${!notification.is_read ? 'bg-blue-50/50 dark:bg-blue-900/10' : ''}`}
- >
- <div className="flex gap-3">
- <div className="mt-0.5 shrink-0">
- {getIcon(notification.type)}
- </div>
- <div className="flex-1 min-w-0">
- <div className="flex justify-between items-start gap-2">
- <h4 className={`text-sm font-semibold truncate ${!notification.is_read ? 'text-slate-800 dark:text-slate-100' : 'text-gray-700 dark:text-gray-300'}`}>
- {notification.title}
- </h4>
- {!notification.is_read && (
- <button
- onClick={() => handleMarkAsRead(notification.id)}
- className="text-gray-400 active:text-brand-blue"
- title="O'qildi deb belgilash"
- >
- <span className="w-2 h-2 bg-blue-500 rounded-full block"></span>
- </button>
- )}
- </div>
- <p className="text-xs text-gray-600 dark:text-gray-400 mt-1 line-clamp-2">
- {notification.message}
- </p>
- <p className="text-[10px] text-gray-400 mt-2">
- {formatDistanceToNow(new Date(notification.created_at), { addSuffix: true, locale: getDateLocale() })}
- </p>
- </div>
- </div>
- </div>
- ))}
- </div>
- )}
- </div>
- </div>
- )}
- </div>
- );
+      {mounted && createPortal(notificationSheet, document.body)}
+    </div>
+  );
 }
