@@ -165,12 +165,12 @@ export default function SidebarBetaWidget({ variant = "card" }: { variant?: "car
         <button
           type="button"
           onClick={() => setExpanded(!expanded)}
-          className="h-7 sm:h-8 px-2.5 sm:px-3 bg-amber-500/10 hover:bg-amber-500/15 border border-amber-500/20 rounded-full flex items-center gap-1.5 text-amber-700 dark:text-amber-400 text-[11px] sm:text-xs font-bold font-fredoka transition-colors active:scale-95 cursor-pointer shrink-0 shadow-none"
+          className="h-7 sm:h-8 px-2.5 sm:px-3 bg-amber-500/10 hover:bg-amber-500/15 border border-amber-500/20 rounded-full flex items-center gap-1.5 text-xs font-bold font-fredoka transition-colors active:scale-95 cursor-pointer shrink-0 shadow-none"
           title="Tizim test rejimida ishlamoqda"
         >
           <Sparkles size={13} className="text-amber-500 shrink-0" />
-          <span className="sm:hidden">Beta</span>
-          <span className="hidden sm:inline">{t("beta.pill") || "Test Rejimi"}</span>
+          <span className="sm:hidden text-slate-800 dark:text-slate-100">Beta</span>
+          <span className="hidden sm:inline text-slate-800 dark:text-slate-100">{t("beta.pill") || "Test Rejimi"}</span>
         </button>
 
         {mounted && createPortal(popoverCard, document.body)}
