@@ -73,7 +73,7 @@ export default function SidebarBetaWidget({ variant = "card" }: { variant?: "car
                     <div className="flex items-center gap-1.5 mt-0.5">
                       <span className="w-1.5 h-1.5 rounded-full bg-amber-500 shrink-0" />
                       <span className="text-[10px] font-extrabold uppercase tracking-wider text-slate-400">
-                        {t("beta.badge") || "PROMAX BETA v2.0"}
+                        {t("beta.badge") || "PROMAX v2.5"}
                       </span>
                     </div>
                   </div>
@@ -186,7 +186,7 @@ export default function SidebarBetaWidget({ variant = "card" }: { variant?: "car
             <span className="w-1.5 h-1.5 rounded-full bg-amber-500" />
             <span>BETA</span>
           </span>
-          <span className="text-[10px] text-slate-400 font-bold">v2.0</span>
+          <span className="text-[10px] text-slate-400 font-bold">v2.5</span>
         </div>
 
         <h4 className="text-xs font-bold font-fredoka text-slate-900 dark:text-white">

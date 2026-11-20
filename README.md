@@ -2,6 +2,7 @@
 
 <div align="center">
 
+[![Release](https://img.shields.io/badge/Version-v2.5-f59e0b?style=for-the-badge)](./README.md#-whats-new-in-v25)
 [![Next.js](https://img.shields.io/badge/Next.js-16.1_(Turbopack)-black?style=for-the-badge&logo=next.js&logoColor=white)](https://nextjs.org/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.0+-007ACC?style=for-the-badge&logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
 [![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-3.4+-38B2AC?style=for-the-badge&logo=tailwind-css&logoColor=white)](https://tailwindcss.com/)
@@ -20,6 +21,18 @@
 ## 🌟 Overview
 
 **Promax Education Center Platform** is a full-cycle educational ecosystem connecting students, parents, teachers, and administration into a seamless digital workspace. It combines an ultra-fast public landing portal, interactive student learning dashboard, real-time Olympiads engine, Gamified Coin Shop, comprehensive Admin CRM, and a complete Telegram Bot / Mini App integration.
+
+---
+
+## 🆕 What's New in `v2.5`
+
+- **⚡ Speed & Data Architecture Upgrade:** Migrated 100% of client caching to `@tanstack/react-query` (removed `swr`), eliminated background polling, parallelized Supabase queries, and fixed N+1 fetches.
+- **🎨 Unified Modern UI/UX:** Redesigned the Student Dashboard layout, Daily Streak, Notifications, and Beta sheets with a clean bottom-sheet system and a labeled 5-tab mobile navigation bar.
+- **📚 Real Lesson Progress & Resume:** Live subject progress bars, lesson completion tracking, Prev/Next navigation, and a 1-tap *"Oxirgi darsni davom ettirish"* resume card.
+- **📝 Upgraded Test Runner & Results:** Delta-only batch answer saving, keyboard shortcuts (`A–D`, `1–4`, `←/→`), **Mistake Retake Mode**, KaTeX math rendering, and printable certificates.
+- **📊 Admin CRM Power Tools:** 1-click `.xlsx` Excel exports (Students & Payments), Weekly Parent Telegram Digest, and full UZ/RU/EN localization updates.
+
+> **Coming in `v3.0`:** Expanded University-Entrance (DTM / SAT / IELTS) Interactive Games Arena, Platform-wide Tactile Sound System, and Live Multiplayer Modes.
 
 ---
 
