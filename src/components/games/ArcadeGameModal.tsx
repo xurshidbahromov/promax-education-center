@@ -104,6 +104,10 @@ export default function ArcadeGameModal({
 
   useEffect(() => {
     setMounted(true);
+    setSoundEnabled(gameSfx.enabled);
+    const onToggle = () => setSoundEnabled(gameSfx.enabled);
+    window.addEventListener("promax_sound_toggled", onToggle);
+    return () => window.removeEventListener("promax_sound_toggled", onToggle);
   }, []);
 
   useEffect(() => {
@@ -333,6 +337,7 @@ export default function ArcadeGameModal({
               <div className="flex items-center gap-1.5 shrink-0">
                 <button
                   type="button"
+                  data-no-sound="true"
                   onClick={toggleSound}
                   className="w-8 h-8 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200 flex items-center justify-center transition-colors cursor-pointer"
                   aria-label="Ovozni yoqish/o'chirish"
@@ -534,6 +539,7 @@ export default function ArcadeGameModal({
                     <button
                       key={`${opt}-${idx}`}
                       type="button"
+                      data-no-sound="true"
                       disabled={Boolean(feedback)}
                       onClick={() => handleSelectOption(opt)}
                       className={`p-3.5 rounded-2xl border text-left transition-all active:scale-95 flex items-center gap-2.5 cursor-pointer disabled:cursor-default ${btnStyle}`}

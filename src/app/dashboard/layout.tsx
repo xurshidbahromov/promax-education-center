@@ -26,7 +26,9 @@ import { usePathname } from "next/navigation";
 import NotificationBell from "@/components/NotificationBell";
 import DashboardReveal from "@/components/ui/DashboardReveal";
 import StreakPill from "@/components/dashboard/StreakPill";
+import SoundToggle from "@/components/ui/SoundToggle";
 import { checkAndUpdateDailyStreak } from "@/lib/streak";
+import { soundFx } from "@/lib/sound-effects";
 import toast from "react-hot-toast";
 
 import { motion } from "framer-motion";
@@ -103,6 +105,7 @@ export default function DashboardLayout({
           if (res.newlyAwarded) {
             window.dispatchEvent(new CustomEvent("promax_streak_updated"));
             window.dispatchEvent(new CustomEvent("promax_coins_updated"));
+            soundFx.playCoin();
             toast.custom(
               (tObj) => (
                 <div
@@ -146,6 +149,29 @@ export default function DashboardLayout({
 
     checkUser();
   }, [router, supabase, queryClient]);
+
+  // Global tactile click & navigation micro-sounds
+  useEffect(() => {
+    const handleInteractiveClick = (e: MouseEvent) => {
+      const target = e.target as HTMLElement | null;
+      if (!target) return;
+      const interactive = target.closest(
+        'button, a[href], [role="button"], input[type="checkbox"], input[type="radio"]'
+      ) as HTMLElement | null;
+      if (!interactive) return;
+      if (interactive.dataset.noSound === "true" || interactive.closest('[data-no-sound="true"]')) return;
+      if ((interactive as HTMLButtonElement).disabled || interactive.getAttribute("aria-disabled") === "true") return;
+
+      if (interactive.tagName === "A") {
+        soundFx.playNavigate();
+      } else {
+        soundFx.playTap();
+      }
+    };
+
+    document.addEventListener("click", handleInteractiveClick, true);
+    return () => document.removeEventListener("click", handleInteractiveClick, true);
+  }, []);
 
  const handleLogout = async () => {
  await supabase.auth.signOut();
@@ -267,11 +293,13 @@ export default function DashboardLayout({
       </div>
     </Link>
 
-    {/* Unified Status Island (Streak, Test Rejimi & Notifications) */}
-    <div className="h-10 sm:h-11 lg:h-auto bg-white/85 dark:bg-slate-900/85 backdrop-blur-2xl border border-gray-200/60 dark:border-slate-800/60 rounded-full flex items-center justify-center gap-1.5 sm:gap-2 lg:gap-2.5 px-2 sm:px-3 lg:px-4 lg:py-2 shadow-lg lg:shadow-xl shadow-brand-blue/5 pointer-events-auto transition-all duration-300 shrink-0">
+    {/* Unified Status Island (Streak, Test Rejimi, Sound & Notifications) */}
+    <div className="h-10 sm:h-11 lg:h-auto bg-white/85 dark:bg-slate-900/85 backdrop-blur-2xl border border-gray-200/60 dark:border-slate-800/60 rounded-full flex items-center justify-center gap-1 sm:gap-1.5 lg:gap-2.5 px-2 sm:px-3 lg:px-4 lg:py-2 shadow-lg lg:shadow-xl shadow-brand-blue/5 pointer-events-auto transition-all duration-300 shrink-0">
       <StreakPill />
       <div className="hidden lg:block w-px h-5 bg-slate-200 dark:bg-slate-800" />
       <SidebarBetaWidget variant="pill" />
+      <div className="hidden lg:block w-px h-5 bg-slate-200 dark:bg-slate-800" />
+      <SoundToggle />
       <div className="hidden lg:block w-px h-5 bg-slate-200 dark:bg-slate-800" />
       <NotificationBell />
     </div>

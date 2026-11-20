@@ -61,6 +61,7 @@ import {
 import MathRenderer from "@/components/MathRenderer";
 import { TakeTestSkeleton } from "@/components/ui/Skeleton";
 import { createClient } from "@/utils/supabase/client";
+import { soundFx } from "@/lib/sound-effects";
 import toast from "react-hot-toast";
 
 const fallbackNationalQs: Question[] = [
@@ -805,6 +806,7 @@ export default function TakeTestPage() {
     setShowConfirmModal(false);
     const timeSpent = test?.duration_minutes ? (test.duration_minutes * 60 - (timeRemaining || 0)) : 0;
     await runEvaluationAndShowResults(timeSpent);
+    soundFx.playCelebrate();
   };
 
   const handlePracticeRetake = () => {

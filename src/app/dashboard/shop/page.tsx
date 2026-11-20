@@ -27,6 +27,7 @@ import {
 } from "lucide-react";
 import Image from "next/image";
 import toast from "react-hot-toast";
+import { soundFx } from "@/lib/sound-effects";
 import {
   getShopItems,
   purchaseShopItem,
@@ -122,6 +123,7 @@ export default function StudentShopPage() {
     try {
       const res = await purchaseShopItem(user.id, purchasingItem);
       if (res.success) {
+        soundFx.playSuccess();
         toast.success(`"${purchasingItem.title}" muvaffaqiyatli xarid qilindi!`);
         if (user.id) {
           queryClient.invalidateQueries({ queryKey: ['userProfile', user.id] });
@@ -177,6 +179,7 @@ export default function StudentShopPage() {
       );
       window.open(`${PAYMENT_CONFIG.telegramUrl}?text=${text}`, '_blank');
 
+      soundFx.playCoin();
       toast.success("So'rovingiz qabul qilindi! Chekni Telegram orqali adminga yuboring.", {
         duration: 5000
       });

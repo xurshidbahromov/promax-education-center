@@ -16,6 +16,7 @@ import { useLanguage } from "@/context/LanguageContext";
 import { formatDistanceToNow } from "date-fns";
 import { uz, enUS, ru } from "date-fns/locale";
 import toast from "react-hot-toast";
+import { soundFx } from "@/lib/sound-effects";
 
 interface Notification {
  id: string;
@@ -116,7 +117,10 @@ export default function NotificationBell() {
           (payload: any) => {
             fetchUnreadCount(user.id);
             if (payload?.new?.type === 'coin_credit') {
+              soundFx.playCoin();
               window.dispatchEvent(new CustomEvent('promax_coins_updated'));
+            } else {
+              soundFx.playNotification();
             }
             if (isOpenRef.current) {
               fetchNotifications(false);

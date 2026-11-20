@@ -7,6 +7,7 @@ import { isLessonCompleted, toggleLessonCompleted, saveLastVisitedLesson } from 
 import { ArrowLeft, ArrowRight, PlayCircle, FileText, FileDown, Link as LinkIcon, CheckCircle2, Circle } from "lucide-react";
 import Link from "next/link";
 import toast from "react-hot-toast";
+import { soundFx } from "@/lib/sound-effects";
 
 export default function LessonDetailPage() {
   const params = useParams();
@@ -50,6 +51,7 @@ export default function LessonDetailPage() {
     const res = await toggleLessonCompleted(lessonId);
     setCompleted(res.completed);
     if (res.completed) {
+      soundFx.playSuccess();
       toast.success("Dars o'zlashtirildi deb belgilandi! ✅");
     } else {
       toast("Dars holati qaytarildi");

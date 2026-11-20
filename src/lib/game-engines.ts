@@ -1,4 +1,5 @@
-// University-entrance (DTM / SAT / IELTS) Arcade Game Engines & Web Audio SoundFx
+// University-entrance (DTM / SAT / IELTS) Arcade Game Engines & Unified SoundFx
+import { soundFx } from "@/lib/sound-effects";
 
 export type GameId = "math" | "logic" | "vocab";
 export type GameDifficulty = "medium" | "dtm" | "sat";
@@ -37,107 +38,19 @@ export const DIFFICULTY_META: Record<
   },
 };
 
-// Lightweight Web Audio API Synthesizer (No external sound files required)
-class SoundFx {
-  private ctx: AudioContext | null = null;
-  public enabled = true;
-
-  private getContext() {
-    if (typeof window === "undefined") return null;
-    if (!this.ctx) {
-      const AudioCtx = window.AudioContext || (window as any).webkitAudioContext;
-      if (AudioCtx) {
-        this.ctx = new AudioCtx();
-      }
-    }
-    if (this.ctx && this.ctx.state === "suspended") {
-      this.ctx.resume();
-    }
-    return this.ctx;
-  }
-
-  playCorrect() {
-    if (!this.enabled) return;
-    try {
-      const ctx = this.getContext();
-      if (!ctx) return;
-      const osc = ctx.createOscillator();
-      const gain = ctx.createGain();
-      osc.type = "sine";
-      osc.frequency.setValueAtTime(587.33, ctx.currentTime);
-      osc.frequency.exponentialRampToValueAtTime(880, ctx.currentTime + 0.12);
-      gain.gain.setValueAtTime(0.14, ctx.currentTime);
-      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.14);
-      osc.connect(gain);
-      gain.connect(ctx.destination);
-      osc.start();
-      osc.stop(ctx.currentTime + 0.15);
-    } catch {}
-  }
-
-  playWrong() {
-    if (!this.enabled) return;
-    try {
-      const ctx = this.getContext();
-      if (!ctx) return;
-      const osc = ctx.createOscillator();
-      const gain = ctx.createGain();
-      osc.type = "triangle";
-      osc.frequency.setValueAtTime(170, ctx.currentTime);
-      osc.frequency.exponentialRampToValueAtTime(110, ctx.currentTime + 0.18);
-      gain.gain.setValueAtTime(0.16, ctx.currentTime);
-      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.2);
-      osc.connect(gain);
-      gain.connect(ctx.destination);
-      osc.start();
-      osc.stop(ctx.currentTime + 0.2);
-    } catch {}
-  }
-
-  playCombo() {
-    if (!this.enabled) return;
-    try {
-      const ctx = this.getContext();
-      if (!ctx) return;
-      [523.25, 659.25, 783.99, 1046.5].forEach((freq, i) => {
-        const osc = ctx.createOscillator();
-        const gain = ctx.createGain();
-        osc.type = "sine";
-        osc.frequency.value = freq;
-        const start = ctx.currentTime + i * 0.05;
-        gain.gain.setValueAtTime(0.11, start);
-        gain.gain.exponentialRampToValueAtTime(0.001, start + 0.1);
-        osc.connect(gain);
-        gain.connect(ctx.destination);
-        osc.start(start);
-        osc.stop(start + 0.11);
-      });
-    } catch {}
-  }
-
-  playGameOver() {
-    if (!this.enabled) return;
-    try {
-      const ctx = this.getContext();
-      if (!ctx) return;
-      [440, 554.37, 659.25, 880].forEach((freq, i) => {
-        const osc = ctx.createOscillator();
-        const gain = ctx.createGain();
-        osc.type = "triangle";
-        osc.frequency.value = freq;
-        const start = ctx.currentTime + i * 0.08;
-        gain.gain.setValueAtTime(0.13, start);
-        gain.gain.exponentialRampToValueAtTime(0.001, start + 0.2);
-        osc.connect(gain);
-        gain.connect(ctx.destination);
-        osc.start(start);
-        osc.stop(start + 0.22);
-      });
-    } catch {}
-  }
-}
-
-export const gameSfx = new SoundFx();
+// Unified with global Promax soundFx engine
+export const gameSfx = {
+  get enabled() {
+    return soundFx.isEnabled();
+  },
+  set enabled(val: boolean) {
+    soundFx.setEnabled(val);
+  },
+  playCorrect: () => soundFx.playCorrect(),
+  playWrong: () => soundFx.playWrong(),
+  playCombo: () => soundFx.playCombo(),
+  playGameOver: () => soundFx.playCelebrate(),
+};
 
 // ─── HELPERS ─────────────────────────────────────────────────────────────────
 
