@@ -1,7 +1,7 @@
 "use client";
 
-import useSWR from "swr";
-import { getSubjects, type Subject } from "@/lib/supabase-queries";
+import { useStudentSubjects } from "@/hooks/useDashboardData";
+import { type Subject } from "@/lib/supabase-queries";
 import Link from "next/link";
 import Image from "next/image";
 import {
@@ -97,8 +97,7 @@ function LessonsPageSkeleton() {
 
 // ── Main Component ────────────────────────────────────────────────────────────
 export default function LessonsPage() {
-  const fetcher = () => getSubjects();
-  const { data: subjects = [], isLoading: loading } = useSWR('subjects', fetcher);
+  const { data: subjects = [], isLoading: loading } = useStudentSubjects();
 
   if (loading) return <LessonsPageSkeleton />;
 

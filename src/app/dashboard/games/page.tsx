@@ -2,8 +2,7 @@
 
 import { useLanguage } from "@/context/LanguageContext";
 import { useState, useEffect } from "react";
-import useSWR from "swr";
-import { getUserProfile } from "@/lib/profile";
+import { useCurrentUser, useUserProfile } from "@/hooks/useDashboardData";
 import {
   Gamepad2,
   BrainCircuit,
@@ -31,7 +30,8 @@ interface GameCard {
 
 export default function GameZonePage() {
   const { t } = useLanguage();
-  const { data: profile, isLoading, mutate } = useSWR('userProfileGame', getUserProfile);
+  const { data: user } = useCurrentUser();
+  const { data: profile, isLoading, refetch } = useUserProfile(user?.id);
   const [coins, setCoins] = useState(0);
   const [isMathModalOpen, setIsMathModalOpen] = useState(false);
 
@@ -40,16 +40,6 @@ export default function GameZonePage() {
       setCoins(profile.coins || 0);
     }
   }, [profile]);
-
-  useEffect(() => {
-    const handleCoinsUpdate = () => {
-      mutate();
-    };
-    window.addEventListener("promax_coins_updated", handleCoinsUpdate);
-    return () => {
-      window.removeEventListener("promax_coins_updated", handleCoinsUpdate);
-    };
-  }, [mutate]);
 
   const games: GameCard[] = [
     {
@@ -208,7 +198,8 @@ export default function GameZonePage() {
         onClose={() => setIsMathModalOpen(false)}
         onCoinsEarned={(newCoins) => {
           setCoins((prev) => prev + newCoins);
-          mutate();
+          refetch();
+          window.dispatchEvent(new CustomEvent("promax_coins_updated"));
         }}
       />
     </div>

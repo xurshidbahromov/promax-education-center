@@ -1,6 +1,6 @@
 "use client";
 
-import useSWR from "swr";
+import { useQuery } from "@tanstack/react-query";
 import { useParams, useRouter } from "next/navigation";
 import { useLanguage } from "@/context/LanguageContext";
 import { getExamResultById, type ExamResult } from "@/lib/supabase-queries";
@@ -16,10 +16,12 @@ export default function ResultDetailPage() {
   const router = useRouter();
   const params = useParams();
 
-  const { data: result = null, isLoading: loading } = useSWR(
-    params.id ? `result-${params.id}` : null,
-    () => getExamResultById(params.id as string)
-  );
+  const { data: result = null, isLoading: loading } = useQuery({
+    queryKey: ['examResultDetail', params.id],
+    queryFn: () => getExamResultById(params.id as string),
+    enabled: !!params.id,
+    staleTime: 5 * 60 * 1000,
+  });
 
   if (loading) {
     return (

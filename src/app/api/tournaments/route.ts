@@ -238,15 +238,24 @@ export async function GET(request: NextRequest) {
 
   try {
     const supabase = await createTelegramBotClient();
-    let query = supabase
+
+    // Build filtered queries so all 3 execute in a single parallel round-trip
+    let regQuery = supabase.from('tournament_registrations').select('tournament_id, student_id');
+    let resQuery = supabase.from('tournament_results').select('tournament_id, student_id');
+    if (id) {
+      regQuery = regQuery.eq('tournament_id', id);
+      resQuery = resQuery.eq('tournament_id', id);
+    }
+
+    const baseTournamentQuery = supabase
       .from('tournaments')
       .select('*')
       .eq('type', type);
 
-    // Fetch live participants count from registrations and results
-    const [regRes, resultsRes] = await Promise.all([
-      supabase.from('tournament_registrations').select('tournament_id, student_id'),
-      supabase.from('tournament_results').select('tournament_id, student_id')
+    const [tournRes, regRes, resultsRes] = await Promise.all([
+      id ? baseTournamentQuery.eq('id', id).single() : baseTournamentQuery.order('created_at', { ascending: false }),
+      regQuery,
+      resQuery,
     ]);
 
     const participantMap = new Map<string, Set<string>>();
@@ -274,8 +283,7 @@ export async function GET(request: NextRequest) {
     }
 
     if (id) {
-      query = query.eq('id', id);
-      const { data, error } = await query.single();
+      const { data, error } = tournRes as any;
       if (!error && data) {
         const liveCount = participantMap.get(data.id)?.size || 0;
         const stored = Number(data.participants_count) || 0;
@@ -288,8 +296,7 @@ export async function GET(request: NextRequest) {
         return NextResponse.json({ tournament: mapped });
       }
     } else {
-      query = query.order('created_at', { ascending: false });
-      const { data, error } = await query;
+      const { data, error } = tournRes as any;
       if (!error && data && data.length > 0) {
         const mapped = data.map((row: any) => {
           const liveCount = participantMap.get(row.id)?.size || 0;

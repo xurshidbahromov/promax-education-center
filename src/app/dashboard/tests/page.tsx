@@ -1,8 +1,8 @@
 "use client";
 
 import { useLanguage } from "@/context/LanguageContext";
-import { useState } from "react";
-import useSWR from "swr";
+import { useState, useMemo } from "react";
+import { useQuery } from "@tanstack/react-query";
 import Link from "next/link";
 import {
  FileCheck,
@@ -26,19 +26,26 @@ export default function OnlineTestsPage() {
  const [selectedSubject, setSelectedSubject] = useState<Subject | "all">("all");
  const [selectedType, setSelectedType] = useState<TestType | "all">("all");
 
- const fetcher = async ([url, filters]: [string, TestFilters]) => {
- return getPublishedTests(filters);
- };
+  const serverFilters: TestFilters = {};
+  if (selectedSubject !== "all") serverFilters.subject = selectedSubject;
+  if (selectedType !== "all") serverFilters.test_type = selectedType;
 
- const currentFilters: TestFilters = {};
- if (selectedSubject !== "all") currentFilters.subject = selectedSubject;
- if (selectedType !== "all") currentFilters.test_type = selectedType;
- if (searchQuery.trim()) currentFilters.search = searchQuery;
+  const { data: rawTests = [], isLoading: loading } = useQuery({
+    queryKey: ['publishedTests', selectedSubject, selectedType],
+    queryFn: () => getPublishedTests(serverFilters),
+    staleTime: 3 * 60 * 1000,
+  });
 
- const { data: tests = [], isLoading: loading } = useSWR(
- ['/api/tests/published', currentFilters],
- fetcher
- );
+  // Instant client-side search (0 DB queries per keystroke)
+  const tests = useMemo(() => {
+    const q = searchQuery.trim().toLowerCase();
+    if (!q) return rawTests;
+    return rawTests.filter(
+      (t) =>
+        (t.title || "").toLowerCase().includes(q) ||
+        (t.description || "").toLowerCase().includes(q)
+    );
+  }, [rawTests, searchQuery]);
 
  const subjects = [
  { id: "all", label: t('tests.subjects.all'), color: "bg-gray-500" },

@@ -1,9 +1,9 @@
 "use client";
 
-import { useState } from "react";
-import useSWR from "swr";
+import { useQuery } from "@tanstack/react-query";
 import { useParams, useRouter } from "next/navigation";
 import { useLanguage } from "@/context/LanguageContext";
+import { useCurrentUser } from "@/hooks/useDashboardData";
 import Link from "next/link";
 import {
  ArrowLeft,
@@ -25,17 +25,20 @@ export default function TestDetailsPage() {
  const { t } = useLanguage();
  const testId = params.id as string;
 
- const fetcher = async (id: string) => {
- const testData = await getTestById(id);
- let history: any[] = [];
- const { data: user } = await (await import("@/lib/supabase")).supabase.auth.getUser();
- if (user.user) {
- history = await getStudentTestHistory(user.user.id, id);
- }
- return { test: testData, previousAttempts: history };
- };
+  const { data: currentUser } = useCurrentUser();
 
- const { data, isLoading: loading } = useSWR(testId ? `test-${testId}` : null, () => fetcher(testId));
+  const { data, isLoading: loading } = useQuery({
+    queryKey: ['testDetail', testId, currentUser?.id],
+    queryFn: async () => {
+      const [testData, history] = await Promise.all([
+        getTestById(testId),
+        currentUser?.id ? getStudentTestHistory(currentUser.id, testId) : Promise.resolve([]),
+      ]);
+      return { test: testData, previousAttempts: history };
+    },
+    enabled: !!testId,
+    staleTime: 2 * 60 * 1000,
+  });
  const test = data?.test || null;
  const previousAttempts = data?.previousAttempts || [];
 

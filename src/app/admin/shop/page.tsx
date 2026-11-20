@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useMemo, useEffect } from 'react';
-import useSWR, { mutate } from 'swr';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import {
   PackageCheck,
   Coins,
@@ -65,6 +65,7 @@ function ShopSkeleton() {
 }
 
 export default function AdminShopPage() {
+  const queryClient = useQueryClient();
   const [activeTab, setActiveTab] = useState<'gifts' | 'coins' | 'inventory'>('gifts');
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [categoryFilter, setCategoryFilter] = useState<string>('all');
@@ -90,9 +91,17 @@ export default function AdminShopPage() {
   const [itemImage, setItemImage] = useState('');
   const [isSavingItem, setIsSavingItem] = useState(false);
 
-  // Fetch shop items & orders
-  const { data: items = [], isLoading: itemsLoading } = useSWR('adminShopItems', getShopItems);
-  const { data: orders = [], isLoading: ordersLoading } = useSWR('adminShopOrders', adminGetShopOrders);
+  // Fetch shop items & orders via unified React Query cache
+  const { data: items = [], isLoading: itemsLoading } = useQuery({
+    queryKey: ['adminShopItems'],
+    queryFn: getShopItems,
+    staleTime: 2 * 60 * 1000,
+  });
+  const { data: orders = [], isLoading: ordersLoading } = useQuery({
+    queryKey: ['adminShopOrders'],
+    queryFn: adminGetShopOrders,
+    staleTime: 2 * 60 * 1000,
+  });
 
   // Load students for coin bonus selector
   useEffect(() => {
@@ -182,7 +191,7 @@ export default function AdminShopPage() {
         } else {
           toast.success("Buyurtma bekor qilindi va tangalar o'quvchiga qaytarildi! 🔄");
         }
-        mutate('adminShopOrders');
+        queryClient.invalidateQueries({ queryKey: ['adminShopOrders'] });
       } else {
         toast.error('Holatni yangilashda xatolik yuz berdi');
       }
@@ -216,7 +225,7 @@ export default function AdminShopPage() {
       );
       if (res.success) {
         toast.success(`O'quvchiga +${bonusAmount} Promax Coin muvaffaqiyatli berildi! 💎`);
-        mutate('adminShopOrders');
+        queryClient.invalidateQueries({ queryKey: ['adminShopOrders'] });
         setShowBonusModal(false);
         setSelectedStudentId('');
         setBonusAmount(100);
@@ -298,8 +307,8 @@ export default function AdminShopPage() {
 
         if (res.success) {
           toast.success("Sovg'a muvaffaqiyatli tahrirlandi!");
-          mutate('adminShopItems');
-          mutate('shopItems');
+          queryClient.invalidateQueries({ queryKey: ['adminShopItems'] });
+          queryClient.invalidateQueries({ queryKey: ['shopItems'] });
           setShowAddModal(false);
         } else {
           toast.error(res.error || 'Tahrirlashda xatolik yuz berdi');
@@ -321,8 +330,8 @@ export default function AdminShopPage() {
           toast.error("Ma'lumotlar bazasida xatolik yuz berdi");
         } else {
           toast.success("Yangi sovg'a qo'shildi!");
-          mutate('adminShopItems');
-          mutate('shopItems');
+          queryClient.invalidateQueries({ queryKey: ['adminShopItems'] });
+          queryClient.invalidateQueries({ queryKey: ['shopItems'] });
           setShowAddModal(false);
         }
       }
@@ -341,8 +350,8 @@ export default function AdminShopPage() {
       const res = await adminDeleteShopItem(itemId);
       if (res.success) {
         toast.success("Sovg'a o'chirildi!");
-        mutate('adminShopItems');
-        mutate('shopItems');
+        queryClient.invalidateQueries({ queryKey: ['adminShopItems'] });
+        queryClient.invalidateQueries({ queryKey: ['shopItems'] });
       } else {
         toast.error("O'chirishda xatolik yuz berdi");
       }

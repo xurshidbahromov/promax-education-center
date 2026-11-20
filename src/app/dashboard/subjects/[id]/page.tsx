@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import useSWR from "swr";
+import { useQuery } from "@tanstack/react-query";
 import { useParams, useRouter } from "next/navigation";
 import { getSubjectById, getLessonsBySubjectId, type Subject, type Lesson } from "@/lib/supabase-queries";
 import { getCompletedLessonIds, calculateSubjectProgress } from "@/lib/lesson-progress";
@@ -31,7 +31,12 @@ export default function SubjectDetailPage() {
  return { subject: subj, lessons: less };
  };
 
- const { data, isLoading: loading } = useSWR(subjectId ? `subject-${subjectId}` : null, () => fetcher(subjectId));
+  const { data, isLoading: loading } = useQuery({
+    queryKey: ['subjectDetail', subjectId],
+    queryFn: () => fetcher(subjectId),
+    enabled: !!subjectId,
+    staleTime: 3 * 60 * 1000,
+  });
  const subject = data?.subject || null;
  const lessons = data?.lessons || [];
 

@@ -138,27 +138,18 @@ export async function getExamResultById(resultId: string): Promise<ExamResult | 
 
  if (!result) return null;
 
- // Step 2: Try to get exam data separately (graceful fallback if table/FK missing)
- let examData: ExamResult['exam'] | undefined;
- if (result.exam_id) {
-   const { data: exam } = await supabase
-     .from('exams')
-     .select('title, date, type, max_score')
-     .eq('id', result.exam_id)
-     .single();
-   if (exam) examData = exam;
- }
+  // Step 2 & 3: Fetch exam and direction data in parallel
+  const [examRes, dirRes] = await Promise.all([
+    result.exam_id
+      ? supabase.from('exams').select('title, date, type, max_score').eq('id', result.exam_id).single()
+      : Promise.resolve({ data: null }),
+    result.direction_id
+      ? supabase.from('directions').select('title, code').eq('id', result.direction_id).single()
+      : Promise.resolve({ data: null }),
+  ]);
 
- // Step 3: Try to get direction data separately (graceful fallback)
- let directionData: ExamResult['direction'] | undefined;
- if (result.direction_id) {
-   const { data: direction } = await supabase
-     .from('directions')
-     .select('title, code')
-     .eq('id', result.direction_id)
-     .single();
-   if (direction) directionData = direction;
- }
+  const examData: ExamResult['exam'] | undefined = examRes.data || undefined;
+  const directionData: ExamResult['direction'] | undefined = dirRes.data || undefined;
 
  return {
    ...result,

@@ -2,7 +2,8 @@
 
 import { useLanguage } from "@/context/LanguageContext";
 import { useState } from "react";
-import useSWR from "swr";
+import { useQuery } from "@tanstack/react-query";
+import { useCurrentUser } from "@/hooks/useDashboardData";
 import {
  Search,
  Filter,
@@ -26,14 +27,13 @@ export default function ResultsPage() {
  const [filterStatus, setFilterStatus] = useState("all");
  const [filterSubject, setFilterSubject] = useState("all");
  const [filterTestType, setFilterTestType] = useState("all");
- const fetcher = async () => {
- const supabase = createClient();
- const { data: { user } } = await supabase.auth.getUser();
- if (!user) return [];
- return getStudentResults(user.id);
- };
-
- const { data: results = [], isLoading: loading } = useSWR('studentResults', fetcher);
+  const { data: currentUser } = useCurrentUser();
+  const { data: results = [], isLoading: loading } = useQuery({
+    queryKey: ['studentResults', currentUser?.id],
+    queryFn: () => currentUser?.id ? getStudentResults(currentUser.id) : Promise.resolve([]),
+    enabled: !!currentUser?.id,
+    staleTime: 2 * 60 * 1000,
+  });
 
  const filteredResults = results.filter(result => {
  const examTitle = result.exam?.title || "";

@@ -84,26 +84,26 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    // 1. Fetch tournament prizes & info if exists
-    try {
-      const { data: tourn } = await supabase
+    // 1 & 2. Fetch tournament prizes and results in parallel
+    const [tournRes, resultsRes] = await Promise.all([
+      supabase
         .from('tournaments')
         .select('top_prizes')
         .eq('id', tournamentId)
-        .maybeSingle();
+        .maybeSingle(),
+      supabase
+        .from('tournament_results')
+        .select('*')
+        .eq('tournament_id', tournamentId)
+        .order('score', { ascending: false })
+        .order('time_spent_seconds', { ascending: true }),
+    ]);
 
-      if (tourn && Array.isArray(tourn.top_prizes) && tourn.top_prizes.length > 0) {
-        topPrizes = tourn.top_prizes;
-      }
-    } catch {}
+    if (tournRes?.data && Array.isArray(tournRes.data.top_prizes) && tournRes.data.top_prizes.length > 0) {
+      topPrizes = tournRes.data.top_prizes;
+    }
 
-    // 2. Fetch results from database
-    const { data, error } = await supabase
-      .from('tournament_results')
-      .select('*')
-      .eq('tournament_id', tournamentId)
-      .order('score', { ascending: false })
-      .order('time_spent_seconds', { ascending: true });
+    const { data, error } = resultsRes;
 
     if (!error && data && data.length > 0) {
       const studentIds = Array.from(new Set(data.map((d: any) => d.student_id).filter(Boolean)));

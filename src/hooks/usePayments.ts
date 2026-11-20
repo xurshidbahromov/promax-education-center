@@ -1,5 +1,5 @@
-import { useState } from "react";
-import useSWR from "swr";
+import { useCallback } from "react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { createClient } from "@/utils/supabase/client";
 import { Group, GroupStudent } from "@/lib/admin-queries";
 import { sendPaymentReceiptToStudentAndParents } from "@/lib/notifications-bridge";
@@ -115,10 +115,18 @@ export function useExpectedPayments(monthYear: string, subjectId?: string, group
     });
   };
 
-  const { data, error, mutate, isLoading } = useSWR(
-    ['expected_payments', monthYear, subjectId, groupId, statusFilter],
-    fetcher
-  );
+  const queryClient = useQueryClient();
+  const queryKey = ['expected_payments', monthYear, subjectId, groupId, statusFilter];
+
+  const { data, error, isLoading } = useQuery({
+    queryKey,
+    queryFn: fetcher,
+    staleTime: 2 * 60 * 1000,
+  });
+
+  const mutate = useCallback(() => {
+    return queryClient.invalidateQueries({ queryKey: ['expected_payments'] });
+  }, [queryClient]);
 
   return {
     data: data || [],

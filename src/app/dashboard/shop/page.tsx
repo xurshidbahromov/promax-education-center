@@ -3,8 +3,7 @@
 import { useLanguage } from "@/context/LanguageContext";
 import { useState, useEffect } from "react";
 import { createPortal } from "react-dom";
-import useSWR, { mutate } from "swr";
-import { useQueryClient } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   Coins,
   Sparkles,
@@ -78,12 +77,18 @@ export default function StudentShopPage() {
     setMounted(true);
   }, []);
 
-  // Fetch shop items & student orders
-  const { data: items = [], isLoading: itemsLoading } = useSWR('shopItems', getShopItems);
-  const { data: myOrders = [], isLoading: ordersLoading } = useSWR(
-    user?.id ? ['studentOrders', user.id] : null,
-    () => user?.id ? getStudentOrders(user.id) : Promise.resolve([])
-  );
+  // Fetch shop items & student orders via unified React Query cache
+  const { data: items = [], isLoading: itemsLoading } = useQuery({
+    queryKey: ['shopItems'],
+    queryFn: getShopItems,
+    staleTime: 3 * 60 * 1000,
+  });
+  const { data: myOrders = [], isLoading: ordersLoading } = useQuery({
+    queryKey: ['studentOrders', user?.id],
+    queryFn: () => user?.id ? getStudentOrders(user.id) : Promise.resolve([]),
+    enabled: !!user?.id,
+    staleTime: 2 * 60 * 1000,
+  });
 
   const studentCoins = profile?.coins || 0;
 
@@ -121,11 +126,10 @@ export default function StudentShopPage() {
         if (user.id) {
           queryClient.invalidateQueries({ queryKey: ['userProfile', user.id] });
           queryClient.invalidateQueries({ queryKey: ['dashboardStats'] });
-          mutate(['userProfile', user.id]);
-          mutate('dashboardStats');
-          mutate(['studentOrders', user.id]);
+          queryClient.invalidateQueries({ queryKey: ['studentOrders', user.id] });
+          window.dispatchEvent(new CustomEvent("promax_coins_updated"));
         }
-        mutate('shopItems');
+        queryClient.invalidateQueries({ queryKey: ['shopItems'] });
         setPurchasingItem(null);
       } else {
         toast.error(res.error || "Xaridni amalga oshirishda xatolik");
@@ -178,7 +182,7 @@ export default function StudentShopPage() {
       });
 
       if (user.id) {
-        mutate(['studentOrders', user.id]);
+        queryClient.invalidateQueries({ queryKey: ['studentOrders', user.id] });
       }
       setActiveCheckout(null);
     } catch (err) {
