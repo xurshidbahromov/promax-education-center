@@ -1,11 +1,15 @@
 "use client";
 
 import { motion, AnimatePresence } from "framer-motion";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
+
+const INK_PATH = "M 10 35 Q 45 11, 80 35 T 150 35 T 220 35 Q 232 25, 240 35";
 
 export default function DashboardReveal({ isLoading = false }: { isLoading?: boolean }) {
   const [isFinished, setIsFinished] = useState(false);
+  const pathRef = useRef<SVGPathElement | null>(null);
+  const penRef = useRef<SVGGElement | null>(null);
 
   useEffect(() => {
     if (!isLoading) {
@@ -15,6 +19,65 @@ export default function DashboardReveal({ isLoading = false }: { isLoading?: boo
       return () => clearTimeout(timer);
     }
   }, [isLoading]);
+
+  // 100% pixel-perfect sync between ink stroke tip and pen nib via SVG getPointAtLength
+  useEffect(() => {
+    if (isFinished) return;
+    let rafId = 0;
+    let startTs: number | null = null;
+    const CYCLE_MS = 2400; // 0..0.78 draw, 0.78..0.90 hold, 0.90..1.00 fade & reset
+
+    const easeInOutSine = (t: number) => -(Math.cos(Math.PI * t) - 1) / 2;
+
+    const tick = (now: number) => {
+      if (startTs === null) startTs = now;
+      const elapsed = (now - startTs) % CYCLE_MS;
+      const norm = elapsed / CYCLE_MS;
+
+      const pathEl = pathRef.current;
+      const penEl = penRef.current;
+
+      if (pathEl && penEl) {
+        const totalLength = pathEl.getTotalLength();
+        pathEl.style.strokeDasharray = `${totalLength}`;
+
+        if (norm < 0.78) {
+          // Drawing phase: pen nib stays locked 1:1 to exact leading point of the ink path
+          const drawT = easeInOutSine(norm / 0.78);
+          const dist = drawT * totalLength;
+          const pt = pathEl.getPointAtLength(dist);
+          const fadeIn = Math.min(1, norm / 0.08);
+
+          pathEl.style.strokeDashoffset = `${totalLength - dist}`;
+          pathEl.style.opacity = "1";
+          penEl.setAttribute("transform", `translate(${pt.x.toFixed(2)}, ${pt.y.toFixed(2)})`);
+          penEl.style.opacity = `${fadeIn}`;
+        } else if (norm < 0.9) {
+          // Hold completed line briefly, lift pen gently
+          const holdT = (norm - 0.78) / 0.12;
+          const endPt = pathEl.getPointAtLength(totalLength);
+          pathEl.style.strokeDashoffset = "0";
+          pathEl.style.opacity = "1";
+          penEl.setAttribute(
+            "transform",
+            `translate(${endPt.x.toFixed(2)}, ${(endPt.y - holdT * 6).toFixed(2)})`
+          );
+          penEl.style.opacity = `${Math.max(0, 1 - holdT * 1.4)}`;
+        } else {
+          // Smoothly fade out ink before next cycle
+          const fadeOut = 1 - (norm - 0.9) / 0.1;
+          pathEl.style.strokeDashoffset = "0";
+          pathEl.style.opacity = `${Math.max(0, fadeOut)}`;
+          penEl.style.opacity = "0";
+        }
+      }
+
+      rafId = requestAnimationFrame(tick);
+    };
+
+    rafId = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(rafId);
+  }, [isFinished]);
 
   if (isFinished) return null;
 
@@ -125,41 +188,22 @@ export default function DashboardReveal({ isLoading = false }: { isLoading?: boo
                   <line x1="0" y1="35" x2="250" y2="35" stroke="currentColor" className="text-slate-200 dark:text-slate-800" strokeWidth="1" />
                   <line x1="0" y1="58" x2="250" y2="58" stroke="currentColor" className="text-slate-200 dark:text-slate-800" strokeWidth="1" />
 
-                  {/* The Drawn Ink Line — Smooth Flowing Wave */}
-                  <motion.path
-                    d="M 10 35 Q 45 15, 80 35 T 150 35 T 210 35 Q 228 20, 238 35"
+                  {/* The Drawn Ink Line — Driven 1:1 with Pen Nib via getPointAtLength */}
+                  <path
+                    ref={pathRef}
+                    d={INK_PATH}
                     fill="none"
                     stroke="url(#promaxPenInk)"
                     strokeWidth="3.5"
                     strokeLinecap="round"
                     strokeLinejoin="round"
-                    initial={{ pathLength: 0 }}
-                    animate={{ pathLength: [0, 0.2, 0.5, 0.8, 1, 1, 0] }}
-                    transition={{
-                      duration: 2.6,
-                      times: [0, 0.2, 0.5, 0.75, 0.9, 0.97, 1],
-                      repeat: Infinity,
-                      ease: "easeInOut"
-                    }}
+                    style={{ strokeDasharray: 400, strokeDashoffset: 400 }}
                   />
 
-                  {/* ── The Stylus / Fountain Pen (Exact Nib Tip (0,0) on Path) ── */}
-                  <motion.g
-                    initial={{ x: 10, y: 35, opacity: 0 }}
-                    animate={{
-                      x: [10, 45, 80, 115, 150, 180, 210, 238, 10],
-                      y: [35, 15, 35, 15, 35, 15, 35, 35, 35],
-                      opacity: [0, 1, 1, 1, 1, 1, 1, 0, 0]
-                    }}
-                    transition={{
-                      duration: 2.6,
-                      times: [0, 0.15, 0.35, 0.5, 0.65, 0.78, 0.88, 0.95, 1],
-                      repeat: Infinity,
-                      ease: "easeInOut"
-                    }}
-                  >
+                  {/* ── The Stylus / Fountain Pen (Exact Nib Tip (0,0) locked to Path) ── */}
+                  <g ref={penRef} transform="translate(10, 35)" style={{ opacity: 0 }}>
                     {/* Pen Graphics: Origin (0,0) is EXACTLY the Nib Tip Point, slanted to the right */}
-                    <g transform="rotate(40)">
+                    <g transform="rotate(38)">
                       {/* Golden Nib Body */}
                       <polygon points="0,0 -4,-12 4,-12" fill="#F59E0B" />
                       {/* Nib Slit & Breather Hole */}
@@ -178,7 +222,7 @@ export default function DashboardReveal({ isLoading = false }: { isLoading?: boo
                       {/* Brand Orange Accent Band */}
                       <rect x="-5.5" y="-42" width="11" height="3.5" fill="#F97316" rx="0.5" />
                     </g>
-                  </motion.g>
+                  </g>
 
                 </svg>
 
