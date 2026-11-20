@@ -62,6 +62,7 @@ import MathRenderer from "@/components/MathRenderer";
 import { TakeTestSkeleton } from "@/components/ui/Skeleton";
 import { createClient } from "@/utils/supabase/client";
 import { soundFx } from "@/lib/sound-effects";
+import TestStartReveal from "@/components/ui/TestStartReveal";
 import toast from "react-hot-toast";
 
 const fallbackNationalQs: Question[] = [
@@ -875,11 +876,13 @@ export default function TakeTestPage() {
   return "text-gray-700 dark:text-gray-300";
   };
 
-  if (loading) {
-  return <TakeTestSkeleton />;
-  }
+  const revealModeLabel = isInternational
+    ? "XALQARO TITUL"
+    : isOlympiad
+    ? "OLIMPIADA TITULI"
+    : "TITUL VARAQASI";
 
-  if (!test || questions.length === 0) {
+  if (!loading && (!test || questions.length === 0)) {
     return (
       <div className="min-h-[70vh] flex flex-col items-center justify-center p-6 text-center space-y-4">
         <div className="w-16 h-16 rounded-2xl bg-amber-500/10 text-amber-600 dark:text-amber-400 flex items-center justify-center">
@@ -1465,9 +1468,17 @@ export default function TakeTestPage() {
   };
 
   const currentQuestion = questions[currentQuestionIndex];
-  const progress = ((currentQuestionIndex+ 1) / questions.length) * 100;
+  const progress = questions.length > 0 ? ((currentQuestionIndex + 1) / questions.length) * 100 : 0;
 
   return (
+    <>
+      <TestStartReveal
+        isLoading={loading}
+        title={test?.title}
+        modeLabel={revealModeLabel}
+      />
+
+      {!loading && test && currentQuestion && (
     <div className="relative min-h-screen text-slate-800 dark:text-white font-sans bg-transparent pb-24 md:pb-0">
       <div className="fixed inset-0 z-0 overflow-hidden pointer-events-none">
         <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] rounded-full bg-blue-300/20 dark:bg-blue-500/10 blur-[130px]" />
@@ -2320,5 +2331,7 @@ export default function TakeTestPage() {
         )}
       </AnimatePresence>
  </div>
+      )}
+    </>
  );
 }
