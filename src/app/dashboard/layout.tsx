@@ -17,7 +17,8 @@ import {
   X,
   Trophy,
   BellRing,
-  Loader2
+  Loader2,
+  Flame
 } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
@@ -25,7 +26,6 @@ import { usePathname } from "next/navigation";
 import NotificationBell from "@/components/NotificationBell";
 import DashboardReveal from "@/components/ui/DashboardReveal";
 import StreakPill from "@/components/dashboard/StreakPill";
-import StreakFlameIcon from "@/components/ui/StreakFlameIcon";
 import { checkAndUpdateDailyStreak } from "@/lib/streak";
 import toast from "react-hot-toast";
 
@@ -110,18 +110,18 @@ export default function DashboardLayout({
                     tObj.visible ? "opacity-100 translate-y-0 scale-100" : "opacity-0 -translate-y-2 scale-95"
                   } mt-12 lg:mt-0 pointer-events-auto flex items-center gap-3 w-full max-w-[325px] sm:max-w-sm bg-white/95 dark:bg-slate-900/95 backdrop-blur-2xl border border-slate-200/80 dark:border-slate-800 shadow-[0_10px_30px_rgba(15,23,42,0.08)] rounded-2xl px-3.5 py-2.5 transition-all duration-300`}
                 >
-                  <div className="w-8 h-8 rounded-xl bg-brand-orange/[0.08] dark:bg-brand-orange/15 border border-brand-orange/20 text-brand-orange flex items-center justify-center shrink-0">
-                    <StreakFlameIcon size={17} />
+                  <div className="w-9 h-9 rounded-xl bg-amber-500 text-white flex items-center justify-center shrink-0">
+                    <Flame size={17} />
                   </div>
                   <div className="flex-1 min-w-0">
                     <p className="text-[13px] font-bold font-fredoka text-slate-900 dark:text-white leading-tight truncate">
                       Kunlik faollik • {res.streak.currentStreak}-kun
                     </p>
                     <p className="text-[11px] font-medium text-slate-500 dark:text-slate-400 mt-0.5 truncate">
-                      Hisobingizga +{res.rewardCoins} coin qo&apos;shildi
+                      Hisobingizga +{res.rewardCoins} tanga qo&apos;shildi
                     </p>
                   </div>
-                  <span className="px-2 py-0.5 rounded-full bg-slate-900 dark:bg-white text-white dark:text-slate-900 text-[11px] font-bold tabular-nums shrink-0">
+                  <span className="px-2.5 py-0.5 rounded-full bg-amber-500/10 border border-amber-500/20 text-amber-600 dark:text-amber-400 text-[11px] font-bold tabular-nums shrink-0">
                     +{res.rewardCoins}
                   </span>
                   <button
@@ -160,6 +160,14 @@ export default function DashboardLayout({
     { name: t('sidebar.games'), href: '/dashboard/games', icon: Gamepad2, beta: true },
     { name: t('sidebar.shop') || 'Do\'kon', href: '/dashboard/shop', icon: ShoppingBag },
     { name: t('sidebar.profile'), href: '/dashboard/profile', icon: CircleUserRound },
+ ];
+
+ const mobileMenuItems = [
+    { name: t('sidebar.dashboard') || 'Asosiy', shortName: 'Asosiy', href: '/dashboard', icon: LayoutDashboard, matchPrefixes: ['/dashboard'] },
+    { name: t('sidebar.lessons') || 'Darslar', shortName: 'Darslar', href: '/dashboard/lessons', icon: LibraryBig, matchPrefixes: ['/dashboard/lessons', '/dashboard/subjects'] },
+    { name: t('sidebar.onlinetests') || 'Testlar', shortName: 'Testlar', href: '/dashboard/tests', icon: FileCheck, matchPrefixes: ['/dashboard/tests', '/dashboard/olympiads', '/dashboard/international'] },
+    { name: t('sidebar.shop') || "Do'kon", shortName: "Do'kon", href: '/dashboard/shop', icon: ShoppingBag, matchPrefixes: ['/dashboard/shop'] },
+    { name: t('sidebar.profile') || 'Profil', shortName: 'Profil', href: '/dashboard/profile', icon: CircleUserRound, matchPrefixes: ['/dashboard/profile'] },
  ];
 
   const isTakeTestPage = pathname.includes('/take');
@@ -271,38 +279,47 @@ export default function DashboardLayout({
   )}
 
  {/* Page Content */}
- <main className={`flex-1 overflow-y-auto w-full relative z-0 ${isTakeTestPage ? '' : 'p-4 pt-20 pb-20 lg:p-6 lg:pt-16 lg:pb-6'}`}>
+ <main className={`flex-1 overflow-y-auto w-full relative z-0 ${isTakeTestPage ? '' : 'p-4 pt-20 pb-24 lg:p-6 lg:pt-16 lg:pb-6'}`}>
  <div className={`w-full max-w-full mx-auto min-h-full ${isTakeTestPage ? 'pt-safe' : ''}`}>
  {children}
  </div>
  </main>
  </div>
 
- {/* Mobile Bottom Navigation */}
+ {/* Mobile Bottom Navigation (5 Primary Labeled Tabs) */}
  {!isTakeTestPage && (
- <div className="lg:hidden fixed bottom-3 left-4 right-4 z-50 flex justify-center pointer-events-none">
- <nav className="bg-white/70 dark:bg-slate-900/70 backdrop-blur-3xl border border-white/50 dark:border-slate-700/50 px-1.5 py-1.5 rounded-[2rem] shadow-[0_8px_30px_rgb(0,86,210,0.1)] dark:shadow-[0_8px_30px_rgb(0,0,0,0.4)] w-full max-w-md pointer-events-auto safe-area-pb">
- <div className="flex items-center justify-between gap-1 relative">
- {menuItems.map((item) => {
- const isActive = pathname === item.href;
+ <div className="lg:hidden fixed bottom-3 left-3.5 right-3.5 z-50 flex justify-center pointer-events-none">
+ <nav
+ aria-label="Asosiy navigatsiya"
+ className="bg-white/85 dark:bg-slate-900/85 backdrop-blur-2xl border border-slate-200/70 dark:border-slate-800/70 px-1.5 py-1.5 rounded-[1.75rem] shadow-[0_10px_28px_rgba(15,23,42,0.08)] dark:shadow-[0_10px_28px_rgba(0,0,0,0.4)] w-full max-w-md pointer-events-auto safe-area-pb"
+ >
+ <div className="grid grid-cols-5 gap-0.5 relative">
+ {mobileMenuItems.map((item) => {
+ const isActive =
+ item.href === '/dashboard'
+ ? pathname === '/dashboard'
+ : item.matchPrefixes.some((prefix) => pathname === prefix || pathname.startsWith(`${prefix}/`));
  return (
  <Link
  key={item.href}
  href={item.href}
- className={`relative flex items-center justify-center flex-1 h-12 rounded-full transition-all duration-300 active:scale-95 ${
- isActive ? "text-brand-blue" : "text-slate-400 dark:text-slate-500 active:text-slate-600 dark:active:text-slate-300"
+ className={`relative flex flex-col items-center justify-center gap-0.5 py-1.5 rounded-[1.25rem] transition-colors duration-200 active:scale-95 ${
+ isActive
+ ? "text-brand-blue dark:text-blue-400"
+ : "text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200"
  }`}
  >
  {isActive && (
  <motion.div
  layoutId="mobile-nav-active-pill"
- className="absolute inset-0 bg-brand-blue/10 dark:bg-brand-blue/20 rounded-full"
- transition={{ type: "spring", stiffness: 400, damping: 30 }}
+ className="absolute inset-0 bg-brand-blue/[0.09] dark:bg-brand-blue/20 rounded-[1.25rem]"
+ transition={{ type: "spring", stiffness: 420, damping: 32 }}
  />
  )}
- <div className="relative z-10 flex items-center justify-center">
- <item.icon size={22} className={isActive ? "stroke-[2.5px]" : "stroke-[2px]"} />
- </div>
+ <item.icon size={19} className={`relative z-10 ${isActive ? "stroke-[2.3]" : "stroke-[1.85]"}`} />
+ <span className={`relative z-10 text-[10px] leading-none tracking-tight truncate max-w-full px-0.5 ${isActive ? "font-bold" : "font-medium"}`}>
+ {item.shortName}
+ </span>
  </Link>
  );
  })}

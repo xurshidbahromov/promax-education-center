@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { getLessonById, getLessonsBySubjectId, getMaterialsByLessonId, type Lesson, type Material } from "@/lib/supabase-queries";
-import { isLessonCompleted, toggleLessonCompleted } from "@/lib/lesson-progress";
+import { isLessonCompleted, toggleLessonCompleted, saveLastVisitedLesson } from "@/lib/lesson-progress";
 import { ArrowLeft, ArrowRight, PlayCircle, FileText, FileDown, Link as LinkIcon, CheckCircle2, Circle } from "lucide-react";
 import Link from "next/link";
 import toast from "react-hot-toast";
@@ -29,6 +29,13 @@ export default function LessonDetailPage() {
       ]);
       setLesson(less);
       setMaterials(mats);
+      if (less) {
+        saveLastVisitedLesson({
+          lessonId: less.id,
+          title: less.title,
+          subjectId: less.subject_id,
+        });
+      }
       if (less?.subject_id) {
         const siblings = await getLessonsBySubjectId(less.subject_id);
         setSiblingLessons(siblings);

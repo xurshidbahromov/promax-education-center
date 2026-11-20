@@ -3,11 +3,10 @@
 import { useState, useEffect, useRef } from "react";
 import { createPortal } from "react-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import { Sparkles, X, ChevronRight, Check } from "lucide-react";
+import { Flame, Sparkles, X, ChevronRight, Check } from "lucide-react";
 import Link from "next/link";
 import { getCachedStreak, getCurrentWeekStatus, type StreakData } from "@/lib/streak";
 import { useCurrentUser } from "@/hooks/useDashboardData";
-import StreakFlameIcon from "@/components/ui/StreakFlameIcon";
 
 export default function StreakPill() {
   const { data: user } = useCurrentUser();
@@ -48,126 +47,136 @@ export default function StreakPill() {
   const popoverCard = (
     <AnimatePresence>
       {expanded && (
-        <div className="fixed inset-0 z-[99999] flex items-center justify-center p-4 bg-slate-950/40 backdrop-blur-md">
+        <div
+          onClick={(e) => { if (e.target === e.currentTarget) setExpanded(false); }}
+          className="fixed inset-0 z-[99999] flex items-end sm:items-center justify-center sm:p-4 bg-slate-950/60 backdrop-blur-sm"
+        >
           <motion.div
             ref={containerRef}
-            initial={{ opacity: 0, scale: 0.96, y: 8 }}
-            animate={{ opacity: 1, scale: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.96, y: 8 }}
-            transition={{ duration: 0.2, ease: "easeOut" }}
-            className="relative w-full max-w-sm bg-white/95 dark:bg-slate-900/95 backdrop-blur-2xl rounded-3xl p-5 sm:p-6 border border-slate-200/70 dark:border-slate-800 shadow-[0_20px_50px_rgba(15,23,42,0.12)] space-y-4 text-left text-slate-800 dark:text-white"
+            initial={{ opacity: 0, y: 36, scale: 0.98 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: 36, scale: 0.98 }}
+            transition={{ duration: 0.24, ease: "easeOut" }}
+            className="bg-white dark:bg-slate-900 border-t border-x sm:border border-slate-200/80 dark:border-slate-800 rounded-t-[32px] sm:rounded-[32px] max-w-md w-full shadow-2xl relative flex flex-col max-h-[85vh] overflow-hidden text-left text-slate-800 dark:text-white"
           >
-            {/* Header */}
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2.5">
-                <div className="w-9 h-9 rounded-2xl bg-brand-orange/10 border border-brand-orange/20 text-brand-orange flex items-center justify-center">
-                  <StreakFlameIcon size={20} />
-                </div>
-                <div>
-                  <h4 className="text-sm font-bold font-fredoka text-slate-900 dark:text-white leading-none">
-                    Kunlik Faollik
-                  </h4>
-                  <p className="text-[11px] text-slate-500 dark:text-slate-400 font-medium mt-1">
-                    Har kuni kiring va mukofot oling
-                  </p>
-                </div>
-              </div>
-
-              <button
-                type="button"
-                onClick={() => setExpanded(false)}
-                className="w-8 h-8 rounded-full flex items-center justify-center text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer"
-              >
-                <X size={16} />
-              </button>
-            </div>
-
-            {/* Flat Minimalist Metric Strip */}
-            <div className="grid grid-cols-2 gap-2.5">
-              <div className="rounded-2xl p-3.5 bg-slate-50 dark:bg-slate-800/50 border border-slate-200/60 dark:border-slate-800">
-                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">
-                  Joriy zanjir
-                </span>
-                <div className="flex items-baseline gap-1 mt-1">
-                  <span className="text-2xl font-black font-fredoka text-slate-900 dark:text-white tabular-nums">
-                    {streak.currentStreak}
-                  </span>
-                  <span className="text-xs font-bold text-brand-orange">kun</span>
-                </div>
-              </div>
-              <div className="rounded-2xl p-3.5 bg-slate-50 dark:bg-slate-800/50 border border-slate-200/60 dark:border-slate-800">
-                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">
-                  Rekord
-                </span>
-                <div className="flex items-baseline gap-1 mt-1">
-                  <span className="text-2xl font-black font-fredoka text-slate-700 dark:text-slate-200 tabular-nums">
-                    {streak.longestStreak}
-                  </span>
-                  <span className="text-xs font-bold text-slate-400">kun</span>
-                </div>
-              </div>
-            </div>
-
-            {/* 7-Day Minimalist Grid */}
-            <div>
-              <div className="text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-2 flex items-center justify-between">
-                <span>Bu hafta</span>
-                <span className="inline-flex items-center gap-1 text-[10px] text-emerald-600 dark:text-emerald-400 font-bold normal-case">
-                  {streak.todayAwarded ? (
-                    <>
-                      <Check size={12} strokeWidth={2.5} />
-                      <span>Bugun faol (+5 coin)</span>
-                    </>
-                  ) : (
-                    <span className="text-slate-400">Kutilmoqda</span>
-                  )}
-                </span>
-              </div>
-              <div className="grid grid-cols-7 gap-1.5 bg-slate-50/80 dark:bg-slate-800/40 p-2.5 rounded-2xl border border-slate-200/60 dark:border-slate-800">
-                {weekStatus.map((day) => (
-                  <div key={day.dateStr} className="flex flex-col items-center gap-1.5">
-                    <span className={`text-[10px] font-bold ${day.isToday ? "text-brand-orange" : "text-slate-400"}`}>
-                      {day.dayLabel}
-                    </span>
-                    <div
-                      className={`w-7 h-7 rounded-full flex items-center justify-center transition-all ${
-                        day.isActive
-                          ? "bg-brand-orange text-white"
-                          : day.isToday
-                          ? "border border-dashed border-brand-orange text-brand-orange bg-brand-orange/5"
-                          : "border border-slate-200/80 dark:border-slate-700/70 bg-transparent text-slate-300 dark:text-slate-600"
-                      }`}
-                    >
-                      {day.isActive ? (
-                        <Check size={13} strokeWidth={2.6} />
-                      ) : day.isToday ? (
-                        <span className="w-1.5 h-1.5 rounded-full bg-brand-orange" />
-                      ) : (
-                        <span className="w-1 h-1 rounded-full bg-current opacity-50" />
-                      )}
-                    </div>
+            {/* Sticky Header (Shop style) */}
+            <div className="sticky top-0 z-20 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md px-6 pt-3.5 pb-3 border-b border-slate-100 dark:border-slate-800/80 flex flex-col gap-2">
+              <div className="w-12 h-1.5 bg-slate-300 dark:bg-slate-700 rounded-full mx-auto sm:hidden" />
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2.5">
+                  <div className="w-9 h-9 rounded-xl bg-amber-500/10 text-amber-500 flex items-center justify-center shrink-0">
+                    <Flame size={18} />
                   </div>
-                ))}
+                  <div>
+                    <h4 className="font-extrabold text-slate-900 dark:text-slate-100 text-base font-fredoka leading-tight">
+                      Kunlik Faollik
+                    </h4>
+                    <p className="text-[11px] text-slate-500 dark:text-slate-400 font-medium">
+                      Har kuni kiring va mukofot oling
+                    </p>
+                  </div>
+                </div>
+
+                <button
+                  type="button"
+                  onClick={() => setExpanded(false)}
+                  className="w-8 h-8 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 flex items-center justify-center transition-colors cursor-pointer"
+                  aria-label="Yopish"
+                >
+                  <X size={16} />
+                </button>
               </div>
             </div>
 
-            {/* Subtle Flat Bonus Note */}
-            <div className="text-[11px] text-slate-500 dark:text-slate-400 bg-slate-50 dark:bg-slate-800/40 border border-slate-200/60 dark:border-slate-800 rounded-2xl p-3 flex items-center gap-2.5">
-              <Sparkles size={15} className="text-brand-orange shrink-0" strokeWidth={1.8} />
-              <span>
-                Har kuni <strong className="text-slate-700 dark:text-slate-200">+5 coin</strong>, har 7-kunda esa <strong className="text-slate-700 dark:text-slate-200">+25 coin</strong> beriladi.
-              </span>
-            </div>
+            {/* Body */}
+            <div className="p-6 space-y-4 overflow-y-auto">
+              {/* Metric Strip */}
+              <div className="grid grid-cols-2 gap-3">
+                <div className="rounded-2xl p-4 bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-700/50">
+                  <span className="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider block">
+                    Joriy zanjir
+                  </span>
+                  <div className="flex items-baseline gap-1 mt-1">
+                    <span className="text-2xl font-black font-fredoka text-slate-900 dark:text-white tabular-nums">
+                      {streak.currentStreak}
+                    </span>
+                    <span className="text-xs font-bold text-amber-500">kun</span>
+                  </div>
+                </div>
+                <div className="rounded-2xl p-4 bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-700/50">
+                  <span className="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider block">
+                    Rekord
+                  </span>
+                  <div className="flex items-baseline gap-1 mt-1">
+                    <span className="text-2xl font-black font-fredoka text-slate-700 dark:text-slate-200 tabular-nums">
+                      {streak.longestStreak}
+                    </span>
+                    <span className="text-xs font-bold text-slate-400">kun</span>
+                  </div>
+                </div>
+              </div>
 
-            {/* Footer Action */}
-            <Link
-              href="/dashboard"
-              onClick={() => setExpanded(false)}
-              className="w-full py-2.5 px-4 rounded-2xl bg-slate-900 hover:bg-slate-800 dark:bg-white dark:hover:bg-slate-100 text-white dark:text-slate-900 font-bold text-xs transition-all flex items-center justify-center gap-1.5"
-            >
-              <span>Bosh sahifada ko&apos;rish</span>
-              <ChevronRight size={14} />
-            </Link>
+              {/* 7-Day Grid */}
+              <div>
+                <div className="text-[11px] font-extrabold text-slate-400 uppercase tracking-wider mb-2 flex items-center justify-between">
+                  <span>Bu hafta</span>
+                  <span className="inline-flex items-center gap-1 text-[10px] text-emerald-600 dark:text-emerald-400 font-bold normal-case">
+                    {streak.todayAwarded ? (
+                      <>
+                        <Check size={12} strokeWidth={2.5} />
+                        <span>Bugun faol (+5 tanga)</span>
+                      </>
+                    ) : (
+                      <span className="text-slate-400">Kutilmoqda</span>
+                    )}
+                  </span>
+                </div>
+                <div className="grid grid-cols-7 gap-1.5 bg-slate-50 dark:bg-slate-800/50 p-3 rounded-2xl border border-slate-100 dark:border-slate-700/50">
+                  {weekStatus.map((day) => (
+                    <div key={day.dateStr} className="flex flex-col items-center gap-1.5">
+                      <span className={`text-[10px] font-bold ${day.isToday ? "text-amber-500" : "text-slate-400"}`}>
+                        {day.dayLabel}
+                      </span>
+                      <div
+                        className={`w-7 h-7 rounded-full flex items-center justify-center transition-all ${
+                          day.isActive
+                            ? "bg-amber-500 text-white"
+                            : day.isToday
+                            ? "border border-dashed border-amber-500 text-amber-500 bg-amber-500/10"
+                            : "border border-slate-200 dark:border-slate-700 bg-transparent text-slate-300 dark:text-slate-600"
+                        }`}
+                      >
+                        {day.isActive ? (
+                          <Check size={13} strokeWidth={2.6} />
+                        ) : day.isToday ? (
+                          <span className="w-1.5 h-1.5 rounded-full bg-amber-500" />
+                        ) : (
+                          <span className="w-1 h-1 rounded-full bg-current opacity-50" />
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Shop-style Amber Bonus Note */}
+              <div className="text-[11px] text-amber-800 dark:text-amber-300 bg-amber-50 dark:bg-amber-500/10 border border-amber-200/60 dark:border-amber-500/20 rounded-2xl p-3.5 flex items-center gap-2.5 font-medium">
+                <Sparkles size={15} className="text-amber-500 shrink-0" />
+                <span>
+                  Har kuni <strong className="text-amber-900 dark:text-amber-200">+5 tanga</strong>, har 7-kunda esa <strong className="text-amber-900 dark:text-amber-200">+25 tanga</strong> beriladi.
+                </span>
+              </div>
+
+              {/* Footer Action */}
+              <Link
+                href="/dashboard"
+                onClick={() => setExpanded(false)}
+                className="w-full py-3 px-4 rounded-2xl bg-amber-500 hover:bg-amber-600 active:scale-95 text-white font-bold text-xs transition-all flex items-center justify-center gap-1.5 shadow-sm"
+              >
+                <span>Bosh sahifada ko&apos;rish</span>
+                <ChevronRight size={14} />
+              </Link>
+            </div>
           </motion.div>
         </div>
       )}
@@ -179,12 +188,12 @@ export default function StreakPill() {
       <button
         type="button"
         onClick={() => setExpanded(!expanded)}
-        className="h-7 sm:h-8 px-2 sm:px-2.5 bg-brand-orange/[0.08] hover:bg-brand-orange/[0.14] dark:bg-brand-orange/15 dark:hover:bg-brand-orange/20 border border-brand-orange/15 rounded-full flex items-center gap-1 sm:gap-1.5 text-slate-800 dark:text-slate-100 text-xs font-bold font-fredoka transition-colors active:scale-95 cursor-pointer shrink-0 shadow-none"
+        className="h-7 sm:h-8 px-2.5 sm:px-3 bg-amber-500/10 hover:bg-amber-500/15 border border-amber-500/20 rounded-full flex items-center gap-1 sm:gap-1.5 text-amber-600 dark:text-amber-400 text-xs font-bold font-fredoka transition-colors active:scale-95 cursor-pointer shrink-0 shadow-none"
         title="Kunlik faollik zanjiri"
       >
-        <StreakFlameIcon size={15} className="text-brand-orange shrink-0" />
-        <span className="leading-none tabular-nums">{streak.currentStreak}</span>
-        <span className="hidden sm:inline leading-none text-slate-500 dark:text-slate-400 font-semibold">kun</span>
+        <Flame size={14} className="text-amber-500 shrink-0" />
+        <span className="leading-none tabular-nums text-slate-800 dark:text-slate-100">{streak.currentStreak}</span>
+        <span className="hidden sm:inline leading-none text-amber-600 dark:text-amber-400 font-semibold">kun</span>
       </button>
 
       {mounted && createPortal(popoverCard, document.body)}

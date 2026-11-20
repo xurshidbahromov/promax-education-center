@@ -42,109 +42,116 @@ export default function SidebarBetaWidget({ variant = "card" }: { variant?: "car
     };
   }, [expanded]);
 
-  // Flat Minimalist Creative Premium Modal (aligned with StreakPill & DailyStreakCard)
+  // Shop-aligned Bottom Sheet / Modal
   const popoverCard = (
     <AnimatePresence>
       {expanded && (
-        <div className="fixed inset-0 z-[99999] flex items-center justify-center p-4 bg-slate-950/40 backdrop-blur-md">
+        <div
+          onClick={(e) => { if (e.target === e.currentTarget) setExpanded(false); }}
+          className="fixed inset-0 z-[99999] flex items-end sm:items-center justify-center sm:p-4 bg-slate-950/60 backdrop-blur-sm"
+        >
           <motion.div
             ref={containerRef}
-            initial={{ opacity: 0, scale: 0.96, y: 8 }}
-            animate={{ opacity: 1, scale: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.96, y: 8 }}
-            transition={{ duration: 0.2, ease: "easeOut" }}
-            className="relative w-full max-w-sm bg-white/95 dark:bg-slate-900/95 backdrop-blur-2xl rounded-3xl p-5 sm:p-6 border border-slate-200/70 dark:border-slate-800 shadow-[0_20px_50px_rgba(15,23,42,0.12)] space-y-4 text-left text-slate-800 dark:text-white"
+            initial={{ opacity: 0, y: 36, scale: 0.98 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: 36, scale: 0.98 }}
+            transition={{ duration: 0.24, ease: "easeOut" }}
+            className="bg-white dark:bg-slate-900 border-t border-x sm:border border-slate-200/80 dark:border-slate-800 rounded-t-[32px] sm:rounded-[32px] max-w-md w-full shadow-2xl relative flex flex-col max-h-[85vh] overflow-hidden text-left text-slate-800 dark:text-white"
           >
-            {/* Header */}
-            <div className="flex items-center justify-between gap-3">
-              <div className="flex items-center gap-2.5">
-                <div className="w-9 h-9 rounded-2xl bg-brand-orange/10 border border-brand-orange/20 text-brand-orange flex items-center justify-center shrink-0">
-                  <Sparkles size={18} strokeWidth={1.8} />
-                </div>
-                <div>
-                  <div className="flex items-center gap-1.5">
-                    <h4 className="text-sm font-bold font-fredoka text-slate-900 dark:text-white leading-none">
+            {/* Sticky Header (Shop style) */}
+            <div className="sticky top-0 z-20 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md px-6 pt-3.5 pb-3 border-b border-slate-100 dark:border-slate-800/80 flex flex-col gap-2">
+              <div className="w-12 h-1.5 bg-slate-300 dark:bg-slate-700 rounded-full mx-auto sm:hidden" />
+              <div className="flex items-center justify-between gap-3">
+                <div className="flex items-center gap-2.5">
+                  <div className="w-9 h-9 rounded-xl bg-amber-500/10 text-amber-500 flex items-center justify-center shrink-0">
+                    <Sparkles size={18} />
+                  </div>
+                  <div>
+                    <h4 className="font-extrabold text-slate-900 dark:text-slate-100 text-base font-fredoka leading-tight">
                       {t("beta.title") || "Platforma Test Rejimida"}
                     </h4>
+                    <div className="flex items-center gap-1.5 mt-0.5">
+                      <span className="w-1.5 h-1.5 rounded-full bg-amber-500 shrink-0" />
+                      <span className="text-[10px] font-extrabold uppercase tracking-wider text-slate-400">
+                        {t("beta.badge") || "PROMAX BETA v2.0"}
+                      </span>
+                    </div>
                   </div>
-                  <div className="flex items-center gap-1.5 mt-1">
-                    <span className="w-1.5 h-1.5 rounded-full bg-brand-orange shrink-0" />
-                    <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
-                      {t("beta.badge") || "PROMAX BETA v2.0"}
-                    </span>
-                  </div>
                 </div>
-              </div>
 
-              <button
-                type="button"
-                onClick={() => setExpanded(false)}
-                className="w-8 h-8 rounded-full flex items-center justify-center text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer shrink-0"
-                aria-label="Yopish"
-              >
-                <X size={16} />
-              </button>
-            </div>
-
-            {/* Description */}
-            <p className="text-xs text-slate-500 dark:text-slate-400 font-medium leading-relaxed">
-              {t("beta.desc") ||
-                "Platformamiz sinov va takomillashtirish bosqichida. Biz har kuni yangi imkoniyatlar va qulayliklar qo'shib bormoqdamiz."}
-            </p>
-
-            {/* 2 Flat Feature Cards */}
-            <div className="space-y-2">
-              <div className="p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-800/40 border border-slate-200/60 dark:border-slate-800 flex items-start gap-3">
-                <div className="w-7 h-7 rounded-xl bg-white dark:bg-slate-800 border border-slate-200/70 dark:border-slate-700/70 text-brand-orange flex items-center justify-center shrink-0 mt-0.5">
-                  <Zap size={14} strokeWidth={1.9} />
-                </div>
-                <div className="space-y-0.5 min-w-0">
-                  <h5 className="font-bold text-xs text-slate-900 dark:text-white">
-                    {t("beta.feature1_title") || "Doimiy Yangilanishlar"}
-                  </h5>
-                  <p className="text-[11px] text-slate-500 dark:text-slate-400 font-medium leading-relaxed">
-                    {t("beta.feature1_desc") ||
-                      "Barcha sahifalar va tizim imkoniyatlari real-vaqt rejimida yangilanib bormoqda."}
-                  </p>
-                </div>
-              </div>
-
-              <div className="p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-800/40 border border-slate-200/60 dark:border-slate-800 flex items-start gap-3">
-                <div className="w-7 h-7 rounded-xl bg-white dark:bg-slate-800 border border-slate-200/70 dark:border-slate-700/70 text-brand-blue flex items-center justify-center shrink-0 mt-0.5">
-                  <MessageSquare size={14} strokeWidth={1.9} />
-                </div>
-                <div className="space-y-0.5 min-w-0">
-                  <h5 className="font-bold text-xs text-slate-900 dark:text-white">
-                    {t("beta.feature2_title") || "Fikr va Takliflar"}
-                  </h5>
-                  <p className="text-[11px] text-slate-500 dark:text-slate-400 font-medium leading-relaxed">
-                    {t("beta.feature2_desc") ||
-                      "Kamchilik yoki takliflaringiz bo'lsa, to'g'ridan-to'g'ri dasturchilarga xabar bering."}
-                  </p>
-                </div>
+                <button
+                  type="button"
+                  onClick={() => setExpanded(false)}
+                  className="w-8 h-8 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 flex items-center justify-center transition-colors cursor-pointer shrink-0"
+                  aria-label="Yopish"
+                >
+                  <X size={16} />
+                </button>
               </div>
             </div>
 
-            {/* Action Buttons */}
-            <div className="flex items-center gap-2.5 pt-1">
-              <button
-                type="button"
-                onClick={() => setExpanded(false)}
-                className="px-4 py-2.5 rounded-2xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 font-bold text-xs transition-colors active:scale-95 whitespace-nowrap cursor-pointer"
-              >
-                {t("beta.understand") || "Tushunarli"}
-              </button>
+            {/* Body */}
+            <div className="p-6 space-y-4 overflow-y-auto">
+              {/* Description */}
+              <p className="text-xs text-slate-500 dark:text-slate-400 font-medium leading-relaxed">
+                {t("beta.desc") ||
+                  "Platformamiz sinov va takomillashtirish bosqichida. Biz har kuni yangi imkoniyatlar va qulayliklar qo'shib bormoqdamiz."}
+              </p>
 
-              <a
-                href="https://t.me/xurshidbahromov"
-                target="_blank"
-                rel="noopener noreferrer"
-                onClick={() => setExpanded(false)}
-                className="flex-1 py-2.5 px-4 rounded-2xl bg-slate-900 hover:bg-slate-800 dark:bg-white dark:hover:bg-slate-100 text-white dark:text-slate-900 font-bold text-xs transition-all active:scale-95 flex items-center justify-center gap-1.5 whitespace-nowrap"
-              >
-                <span>{t("beta.action") || "Xabar Berish"}</span>
-                <ArrowUpRight size={14} className="shrink-0" />
-              </a>
+              {/* 2 Feature Cards (Shop slate-50 inner box style) */}
+              <div className="space-y-2.5">
+                <div className="p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-700/50 flex items-start gap-3">
+                  <div className="w-8 h-8 rounded-xl bg-amber-500/10 text-amber-500 flex items-center justify-center shrink-0 mt-0.5">
+                    <Zap size={15} />
+                  </div>
+                  <div className="space-y-0.5 min-w-0">
+                    <h5 className="font-bold text-xs text-slate-900 dark:text-white">
+                      {t("beta.feature1_title") || "Doimiy Yangilanishlar"}
+                    </h5>
+                    <p className="text-[11px] text-slate-500 dark:text-slate-400 font-medium leading-relaxed">
+                      {t("beta.feature1_desc") ||
+                        "Barcha sahifalar va tizim imkoniyatlari real-vaqt rejimida yangilanib bormoqda."}
+                    </p>
+                  </div>
+                </div>
+
+                <div className="p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-700/50 flex items-start gap-3">
+                  <div className="w-8 h-8 rounded-xl bg-blue-500/10 text-blue-600 dark:text-blue-400 flex items-center justify-center shrink-0 mt-0.5">
+                    <MessageSquare size={15} />
+                  </div>
+                  <div className="space-y-0.5 min-w-0">
+                    <h5 className="font-bold text-xs text-slate-900 dark:text-white">
+                      {t("beta.feature2_title") || "Fikr va Takliflar"}
+                    </h5>
+                    <p className="text-[11px] text-slate-500 dark:text-slate-400 font-medium leading-relaxed">
+                      {t("beta.feature2_desc") ||
+                        "Kamchilik yoki takliflaringiz bo'lsa, to'g'ridan-to'g'ri dasturchilarga xabar bering."}
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Action Buttons (Shop button style) */}
+              <div className="flex items-center gap-2 pt-1">
+                <a
+                  href="https://t.me/xurshidbahromov"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  onClick={() => setExpanded(false)}
+                  className="flex-1 py-3 px-4 rounded-2xl bg-amber-500 hover:bg-amber-600 active:scale-95 text-white font-bold text-xs transition-all flex items-center justify-center gap-1.5 whitespace-nowrap shadow-sm"
+                >
+                  <span>{t("beta.action") || "Xabar Berish"}</span>
+                  <ArrowUpRight size={14} className="shrink-0" />
+                </a>
+
+                <button
+                  type="button"
+                  onClick={() => setExpanded(false)}
+                  className="py-3 px-4 rounded-2xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 font-bold text-xs transition-colors active:scale-95 whitespace-nowrap cursor-pointer"
+                >
+                  {t("beta.understand") || "Tushunarli"}
+                </button>
+              </div>
             </div>
           </motion.div>
         </div>
@@ -158,10 +165,10 @@ export default function SidebarBetaWidget({ variant = "card" }: { variant?: "car
         <button
           type="button"
           onClick={() => setExpanded(!expanded)}
-          className="h-7 sm:h-8 px-2 sm:px-2.5 bg-slate-900/[0.04] hover:bg-slate-900/[0.08] dark:bg-white/[0.06] dark:hover:bg-white/[0.1] border border-slate-200/70 dark:border-slate-700/60 rounded-full flex items-center gap-1.5 text-slate-600 dark:text-slate-300 text-[11px] sm:text-xs font-semibold font-fredoka transition-colors active:scale-95 cursor-pointer shrink-0 shadow-none"
+          className="h-7 sm:h-8 px-2.5 sm:px-3 bg-amber-500/10 hover:bg-amber-500/15 border border-amber-500/20 rounded-full flex items-center gap-1.5 text-amber-700 dark:text-amber-400 text-[11px] sm:text-xs font-bold font-fredoka transition-colors active:scale-95 cursor-pointer shrink-0 shadow-none"
           title="Tizim test rejimida ishlamoqda"
         >
-          <span className="w-1.5 h-1.5 rounded-full bg-brand-orange shrink-0" />
+          <Sparkles size={13} className="text-amber-500 shrink-0" />
           <span className="sm:hidden">Beta</span>
           <span className="hidden sm:inline">{t("beta.pill") || "Test Rejimi"}</span>
         </button>

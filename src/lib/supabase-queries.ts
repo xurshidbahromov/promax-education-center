@@ -559,6 +559,7 @@ export interface Subject {
  description: string;
  cover_image: string;
  created_at: string;
+ lesson_ids?: string[];
 }
 
 export interface Lesson {
@@ -614,7 +615,7 @@ export async function getSubjects(options?: { onlyWithLessons?: boolean }): Prom
       .order('created_at', { ascending: false }),
     supabase
       .from('lessons')
-      .select('subject_id')
+      .select('id, subject_id')
   ]);
 
   if (subjectsRes.error) {
@@ -622,18 +623,26 @@ export async function getSubjects(options?: { onlyWithLessons?: boolean }): Prom
     return [];
   }
 
-  const subjectIdsWithLessons = new Set(
-    (lessonsRes.data || []).map((l: any) => l.subject_id).filter(Boolean)
-  );
+  const lessonsBySubject = new Map<string, string[]>();
+  for (const l of lessonsRes.data || []) {
+    if (!l.subject_id || !l.id) continue;
+    const existing = lessonsBySubject.get(l.subject_id);
+    if (existing) {
+      existing.push(l.id);
+    } else {
+      lessonsBySubject.set(l.subject_id, [l.id]);
+    }
+  }
 
   const filtered = (subjectsRes.data || []).filter((s: any) =>
-    subjectIdsWithLessons.has(s.id)
+    lessonsBySubject.has(s.id)
   );
 
   return filtered.map((s: any) => ({
     ...s,
     title: s.title || s.name || 'Nomsiz Fan',
     name: s.name || s.title || 'Nomsiz Fan',
+    lesson_ids: lessonsBySubject.get(s.id) || [],
   }));
 }
 

@@ -3,30 +3,35 @@
 import { useLanguage } from "@/context/LanguageContext";
 import { useCurrentUser, useUserProfile, useDashboardStats, useUpcomingTests, useAnnouncements, useStudentSubjects } from "@/hooks/useDashboardData";
 import Link from "next/link";
-import Image from "next/image";
-import { 
-  LibraryBig,
+import {
   BookOpenText,
-  FlaskConical, 
-  Globe, 
-  Calculator, 
-  Atom, 
-  Leaf, 
-  FileCheck, 
-  Trophy, 
-  ChevronRight, 
+  FlaskConical,
+  Globe,
+  Calculator,
+  Atom,
+  Leaf,
+  FileCheck,
+  Trophy,
+  ChevronRight,
   Megaphone,
   Clock,
   Zap,
-  TrendingUp
+  TrendingUp,
+  Play,
+  Gamepad2,
 } from "lucide-react";
 import { useState, useMemo, useEffect } from "react";
 import { useQueryClient } from "@tanstack/react-query";
-import { type Subject } from "@/lib/supabase-queries";
 import { DashboardHomeSkeleton } from "@/components/ui/Skeleton";
 import { OlympiadBannerTeaser } from "@/components/dashboard/OlympiadSection";
 import { InternationalBannerTeaser } from "@/components/dashboard/InternationalSection";
 import DailyStreakCard from "@/components/dashboard/DailyStreakCard";
+import {
+  calculateSubjectProgress,
+  getCompletedLessonIds,
+  getLastVisitedLesson,
+  type LastVisitedLesson,
+} from "@/lib/lesson-progress";
 
 // Subject colors & icons
 const subjectMeta: Record<string, { color: string; bg: string; icon: any }> = {
@@ -43,48 +48,6 @@ function getSubjectMeta(title: string) {
   return subjectMeta[key || "default"];
 }
 
-// Quick access cards
-const quickCards = [
-  {
-    label: "Fanlar",
-    sublabel: "Barcha o'quv fanlar",
-    href: "/dashboard/lessons",
-    icon: LibraryBig,
-    color: "text-blue-600 dark:text-blue-400",
-  },
-  {
-    label: "Testlar",
-    sublabel: "Online testlarni yechish",
-    href: "/dashboard/tests",
-    icon: FileCheck,
-    color: "text-violet-600 dark:text-violet-400",
-  },
-  {
-    label: "Natijalar",
-    sublabel: "Ball va statistika",
-    href: "/dashboard/results",
-    icon: TrendingUp,
-    color: "text-amber-600 dark:text-amber-400",
-  },
-  {
-    label: "Yutuqlar",
-    sublabel: "Reyting va mukofotlar",
-    href: "/dashboard/profile",
-    icon: Trophy,
-    color: "text-emerald-600 dark:text-emerald-400",
-  },
-];
-
-interface FeaturedAnnouncement {
-  id: string;
-  title: string;
-  message: string;
-  image: string;
-  badge: string;
-  date: string;
-  badgeBg: string;
-}
-
 export default function DashboardPage() {
   const queryClient = useQueryClient();
   const { t } = useLanguage();
@@ -93,15 +56,25 @@ export default function DashboardPage() {
   const { data: stats } = useDashboardStats(user?.id);
   const { data: upcomingTests } = useUpcomingTests();
   const { data: dbAnnouncements = [] } = useAnnouncements();
+  const [completedLessonIds, setCompletedLessonIds] = useState<string[]>([]);
+  const [lastLesson, setLastLesson] = useState<LastVisitedLesson | null>(null);
 
   useEffect(() => {
+    const syncProgress = () => {
+      setCompletedLessonIds(getCompletedLessonIds());
+      setLastLesson(getLastVisitedLesson());
+    };
+    syncProgress();
+
     const handleUpdate = () => {
       queryClient.invalidateQueries({ queryKey: ['announcements'] });
     };
 
     window.addEventListener('promax_announcements_updated', handleUpdate);
+    window.addEventListener('promax_lesson_progress_updated', syncProgress);
     return () => {
       window.removeEventListener('promax_announcements_updated', handleUpdate);
+      window.removeEventListener('promax_lesson_progress_updated', syncProgress);
     };
   }, [queryClient]);
 
@@ -158,16 +131,117 @@ export default function DashboardPage() {
             <DailyStreakCard userId={user?.id} />
           </div>
 
-          {/* ── 2. ONLAYN OLIMPIADALAR BANNER (Tepada - Fanlardan avval) ── */}
+          {/* ── 2. ONLAYN OLIMPIADALAR & XALQARO MUSOBAQALAR (Eng tepada) ── */}
           <div className="flex flex-col gap-4">
             <OlympiadBannerTeaser />
             <InternationalBannerTeaser />
           </div>
 
-          {/* ── 3. SUBJECT PROGRESS CARDS (Fanlarim) — 2 Columns ── */}
+          {/* ── 3. RESUME LAST LESSON (Darsni davom ettirish) ── */}
+          {lastLesson && (
+            <Link
+              href={`/dashboard/lessons/${lastLesson.lessonId}`}
+              className="bg-white/65 dark:bg-slate-900/65 backdrop-blur-xl rounded-[1.5rem] px-4 py-3.5 border border-white/60 dark:border-slate-800/60 hover:bg-white/85 dark:hover:bg-slate-900/85 active:scale-[0.99] transition-all flex items-center gap-3.5 group"
+            >
+              <div className="w-10 h-10 rounded-2xl bg-brand-blue/10 dark:bg-brand-blue/15 text-brand-blue dark:text-blue-400 flex items-center justify-center shrink-0">
+                <Play size={18} className="fill-current ml-0.5" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-[11px] font-bold uppercase tracking-wider text-brand-blue dark:text-blue-400 leading-none">
+                  Oxirgi darsni davom ettirish
+                </p>
+                <p className="text-[14px] sm:text-[15px] font-semibold text-slate-800 dark:text-slate-100 mt-1 truncate">
+                  {lastLesson.title}
+                </p>
+              </div>
+              <span className="inline-flex items-center gap-1 px-3 py-1.5 rounded-full bg-slate-900 dark:bg-white text-white dark:text-slate-900 text-xs font-bold shrink-0">
+                <span className="hidden xs:inline">Ochish</span>
+                <ChevronRight size={14} />
+              </span>
+            </Link>
+          )}
+
+          {/* ── 4. STATS ROW — 3 Clickable Flat Cards ── */}
+          <section className="grid grid-cols-3 gap-2.5 sm:gap-4">
+            {[
+              {
+                label: "Testlar",
+                value: stats?.totalTests ?? 0,
+                href: "/dashboard/results",
+                icon: FileCheck,
+                iconBg: "bg-brand-blue/10 dark:bg-brand-blue/15 text-brand-blue dark:text-blue-400",
+              },
+              {
+                label: "O'rtacha",
+                value: `${stats?.averageScore ?? 0}%`,
+                href: "/dashboard/results",
+                icon: TrendingUp,
+                iconBg: "bg-emerald-500/10 dark:bg-emerald-500/15 text-emerald-600 dark:text-emerald-400",
+              },
+              {
+                label: "Tangalar",
+                value: stats?.totalCoins ?? 0,
+                href: "/dashboard/shop",
+                icon: Trophy,
+                iconBg: "bg-brand-orange/10 dark:bg-brand-orange/15 text-brand-orange",
+              },
+            ].map((s) => {
+              const Icon = s.icon;
+              return (
+                <Link
+                  key={s.label}
+                  href={s.href}
+                  className="bg-white/60 dark:bg-slate-900/60 backdrop-blur-xl rounded-[1.5rem] p-3.5 sm:p-4 border border-white/60 dark:border-slate-800/60 hover:bg-white/80 dark:hover:bg-slate-900/80 shadow-none flex flex-col items-center gap-1.5 text-center active:scale-[0.98] transition-all group"
+                >
+                  <div className={`w-9 h-9 rounded-xl flex items-center justify-center ${s.iconBg}`}>
+                    <Icon size={18} className="stroke-[2.1]" />
+                  </div>
+                  <p className="text-lg sm:text-xl font-bold font-fredoka text-slate-800 dark:text-slate-100 tabular-nums leading-tight mt-0.5">
+                    {s.value}
+                  </p>
+                  <p className="text-[11px] text-slate-500 dark:text-slate-400 font-medium leading-none">
+                    {s.label}
+                  </p>
+                </Link>
+              );
+            })}
+          </section>
+
+          {/* ── 4.5 COMPACT SECONDARY ACCESS (Mobile-friendly Natijalar & O'yinlar) ── */}
+          <section className="grid grid-cols-2 gap-2.5 sm:gap-3 lg:hidden">
+            <Link
+              href="/dashboard/results"
+              className="bg-white/60 dark:bg-slate-900/60 backdrop-blur-xl rounded-2xl px-3.5 py-3 border border-white/60 dark:border-slate-800/60 active:scale-[0.98] transition-all flex items-center gap-2.5"
+            >
+              <div className="w-8 h-8 rounded-xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shrink-0">
+                <TrendingUp size={16} />
+              </div>
+              <div className="min-w-0 flex-1">
+                <p className="text-[13px] font-bold text-slate-800 dark:text-slate-100 leading-tight truncate">Natijalar</p>
+                <p className="text-[11px] text-slate-500 dark:text-slate-400 truncate">Ball va tahlil</p>
+              </div>
+              <ChevronRight size={15} className="text-slate-400 shrink-0" />
+            </Link>
+
+            <Link
+              href="/dashboard/games"
+              className="bg-white/60 dark:bg-slate-900/60 backdrop-blur-xl rounded-2xl px-3.5 py-3 border border-white/60 dark:border-slate-800/60 active:scale-[0.98] transition-all flex items-center gap-2.5"
+            >
+              <div className="w-8 h-8 rounded-xl bg-brand-orange/10 text-brand-orange flex items-center justify-center shrink-0">
+                <Gamepad2 size={16} />
+              </div>
+              <div className="min-w-0 flex-1">
+                <p className="text-[13px] font-bold text-slate-800 dark:text-slate-100 leading-tight truncate">O&apos;yinlar</p>
+                <p className="text-[11px] text-slate-500 dark:text-slate-400 truncate">Tezkor mashqlar</p>
+              </div>
+              <ChevronRight size={15} className="text-slate-400 shrink-0" />
+            </Link>
+          </section>
+
+          {/* ── 5. SUBJECT PROGRESS CARDS (Fanlarim — Haqiqiy progress) ── */}
           {subjects.length > 0 && (
             <section>
-              <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center justify-between mb-3.5">
                 <h2 className="text-[13px] sm:text-[14px] font-bold text-slate-600 dark:text-slate-400 uppercase tracking-widest">
                   Fanlarim
                 </h2>
@@ -180,22 +254,24 @@ export default function DashboardPage() {
                 {subjects.slice(0, 4).map((subject) => {
                   const meta = getSubjectMeta(subject.title);
                   const Icon = meta.icon;
-                  const completedCount = stats?.totalTests ? Math.min(stats.totalTests, 5) : 0;
-                  const totalCount = 10;
-                  const pct = Math.min(Math.round((completedCount / totalCount) * 100), 100);
+                  const { completedCount, totalCount, percentage } = calculateSubjectProgress(
+                    subject.lesson_ids || [],
+                    completedLessonIds
+                  );
 
                   return (
                     <div key={subject.id}>
                       <Link
                         href={`/dashboard/subjects/${subject.id}`}
-                        className="bg-white/60 dark:bg-slate-900/60 backdrop-blur-xl rounded-[1.5rem] p-4 border border-white/60 dark:border-slate-800/60 shadow-none active:scale-[0.99] transition-all duration-300 flex flex-col gap-3 group block"
+                        className="bg-white/60 dark:bg-slate-900/60 backdrop-blur-xl rounded-[1.5rem] p-4 border border-white/60 dark:border-slate-800/60 hover:bg-white/80 dark:hover:bg-slate-900/80 shadow-none active:scale-[0.99] transition-all duration-200 flex flex-col gap-3 group block"
                       >
                         <div className="flex items-center justify-between">
                           <div className="flex items-center justify-center transition-transform group-active:scale-95">
-                            <Icon size={28} className={meta.color} />
+                            <Icon size={26} className={meta.color} />
                           </div>
-                          <span className="text-[13px] font-bold text-slate-400 dark:text-slate-500">
-                            {completedCount}<span className="text-slate-300 dark:text-slate-600 font-medium">/{totalCount}</span>
+                          <span className="text-[12px] font-bold text-slate-500 dark:text-slate-400 tabular-nums">
+                            {completedCount}
+                            <span className="text-slate-400 dark:text-slate-600 font-medium">/{totalCount}</span>
                           </span>
                         </div>
 
@@ -203,13 +279,16 @@ export default function DashboardPage() {
                           <p className="text-[13px] font-bold text-slate-700 dark:text-slate-200 uppercase tracking-wider line-clamp-1">
                             {subject.title}
                           </p>
+                          <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">
+                            {percentage > 0 ? `${percentage}% o'zlashtirildi` : `${totalCount} ta dars`}
+                          </p>
                         </div>
 
                         {/* Progress bar */}
-                        <div className="h-1.5 w-full bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
+                        <div className="h-1.5 w-full bg-slate-200/70 dark:bg-slate-800 rounded-full overflow-hidden">
                           <div
                             className={`h-full rounded-full transition-all duration-500 ${meta.bg}`}
-                            style={{ width: `${pct}%` }}
+                            style={{ width: `${percentage}%` }}
                           />
                         </div>
                       </Link>
@@ -219,59 +298,6 @@ export default function DashboardPage() {
               </div>
             </section>
           )}
-
-          {/* ── 4. QUICK ACCESS (O'QISH BO'LIMI) — 2 Columns ── */}
-          <section>
-            <h2 className="text-[13px] sm:text-[14px] font-bold text-slate-600 dark:text-slate-400 uppercase tracking-widest mb-4">
-              O'qish
-            </h2>
-
-            <div className="grid grid-cols-2 gap-3 sm:gap-4">
-              {quickCards.map((card) => {
-                const Icon = card.icon;
-                return (
-                  <div key={card.label}>
-                    <Link
-                      href={card.href}
-                      className="bg-white/60 dark:bg-slate-900/60 backdrop-blur-xl rounded-[1.5rem] p-4 border border-white/60 dark:border-slate-800/60 shadow-none active:scale-[0.99] transition-all duration-300 flex items-center gap-4 group block"
-                    >
-                      <div className="flex items-center justify-center shrink-0 group-active:scale-95 transition-transform">
-                        <Icon size={28} className={card.color} />
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <p className="text-[14px] sm:text-[15px] font-semibold text-slate-800 dark:text-slate-100 leading-tight">{card.label}</p>
-                        <p className="text-[12px] text-slate-500 dark:text-slate-400 mt-0.5 line-clamp-1">{card.sublabel}</p>
-                      </div>
-                      <ChevronRight size={18} className="text-slate-300 dark:text-slate-600 group-active:text-brand-blue group-active:scale-95 transition-all shrink-0" />
-                    </Link>
-                  </div>
-                );
-              })}
-            </div>
-          </section>
-
-          {/* ── 5. STATS ROW — 3 Columns ── */}
-          <section className="grid grid-cols-3 gap-3 sm:gap-4">
-            {[
-              { label: "Testlar", value: stats?.totalTests ?? 0, icon: FileCheck, color: "text-brand-blue" },
-              { label: "O'rtacha", value: `${stats?.averageScore ?? 0}%`, icon: TrendingUp, color: "text-emerald-600 dark:text-emerald-400", isStr: true },
-              { label: "Tangalar", value: stats?.totalCoins ?? 0, icon: Trophy, color: "text-amber-600 dark:text-amber-400" },
-            ].map((s) => {
-              const Icon = s.icon;
-              return (
-                <div
-                  key={s.label}
-                  className="bg-white/60 dark:bg-slate-900/60 backdrop-blur-xl rounded-[1.5rem] p-4 border border-white/60 dark:border-slate-800/60 shadow-none flex flex-col items-center gap-2 text-center active:scale-[0.99] transition-all"
-                >
-                  <div className="flex items-center justify-center mb-1 transition-transform group-active:scale-95">
-                    <Icon size={28} className={s.color} />
-                  </div>
-                  <p className="text-xl font-bold font-fredoka text-slate-800 dark:text-slate-100">{s.value}</p>
-                  <p className="text-[11px] text-slate-500 dark:text-slate-400 font-medium">{s.label}</p>
-                </div>
-              );
-            })}
-          </section>
 
           {/* ── 6. UPCOMING TESTS — Vertical Stacked List ── */}
           {(upcomingTests?.length ?? 0) > 0 && (

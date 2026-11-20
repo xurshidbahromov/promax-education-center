@@ -1,6 +1,40 @@
 import { createClient } from "@/utils/supabase/client";
 
 const STORAGE_KEY = "promax_completed_lessons_v1";
+const LAST_LESSON_KEY = "promax_last_lesson_v1";
+
+export interface LastVisitedLesson {
+  lessonId: string;
+  title: string;
+  subjectId?: string;
+  visitedAt: string;
+}
+
+export function saveLastVisitedLesson(lesson: Omit<LastVisitedLesson, "visitedAt">): void {
+  if (typeof window === "undefined" || !lesson.lessonId) return;
+  try {
+    const payload: LastVisitedLesson = {
+      ...lesson,
+      visitedAt: new Date().toISOString(),
+    };
+    localStorage.setItem(LAST_LESSON_KEY, JSON.stringify(payload));
+  } catch {}
+}
+
+export function getLastVisitedLesson(): LastVisitedLesson | null {
+  if (typeof window === "undefined") return null;
+  try {
+    const raw = localStorage.getItem(LAST_LESSON_KEY);
+    if (!raw) return null;
+    const parsed = JSON.parse(raw);
+    if (parsed && typeof parsed.lessonId === "string" && typeof parsed.title === "string") {
+      return parsed as LastVisitedLesson;
+    }
+    return null;
+  } catch {
+    return null;
+  }
+}
 
 export function getCompletedLessonIds(): string[] {
   if (typeof window === "undefined") return [];
