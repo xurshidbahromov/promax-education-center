@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef, useMemo } from "react";
+import StartTestConfirmSheet from "@/components/dashboard/StartTestConfirmSheet";
 import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -1680,82 +1681,15 @@ export default function OlympiadsPage() {
         )}
       </AnimatePresence>
 
-      {/* ── START COMPETITION CONFIRMATION MODAL ── */}
-      <AnimatePresence>
-        {confirmStartItem && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm">
-            <motion.div
-              initial={{ opacity: 0, scale: 0.95 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.95 }}
-              className="relative w-full max-w-md bg-white/95 dark:bg-slate-900/95 backdrop-blur-2xl rounded-3xl p-6 sm:p-7 border border-white/80 dark:border-slate-800 shadow-2xl space-y-5"
-            >
-              <button
-                onClick={() => setConfirmStartItem(null)}
-                className="absolute top-4 right-4 p-1.5 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-500 hover:text-slate-900 dark:hover:text-white cursor-pointer"
-              >
-                <X size={16} />
-              </button>
-
-              {/* Icon & Title */}
-              <div className="flex items-center gap-3.5">
-                <div className="w-12 h-12 rounded-2xl bg-amber-500/15 text-amber-600 dark:text-amber-400 flex items-center justify-center shrink-0">
-                  <AlertCircle size={26} className="text-amber-500" />
-                </div>
-                <div>
-                  <h3 className="text-lg font-black font-fredoka text-slate-900 dark:text-white leading-tight">
-                    Musobaqani boshlaysizmi?
-                  </h3>
-                  <p className="text-xs text-slate-500 font-medium truncate max-w-[240px]">
-                    {confirmStartItem.title}
-                  </p>
-                </div>
-              </div>
-
-              {/* Info Grid */}
-              <div className="grid grid-cols-2 gap-2.5 p-3 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200/60 dark:border-slate-700/60 text-xs">
-                <div className="flex items-center gap-2 text-slate-600 dark:text-slate-300">
-                  <Clock size={15} className="text-brand-blue" />
-                  <span>Vaqti: <strong>{confirmStartItem.durationMinutes} daqiqa</strong></span>
-                </div>
-                <div className="flex items-center gap-2 text-slate-600 dark:text-slate-300">
-                  <FileText size={15} className="text-indigo-500" />
-                  <span>Savollar: <strong>{confirmStartItem.totalQuestions || 30} ta</strong></span>
-                </div>
-              </div>
-
-              {/* Important Warning Alert */}
-              <div className="p-3.5 rounded-2xl bg-amber-50 dark:bg-amber-500/10 border border-amber-200/60 dark:border-amber-500/20 flex items-start gap-2.5">
-                <Clock size={16} className="text-amber-600 dark:text-amber-400 shrink-0 mt-0.5" />
-                <p className="text-xs text-amber-800 dark:text-amber-300 font-medium leading-relaxed">
-                  Testni boshlaganingizdan so'ng vaqt hisobi darhol boshlanadi va uni to'xtatib bo'lmaydi. Barqaror internet aloqangiz borligiga ishonch hosil qiling.
-                </p>
-              </div>
-
-              {/* Action Buttons */}
-              <div className="flex items-center gap-3 pt-1">
-                <button
-                  onClick={() => setConfirmStartItem(null)}
-                  className="flex-1 py-3.5 rounded-2xl bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-bold text-xs sm:text-sm active:scale-95 transition-all cursor-pointer text-center"
-                >
-                  Bekor qilish
-                </button>
-                <button
-                  onClick={() => {
-                    const id = confirmStartItem.id;
-                    setConfirmStartItem(null);
-                    router.push(`/dashboard/tests/${id}/take?type=olympiad`);
-                  }}
-                  className="flex-1 py-3.5 rounded-2xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs sm:text-sm flex items-center justify-center gap-2 shadow-sm active:scale-95 transition-all cursor-pointer text-center"
-                >
-                  <Play size={15} className="fill-white" />
-                  <span>Ha, boshlash</span>
-                </button>
-              </div>
-            </motion.div>
-          </div>
-        )}
-      </AnimatePresence>
+      {/* ── START COMPETITION CONFIRMATION SHEET (Portaled, lightweight) ── */}
+      <StartTestConfirmSheet
+        item={confirmStartItem}
+        onClose={() => setConfirmStartItem(null)}
+        onConfirm={(item) => {
+          setConfirmStartItem(null);
+          router.push(`/dashboard/tests/${item.id}/take?type=olympiad`);
+        }}
+      />
     </div>
   );
 }
