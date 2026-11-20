@@ -25,6 +25,7 @@ import { usePathname } from "next/navigation";
 import NotificationBell from "@/components/NotificationBell";
 import DashboardReveal from "@/components/ui/DashboardReveal";
 import StreakPill from "@/components/dashboard/StreakPill";
+import StreakFlameIcon from "@/components/ui/StreakFlameIcon";
 import { checkAndUpdateDailyStreak } from "@/lib/streak";
 import toast from "react-hot-toast";
 
@@ -102,10 +103,39 @@ export default function DashboardLayout({
           if (res.newlyAwarded) {
             window.dispatchEvent(new CustomEvent("promax_streak_updated"));
             window.dispatchEvent(new CustomEvent("promax_coins_updated"));
-            toast.success(`🔥 Kunlik faollik! +${res.rewardCoins} tanga qo'shildi!`, {
-              icon: "🔥",
-              duration: 4000,
-            });
+            toast.custom(
+              (tObj) => (
+                <div
+                  className={`${
+                    tObj.visible ? "opacity-100 translate-y-0 scale-100" : "opacity-0 -translate-y-2 scale-95"
+                  } mt-12 lg:mt-0 pointer-events-auto flex items-center gap-3 w-full max-w-[325px] sm:max-w-sm bg-white/95 dark:bg-slate-900/95 backdrop-blur-2xl border border-slate-200/80 dark:border-slate-800 shadow-[0_10px_30px_rgba(15,23,42,0.08)] rounded-2xl px-3.5 py-2.5 transition-all duration-300`}
+                >
+                  <div className="w-8 h-8 rounded-xl bg-brand-orange/[0.08] dark:bg-brand-orange/15 border border-brand-orange/20 text-brand-orange flex items-center justify-center shrink-0">
+                    <StreakFlameIcon size={17} />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-[13px] font-bold font-fredoka text-slate-900 dark:text-white leading-tight truncate">
+                      Kunlik faollik • {res.streak.currentStreak}-kun
+                    </p>
+                    <p className="text-[11px] font-medium text-slate-500 dark:text-slate-400 mt-0.5 truncate">
+                      Hisobingizga +{res.rewardCoins} coin qo&apos;shildi
+                    </p>
+                  </div>
+                  <span className="px-2 py-0.5 rounded-full bg-slate-900 dark:bg-white text-white dark:text-slate-900 text-[11px] font-bold tabular-nums shrink-0">
+                    +{res.rewardCoins}
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => toast.dismiss(tObj.id)}
+                    className="p-1 rounded-lg text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 transition-colors cursor-pointer shrink-0"
+                    aria-label="Yopish"
+                  >
+                    <X size={14} />
+                  </button>
+                </div>
+              ),
+              { duration: 4500 }
+            );
           }
         });
       } catch (err) {
@@ -213,14 +243,14 @@ export default function DashboardLayout({
  <div className="flex-1 flex flex-col min-w-0 relative z-10 h-screen overflow-hidden">
   {/* Unified Responsive Top Bar (mounts NotificationBell & StreakPill only ONCE) */}
   {!isTakeTestPage && (
-  <div className="absolute top-4 left-4 right-4 lg:left-auto lg:right-6 z-50 flex items-center justify-between lg:justify-end pointer-events-none">
+  <div className="absolute top-3.5 sm:top-4 left-3.5 right-3.5 sm:left-4 sm:right-4 lg:left-auto lg:right-6 z-50 flex items-center justify-between gap-2 lg:justify-end pointer-events-none">
     {/* Mobile Logo Island */}
-    <Link href="/dashboard" className="lg:hidden h-12 bg-white/80 dark:bg-slate-900/80 backdrop-blur-2xl border border-gray-200/50 dark:border-slate-800/50 rounded-full flex items-center justify-center gap-2.5 px-4 shadow-lg shadow-brand-blue/5 pointer-events-auto">
+    <Link href="/dashboard" className="lg:hidden h-10 sm:h-11 bg-white/85 dark:bg-slate-900/85 backdrop-blur-2xl border border-gray-200/60 dark:border-slate-800/60 rounded-full flex items-center justify-center gap-2 px-3 sm:px-4 shadow-lg shadow-brand-blue/5 pointer-events-auto shrink-0">
       <div className="relative w-5 h-5 flex-shrink-0">
         <Image src="/favicon.ico" alt="Logo" fill className="object-contain" />
       </div>
       <div className="flex flex-col">
-        <span className="font-sans-pro font-black text-sm text-slate-800 dark:text-slate-100 uppercase tracking-wider leading-none">
+        <span className="font-sans-pro font-black text-[13px] sm:text-sm text-slate-800 dark:text-slate-100 uppercase tracking-wider leading-none">
           Promax
         </span>
         <span className="text-[6px] font-semibold text-brand-orange dark:text-brand-orange tracking-[0.2em] uppercase leading-none mt-0.5 pl-[0.5px]">
@@ -230,7 +260,7 @@ export default function DashboardLayout({
     </Link>
 
     {/* Unified Status Island (Streak, Test Rejimi & Notifications) */}
-    <div className="h-12 lg:h-auto bg-white/80 dark:bg-slate-900/80 backdrop-blur-2xl border border-gray-200/50 dark:border-slate-800/50 rounded-full flex items-center justify-center gap-2 lg:gap-2.5 px-3 lg:px-4 lg:py-2 shadow-lg lg:shadow-xl shadow-brand-blue/5 pointer-events-auto transition-all duration-300">
+    <div className="h-10 sm:h-11 lg:h-auto bg-white/85 dark:bg-slate-900/85 backdrop-blur-2xl border border-gray-200/60 dark:border-slate-800/60 rounded-full flex items-center justify-center gap-1.5 sm:gap-2 lg:gap-2.5 px-2 sm:px-3 lg:px-4 lg:py-2 shadow-lg lg:shadow-xl shadow-brand-blue/5 pointer-events-auto transition-all duration-300 shrink-0">
       <StreakPill />
       <div className="hidden lg:block w-px h-5 bg-slate-200 dark:bg-slate-800" />
       <SidebarBetaWidget variant="pill" />

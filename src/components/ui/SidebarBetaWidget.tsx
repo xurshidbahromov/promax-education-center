@@ -138,14 +138,12 @@ export default function SidebarBetaWidget({ variant = "card" }: { variant?: "car
         <button
           type="button"
           onClick={() => setExpanded(!expanded)}
-          className="h-8 px-3.5 bg-amber-500/10 hover:bg-amber-500/15 dark:bg-amber-500/10 dark:hover:bg-amber-500/20 border border-amber-500/20 dark:border-amber-500/20 rounded-full flex items-center gap-2 text-amber-700 dark:text-amber-300 text-xs font-bold font-fredoka transition-all active:scale-95 cursor-pointer shrink-0 shadow-none backdrop-blur-md"
+          className="h-7 sm:h-8 px-2 sm:px-2.5 bg-slate-900/[0.04] hover:bg-slate-900/[0.08] dark:bg-white/[0.06] dark:hover:bg-white/[0.1] border border-slate-200/70 dark:border-slate-700/60 rounded-full flex items-center gap-1.5 text-slate-600 dark:text-slate-300 text-[11px] sm:text-xs font-semibold font-fredoka transition-colors active:scale-95 cursor-pointer shrink-0 shadow-none"
           title="Tizim test rejimida ishlamoqda"
         >
-          <span className="relative flex h-2 w-2 shrink-0">
-            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75" />
-            <span className="relative inline-flex rounded-full h-2 w-2 bg-amber-500" />
-          </span>
-          <span>{t('beta.pill') || "Test Rejimi"}</span>
+          <span className="w-1.5 h-1.5 rounded-full bg-amber-500 shrink-0" />
+          <span className="sm:hidden">Beta</span>
+          <span className="hidden sm:inline">{t('beta.pill') || "Test Rejimi"}</span>
         </button>
 
         {mounted && createPortal(popoverCard, document.body)}

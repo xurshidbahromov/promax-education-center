@@ -60,9 +60,12 @@ export function getCachedStreak(userId?: string): StreakData {
 
 export function saveCachedStreak(data: StreakData, userId?: string) {
   if (typeof window === "undefined") return;
-  const key = `promax_streak_${userId || "current"}`;
+  const serialized = JSON.stringify(data);
   try {
-    localStorage.setItem(key, JSON.stringify(data));
+    if (userId) {
+      localStorage.setItem(`promax_streak_${userId}`, serialized);
+    }
+    localStorage.setItem("promax_streak_current", serialized);
   } catch {}
 }
 

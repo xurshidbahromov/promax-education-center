@@ -84,6 +84,7 @@ export default function RootLayout({
  <LanguageProvider>
  <Toaster 
  position="top-center"
+ containerStyle={{ top: 16 }}
  toastOptions={{
  duration: 4000,
  style: {
@@ -91,7 +92,7 @@ export default function RootLayout({
  boxShadow: 'none',
  padding: 0,
  },
- className: "!max-w-[90vw] sm:!max-w-md !bg-white/60 dark:!bg-slate-900/60 !backdrop-blur-2xl !border !border-white/50 dark:!border-slate-700/50 !shadow-2xl !text-slate-800 dark:!text-slate-100 !font-medium !font-fredoka !text-base sm:!text-lg !rounded-2xl sm:!rounded-[1.5rem] !px-4 sm:!px-6 !py-3 sm:!py-4",
+ className: "!max-w-[92vw] sm:!max-w-md !bg-white/90 dark:!bg-slate-900/90 !backdrop-blur-2xl !border !border-slate-200/80 dark:!border-slate-700/70 !shadow-xl !shadow-slate-900/10 !text-slate-800 dark:!text-slate-100 !font-semibold !text-xs sm:!text-sm !rounded-2xl !px-3.5 sm:!px-4 !py-2.5 sm:!py-3",
  success: {
  iconTheme: { primary: '#10b981', secondary: '#ffffff' }
  },
