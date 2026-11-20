@@ -209,6 +209,18 @@ export default function InternationalCompetitionsPage() {
     } else {
       loadData(false);
     }
+
+    const handleResume = () => {
+      if (document.visibilityState === "visible") {
+        loadData(true);
+      }
+    };
+    window.addEventListener("focus", handleResume);
+    document.addEventListener("visibilitychange", handleResume);
+    return () => {
+      window.removeEventListener("focus", handleResume);
+      document.removeEventListener("visibilitychange", handleResume);
+    };
   }, [user?.id]);
 
   const loadData = async (isSilent: boolean = false) => {

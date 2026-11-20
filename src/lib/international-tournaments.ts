@@ -102,7 +102,7 @@ export async function getInternationalTournaments(): Promise<InternationalTourna
     });
     if (res.ok) {
       const data = await res.json();
-      if (Array.isArray(data.tournaments) && data.tournaments.length > 0) {
+      if (Array.isArray(data.tournaments)) {
         if (typeof window !== 'undefined') {
           localStorage.setItem(STORAGE_INTERNATIONAL_TOURNAMENTS, JSON.stringify(data.tournaments));
         }
@@ -173,17 +173,11 @@ export async function getInternationalTournaments(): Promise<InternationalTourna
 }
 
 export async function getInternationalTournamentById(id: string): Promise<InternationalTournament | null> {
-  // 1. Instant check from local cache
-  const cached = getCachedInternationalTournaments();
-  const cachedItem = cached.find(t => t.id === id);
-  if (cachedItem && cachedItem.questions && cachedItem.questions.length > 0) {
-    return cachedItem;
-  }
-
-  // 2. Fetch from API
+  // 1. Fetch fresh version from API first (cross-device / Telegram Mini App sync)
   try {
-    const res = await fetch(`/api/tournaments?type=international&id=${id}&_t=${Date.now()}`, {
-      cache: 'no-store'
+    const res = await fetch(`/api/tournaments?type=international&id=${encodeURIComponent(id)}&_t=${Date.now()}`, {
+      cache: 'no-store',
+      headers: { 'Cache-Control': 'no-cache, no-store, must-revalidate' }
     });
     if (res.ok) {
       const data = await res.json();
@@ -191,12 +185,14 @@ export async function getInternationalTournamentById(id: string): Promise<Intern
     }
   } catch (e) {}
 
-  // 3. Fallback to getInternationalTournaments
+  // 2. Fallback to getInternationalTournaments
   const tournaments = await getInternationalTournaments();
   const match = tournaments.find(t => t.id === id);
   if (match) return match;
 
-  return cachedItem || null;
+  // 3. Offline local cache fallback
+  const cached = getCachedInternationalTournaments();
+  return cached.find(t => t.id === id) || null;
 }
 
 // ── International Benchmark Contenders (Disabled: Real Users Only) ──
@@ -703,50 +699,30 @@ export async function saveInternationalTournament(
     created_at: tournament.created_at || new Date().toISOString()
   };
 
-  // 1. Sync to API
-  try {
-    const res = await fetch('/api/tournaments', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ type: 'international', tournament: fullTournament })
-    });
-    if (res.ok) {
-      const resJson = await res.json();
-      if (resJson.data) {
-        if (typeof window !== 'undefined') {
-          const stored = localStorage.getItem(STORAGE_INTERNATIONAL_TOURNAMENTS);
-          let list: InternationalTournament[] = [];
-          try { if (stored) list = JSON.parse(stored); } catch (e) {}
-          const existingIndex = list.findIndex(t => t.id === id);
-          if (existingIndex >= 0) {
-            list[existingIndex] = resJson.data;
-          } else {
-            list = [resJson.data, ...list];
-          }
-          localStorage.setItem(STORAGE_INTERNATIONAL_TOURNAMENTS, JSON.stringify(list));
-        }
-        return resJson.data;
-      }
-    }
-  } catch (err) {
-    console.error('Save international tournament error:', err);
+  // 1. Sync to API (throw if DB persistence fails so admin is notified instead of local-only ghost save)
+  const res = await fetch('/api/tournaments', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ type: 'international', tournament: fullTournament })
+  });
+  const resJson = await res.json().catch(() => ({}));
+  if (!res.ok || !resJson.success || !resJson.data) {
+    throw new Error(resJson.error || 'Xalqaro musobaqani server bazasiga saqlab bo\'lmadi');
   }
 
-  // 2. Local fallback
   if (typeof window !== 'undefined') {
     const stored = localStorage.getItem(STORAGE_INTERNATIONAL_TOURNAMENTS);
     let list: InternationalTournament[] = [];
     try { if (stored) list = JSON.parse(stored); } catch (e) {}
     const existingIndex = list.findIndex(t => t.id === id);
     if (existingIndex >= 0) {
-      list[existingIndex] = fullTournament;
+      list[existingIndex] = resJson.data;
     } else {
-      list = [fullTournament, ...list];
+      list = [resJson.data, ...list];
     }
     localStorage.setItem(STORAGE_INTERNATIONAL_TOURNAMENTS, JSON.stringify(list));
   }
-
-  return fullTournament;
+  return resJson.data;
 }
 
 export async function deleteInternationalTournament(id: string): Promise<boolean> {

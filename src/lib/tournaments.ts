@@ -104,7 +104,7 @@ export async function getAdminTournaments(): Promise<AdminTournament[]> {
     });
     if (res.ok) {
       const data = await res.json();
-      if (Array.isArray(data.tournaments) && data.tournaments.length > 0) {
+      if (Array.isArray(data.tournaments)) {
         if (typeof window !== 'undefined') {
           localStorage.setItem('promax_tournaments_v3', JSON.stringify(data.tournaments));
         }
@@ -168,19 +168,13 @@ export async function getAdminTournaments(): Promise<AdminTournament[]> {
   return [];
 }
 
-// ── GET SINGLE TOURNAMENT ──
+// ── GET SINGLE TOURNAMENT (Network-First for cross-device / Telegram Mini App sync) ──
 export async function getTournamentById(id: string): Promise<AdminTournament | null> {
-  // 1. Instant check from local cache
-  const cached = getCachedAdminTournaments();
-  const cachedItem = cached.find((t) => t.id === id);
-  if (cachedItem && cachedItem.questions && cachedItem.questions.length > 0) {
-    return cachedItem;
-  }
-
-  // 2. Fetch from API
+  // 1. Fetch fresh version from API first
   try {
-    const res = await fetch(`/api/tournaments?type=national&id=${id}&_t=${Date.now()}`, {
-      cache: 'no-store'
+    const res = await fetch(`/api/tournaments?type=national&id=${encodeURIComponent(id)}&_t=${Date.now()}`, {
+      cache: 'no-store',
+      headers: { 'Cache-Control': 'no-cache, no-store, must-revalidate' }
     });
     if (res.ok) {
       const data = await res.json();
@@ -188,12 +182,14 @@ export async function getTournamentById(id: string): Promise<AdminTournament | n
     }
   } catch (e) {}
 
-  // 3. Fallback to getAdminTournaments
+  // 2. Fallback to getAdminTournaments
   const tournaments = await getAdminTournaments();
   const match = tournaments.find((t) => t.id === id);
   if (match) return match;
 
-  return cachedItem || null;
+  // 3. Offline local cache fallback
+  const cached = getCachedAdminTournaments();
+  return cached.find((t) => t.id === id) || null;
 }
 
 // ── SAVE TOURNAMENT ──
@@ -222,50 +218,40 @@ export async function saveAdminTournament(
     created_at: tournament.created_at || new Date().toISOString()
   };
 
-  // 1. Sync to API (server-side persistence)
+  // 1. Sync to API (server-side persistence — never fake success if DB failed)
   try {
     const res = await fetch('/api/tournaments', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ type: 'national', tournament: fullTournament })
     });
-    if (res.ok) {
-      const resJson = await res.json();
-      if (resJson.data) {
-        if (typeof window !== 'undefined') {
-          const local = localStorage.getItem('promax_tournaments_v3');
-          let list: AdminTournament[] = [];
-          try { if (local) list = JSON.parse(local); } catch (e) {}
-          const existingIndex = list.findIndex(t => t.id === id);
-          if (existingIndex >= 0) {
-            list[existingIndex] = resJson.data;
-          } else {
-            list = [resJson.data, ...list];
-          }
-          localStorage.setItem('promax_tournaments_v3', JSON.stringify(list));
+    const resJson = await res.json().catch(() => ({}));
+    if (res.ok && resJson.success && resJson.data) {
+      if (typeof window !== 'undefined') {
+        const local = localStorage.getItem('promax_tournaments_v3');
+        let list: AdminTournament[] = [];
+        try { if (local) list = JSON.parse(local); } catch (e) {}
+        const existingIndex = list.findIndex(t => t.id === id);
+        if (existingIndex >= 0) {
+          list[existingIndex] = resJson.data;
+        } else {
+          list = [resJson.data, ...list];
         }
-        return { success: true, data: resJson.data };
+        localStorage.setItem('promax_tournaments_v3', JSON.stringify(list));
       }
+      return { success: true, data: resJson.data };
     }
-  } catch (apiErr) {
+    return {
+      success: false,
+      error: resJson.error || 'Musobaqani server bazasiga saqlab bo\'lmadi',
+    };
+  } catch (apiErr: any) {
     console.error('Save tournament API error:', apiErr);
+    return {
+      success: false,
+      error: apiErr?.message || 'Server bilan ulanishda xatolik yuz berdi',
+    };
   }
-
-  // 2. Local fallback
-  if (typeof window !== 'undefined') {
-    const local = localStorage.getItem('promax_tournaments_v3');
-    let list: AdminTournament[] = [];
-    try { if (local) list = JSON.parse(local); } catch (e) {}
-    const existingIndex = list.findIndex(t => t.id === id);
-    if (existingIndex >= 0) {
-      list[existingIndex] = fullTournament;
-    } else {
-      list = [fullTournament, ...list];
-    }
-    localStorage.setItem('promax_tournaments_v3', JSON.stringify(list));
-  }
-
-  return { success: true, data: fullTournament };
 }
 
 // ── DELETE TOURNAMENT ──

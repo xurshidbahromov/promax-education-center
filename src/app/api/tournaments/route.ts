@@ -1,12 +1,16 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createTelegramBotClient } from '@/utils/supabase/server';
-import fs from 'fs';
-import path from 'path';
+import { createClient, createTelegramBotClient } from '@/utils/supabase/server';
 import type { AdminTournament } from '@/lib/tournaments';
 import type { InternationalTournament } from '@/lib/international-tournaments';
 
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
+
+const NO_CACHE_HEADERS = {
+  'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate',
+  'Pragma': 'no-cache',
+  'Expires': '0',
+};
 
 // Helper to convert Supabase row to frontend AdminTournament
 function mapDbToTournament(row: any, liveCount?: number): AdminTournament {
@@ -293,7 +297,7 @@ export async function GET(request: NextRequest) {
         const mapped = (data.type === 'international' || type === 'international') 
           ? mapDbToIntlTournament(data, liveCount) 
           : mapDbToTournament(data, liveCount);
-        return NextResponse.json({ tournament: mapped });
+        return NextResponse.json({ tournament: mapped }, { headers: NO_CACHE_HEADERS });
       }
     } else {
       const { data, error } = tournRes as any;
@@ -314,13 +318,7 @@ export async function GET(request: NextRequest) {
           }
         }
 
-        return NextResponse.json({ tournaments: mapped }, {
-          headers: {
-            'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate',
-            'Pragma': 'no-cache',
-            'Expires': '0',
-          }
-        });
+        return NextResponse.json({ tournaments: mapped }, { headers: NO_CACHE_HEADERS });
       }
     }
   } catch (dbErr) {
@@ -332,17 +330,17 @@ export async function GET(request: NextRequest) {
     const defaults = getDefaultIntlTournaments();
     if (id) {
       const item = defaults.find(t => t.id === id);
-      return NextResponse.json({ tournament: item || null });
+      return NextResponse.json({ tournament: item || null }, { headers: NO_CACHE_HEADERS });
     }
-    return NextResponse.json({ tournaments: defaults });
+    return NextResponse.json({ tournaments: defaults }, { headers: NO_CACHE_HEADERS });
   }
 
   const defaults = getDefaultNationalTournaments();
   if (id) {
     const item = defaults.find(t => t.id === id);
-    return NextResponse.json({ tournament: item || null });
+    return NextResponse.json({ tournament: item || null }, { headers: NO_CACHE_HEADERS });
   }
-  return NextResponse.json({ tournaments: defaults });
+  return NextResponse.json({ tournaments: defaults }, { headers: NO_CACHE_HEADERS });
 }
 
 // ── POST /api/tournaments ──
@@ -386,7 +384,8 @@ export async function POST(request: NextRequest) {
       updated_at: new Date().toISOString()
     };
 
-    // Save directly to Supabase
+    // Save directly to Supabase (try Service/Bot client first, fallback to active admin cookie session)
+    let lastError: string | null = null;
     try {
       const supabase = await createTelegramBotClient();
       const { data, error } = await supabase
@@ -397,17 +396,46 @@ export async function POST(request: NextRequest) {
 
       if (!error && data) {
         const mapped = type === 'international' ? mapDbToIntlTournament(data) : mapDbToTournament(data);
-        return NextResponse.json({ success: true, data: mapped });
+        return NextResponse.json({ success: true, data: mapped }, { headers: NO_CACHE_HEADERS });
       }
-    } catch (dbErr) {
-      console.error('[Tournaments API] Supabase upsert error:', dbErr);
+      if (error) {
+        lastError = error.message;
+        console.warn('[Tournaments API] Bot client upsert failed, retrying with user session:', error.message);
+      }
+    } catch (dbErr: any) {
+      lastError = dbErr?.message || 'Bot client error';
+      console.warn('[Tournaments API] Bot client exception, retrying with user session:', dbErr);
     }
 
-    const fallbackMapped = type === 'international' ? mapDbToIntlTournament(dbPayload) : mapDbToTournament(dbPayload);
-    return NextResponse.json({ success: true, data: fallbackMapped });
+    // Fallback: use the logged-in admin's authenticated session cookie (passes RLS if admin/staff)
+    try {
+      const sessionClient = await createClient();
+      const { data, error } = await sessionClient
+        .from('tournaments')
+        .upsert(dbPayload, { onConflict: 'id' })
+        .select()
+        .single();
+
+      if (!error && data) {
+        const mapped = type === 'international' ? mapDbToIntlTournament(data) : mapDbToTournament(data);
+        return NextResponse.json({ success: true, data: mapped }, { headers: NO_CACHE_HEADERS });
+      }
+      if (error) {
+        lastError = error.message;
+        console.error('[Tournaments API] Session client upsert failed:', error.message);
+      }
+    } catch (sessionErr: any) {
+      lastError = sessionErr?.message || lastError;
+      console.error('[Tournaments API] Session client exception:', sessionErr);
+    }
+
+    return NextResponse.json(
+      { success: false, error: lastError || 'Musobaqani bazaga saqlab bo\'lmadi (Supabase RLS/Auth xatosi)' },
+      { status: 500, headers: NO_CACHE_HEADERS }
+    );
   } catch (error: any) {
     console.error('[Tournaments API] Error saving tournament:', error);
-    return NextResponse.json({ error: error.message || 'Server error' }, { status: 500 });
+    return NextResponse.json({ success: false, error: error.message || 'Server error' }, { status: 500 });
   }
 }
 
@@ -418,19 +446,42 @@ export async function DELETE(request: NextRequest) {
     const id = searchParams.get('id');
 
     if (!id) {
-      return NextResponse.json({ error: 'Missing tournament id' }, { status: 400 });
+      return NextResponse.json({ success: false, error: 'Missing tournament id' }, { status: 400 });
     }
+
+    let deleted = false;
+    let lastError: string | null = null;
 
     try {
       const supabase = await createTelegramBotClient();
-      await supabase.from('tournaments').delete().eq('id', id);
-    } catch (e) {
-      console.error('[Tournaments API] Supabase delete error:', e);
+      const { error } = await supabase.from('tournaments').delete().eq('id', id);
+      if (!error) deleted = true;
+      else lastError = error.message;
+    } catch (e: any) {
+      lastError = e?.message || 'Delete failed';
     }
 
-    return NextResponse.json({ success: true });
+    if (!deleted) {
+      try {
+        const sessionClient = await createClient();
+        const { error } = await sessionClient.from('tournaments').delete().eq('id', id);
+        if (!error) deleted = true;
+        else lastError = error.message;
+      } catch (e: any) {
+        lastError = e?.message || lastError;
+      }
+    }
+
+    if (!deleted) {
+      return NextResponse.json(
+        { success: false, error: lastError || 'Musobaqani o\'chirib bo\'lmadi' },
+        { status: 500, headers: NO_CACHE_HEADERS }
+      );
+    }
+
+    return NextResponse.json({ success: true }, { headers: NO_CACHE_HEADERS });
   } catch (error: any) {
     console.error('[Tournaments API] Error deleting tournament:', error);
-    return NextResponse.json({ error: error.message || 'Server error' }, { status: 500 });
+    return NextResponse.json({ success: false, error: error.message || 'Server error' }, { status: 500 });
   }
 }
