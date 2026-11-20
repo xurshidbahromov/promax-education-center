@@ -589,6 +589,8 @@ export const ru = {
   "olympiad.banner_subtitle": "Проверьте свои знания и выиграйте ценные призы",
   "olympiad.shelf_title": "Тест знаний",
   "international.shelf_title": "Мировой тест",
+  "international.banner_title": "Международные олимпиады",
+  "international.banner_subtitle": "Шкала SAT 1600, AMC и международные сертификаты",
   "olympiad.participants_count": "{count} участников",
   "olympiad.top_prizes": "Призы для призеров",
   "olympiad.btn_details": "Участвовать",

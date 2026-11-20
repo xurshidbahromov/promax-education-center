@@ -20,13 +20,21 @@ import {
 } from "lucide-react";
 import { useAdminStats, useRecentActivity } from "@/hooks/useAdminData";
 
+const UZ_MONTHS = [
+  "Yanvar", "Fevral", "Mart", "Aprel", "May", "Iyun",
+  "Iyul", "Avgust", "Sentyabr", "Oktyabr", "Noyabr", "Dekabr"
+];
+const UZ_WEEKDAYS = [
+  "Yakshanba", "Dushanba", "Seshanba", "Chorshanba", "Payshanba", "Juma", "Shanba"
+];
+
 export default function AdminDashboardPage() {
   const { data: stats, isLoading: statsLoading } = useAdminStats();
   const { data: activity = [], isLoading: activityLoading } = useRecentActivity();
 
   const todayDate = useMemo(() => {
     const d = new Date();
-    return d.toLocaleDateString('uz-UZ', { year: 'numeric', month: 'long', day: 'numeric', weekday: 'long' });
+    return `${UZ_WEEKDAYS[d.getDay()]}, ${d.getDate()}-${UZ_MONTHS[d.getMonth()]} ${d.getFullYear()}`;
   }, []);
 
   const safeStats = {
@@ -105,7 +113,11 @@ export default function AdminDashboardPage() {
           >
             <div className="min-w-0 flex-1 pr-3">
               <p className="text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider truncate mb-1">{s.title}</p>
-              <p className="text-2xl font-black text-slate-800 dark:text-slate-100 tracking-tight truncate">{s.value}</p>
+              {statsLoading ? (
+                <div className="h-8 w-24 bg-slate-200/70 dark:bg-slate-800 rounded-xl animate-pulse mt-0.5" />
+              ) : (
+                <p className="text-2xl font-black text-slate-800 dark:text-slate-100 tracking-tight truncate tabular-nums">{s.value}</p>
+              )}
             </div>
             
             {/* Box-free icon */}

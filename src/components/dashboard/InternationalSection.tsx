@@ -64,7 +64,7 @@ export function InternationalBannerTeaser() {
           <div className="flex-1 bg-white/60 dark:bg-slate-900/60 text-slate-900 dark:text-white px-2.5 sm:px-6 py-2.5 sm:py-3.5 rounded-t-3xl border-t border-r border-white/60 dark:border-slate-800/60 border-b-0 border-l-0 flex items-center justify-center gap-1.5 z-20 backdrop-blur-xl min-w-0">
             <Users size={14} className="text-brand-blue shrink-0" />
             <span className="text-xs sm:text-sm font-bold text-slate-700 dark:text-slate-300 whitespace-nowrap">
-              {participantsCount} nafar qatnashuvchi
+              {t("olympiad.participants_count", { count: participantsCount })}
             </span>
           </div>
         </div>
@@ -78,12 +78,12 @@ export function InternationalBannerTeaser() {
           {/* Left Text Content Area */}
           <div className="relative z-10 space-y-1 min-w-0 flex-1 w-full xs:w-auto">
             <h4 className="text-base sm:text-xl font-bold font-fredoka text-slate-800 dark:text-slate-100 leading-tight truncate tracking-tight">
-              Xalqaro musobaqalar
+              {t("international.banner_title") || "Xalqaro musobaqalar"}
             </h4>
 
             <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-300 font-medium flex items-center gap-1.5 truncate">
               <Award size={14} className="text-amber-500 shrink-0" />
-              <span>SAT 1600 shkalasi, AMC va xalqaro sertifikatlar</span>
+              <span>{t("international.banner_subtitle") || "SAT 1600 shkalasi, AMC va xalqaro sertifikatlar"}</span>
             </p>
           </div>
 

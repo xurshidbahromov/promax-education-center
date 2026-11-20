@@ -676,6 +676,8 @@ export const uz = {
  "olympiad.banner_subtitle": "Bilimingizni sinang va mukofotlarni qo'lga kiriting",
  "olympiad.shelf_title": "Bilim sinovi",
  "international.shelf_title": "Jahon sinovi",
+ "international.banner_title": "Xalqaro musobaqalar",
+ "international.banner_subtitle": "SAT 1600 shkalasi, AMC va xalqaro sertifikatlar",
  "olympiad.participants_count": "{count} nafar qatnashuvchi",
  "olympiad.top_prizes": "Top o'rinlar uchun mukofotlar",
  "olympiad.btn_details": "Qatnashish",
