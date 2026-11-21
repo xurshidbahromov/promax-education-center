@@ -19,6 +19,16 @@ import {
 import { getTestById, getStudentTestHistory, type Test } from "@/lib/tests";
 import { TestDetailSkeleton } from "@/components/ui/Skeleton";
 
+const UZ_SHORT_MONTHS = ["Yan", "Fev", "Mar", "Apr", "May", "Iyn", "Iyl", "Avg", "Sen", "Okt", "Noy", "Dek"];
+
+function formatAttemptDate(iso: string): string {
+  const d = new Date(iso);
+  if (Number.isNaN(d.getTime())) return "";
+  const hh = String(d.getHours()).padStart(2, "0");
+  const mm = String(d.getMinutes()).padStart(2, "0");
+  return `${d.getDate()}-${UZ_SHORT_MONTHS[d.getMonth()]}, ${hh}:${mm}`;
+}
+
 export default function TestDetailsPage() {
  const params = useParams();
  const router = useRouter();
@@ -205,9 +215,7 @@ export default function TestDetailsPage() {
  Urinish #{previousAttempts.length - index}
  </span>
  <span className="text-[12px] text-slate-500 dark:text-slate-400 mt-0.5">
- {new Date(attempt.completed_at || attempt.started_at).toLocaleDateString('uz-UZ', {
- month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit'
- })}
+ {formatAttemptDate(attempt.completed_at || attempt.started_at)}
  </span>
  </div>
  </div>

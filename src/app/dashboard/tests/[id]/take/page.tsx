@@ -39,6 +39,7 @@ import {
   submitAnswer,
   submitAnswersBatch,
   completeTestAttempt,
+  abandonTestAttempt,
   getActiveAttempt,
   getAttemptResponses,
   type Test,
@@ -551,52 +552,81 @@ export default function TakeTestPage() {
         }
    setTest(testData);
 
-   // Get questions
-   const { data: questionsData } = await supabase
+   // Get questions (direct Supabase first, server API fallback if RLS hides published questions)
+   const { data: questionsData, error: questionsErr } = await supabase
    .from('questions')
    .select('*')
    .eq('test_id', testId)
    .order('order_index', { ascending: true });
 
-   setQuestions(questionsData || []);
+   let loadedQuestions: Question[] = questionsData || [];
+   if (loadedQuestions.length === 0) {
+     if (questionsErr) {
+       console.warn('Direct questions query failed, using server API fallback:', questionsErr.message);
+     }
+     try {
+       const qRes = await fetch(`/api/tests/${encodeURIComponent(testId)}/questions`, { cache: 'no-store' });
+       if (qRes.ok) {
+         const qJson = await qRes.json();
+         if (Array.isArray(qJson.questions) && qJson.questions.length > 0) {
+           loadedQuestions = qJson.questions;
+         }
+       }
+     } catch (fallbackErr) {
+       console.error('Fallback questions API error:', fallbackErr);
+     }
+   }
 
-   // Check for active attempt or create new one
-   const activeAttempt = await getActiveAttempt(testId);
+   setQuestions(loadedQuestions);
+   allQuestionsRef.current = loadedQuestions;
+
+   // Check for active attempt or create new one (auto-abandon expired zombie attempts!)
+   let activeAttempt = await getActiveAttempt(testId);
+   if (activeAttempt && testData.duration_minutes) {
+     const startedMs = new Date(activeAttempt.started_at).getTime();
+     const elapsed = Number.isFinite(startedMs) ? Math.floor((Date.now() - startedMs) / 1000) : 0;
+     const remaining = (testData.duration_minutes * 60) - elapsed;
+     if (remaining <= 0) {
+       await abandonTestAttempt(activeAttempt.id);
+       activeAttempt = null;
+     }
+   }
+
    if (activeAttempt) {
-   setAttemptId(activeAttempt.id);
-   // Load saved responses
-   const savedResponses = await getAttemptResponses(activeAttempt.id);
-   const savedAnswers: Record<string, string> = {};
-   savedResponses.forEach(r => {
-   if (r.student_answer) {
-   savedAnswers[r.question_id] = r.student_answer;
-   }
-   });
-   setAnswers(savedAnswers);
-   lastSavedAnswersRef.current = { ...savedAnswers };
+     setAttemptId(activeAttempt.id);
+     // Load saved responses
+     const savedResponses = await getAttemptResponses(activeAttempt.id);
+     const savedAnswers: Record<string, string> = {};
+     savedResponses.forEach(r => {
+       if (r.student_answer) {
+         savedAnswers[r.question_id] = r.student_answer;
+       }
+     });
+     setAnswers(savedAnswers);
+     lastSavedAnswersRef.current = { ...savedAnswers };
 
-   // Calculate remaining time if timed test
-   if (testData.duration_minutes) {
-   const elapsed = Math.floor(
-   (Date.now() - new Date(activeAttempt.started_at).getTime()) / 1000
-   );
-   const remaining = (testData.duration_minutes * 60) - elapsed;
-   setTimeRemaining(Math.max(0, remaining));
-   }
+     // Calculate remaining time if timed test
+     if (testData.duration_minutes) {
+       const elapsed = Math.floor(
+         (Date.now() - new Date(activeAttempt.started_at).getTime()) / 1000
+       );
+       const remaining = (testData.duration_minutes * 60) - elapsed;
+       setTimeRemaining(Math.max(1, remaining));
+     }
    } else {
-   // Start new attempt
-   const attemptData = await startTestAttempt(testId);
-   if (!attemptData) {
-   alert(t('tests.take.error.start'));
-   router.push('/dashboard/tests');
-   return;
-   }
-   setAttemptId(attemptData.id);
+     // Start new attempt
+     const attemptData = await startTestAttempt(testId);
+     if (!attemptData) {
+       toast.error(t('tests.take.error.start') || "Testni boshlashda xatolik yuz berdi");
+       router.push('/dashboard/tests');
+       return;
+     }
+     setAttemptId(attemptData.id);
 
-   // Set initial time
-   if (testData.duration_minutes) {
-   setTimeRemaining(testData.duration_minutes * 60);
-   }
+     // Set initial time
+     if (testData.duration_minutes) {
+       setTimeRemaining(testData.duration_minutes * 60);
+     }
    }
  } catch (error) {
    console.error("Error loading test:", error);
@@ -710,7 +740,7 @@ export default function TakeTestPage() {
     let unansweredCount = 0;
 
     questions.forEach((q) => {
-      const pts = q.points || (isInternational ? 10 : 3.1);
+      const pts = Number(q.points) || (isInternational ? 10 : isOlympiad ? 3.1 : 1);
       maxScore += pts;
       const studentAns = (answers[q.id] || "").trim().toLowerCase();
       const correctAns = (q.correct_answer || "").trim().toLowerCase();
@@ -777,7 +807,10 @@ export default function TakeTestPage() {
             timeSpentSeconds: timeSpent
           });
         } else {
-          await completeTestAttempt(attemptId || `attempt_${testId}`, timeSpent);
+          const ok = await completeTestAttempt(attemptId || `attempt_${testId}`, timeSpent, answers);
+          if (ok && typeof window !== "undefined") {
+            window.dispatchEvent(new CustomEvent("promax_coins_updated"));
+          }
         }
       }
     } catch (error) {

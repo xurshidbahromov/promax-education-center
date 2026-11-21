@@ -251,7 +251,7 @@ export async function startTestAttempt(testId: string): Promise<{ id: string; st
  .select('points')
  .eq('test_id', testId);
 
- const maxScore = questions?.reduce((sum, q) => sum+ q.points, 0) || 0;
+ const maxScore = questions?.reduce((sum, q) => sum + (Number(q.points) || 1), 0) || 0;
 
  const { data: attempt, error } = await supabase
  .from('test_attempts')
@@ -269,7 +269,7 @@ export async function startTestAttempt(testId: string): Promise<{ id: string; st
  return null;
  }
 
- return attempt ? { id: attempt.id, started_at: attempt.created_at } : null;
+ return attempt ? { id: attempt.id, started_at: attempt.started_at || attempt.created_at || new Date().toISOString() } : null;
 }
 
 /**
@@ -341,110 +341,142 @@ export async function submitAnswersBatch(
 }
 
 /**
- * Complete test attempt and calculate score
+ * Complete test attempt and calculate score (case-insensitive, trimmed, accepts client answers fallback)
  */
-export async function completeTestAttempt(attemptId: string, totalTimeSpent?: number): Promise<boolean> {
- const supabase = createClient();
+export async function completeTestAttempt(
+  attemptId: string,
+  totalTimeSpent?: number,
+  clientAnswers?: Record<string, string>
+): Promise<boolean> {
+  const supabase = createClient();
 
-  // 1. Fetch attempt to get test_id and test title
+  // 1. Fetch attempt to get test_id
   const { data: attempt, error: attemptError } = await supabase
     .from('test_attempts')
-    .select('test_id, student_id, test:tests(title)')
+    .select('test_id, student_id, status')
     .eq('id', attemptId)
     .single();
 
- if (attemptError || !attempt) {
- console.error('Error fetching attempt:', attemptError);
- return false;
- }
+  if (attemptError || !attempt) {
+    console.error('Error fetching attempt:', attemptError);
+    return false;
+  }
 
- // 2. Fetch all questions with correct answers
- const { data: questions, error: questionsError } = await supabase
- .from('questions')
- .select('id, correct_answer, points')
- .eq('test_id', attempt.test_id);
+  // Already completed — avoid duplicate RLS errors
+  if (attempt.status === 'completed') {
+    return true;
+  }
 
- if (questionsError || !questions) {
- console.error('Error fetching questions:', questionsError);
- return false;
- }
+  // 2 & 3. Fetch questions and saved responses in parallel
+  const [questionsRes, responsesRes] = await Promise.all([
+    supabase
+      .from('questions')
+      .select('id, correct_answer, points')
+      .eq('test_id', attempt.test_id),
+    supabase
+      .from('question_responses')
+      .select('question_id, student_answer')
+      .eq('attempt_id', attemptId),
+  ]);
 
- // 3. Fetch all student responses
- const { data: responses, error: responsesError } = await supabase
- .from('question_responses')
- .select('question_id, student_answer')
- .eq('attempt_id', attemptId);
+  if (questionsRes.error || !questionsRes.data) {
+    console.error('Error fetching questions:', questionsRes.error);
+    return false;
+  }
 
- if (responsesError || !responses) {
- console.error('Error fetching responses:', responsesError);
- return false;
- }
+  const questions = questionsRes.data;
+  const responses = responsesRes.data || [];
 
- // 4. Calculate Score
- let totalScore = 0;
- const maxScore = questions.reduce((sum, q) => sum+ q.points, 0);
- const updates = [];
+  // Merge DB responses with latest clientAnswers (clientAnswers takes precedence so last-second picks are never lost)
+  const responseMap = new Map<string, string>();
+  for (const r of responses) {
+    if (r.student_answer != null) {
+      responseMap.set(r.question_id, r.student_answer);
+    }
+  }
+  if (clientAnswers) {
+    for (const [qId, ans] of Object.entries(clientAnswers)) {
+      if (ans != null && ans.trim() !== '') {
+        responseMap.set(qId, ans);
+      }
+    }
+  }
 
- // Map responses for easy lookup
- const responseMap = new Map(responses.map(r => [r.question_id, r.student_answer]));
+  // 4. Calculate Score (normalized trim + lowercase to match frontend evaluation 1:1)
+  let totalScore = 0;
+  let maxScore = 0;
+  const updates = [];
 
- for (const question of questions) {
- const studentAnswer = responseMap.get(question.id);
- const isCorrect = studentAnswer === question.correct_answer;
- const pointsEarned = isCorrect ? question.points : 0;
+  for (const question of questions) {
+    const pts = Number(question.points) || 1;
+    maxScore += pts;
+    const rawAnswer = responseMap.get(question.id) ?? null;
+    const normalizedStudent = (rawAnswer || '').trim().toLowerCase();
+    const normalizedCorrect = (question.correct_answer || '').trim().toLowerCase();
+    const isCorrect = normalizedStudent.length > 0 && normalizedStudent === normalizedCorrect;
+    const pointsEarned = isCorrect ? pts : 0;
 
- if (isCorrect) {
- totalScore+= pointsEarned;
- }
+    if (isCorrect) {
+      totalScore += pointsEarned;
+    }
 
- // Prepare update for the response
- updates.push({
- attempt_id: attemptId,
- question_id: question.id,
- student_answer: studentAnswer, // Ensure we keep the answer
- is_correct: isCorrect,
- points_earned: pointsEarned
- });
- }
+    updates.push({
+      attempt_id: attemptId,
+      question_id: question.id,
+      student_answer: rawAnswer,
+      is_correct: isCorrect,
+      points_earned: pointsEarned,
+    });
+  }
 
- // 5. Update responses with scoring info (Batch upsert)
- const { error: updateResponsesError } = await supabase
- .from('question_responses')
- .upsert(updates, { onConflict: 'attempt_id,question_id' });
+  // 5. Update responses with scoring info BEFORE closing attempt (required by RLS status='in_progress')
+  if (updates.length > 0) {
+    const { error: updateResponsesError } = await supabase
+      .from('question_responses')
+      .upsert(updates, { onConflict: 'attempt_id,question_id' });
 
- if (updateResponsesError) {
- console.error('Error updating response scores:', updateResponsesError);
- // Continue anyway to close the attempt
- }
+    if (updateResponsesError) {
+      console.error('Error updating response scores:', updateResponsesError);
+    }
+  }
 
- // 6. Update Attempt with final results
- const percentage = maxScore > 0 ? (totalScore / maxScore) * 100 : 0;
+  // 6. Update Attempt with final results
+  const percentage = maxScore > 0 ? (totalScore / maxScore) * 100 : 0;
+  const updatePayload: any = {
+    status: 'completed',
+    completed_at: new Date().toISOString(),
+    score: Math.round(totalScore * 10) / 10,
+    max_score: Math.round(maxScore * 10) / 10,
+    percentage: Math.round(percentage * 10) / 10,
+  };
 
- // Check if time_spent_seconds is provided, otherwise calculate from start time? 
- // For now use the provided argument or ignore if null
- const updatePayload: any = {
- status: 'completed',
- completed_at: new Date().toISOString(),
- score: totalScore,
- max_score: maxScore,
- percentage: Math.round(percentage * 10) / 10 // Round to 1 decimal
- };
+  if (totalTimeSpent !== undefined) {
+    updatePayload.time_spent_seconds = Math.max(1, Math.round(totalTimeSpent));
+  }
 
- if (totalTimeSpent !== undefined) {
- updatePayload.time_spent_seconds = totalTimeSpent;
- }
+  const { error: updateAttemptError } = await supabase
+    .from('test_attempts')
+    .update(updatePayload)
+    .eq('id', attemptId);
 
- const { error: updateAttemptError } = await supabase
- .from('test_attempts')
- .update(updatePayload)
- .eq('id', attemptId);
+  if (updateAttemptError) {
+    console.error('Error completing attempt:', JSON.stringify(updateAttemptError, null, 2));
+    return false;
+  }
 
- if (updateAttemptError) {
- console.error('Error completing attempt:', JSON.stringify(updateAttemptError, null, 2));
- return false;
- }
+  return true;
+}
 
- return true;
+/**
+ * Mark an expired in-progress attempt as abandoned so student can start fresh
+ */
+export async function abandonTestAttempt(attemptId: string): Promise<boolean> {
+  const supabase = createClient();
+  const { error } = await supabase
+    .from('test_attempts')
+    .update({ status: 'abandoned', completed_at: new Date().toISOString() })
+    .eq('id', attemptId);
+  return !error;
 }
 
 /**
@@ -496,7 +528,8 @@ export async function getStudentTestHistory(studentId?: string, testId?: string)
  .from('test_attempts')
  .select('*')
  .eq('student_id', studentId || user!.id)
- .order('started_at', { ascending: false });
+ .eq('status', 'completed')
+ .order('completed_at', { ascending: false });
 
  if (testId) {
  query = query.eq('test_id', testId);
@@ -529,7 +562,7 @@ export async function getActiveAttempt(testId: string): Promise<TestAttempt | nu
  .eq('status', 'in_progress')
  .order('started_at', { ascending: false })
  .limit(1)
- .single();
+ .maybeSingle();
 
  if (error) return null;
 
@@ -621,29 +654,56 @@ export async function updateTest(
  }
  }
 
- // Upsert (Update or Insert) questions
- const questionsToUpsert = testData.questions.map((q, index) => ({
- id: q.id, // If provided, it updates. If undefined, it inserts (but Supabase upsert needs distinct handling or ID must be generated if not present?)
- // Actually supabase upsert works best if we provide ID for updates. For new items, we shouldn't pass ID if it's auto-generated, OR we generate a UUID here.
- // Let's generate UUIDs for new questions to ensure consistency
- test_id: testId,
- question_text: q.question_text,
- question_type: q.question_type,
- options: q.options,
- correct_answer: q.correct_answer,
- explanation: q.explanation,
- points: q.points,
- order_index: index,
- image_url: q.image_url || null
- }));
+ // Separate existing questions (update) from new questions (insert without id so DB generates UUID)
+ const toUpdate = testData.questions
+   .map((q, index) => ({ q, index }))
+   .filter(({ q }) => Boolean(q.id))
+   .map(({ q, index }) => ({
+     id: q.id as string,
+     test_id: testId,
+     question_text: q.question_text,
+     question_type: q.question_type,
+     options: q.options,
+     correct_answer: q.correct_answer,
+     explanation: q.explanation,
+     points: q.points,
+     order_index: index,
+     image_url: q.image_url || null,
+   }));
 
- const { error: questionsError } = await supabase
- .from('questions')
- .upsert(questionsToUpsert, { onConflict: 'id' });
+ const toInsert = testData.questions
+   .map((q, index) => ({ q, index }))
+   .filter(({ q }) => !q.id)
+   .map(({ q, index }) => ({
+     test_id: testId,
+     question_text: q.question_text,
+     question_type: q.question_type,
+     options: q.options,
+     correct_answer: q.correct_answer,
+     explanation: q.explanation,
+     points: q.points,
+     order_index: index,
+     image_url: q.image_url || null,
+   }));
 
- if (questionsError) {
- console.error('Error updating questions:', questionsError);
- return false;
+ if (toUpdate.length > 0) {
+   const { error: updateErr } = await supabase
+     .from('questions')
+     .upsert(toUpdate, { onConflict: 'id' });
+   if (updateErr) {
+     console.error('Error updating existing questions:', updateErr);
+     return false;
+   }
+ }
+
+ if (toInsert.length > 0) {
+   const { error: insertErr } = await supabase
+     .from('questions')
+     .insert(toInsert);
+   if (insertErr) {
+     console.error('Error inserting new questions:', insertErr);
+     return false;
+   }
  }
  }
 
