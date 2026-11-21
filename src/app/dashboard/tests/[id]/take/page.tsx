@@ -958,99 +958,71 @@ export default function TakeTestPage() {
     const strokeDashoffset = circumference - (calculatedSummary.percentage / 100) * circumference;
 
     return (
-      <div className="relative z-10 w-full max-w-6xl mx-auto px-3 sm:px-6 lg:px-8 py-6 sm:py-10 space-y-6 sm:space-y-8">
-        {/* Navigation Bar */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4">
+      <div className="relative z-10 w-full max-w-5xl mx-auto px-3.5 sm:px-6 lg:px-8 py-5 sm:py-8 space-y-5 sm:space-y-6">
+        {/* Clean Minimal Top Bar */}
+        <div className="flex items-center justify-between gap-3">
           <button
             type="button"
             onClick={() => router.push(isInternational ? '/dashboard/international' : isOlympiad ? '/dashboard/olympiads' : '/dashboard/tests')}
-            className="inline-flex items-center gap-2 text-xs sm:text-sm font-bold text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white transition-colors cursor-pointer group self-start"
+            className="inline-flex items-center gap-2 text-xs sm:text-sm font-bold text-slate-600 hover:text-slate-900 dark:text-slate-300 dark:hover:text-white transition-colors cursor-pointer group min-w-0"
           >
-            <ArrowLeft size={16} className="group-hover:-translate-x-0.5 transition-transform shrink-0" />
-            <span className="truncate">{isInternational ? "Xalqaro musobaqalarga qaytish" : isOlympiad ? "Musobaqalarga qaytish" : "Testlar ro'yxatiga qaytish"}</span>
+            <span className="w-8 h-8 rounded-full bg-white/80 dark:bg-slate-900/80 border border-slate-200/70 dark:border-slate-800 flex items-center justify-center shrink-0">
+              <ArrowLeft size={15} className="group-hover:-translate-x-0.5 transition-transform" />
+            </span>
+            <span className="truncate">{isInternational ? "Xalqaro musobaqalar" : isOlympiad ? "Musobaqalar" : "Testlar ro'yxati"}</span>
           </button>
 
-          <div className="flex flex-wrap items-center gap-2 sm:gap-2.5 w-full sm:w-auto">
-            {(calculatedSummary.wrongCount + calculatedSummary.unansweredCount) > 0 && (
-              <button
-                type="button"
-                onClick={handleMistakesRetake}
-                className="flex-1 sm:flex-initial justify-center px-3.5 sm:px-4 py-2 sm:py-2.5 rounded-xl sm:rounded-2xl bg-rose-500/10 hover:bg-rose-500 hover:text-white text-rose-600 dark:text-rose-400 text-xs sm:text-sm font-bold flex items-center gap-1.5 sm:gap-2 border border-rose-500/20 shadow-xs transition-all cursor-pointer active:scale-95"
-              >
-                <Sparkles size={14} className="shrink-0" />
-                <span>Xatolarni ishlash ({calculatedSummary.wrongCount + calculatedSummary.unansweredCount})</span>
-              </button>
-            )}
-            <button
-              type="button"
-              onClick={handlePracticeRetake}
-              className="flex-1 sm:flex-initial justify-center px-3.5 sm:px-4 py-2 sm:py-2.5 rounded-xl sm:rounded-2xl bg-white/80 hover:bg-slate-100 dark:bg-slate-800/80 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 text-xs sm:text-sm font-bold flex items-center gap-1.5 sm:gap-2 border border-slate-200/80 dark:border-slate-700/80 shadow-xs transition-all cursor-pointer active:scale-95"
-            >
-              <RotateCcw size={14} className="shrink-0" />
-              <span>Qayta yechish</span>
-            </button>
-            {calculatedSummary.percentage >= 60 && (
-              <button
-                type="button"
-                onClick={() => setShowCertificateModal(true)}
-                className="flex-1 sm:flex-initial justify-center px-3.5 sm:px-4 py-2 sm:py-2.5 rounded-xl sm:rounded-2xl bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white text-xs sm:text-sm font-bold flex items-center gap-1.5 sm:gap-2 shadow-md shadow-amber-500/20 transition-all cursor-pointer active:scale-95"
-              >
-                <Award size={15} className="shrink-0" />
-                <span>Sertifikat</span>
-              </button>
-            )}
-            <button
-              type="button"
-              onClick={() => router.push(isInternational ? '/dashboard/international' : isOlympiad ? '/dashboard/olympiads' : '/dashboard/results')}
-              className="flex-1 sm:flex-initial justify-center px-4 sm:px-5 py-2 sm:py-2.5 rounded-xl sm:rounded-2xl bg-slate-900 hover:bg-slate-800 dark:bg-white dark:hover:bg-slate-100 text-white dark:text-slate-900 text-xs sm:text-sm font-bold flex items-center gap-1.5 sm:gap-2 transition-all cursor-pointer shadow-md hover:shadow-lg active:scale-95"
-            >
-              <Trophy size={14} className="shrink-0" />
-              <span>Reyting</span>
-            </button>
-          </div>
+          <button
+            type="button"
+            onClick={() => router.push(isInternational ? '/dashboard/international' : isOlympiad ? '/dashboard/olympiads' : '/dashboard/results')}
+            className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-full bg-white/80 dark:bg-slate-900/80 hover:bg-white dark:hover:bg-slate-800 border border-slate-200/70 dark:border-slate-800 text-slate-700 dark:text-slate-200 text-xs font-bold transition-colors active:scale-95 cursor-pointer shrink-0"
+          >
+            <Trophy size={13} className="text-amber-500 shrink-0" />
+            <span>{isInternational || isOlympiad ? "Reyting" : "Natijalar"}</span>
+          </button>
         </div>
 
-        {/* Hero Performance Card */}
-        <div className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-2xl rounded-[24px] sm:rounded-[32px] border border-slate-200/70 dark:border-slate-800/80 p-5 sm:p-8 lg:p-12 shadow-sm relative overflow-hidden">
-          <div className="flex flex-col-reverse md:flex-row items-center justify-between gap-6 sm:gap-8">
-            <div className="flex-1 space-y-2.5 sm:space-y-3.5 text-center md:text-left w-full">
+        {/* Hero Performance Card (Do'kon / Flat-Minimalist style) */}
+        <div className="bg-white/85 dark:bg-slate-900/85 backdrop-blur-xl rounded-[28px] sm:rounded-[32px] border border-white/80 dark:border-slate-800 p-5 sm:p-8 shadow-none relative overflow-hidden">
+          <div className="flex flex-col-reverse md:flex-row items-center justify-between gap-5 sm:gap-8">
+            <div className="flex-1 space-y-2.5 text-center md:text-left w-full">
               <div className="flex flex-wrap items-center justify-center md:justify-start gap-2">
-                <span className="text-[11px] sm:text-xs font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">
-                  {isInternational ? (tournamentData?.categoryLabel || "Xalqaro Musobaqa") : isOlympiad ? (tournamentData?.subject || "Olimpiada") : "Test"}
+                <span className="text-[11px] font-extrabold uppercase tracking-widest text-slate-400 dark:text-slate-500">
+                  {isInternational ? (tournamentData?.categoryLabel || "Xalqaro Musobaqa") : isOlympiad ? (tournamentData?.subject || "Olimpiada") : "Test Natijasi"}
                 </span>
-                <span className="text-slate-300 dark:text-slate-700">•</span>
-                <span className={`inline-flex items-center gap-1.5 text-[11px] sm:text-xs font-bold px-2.5 sm:px-3 py-0.5 sm:py-1 rounded-full ${
+                <span className={`inline-flex items-center gap-1 text-[11px] font-bold px-2.5 py-0.5 rounded-full ${
                   isExcellent
                     ? "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20"
                     : isGood
-                    ? "bg-blue-500/10 text-brand-blue border border-blue-500/20"
+                    ? "bg-brand-blue/10 text-brand-blue dark:text-blue-400 border border-brand-blue/20"
                     : "bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20"
                 }`}>
-                  {isExcellent ? "A'lo natija 🔥" : isGood ? "Yaxshi natija 👏" : "Mashq qilish kerak 💪"}
+                  <Sparkles size={11} />
+                  <span>{isExcellent ? "A'lo natija" : isGood ? "Yaxshi natija" : "Mashq qilish kerak"}</span>
                 </span>
                 {isPracticeMode && (
-                  <span className="inline-flex items-center gap-1 text-[11px] sm:text-xs font-bold px-2.5 sm:px-3 py-0.5 sm:py-1 rounded-full bg-violet-500/10 text-violet-600 dark:text-violet-400 border border-violet-500/20">
-                    <RotateCcw size={11} />
-                    <span>Mashq natijasi</span>
+                  <span className="inline-flex items-center gap-1 text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-violet-500/10 text-violet-600 dark:text-violet-400 border border-violet-500/20">
+                    <RotateCcw size={10} />
+                    <span>Mashq</span>
                   </span>
                 )}
               </div>
 
-              <h1 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold font-fredoka text-slate-900 dark:text-white leading-tight">
+              <h1 className="text-xl sm:text-2xl md:text-3xl font-bold font-fredoka text-slate-900 dark:text-white leading-tight">
                 {test.title}
               </h1>
 
-              <div className="flex items-baseline justify-center md:justify-start gap-2 pt-0.5 sm:pt-1">
-                <span className="font-fredoka text-4xl sm:text-5xl lg:text-6xl font-black text-slate-900 dark:text-white leading-none tracking-tight">
+              <div className="flex items-baseline justify-center md:justify-start gap-2 pt-0.5">
+                <span className="font-fredoka text-4xl sm:text-5xl font-black text-slate-900 dark:text-white leading-none tracking-tight tabular-nums">
                   {calculatedSummary.totalScore}
                 </span>
-                <span className="text-base sm:text-xl lg:text-2xl font-bold text-slate-400 dark:text-slate-500">
+                <span className="text-base sm:text-xl font-bold text-slate-400 dark:text-slate-500 tabular-nums">
                   / {calculatedSummary.maxScore} ball
                 </span>
               </div>
 
               {calculatedSummary.scaledScore && (
-                <div className="inline-flex items-center gap-1.5 sm:gap-2 px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-xl bg-slate-100/80 dark:bg-slate-800/80 text-[11px] sm:text-xs font-bold text-slate-600 dark:text-slate-300">
+                <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-xl bg-slate-100/80 dark:bg-slate-800/80 text-xs font-bold text-slate-600 dark:text-slate-300">
                   <span>Digital SAT balli:</span>
                   <span className="font-black text-slate-900 dark:text-white">{calculatedSummary.scaledScore}</span>
                 </div>
@@ -1059,8 +1031,8 @@ export default function TakeTestPage() {
 
             {/* Circular Percentage Dial */}
             <div className="shrink-0 flex flex-col items-center">
-              <div className="relative w-28 h-28 sm:w-36 sm:h-36 flex items-center justify-center">
-                <svg className="w-28 h-28 sm:w-36 sm:h-36 -rotate-90" viewBox="0 0 100 100">
+              <div className="relative w-28 h-28 sm:w-32 sm:h-32 flex items-center justify-center">
+                <svg className="w-28 h-28 sm:w-32 sm:h-32 -rotate-90" viewBox="0 0 100 100">
                   <circle
                     cx="50"
                     cy="50"
@@ -1085,10 +1057,10 @@ export default function TakeTestPage() {
                   />
                 </svg>
                 <div className="absolute inset-0 flex flex-col items-center justify-center text-center">
-                  <span className="font-fredoka text-2xl sm:text-4xl font-bold text-slate-900 dark:text-white leading-none">
+                  <span className="font-fredoka text-2xl sm:text-3xl font-black text-slate-900 dark:text-white leading-none tabular-nums">
                     {calculatedSummary.percentage}%
                   </span>
-                  <span className="text-[9px] sm:text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-0.5 sm:mt-1">
+                  <span className="text-[9px] font-extrabold text-slate-400 uppercase tracking-widest mt-1">
                     Natija
                   </span>
                 </div>
@@ -1097,65 +1069,99 @@ export default function TakeTestPage() {
           </div>
 
           {/* Stats 4-Column Grid */}
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 sm:gap-4 pt-6 sm:pt-8 mt-6 sm:mt-8 border-t border-slate-100 dark:border-slate-800/80">
-            <div className="p-3 sm:p-4 rounded-xl sm:rounded-2xl bg-emerald-50/50 dark:bg-emerald-950/20 border border-emerald-100/80 dark:border-emerald-900/30">
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 sm:gap-3 pt-5 mt-5 border-t border-slate-100 dark:border-slate-800/80">
+            <div className="p-3.5 rounded-2xl bg-emerald-50/60 dark:bg-emerald-950/20 border border-emerald-100 dark:border-emerald-900/30">
               <div className="flex items-center justify-between mb-1">
-                <span className="text-[10px] sm:text-[11px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-400">To'g'ri</span>
+                <span className="text-[10px] font-extrabold uppercase tracking-wider text-slate-400">To&apos;g&apos;ri</span>
                 <CheckCircle2 size={14} className="text-emerald-500 shrink-0" />
               </div>
-              <span className="font-fredoka text-xl sm:text-2xl font-bold text-emerald-600 dark:text-emerald-400">
+              <span className="font-fredoka text-xl sm:text-2xl font-bold text-emerald-600 dark:text-emerald-400 tabular-nums">
                 {calculatedSummary.correctCount} <span className="text-xs font-sans text-slate-400 font-medium">savol</span>
               </span>
             </div>
 
-            <div className="p-3 sm:p-4 rounded-xl sm:rounded-2xl bg-rose-50/50 dark:bg-rose-950/20 border border-rose-100/80 dark:border-rose-900/30">
+            <div className="p-3.5 rounded-2xl bg-rose-50/60 dark:bg-rose-950/20 border border-rose-100 dark:border-rose-900/30">
               <div className="flex items-center justify-between mb-1">
-                <span className="text-[10px] sm:text-[11px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-400">Noto'g'ri</span>
+                <span className="text-[10px] font-extrabold uppercase tracking-wider text-slate-400">Noto&apos;g&apos;ri</span>
                 <XCircle size={14} className="text-rose-500 shrink-0" />
               </div>
-              <span className="font-fredoka text-xl sm:text-2xl font-bold text-rose-600 dark:text-rose-400">
+              <span className="font-fredoka text-xl sm:text-2xl font-bold text-rose-600 dark:text-rose-400 tabular-nums">
                 {calculatedSummary.wrongCount} <span className="text-xs font-sans text-slate-400 font-medium">savol</span>
               </span>
             </div>
 
-            <div className="p-3 sm:p-4 rounded-xl sm:rounded-2xl bg-slate-50 dark:bg-slate-800/40 border border-slate-200/60 dark:border-slate-800/60">
+            <div className="p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-700/50">
               <div className="flex items-center justify-between mb-1">
-                <span className="text-[10px] sm:text-[11px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-400">O'tkazilgan</span>
+                <span className="text-[10px] font-extrabold uppercase tracking-wider text-slate-400">O&apos;tkazilgan</span>
                 <HelpCircle size={14} className="text-slate-400 shrink-0" />
               </div>
-              <span className="font-fredoka text-xl sm:text-2xl font-bold text-slate-600 dark:text-slate-300">
+              <span className="font-fredoka text-xl sm:text-2xl font-bold text-slate-600 dark:text-slate-300 tabular-nums">
                 {calculatedSummary.unansweredCount} <span className="text-xs font-sans text-slate-400 font-medium">savol</span>
               </span>
             </div>
 
-            <div className="p-3 sm:p-4 rounded-xl sm:rounded-2xl bg-blue-50/50 dark:bg-blue-950/20 border border-blue-100/80 dark:border-blue-900/30">
+            <div className="p-3.5 rounded-2xl bg-blue-50/60 dark:bg-blue-950/20 border border-blue-100 dark:border-blue-900/30">
               <div className="flex items-center justify-between mb-1">
-                <span className="text-[10px] sm:text-[11px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-400">Vaqt</span>
+                <span className="text-[10px] font-extrabold uppercase tracking-wider text-slate-400">Vaqt</span>
                 <Clock size={14} className="text-brand-blue shrink-0" />
               </div>
-              <span className="font-fredoka text-lg sm:text-2xl font-bold text-slate-800 dark:text-slate-100 font-mono">
+              <span className="font-fredoka text-lg sm:text-2xl font-bold text-slate-800 dark:text-slate-100 font-mono tabular-nums">
                 {formatTime(calculatedSummary.timeSpent)}
               </span>
             </div>
           </div>
+
+          {/* Uniform Action Row inside Hero Card (no cramped wrapping on mobile!) */}
+          <div className="grid grid-cols-2 sm:flex sm:flex-wrap items-center gap-2.5 pt-4 mt-4 border-t border-slate-100 dark:border-slate-800/80">
+            {calculatedSummary.percentage >= 60 && (
+              <button
+                type="button"
+                onClick={() => setShowCertificateModal(true)}
+                className="py-3 px-4 rounded-2xl bg-amber-500 hover:bg-amber-600 text-white text-xs sm:text-sm font-bold flex items-center justify-center gap-1.5 shadow-sm transition-all cursor-pointer active:scale-95 whitespace-nowrap"
+              >
+                <Award size={15} className="shrink-0" />
+                <span>Sertifikat</span>
+              </button>
+            )}
+            {(calculatedSummary.wrongCount + calculatedSummary.unansweredCount) > 0 && (
+              <button
+                type="button"
+                onClick={handleMistakesRetake}
+                className="py-3 px-4 rounded-2xl bg-rose-500/10 hover:bg-rose-500 hover:text-white text-rose-600 dark:text-rose-400 text-xs sm:text-sm font-bold flex items-center justify-center gap-1.5 border border-rose-500/20 transition-all cursor-pointer active:scale-95 whitespace-nowrap"
+              >
+                <Sparkles size={14} className="shrink-0" />
+                <span>Xatolar ({calculatedSummary.wrongCount + calculatedSummary.unansweredCount})</span>
+              </button>
+            )}
+            <button
+              type="button"
+              onClick={handlePracticeRetake}
+              className="py-3 px-4 rounded-2xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 text-xs sm:text-sm font-bold flex items-center justify-center gap-1.5 transition-all cursor-pointer active:scale-95 whitespace-nowrap"
+            >
+              <RotateCcw size={14} className="shrink-0" />
+              <span>Qayta yechish</span>
+            </button>
+          </div>
         </div>
 
         {/* Filter Strip & Fast Jump */}
-        <div className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-2xl rounded-[20px] sm:rounded-[28px] border border-slate-200/70 dark:border-slate-800/80 p-4 sm:p-6 space-y-3.5 sm:space-y-4 shadow-sm">
+        <div className="bg-white/85 dark:bg-slate-900/85 backdrop-blur-xl rounded-[24px] sm:rounded-[28px] border border-white/80 dark:border-slate-800 p-4 sm:p-5 space-y-3.5 shadow-none">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-            <h2 className="text-sm sm:text-base font-bold text-slate-900 dark:text-white flex items-center gap-2">
-              <ListChecks size={18} className="text-brand-blue shrink-0" />
+            <h2 className="text-sm sm:text-base font-extrabold font-fredoka text-slate-900 dark:text-white flex items-center gap-2">
+              <span className="w-7 h-7 rounded-xl bg-brand-blue/10 text-brand-blue flex items-center justify-center shrink-0">
+                <ListChecks size={15} />
+              </span>
               <span>Savollar tahlili</span>
             </h2>
 
             {/* Responsive Filter Segmented Control */}
-            <div className="grid grid-cols-3 sm:flex items-center gap-1 sm:gap-1.5 p-1 bg-slate-100 dark:bg-slate-800/80 rounded-xl sm:rounded-2xl w-full sm:w-auto">
+            <div className="grid grid-cols-3 sm:flex items-center gap-1 p-1 bg-slate-100/90 dark:bg-slate-800/80 rounded-2xl w-full sm:w-auto">
               <button
                 type="button"
                 onClick={() => setResultsFilter("all")}
-                className={`px-2 sm:px-3.5 py-1.5 rounded-lg sm:rounded-xl text-[11px] sm:text-xs font-bold transition-all cursor-pointer text-center truncate ${
+                className={`px-2.5 sm:px-3.5 py-2 rounded-xl text-[11px] sm:text-xs font-bold transition-all cursor-pointer text-center truncate ${
                   resultsFilter === "all"
-                    ? "bg-white dark:bg-slate-700 text-slate-900 dark:text-white shadow-xs"
+                    ? "bg-amber-500 text-white shadow-xs"
                     : "text-slate-500 hover:text-slate-800 dark:hover:text-slate-200"
                 }`}
               >
@@ -1164,20 +1170,20 @@ export default function TakeTestPage() {
               <button
                 type="button"
                 onClick={() => setResultsFilter("correct")}
-                className={`px-2 sm:px-3.5 py-1.5 rounded-lg sm:rounded-xl text-[11px] sm:text-xs font-bold transition-all cursor-pointer text-center truncate ${
+                className={`px-2.5 sm:px-3.5 py-2 rounded-xl text-[11px] sm:text-xs font-bold transition-all cursor-pointer text-center truncate ${
                   resultsFilter === "correct"
-                    ? "bg-white dark:bg-slate-700 text-emerald-600 dark:text-emerald-400 shadow-xs"
+                    ? "bg-emerald-500 text-white shadow-xs"
                     : "text-slate-500 hover:text-emerald-600 dark:hover:text-emerald-400"
                 }`}
               >
-                To'g'ri ({calculatedSummary.correctCount})
+                To&apos;g&apos;ri ({calculatedSummary.correctCount})
               </button>
               <button
                 type="button"
                 onClick={() => setResultsFilter("wrong")}
-                className={`px-2 sm:px-3.5 py-1.5 rounded-lg sm:rounded-xl text-[11px] sm:text-xs font-bold transition-all cursor-pointer text-center truncate ${
+                className={`px-2.5 sm:px-3.5 py-2 rounded-xl text-[11px] sm:text-xs font-bold transition-all cursor-pointer text-center truncate ${
                   resultsFilter === "wrong"
-                    ? "bg-white dark:bg-slate-700 text-rose-600 dark:text-rose-400 shadow-xs"
+                    ? "bg-rose-500 text-white shadow-xs"
                     : "text-slate-500 hover:text-rose-600 dark:hover:text-rose-400"
                 }`}
               >
@@ -1186,83 +1192,117 @@ export default function TakeTestPage() {
             </div>
           </div>
 
-          {/* Jump To Question Numbers */}
-          <div className="flex flex-wrap gap-1.5 sm:gap-2 pt-2 border-t border-slate-100 dark:border-slate-800">
-            {questions.map((q, idx) => {
-              const studentAns = (answers[q.id] || "").trim().toLowerCase();
-              const correctAns = (q.correct_answer || "").trim().toLowerCase();
-              const isCorrect = studentAns && (studentAns === correctAns || (q as any).accepted_answers?.some((a: string) => a.toLowerCase() === studentAns));
-              const isUnanswered = !studentAns;
+          {/* Jump To Question Numbers (only shown when > 1 question) */}
+          {questions.length > 1 && (
+            <div className="flex flex-wrap gap-1.5 sm:gap-2 pt-3 border-t border-slate-100 dark:border-slate-800/80">
+              {questions.map((q, idx) => {
+                const studentAns = (answers[q.id] || "").trim().toLowerCase();
+                const correctAns = (q.correct_answer || "").trim().toLowerCase();
+                const isCorrect = studentAns && (studentAns === correctAns || (q as any).accepted_answers?.some((a: string) => a.toLowerCase() === studentAns));
+                const isUnanswered = !studentAns;
 
-              return (
-                <button
-                  key={q.id}
-                  type="button"
-                  onClick={() => {
-                    const el = document.getElementById(`review-q-${q.id}`);
-                    if (el) {
-                      el.scrollIntoView({ behavior: "smooth", block: "center" });
-                    }
-                  }}
-                  className={`w-7 h-7 sm:w-8 sm:h-8 rounded-lg sm:rounded-xl text-[11px] sm:text-xs font-bold flex items-center justify-center transition-all cursor-pointer active:scale-95 shadow-xs ${
-                    isCorrect
-                      ? "bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600 dark:text-emerald-400 border border-emerald-200/80 dark:border-emerald-800/60"
-                      : isUnanswered
-                      ? "bg-slate-50 dark:bg-slate-800/60 text-slate-400 border border-slate-200/80 dark:border-slate-700/60"
-                      : "bg-rose-50 dark:bg-rose-950/40 text-rose-600 dark:text-rose-400 border border-rose-200/80 dark:border-rose-800/60"
-                  }`}
-                  title={`Savol #${idx + 1}`}
-                >
-                  {idx + 1}
-                </button>
-              );
-            })}
-          </div>
+                return (
+                  <button
+                    key={q.id}
+                    type="button"
+                    onClick={() => {
+                      if (resultsFilter !== "all") setResultsFilter("all");
+                      setTimeout(() => {
+                        const el = document.getElementById(`review-q-${q.id}`);
+                        if (el) el.scrollIntoView({ behavior: "smooth", block: "center" });
+                      }, 40);
+                    }}
+                    className={`w-8 h-8 rounded-xl text-xs font-extrabold tabular-nums flex items-center justify-center transition-all cursor-pointer active:scale-95 ${
+                      isCorrect
+                        ? "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/25"
+                        : isUnanswered
+                        ? "bg-slate-100 dark:bg-slate-800 text-slate-400 border border-slate-200/80 dark:border-slate-700"
+                        : "bg-rose-500/10 text-rose-600 dark:text-rose-400 border border-rose-500/25"
+                    }`}
+                    title={`Savol #${idx + 1}`}
+                  >
+                    {idx + 1}
+                  </button>
+                );
+              })}
+            </div>
+          )}
         </div>
 
         {/* Questions Cards List */}
-        <div className="space-y-4 sm:space-y-6">
-          {filteredQuestions.map((q) => {
+        <div className="space-y-4">
+          {filteredQuestions.length === 0 ? (
+            <div className="bg-white/85 dark:bg-slate-900/85 backdrop-blur-xl rounded-[24px] border border-white/80 dark:border-slate-800 p-8 text-center flex flex-col items-center gap-2">
+              <div className="w-11 h-11 rounded-2xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 flex items-center justify-center">
+                <CheckCircle2 size={22} />
+              </div>
+              <p className="text-sm font-bold text-slate-800 dark:text-slate-100">
+                {resultsFilter === "wrong"
+                  ? "Xato savollar yo'q — barcha javoblar to'g'ri!"
+                  : "Bu filtrda savollar topilmadi"}
+              </p>
+              <button
+                type="button"
+                onClick={() => setResultsFilter("all")}
+                className="mt-1 px-4 py-2 rounded-xl bg-slate-100 dark:bg-slate-800 text-xs font-bold text-slate-700 dark:text-slate-200 cursor-pointer"
+              >
+                Barcha savollarni ko&apos;rish
+              </button>
+            </div>
+          ) : (
+          filteredQuestions.map((q) => {
             const studentAns = (answers[q.id] || "").trim().toLowerCase();
             const correctAns = (q.correct_answer || "").trim().toLowerCase();
             const isCorrect = studentAns && (studentAns === correctAns || (q as any).accepted_answers?.some((a: string) => a.toLowerCase() === studentAns));
             const isUnanswered = !studentAns;
             const isWrong = !isCorrect && !isUnanswered;
-            const qPoints = q.points || (isInternational ? 10 : 3.1);
+            const qPoints = Number(q.points) || (isInternational ? 10 : isOlympiad ? 3.1 : 1);
             const originalIndex = questions.findIndex(item => item.id === q.id);
 
             return (
               <div
                 key={q.id}
                 id={`review-q-${q.id}`}
-                className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-2xl rounded-[20px] sm:rounded-[28px] border border-slate-200/70 dark:border-slate-800/80 p-4 sm:p-7 lg:p-9 space-y-4 sm:space-y-5 shadow-sm"
+                className={`bg-white/85 dark:bg-slate-900/85 backdrop-blur-xl rounded-[24px] sm:rounded-[28px] border border-white/80 dark:border-slate-800 border-l-4 ${
+                  isCorrect
+                    ? "border-l-emerald-500"
+                    : isWrong
+                    ? "border-l-rose-500"
+                    : "border-l-slate-300 dark:border-l-slate-700"
+                } p-4 sm:p-6 space-y-4 shadow-none`}
               >
                 {/* Header */}
-                <div className="flex items-center justify-between gap-2">
+                <div className="flex items-center justify-between gap-2 pb-3 border-b border-slate-100 dark:border-slate-800/80">
                   <div className="flex items-center gap-2">
-                    <span className="w-7 h-7 sm:w-8 sm:h-8 rounded-lg sm:rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-bold text-xs flex items-center justify-center shadow-xs">
-                      #{originalIndex + 1}
+                    <span className={`px-2.5 h-7 rounded-xl font-extrabold text-xs tabular-nums flex items-center justify-center ${
+                      isCorrect
+                        ? "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400"
+                        : isWrong
+                        ? "bg-rose-500/10 text-rose-600 dark:text-rose-400"
+                        : "bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300"
+                    }`}>
+                      Savol #{originalIndex + 1}
                     </span>
-                    <span className="text-[11px] sm:text-xs font-bold text-slate-400 dark:text-slate-500">
-                      {qPoints} ball
+                    <span className="text-[11px] font-bold text-slate-400 dark:text-slate-500 tabular-nums">
+                      {isCorrect ? `+${qPoints}` : "0"} / {qPoints} ball
                     </span>
                   </div>
 
-                  <div className="flex items-center gap-1.5 sm:gap-2">
+                  <div className="flex items-center gap-1.5">
                     {isCorrect && (
-                      <span className="inline-flex items-center gap-1 sm:gap-1.5 px-2.5 sm:px-3 py-0.5 sm:py-1 rounded-full text-[11px] sm:text-xs font-bold bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
-                        <CheckCircle2 size={13} />
-                        <span>To'g'ri</span>
+                      <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-bold bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
+                        <CheckCircle2 size={12} />
+                        <span>To&apos;g&apos;ri</span>
                       </span>
                     )}
                     {isWrong && (
-                      <span className="inline-flex items-center gap-1 sm:gap-1.5 px-2.5 sm:px-3 py-0.5 sm:py-1 rounded-full text-[11px] sm:text-xs font-bold bg-rose-500/10 text-rose-600 dark:text-rose-400 border border-rose-500/20">
-                        <XCircle size={13} />
-                        <span>Noto'g'ri</span>
+                      <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-bold bg-rose-500/10 text-rose-600 dark:text-rose-400 border border-rose-500/20">
+                        <XCircle size={12} />
+                        <span>Noto&apos;g&apos;ri</span>
                       </span>
                     )}
                     {isUnanswered && (
-                      <span className="inline-flex items-center gap-1 sm:gap-1.5 px-2.5 sm:px-3 py-0.5 sm:py-1 rounded-full text-[11px] sm:text-xs font-bold bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 border border-slate-200 dark:border-slate-700">
+                      <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-bold bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400">
                         <span>Javobsiz</span>
                       </span>
                     )}
@@ -1274,10 +1314,10 @@ export default function TakeTestPage() {
                           setZoomedImage(q.image_url);
                           setZoomScale(1);
                         }}
-                        className="p-1.5 rounded-lg sm:rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-500 hover:text-slate-900 dark:hover:text-white transition-colors cursor-pointer"
+                        className="w-7 h-7 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-500 hover:text-slate-900 dark:hover:text-white flex items-center justify-center transition-colors cursor-pointer"
                         title="Rasmni kattalashtirish"
                       >
-                        <Maximize2 size={14} />
+                        <Maximize2 size={13} />
                       </button>
                     )}
                   </div>
@@ -1285,60 +1325,60 @@ export default function TakeTestPage() {
 
                 {/* Question Image (if any) */}
                 {q.image_url && (
-                  <div className="pt-1">
-                    <div
-                      onClick={() => {
-                        setZoomedImage(q.image_url);
-                        setZoomScale(1);
-                      }}
-                      className="w-full flex items-center justify-center cursor-zoom-in bg-slate-50 dark:bg-slate-950/40 p-2 sm:p-3 rounded-xl sm:rounded-2xl border border-slate-100 dark:border-slate-800"
-                    >
-                      <img
-                        src={q.image_url}
-                        alt={`Savol #${originalIndex + 1}`}
-                        className="w-auto max-w-full max-h-[300px] sm:max-h-[460px] rounded-lg sm:rounded-xl object-contain"
-                      />
-                    </div>
+                  <div
+                    onClick={() => {
+                      setZoomedImage(q.image_url);
+                      setZoomScale(1);
+                    }}
+                    className="w-full flex items-center justify-center cursor-zoom-in bg-slate-50 dark:bg-slate-950/40 p-2.5 rounded-2xl border border-slate-100 dark:border-slate-800"
+                  >
+                    <img
+                      src={q.image_url}
+                      alt={`Savol #${originalIndex + 1}`}
+                      className="w-auto max-w-full max-h-[280px] sm:max-h-[420px] rounded-xl object-contain"
+                    />
                   </div>
                 )}
 
                 {/* Question Text */}
-                <div className="text-[15px] sm:text-[17px] font-medium text-slate-900 dark:text-slate-100 leading-relaxed overflow-x-auto">
+                <div className="text-[15px] sm:text-[16px] font-semibold text-slate-900 dark:text-slate-100 leading-relaxed overflow-x-auto">
                   <MathRenderer content={q.question_text} />
                 </div>
 
                 {/* Options Review */}
                 {q.options && typeof q.options === "object" && (
-                  <div className="space-y-2 sm:space-y-2.5 pt-1">
+                  <div className="space-y-2 pt-0.5">
                     {Object.entries(q.options).map(([optKey, optVal]) => {
                       const isUserChoice = (answers[q.id] || "").toLowerCase() === optKey.toLowerCase();
                       const isAnswerCorrectKey = (q.correct_answer || "").toLowerCase() === optKey.toLowerCase();
 
-                      let containerStyle = "border-slate-200/70 dark:border-slate-800/80 bg-slate-50/50 dark:bg-slate-900/40 text-slate-700 dark:text-slate-300";
+                      let containerStyle = "border-slate-100 dark:border-slate-800 bg-slate-50/70 dark:bg-slate-800/40 text-slate-700 dark:text-slate-300";
                       let badge = null;
 
                       if (isUserChoice && isAnswerCorrectKey) {
-                        containerStyle = "border-emerald-500 bg-emerald-50/70 dark:bg-emerald-950/30 text-emerald-950 dark:text-emerald-100 shadow-xs";
+                        containerStyle = "border-emerald-500/50 bg-emerald-50/80 dark:bg-emerald-950/30 text-emerald-950 dark:text-emerald-100";
                         badge = (
-                          <span className="text-[11px] sm:text-xs font-bold text-emerald-600 dark:text-emerald-400 flex items-center gap-1 shrink-0">
+                          <span className="text-[11px] font-bold text-emerald-600 dark:text-emerald-400 flex items-center gap-1 shrink-0">
                             <CheckCircle2 size={13} />
-                            <span>Sizning javobingiz</span>
+                            <span className="hidden xs:inline">Sizning javobingiz</span>
+                            <span className="xs:hidden">To&apos;g&apos;ri</span>
                           </span>
                         );
                       } else if (isUserChoice && !isAnswerCorrectKey) {
-                        containerStyle = "border-rose-400/80 dark:border-rose-600/80 bg-rose-50/70 dark:bg-rose-950/30 text-rose-950 dark:text-rose-100 shadow-xs";
+                        containerStyle = "border-rose-400/60 bg-rose-50/80 dark:bg-rose-950/30 text-rose-950 dark:text-rose-100";
                         badge = (
-                          <span className="text-[11px] sm:text-xs font-bold text-rose-600 dark:text-rose-400 flex items-center gap-1 shrink-0">
+                          <span className="text-[11px] font-bold text-rose-600 dark:text-rose-400 flex items-center gap-1 shrink-0">
                             <XCircle size={13} />
-                            <span>Sizning javobingiz</span>
+                            <span className="hidden xs:inline">Sizning javobingiz</span>
+                            <span className="xs:hidden">Sizniki</span>
                           </span>
                         );
                       } else if (!isUserChoice && isAnswerCorrectKey) {
-                        containerStyle = "border-emerald-500/70 border-dashed bg-emerald-50/40 dark:bg-emerald-950/20 text-emerald-900 dark:text-emerald-200";
+                        containerStyle = "border-emerald-500/50 border-dashed bg-emerald-50/40 dark:bg-emerald-950/20 text-emerald-900 dark:text-emerald-200";
                         badge = (
-                          <span className="text-[11px] sm:text-xs font-bold text-emerald-600 dark:text-emerald-400 flex items-center gap-1 shrink-0">
+                          <span className="text-[11px] font-bold text-emerald-600 dark:text-emerald-400 flex items-center gap-1 shrink-0">
                             <CheckCircle2 size={13} />
-                            <span>To'g'ri javob</span>
+                            <span>To&apos;g&apos;ri javob</span>
                           </span>
                         );
                       }
@@ -1346,31 +1386,27 @@ export default function TakeTestPage() {
                       return (
                         <div
                           key={optKey}
-                          className={`flex flex-col sm:flex-row sm:items-center justify-between gap-2 sm:gap-3.5 p-3 sm:p-4 rounded-xl sm:rounded-2xl border transition-colors ${containerStyle}`}
+                          className={`flex items-center justify-between gap-2.5 p-3 sm:p-3.5 rounded-2xl border transition-colors ${containerStyle}`}
                         >
-                          <div className="flex items-start sm:items-center gap-2.5 sm:gap-3.5 flex-1 min-w-0">
+                          <div className="flex items-center gap-3 flex-1 min-w-0">
                             <div
-                              className={`w-6 h-6 sm:w-7 sm:h-7 rounded-md sm:rounded-lg flex items-center justify-center font-bold text-xs shrink-0 mt-0.5 sm:mt-0 ${
+                              className={`w-7 h-7 rounded-xl flex items-center justify-center font-extrabold text-xs shrink-0 ${
                                 isUserChoice && isAnswerCorrectKey
-                                  ? "bg-emerald-500 text-white shadow-xs"
+                                  ? "bg-emerald-500 text-white"
                                   : isUserChoice && !isAnswerCorrectKey
-                                  ? "bg-rose-500 text-white shadow-xs"
+                                  ? "bg-rose-500 text-white"
                                   : isAnswerCorrectKey
-                                  ? "bg-emerald-500/20 text-emerald-600 dark:text-emerald-400"
-                                  : "bg-slate-200 dark:bg-slate-800 text-slate-500"
+                                  ? "bg-emerald-500/15 text-emerald-600 dark:text-emerald-400"
+                                  : "bg-white dark:bg-slate-800 border border-slate-200/70 dark:border-slate-700 text-slate-500"
                               }`}
                             >
                               {optKey.toUpperCase()}
                             </div>
-                            <div className="text-sm sm:text-[15px] font-medium leading-normal break-words min-w-0 overflow-x-auto">
+                            <div className="text-sm font-medium leading-snug break-words min-w-0 overflow-x-auto">
                               <MathRenderer content={String(optVal || "")} inline />
                             </div>
                           </div>
-                          {badge && (
-                            <div className="self-end sm:self-auto pl-8 sm:pl-0">
-                              {badge}
-                            </div>
-                          )}
+                          {badge}
                         </div>
                       );
                     })}
@@ -1379,37 +1415,58 @@ export default function TakeTestPage() {
 
                 {/* Text input comparison (if no options) */}
                 {!q.options && (
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 sm:gap-3 p-3 sm:p-4 rounded-xl sm:rounded-2xl bg-slate-50 dark:bg-slate-900/40 border border-slate-200/80 dark:border-slate-800/80">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-700/50">
                     <div>
-                      <span className="text-[11px] sm:text-xs font-bold text-slate-400 block mb-0.5 sm:mb-1">Sizning javobingiz:</span>
-                      <span className={`text-xs sm:text-sm font-bold break-all ${isCorrect ? "text-emerald-600" : isUnanswered ? "text-slate-400 italic" : "text-rose-500"}`}>
+                      <span className="text-[10px] font-extrabold uppercase tracking-wider text-slate-400 block mb-0.5">Sizning javobingiz</span>
+                      <span className={`text-sm font-bold break-all ${isCorrect ? "text-emerald-600" : isUnanswered ? "text-slate-400 italic" : "text-rose-500"}`}>
                         {studentAns || "(Javob berilmagan)"}
                       </span>
                     </div>
                     <div>
-                      <span className="text-[11px] sm:text-xs font-bold text-emerald-600 dark:text-emerald-400 block mb-0.5 sm:mb-1">To'g'ri javob:</span>
-                      <span className="text-xs sm:text-sm font-bold text-emerald-700 dark:text-emerald-300 break-all">
+                      <span className="text-[10px] font-extrabold uppercase tracking-wider text-emerald-600 dark:text-emerald-400 block mb-0.5">To&apos;g&apos;ri javob</span>
+                      <span className="text-sm font-bold text-emerald-700 dark:text-emerald-300 break-all">
                         {q.correct_answer}
                       </span>
                     </div>
                   </div>
                 )}
 
-                {/* Explanation / Solution */}
+                {/* Explanation / Solution (Shop Amber Note style) */}
                 {q.explanation && (
-                  <div className="p-3.5 sm:p-5 rounded-xl sm:rounded-2xl bg-amber-500/5 dark:bg-amber-500/10 border border-amber-500/20 space-y-1.5 sm:space-y-2">
-                    <div className="flex items-center gap-1.5 sm:gap-2 text-[11px] sm:text-xs font-bold uppercase tracking-wider text-amber-700 dark:text-amber-400">
+                  <div className="p-3.5 sm:p-4 rounded-2xl bg-amber-50 dark:bg-amber-500/10 border border-amber-200/60 dark:border-amber-500/20 space-y-1.5">
+                    <div className="flex items-center gap-1.5 text-[11px] font-extrabold uppercase tracking-wider text-amber-700 dark:text-amber-400">
                       <Lightbulb size={14} className="text-amber-500 shrink-0" />
                       <span>Yechim va tushuntirish</span>
                     </div>
-                    <div className="text-xs sm:text-sm text-slate-700 dark:text-slate-300 leading-relaxed font-sans overflow-x-auto">
+                    <div className="text-xs sm:text-sm text-amber-900/90 dark:text-amber-200/90 leading-relaxed font-sans overflow-x-auto">
                       <MathRenderer content={q.explanation} />
                     </div>
                   </div>
                 )}
               </div>
             );
-          })}
+          })
+          )}
+        </div>
+
+        {/* Bottom Quick Return Bar */}
+        <div className="flex items-center justify-center gap-2.5 pt-2 pb-6">
+          <button
+            type="button"
+            onClick={() => router.push(isInternational ? '/dashboard/international' : isOlympiad ? '/dashboard/olympiads' : '/dashboard/tests')}
+            className="flex-1 sm:flex-initial py-3 px-5 rounded-2xl bg-white/85 dark:bg-slate-900/85 hover:bg-white dark:hover:bg-slate-800 border border-slate-200/70 dark:border-slate-800 text-slate-700 dark:text-slate-200 text-xs sm:text-sm font-bold flex items-center justify-center gap-1.5 transition-colors active:scale-95 cursor-pointer"
+          >
+            <ArrowLeft size={15} />
+            <span>{isInternational ? "Xalqaro musobaqalar" : isOlympiad ? "Musobaqalar" : "Testlarga qaytish"}</span>
+          </button>
+          <button
+            type="button"
+            onClick={() => router.push('/dashboard/results')}
+            className="flex-1 sm:flex-initial py-3 px-5 rounded-2xl bg-amber-500 hover:bg-amber-600 text-white text-xs sm:text-sm font-bold flex items-center justify-center gap-1.5 shadow-sm transition-colors active:scale-95 cursor-pointer"
+          >
+            <Trophy size={15} />
+            <span>Barcha natijalar</span>
+          </button>
         </div>
 
         {/* Official Promax Certificate / Diploma Modal */}
