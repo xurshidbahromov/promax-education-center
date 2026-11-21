@@ -68,6 +68,13 @@ interface CommentItem {
 export default function OlympiadsPage() {
   const { t } = useLanguage();
   const router = useRouter();
+  const [confirmStartItem, setConfirmStartItem] = useState<AdminTournament | null>(null);
+
+  useEffect(() => {
+    if (confirmStartItem?.id) {
+      router.prefetch(`/dashboard/tests/${confirmStartItem.id}/take?type=olympiad`);
+    }
+  }, [confirmStartItem?.id, router]);
   const searchParams = useSearchParams();
   const { data: user } = useCurrentUser();
   const { data: profile } = useUserProfile(user?.id);
@@ -86,7 +93,6 @@ export default function OlympiadsPage() {
   const [loading, setLoading] = useState(false);
   const [leaderboardLoading, setLeaderboardLoading] = useState(false);
   const [selectedItem, setSelectedItem] = useState<AdminTournament | null>(null);
-  const [confirmStartItem, setConfirmStartItem] = useState<AdminTournament | null>(null);
   const [registeredIds, setRegisteredIds] = useState<string[]>([]);
 
   // Determine initial tournament ID synchronously
