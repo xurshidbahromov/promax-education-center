@@ -30,7 +30,8 @@ import {
   HelpCircle,
   Lightbulb,
   Award,
-  Printer
+  Printer,
+  ShieldCheck
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
@@ -1471,82 +1472,158 @@ export default function TakeTestPage() {
 
         {/* Official Promax Certificate / Diploma Modal */}
         {showCertificateModal && (
-          <div className="fixed inset-0 z-[150] bg-slate-950/75 backdrop-blur-md flex items-center justify-center p-4 overflow-y-auto">
-            <div className="bg-white dark:bg-slate-900 rounded-[28px] max-w-2xl w-full p-5 sm:p-8 border-2 border-amber-400/60 shadow-2xl space-y-6 relative overflow-hidden">
-              <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-3">
-                <div className="flex items-center gap-2 text-amber-600 dark:text-amber-400 font-bold text-sm">
-                  <Award size={18} />
-                  <span>Rasmiy Elektron Sertifikat</span>
+          <div
+            onClick={(e) => { if (e.target === e.currentTarget) setShowCertificateModal(false); }}
+            className="fixed inset-0 z-[200] bg-slate-950/60 backdrop-blur-[3px] flex items-center justify-center p-3.5 sm:p-5 overflow-y-auto"
+          >
+            <div className="bg-white dark:bg-slate-900 rounded-[28px] max-w-xl w-full p-4 sm:p-6 border border-slate-200/80 dark:border-slate-800 shadow-2xl space-y-4 relative overflow-hidden">
+              {/* Modal Header */}
+              <div className="flex items-center justify-between gap-2 pb-3 border-b border-slate-100 dark:border-slate-800">
+                <div className="flex items-center gap-2 min-w-0">
+                  <div className="w-8 h-8 rounded-xl bg-amber-500/10 text-amber-500 flex items-center justify-center shrink-0">
+                    <Award size={17} />
+                  </div>
+                  <span className="font-extrabold font-fredoka text-sm sm:text-base text-slate-900 dark:text-white truncate">
+                    Rasmiy Sertifikat
+                  </span>
                 </div>
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-1.5 shrink-0">
                   <button
                     type="button"
                     onClick={() => window.print()}
-                    className="px-3.5 py-1.5 rounded-xl bg-brand-blue hover:bg-blue-600 text-white text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer"
+                    className="px-3.5 py-2 rounded-xl bg-amber-500 hover:bg-amber-600 active:scale-95 text-white text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer whitespace-nowrap shadow-sm"
                   >
-                    <Printer size={14} />
-                    <span>Chop etish / PDF</span>
+                    <Printer size={14} className="shrink-0" />
+                    <span>PDF / Chop etish</span>
                   </button>
                   <button
                     type="button"
                     onClick={() => setShowCertificateModal(false)}
-                    className="w-8 h-8 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-500 hover:text-slate-900 dark:hover:text-white cursor-pointer"
+                    className="w-8 h-8 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 cursor-pointer shrink-0"
+                    aria-label="Yopish"
                   >
                     <X size={16} />
                   </button>
                 </div>
               </div>
 
-              {/* Certificate Printable Canvas */}
-              <div className="relative p-6 sm:p-10 rounded-2xl border-4 border-double border-amber-500/40 bg-gradient-to-br from-amber-50/40 via-white to-blue-50/40 dark:from-slate-900 dark:via-slate-900 dark:to-slate-800/90 text-center space-y-5">
-                <div className="flex flex-col items-center gap-2">
-                  <div className="w-14 h-14 rounded-2xl bg-gradient-to-tr from-brand-blue to-indigo-600 text-white flex items-center justify-center shadow-lg shadow-brand-blue/20">
-                    <Trophy size={28} />
-                  </div>
-                  <span className="text-[11px] font-black uppercase tracking-[0.3em] text-brand-orange">
-                    Promax Education Center
-                  </span>
-                  <h2 className="text-2xl sm:text-3xl font-black font-fredoka uppercase tracking-wide text-slate-900 dark:text-white">
-                    S E R T I F I K A T
-                  </h2>
+              {/* Official Promax Printable Certificate Canvas */}
+              <div className="relative p-6 sm:p-9 rounded-2xl border-2 border-amber-500/35 bg-gradient-to-b from-amber-50/40 via-white to-blue-50/30 dark:from-slate-900 dark:via-slate-900 dark:to-slate-800/90 text-center space-y-5 overflow-hidden">
+                {/* Inner hairline frame */}
+                <div className="pointer-events-none absolute inset-2.5 rounded-xl border border-amber-500/20" />
+
+                {/* Decorative Corner Ornaments (SVG) */}
+                <svg className="pointer-events-none absolute top-3.5 left-3.5 w-6 h-6 text-amber-500/45" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
+                  <path d="M2 12V2h10" />
+                </svg>
+                <svg className="pointer-events-none absolute top-3.5 right-3.5 w-6 h-6 text-amber-500/45" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
+                  <path d="M22 12V2H12" />
+                </svg>
+                <svg className="pointer-events-none absolute bottom-3.5 left-3.5 w-6 h-6 text-amber-500/45" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
+                  <path d="M2 12v10h10" />
+                </svg>
+                <svg className="pointer-events-none absolute bottom-3.5 right-3.5 w-6 h-6 text-amber-500/45" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
+                  <path d="M22 12v10H12" />
+                </svg>
+
+                {/* Subtle Center Logo Watermark */}
+                <div className="pointer-events-none absolute inset-0 flex items-center justify-center opacity-[0.04]">
+                  <Image
+                    src="/Logo_without_sentence.png"
+                    alt=""
+                    width={200}
+                    height={200}
+                    className="object-contain"
+                  />
                 </div>
 
-                <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400">
-                  Ushbu sertifikat quyidagi ishtirokchiga muvaffaqiyatli natijasi uchun taqdim etildi:
+                {/* Official Promax Crest & Logo */}
+                <div className="relative z-10 flex flex-col items-center gap-2">
+                  <div className="flex items-center gap-2.5 px-3.5 py-1.5 rounded-full bg-white/90 dark:bg-slate-800/80 border border-slate-200/70 dark:border-slate-700/70">
+                    <Image
+                      src="/Logo_without_sentence.png"
+                      alt="Promax Education"
+                      width={24}
+                      height={24}
+                      className="object-contain"
+                    />
+                    <span className="text-[11px] font-black uppercase tracking-[0.22em] text-slate-800 dark:text-slate-100">
+                      PROMAX <span className="text-amber-500">EDUCATION</span>
+                    </span>
+                  </div>
+
+                  <h2 className="text-2xl sm:text-3xl font-black font-fredoka uppercase tracking-[0.18em] text-slate-900 dark:text-white pt-1">
+                    SERTIFIKAT
+                  </h2>
+                  <div className="flex items-center gap-2 w-32 justify-center">
+                    <span className="h-px flex-1 bg-amber-500/40" />
+                    <Sparkles size={12} className="text-amber-500" />
+                    <span className="h-px flex-1 bg-amber-500/40" />
+                  </div>
+                </div>
+
+                <p className="relative z-10 text-xs sm:text-sm text-slate-500 dark:text-slate-400 max-w-sm mx-auto leading-relaxed">
+                  Ushbu rasmiy sertifikat quyidagi ishtirokchiga yuqori bilimi va muvaffaqiyatli natijasi uchun taqdim etildi:
                 </p>
 
-                <div className="py-2 border-b-2 border-amber-500/30 max-w-md mx-auto">
-                  <span className="text-xl sm:text-3xl font-black font-fredoka text-brand-blue dark:text-blue-400">
+                {/* Recipient Name */}
+                <div className="relative z-10 py-2 border-b-2 border-amber-500/35 max-w-xs mx-auto">
+                  <span className="text-2xl sm:text-3xl font-black font-fredoka text-brand-blue dark:text-blue-400 tracking-tight">
                     {studentDisplayName}
                   </span>
                 </div>
 
-                <div className="space-y-1.5">
+                {/* Exam Title & Crisp Tier Badges (zero OS emojis) */}
+                <div className="relative z-10 space-y-2.5">
                   <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-300 font-medium">
-                    <strong className="text-slate-900 dark:text-white">&ldquo;{test.title}&rdquo;</strong> sinovida ishtirok etib,
+                    <strong className="text-slate-900 dark:text-white">&ldquo;{test.title}&rdquo;</strong> sinovida muvaffaqiyatli ishtirok etib,
                   </p>
-                  <div className="inline-flex flex-wrap items-center justify-center gap-2 pt-1">
-                    <span className="px-3 py-1 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 text-xs sm:text-sm font-black">
-                      {calculatedSummary.totalScore} / {calculatedSummary.maxScore} ball ({calculatedSummary.percentage}%)
+                  <div className="inline-flex flex-wrap items-center justify-center gap-2">
+                    <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 text-xs font-extrabold tabular-nums">
+                      <CheckCircle2 size={13} />
+                      <span>{calculatedSummary.totalScore} / {calculatedSummary.maxScore} ball ({calculatedSummary.percentage}%)</span>
                     </span>
-                    <span className="px-3 py-1 rounded-full bg-amber-500/15 text-amber-700 dark:text-amber-300 border border-amber-500/30 text-xs sm:text-sm font-black">
-                      {calculatedSummary.percentage >= 90
-                        ? "🥇 Oltin Daraja"
+                    <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full border text-xs font-extrabold ${
+                      calculatedSummary.percentage >= 90
+                        ? "bg-amber-500/15 text-amber-700 dark:text-amber-300 border-amber-500/30"
                         : calculatedSummary.percentage >= 75
-                        ? "🥈 Kumush Daraja"
-                        : "🥉 Bronza Daraja"}
+                        ? "bg-slate-200/70 dark:bg-slate-700/70 text-slate-700 dark:text-slate-200 border-slate-300 dark:border-slate-600"
+                        : "bg-orange-500/10 text-orange-700 dark:text-orange-300 border-orange-500/25"
+                    }`}>
+                      <Award size={13} />
+                      <span>
+                        {calculatedSummary.percentage >= 90
+                          ? "Oltin Daraja"
+                          : calculatedSummary.percentage >= 75
+                          ? "Kumush Daraja"
+                          : "Bronza Daraja"}
+                      </span>
                     </span>
                   </div>
                 </div>
 
-                <div className="pt-6 flex items-center justify-between text-[11px] text-slate-400 border-t border-slate-200/60 dark:border-slate-800">
+                {/* Official Footer: Date + Verified Seal + Certificate ID */}
+                <div className="relative z-10 pt-5 mt-2 flex items-end justify-between gap-2 text-[11px] text-slate-400 border-t border-slate-200/70 dark:border-slate-800">
                   <div className="text-left">
-                    <span className="block font-bold text-slate-600 dark:text-slate-300">Sana:</span>
-                    <span>{new Date().toLocaleDateString("uz-UZ")}</span>
+                    <span className="block text-[10px] font-extrabold uppercase tracking-wider text-slate-400">Sana</span>
+                    <span className="font-bold text-slate-700 dark:text-slate-200">
+                      {new Date().getDate()}-{["Yanvar","Fevral","Mart","Aprel","May","Iyun","Iyul","Avgust","Sentabr","Oktabr","Noyabr","Dekabr"][new Date().getMonth()]}, {new Date().getFullYear()}
+                    </span>
                   </div>
+
+                  {/* Verified Seal */}
+                  <div className="flex flex-col items-center gap-0.5 text-brand-blue dark:text-blue-400">
+                    <div className="w-9 h-9 rounded-full bg-brand-blue/10 border border-brand-blue/25 flex items-center justify-center">
+                      <ShieldCheck size={18} />
+                    </div>
+                    <span className="text-[8px] font-black uppercase tracking-widest">Tasdiqlangan</span>
+                  </div>
+
                   <div className="text-right">
-                    <span className="block font-bold text-slate-600 dark:text-slate-300">ID Raqami:</span>
-                    <span className="font-mono">PMX-{String(testId).slice(0, 5).toUpperCase()}-{calculatedSummary.percentage}</span>
+                    <span className="block text-[10px] font-extrabold uppercase tracking-wider text-slate-400">Sertifikat ID</span>
+                    <span className="font-mono font-bold text-slate-700 dark:text-slate-200">
+                      PMX-{String(testId).slice(0, 5).toUpperCase()}-{calculatedSummary.percentage}
+                    </span>
                   </div>
                 </div>
               </div>
