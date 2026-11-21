@@ -2244,119 +2244,116 @@ export default function TakeTestPage() {
         </div>
       )}
 
-      {/* ── PROMAX SIGNATURE CHECKING OVERLAY ── */}
+      {/* ── PROMAX SIGNATURE OMR GRADING SCANNER OVERLAY ── */}
       <AnimatePresence>
         {isCheckingResults && (
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            transition={{ duration: 0.25, ease: [0.16, 1, 0.3, 1] }}
-            className="fixed inset-0 z-[200] flex items-center justify-center p-4 bg-slate-900/40 dark:bg-black/70 backdrop-blur-md select-none"
+            transition={{ duration: 0.2, ease: "easeOut" }}
+            className="fixed inset-0 z-[200] flex items-center justify-center p-4 bg-slate-950/55 backdrop-blur-[3px] select-none"
           >
-            {/* Modal Card */}
             <motion.div
-              initial={{ scale: 0.94, opacity: 0, y: 12 }}
+              initial={{ scale: 0.96, opacity: 0, y: 12 }}
               animate={{ scale: 1, opacity: 1, y: 0 }}
-              exit={{ scale: 0.96, opacity: 0, y: -10 }}
-              transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
-              className="relative w-full max-w-[320px] sm:max-w-sm bg-white dark:bg-slate-900/95 backdrop-blur-2xl rounded-[28px] sm:rounded-[32px] p-6 sm:p-8 border border-slate-200/80 dark:border-slate-800 shadow-[0_25px_60px_rgba(0,0,0,0.12)] dark:shadow-[0_25px_60px_rgba(0,0,0,0.6)] flex flex-col items-center text-center overflow-hidden"
+              exit={{ scale: 0.96, opacity: 0, y: -8 }}
+              transition={{ duration: 0.24, ease: [0.16, 1, 0.3, 1] }}
+              style={{ willChange: "transform, opacity" }}
+              className="relative w-full max-w-[330px] sm:max-w-sm bg-white dark:bg-slate-900 rounded-[28px] p-6 border border-slate-200/80 dark:border-slate-800 shadow-2xl flex flex-col items-center text-center overflow-hidden"
             >
-              {/* Subtle Ambient Radial Glows inside card */}
-              <div className="absolute -top-16 -right-16 w-36 h-36 bg-brand-blue/10 dark:bg-brand-blue/20 rounded-full blur-3xl pointer-events-none" />
-              <div className="absolute -bottom-16 -left-16 w-36 h-36 bg-brand-orange/10 dark:bg-brand-orange/20 rounded-full blur-3xl pointer-events-none" />
+              {/* Top Header Strip */}
+              <div className="w-full flex items-center justify-between pb-3 mb-4 border-b border-slate-100 dark:border-slate-800/80">
+                <div className="flex items-center gap-2">
+                  <div className="relative w-6 h-6 shrink-0">
+                    <Image
+                      src="/Logo_without_sentence.png"
+                      alt="Promax"
+                      width={24}
+                      height={24}
+                      priority
+                      className="object-contain"
+                    />
+                  </div>
+                  <span className="text-[10px] font-extrabold tracking-[0.16em] text-brand-blue uppercase">
+                    OPTIK TEKSHIRUV
+                  </span>
+                </div>
+                <span className="px-2 py-0.5 rounded-full bg-amber-500/10 text-amber-600 dark:text-amber-400 text-[9px] font-extrabold uppercase tracking-wider">
+                  PROMAX
+                </span>
+              </div>
 
-              {/* Promax Logo Emblem */}
-              <div className="relative w-12 h-12 sm:w-16 sm:h-16 flex items-center justify-center mb-1 drop-shadow-[0_6px_16px_rgba(0,86,210,0.2)]">
-                <Image
-                  src="/Logo_without_sentence.png"
-                  alt="Promax"
-                  width={64}
-                  height={64}
-                  priority
-                  className="object-contain"
+              {/* OMR Optical Scanner Sheet (3 graded rows + sweeping laser beam) */}
+              <div className="relative w-full rounded-2xl bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-700/50 p-3.5 mb-5 overflow-hidden">
+                {/* Sweeping Optical Scan Beam */}
+                <motion.div
+                  initial={{ y: -8 }}
+                  animate={{ y: 102 }}
+                  transition={{ duration: 1.15, repeat: Infinity, ease: "easeInOut" }}
+                  style={{ willChange: "transform" }}
+                  className="pointer-events-none absolute left-0 right-0 top-0 h-7 bg-gradient-to-b from-brand-blue/0 via-brand-blue/15 to-brand-blue/0 border-b border-brand-blue/50 z-10"
                 />
+
+                <div className="space-y-2.5 relative z-0">
+                  {[
+                    { num: "01", activeCol: 1, delay: 0.15 },
+                    { num: "02", activeCol: 3, delay: 0.45 },
+                    { num: "03", activeCol: 0, delay: 0.75 },
+                  ].map((row) => (
+                    <div key={row.num} className="flex items-center justify-between gap-2">
+                      <span className="text-[11px] font-mono font-extrabold text-slate-400 w-5 text-left">
+                        {row.num}
+                      </span>
+                      <div className="flex items-center gap-2 flex-1 justify-center">
+                        {["A", "B", "C", "D"].map((letter, idx) => {
+                          const isFilled = idx === row.activeCol;
+                          return (
+                            <span
+                              key={letter}
+                              className={`w-6 h-6 rounded-full text-[10px] font-extrabold flex items-center justify-center border ${
+                                isFilled
+                                  ? row.num === "02"
+                                    ? "bg-amber-500 border-amber-500 text-white"
+                                    : "bg-brand-blue border-brand-blue text-white"
+                                  : "border-slate-200 dark:border-slate-700 text-slate-400 dark:text-slate-500 bg-white dark:bg-slate-900"
+                              }`}
+                            >
+                              {letter}
+                            </span>
+                          );
+                        })}
+                      </div>
+                      <motion.span
+                        initial={{ scale: 0.6, opacity: 0 }}
+                        animate={{ scale: 1, opacity: 1 }}
+                        transition={{ delay: row.delay, duration: 0.2 }}
+                        className="w-5 h-5 rounded-full bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shrink-0"
+                      >
+                        <CheckCircle size={12} strokeWidth={2.5} />
+                      </motion.span>
+                    </div>
+                  ))}
+                </div>
               </div>
 
-              {/* Smooth Stylus Ink Wave Canvas */}
-              <div className="w-full max-w-[220px] sm:max-w-[260px] h-16 sm:h-20 relative flex items-center justify-center my-1 sm:my-2">
-                <svg viewBox="0 0 250 70" className="w-full h-full overflow-visible">
-                  <defs>
-                    <linearGradient id="checkPenInk" x1="0%" y1="0%" x2="100%" y2="0%">
-                      <stop offset="0%" stopColor="#0056D2" />
-                      <stop offset="60%" stopColor="#0284C7" />
-                      <stop offset="100%" stopColor="#F97316" />
-                    </linearGradient>
-                  </defs>
-
-                  {/* Clean Guidelines */}
-                  <line x1="10" y1="14" x2="240" y2="14" stroke="currentColor" className="text-slate-100 dark:text-slate-800" strokeWidth="1.5" strokeDasharray="3 3" />
-                  <line x1="10" y1="35" x2="240" y2="35" stroke="currentColor" className="text-slate-100 dark:text-slate-800" strokeWidth="1.5" />
-                  <line x1="10" y1="56" x2="240" y2="56" stroke="currentColor" className="text-slate-100 dark:text-slate-800" strokeWidth="1.5" strokeDasharray="3 3" />
-
-                  {/* Drawn Ink Wave */}
-                  <motion.path
-                    d="M 15 35 Q 45 15, 80 35 T 150 35 T 205 35 Q 220 22, 230 35"
-                    fill="none"
-                    stroke="url(#checkPenInk)"
-                    strokeWidth="3.5"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    initial={{ pathLength: 0 }}
-                    animate={{ pathLength: [0, 0.25, 0.55, 0.85, 1, 1, 0] }}
-                    transition={{
-                      duration: 1.8,
-                      times: [0, 0.2, 0.5, 0.75, 0.9, 0.96, 1],
-                      repeat: Infinity,
-                      ease: "easeInOut"
-                    }}
-                  />
-
-                  {/* Fountain Pen */}
-                  <motion.g
-                    initial={{ x: 15, y: 35, opacity: 0 }}
-                    animate={{
-                      x: [15, 45, 80, 115, 150, 178, 205, 230, 15],
-                      y: [35, 15, 35, 15, 35, 15, 35, 35, 35],
-                      opacity: [0, 1, 1, 1, 1, 1, 1, 0, 0]
-                    }}
-                    transition={{
-                      duration: 1.8,
-                      times: [0, 0.15, 0.35, 0.5, 0.65, 0.78, 0.88, 0.95, 1],
-                      repeat: Infinity,
-                      ease: "easeInOut"
-                    }}
-                  >
-                    <g transform="rotate(40)">
-                      <polygon points="0,0 -4,-12 4,-12" fill="#F59E0B" />
-                      <line x1="0" y1="0" x2="0" y2="-7" stroke="#78350F" strokeWidth="0.8" />
-                      <circle cx="0" cy="-7" r="0.9" fill="#0056D2" />
-                      <rect x="-4.5" y="-15" width="9" height="3" fill="#0F172A" rx="0.5" />
-                      <polygon points="-4.5,-15 4.5,-15 5.5,-45 -5.5,-45" fill="#0056D2" />
-                      <rect x="-5" y="-30" width="10" height="2.5" fill="#E2E8F0" />
-                      <rect x="-5.5" y="-42" width="11" height="3.5" fill="#F97316" rx="0.5" />
-                    </g>
-                  </motion.g>
-                </svg>
-              </div>
-
-              {/* Matched Typography */}
+              {/* Typography */}
               <div className="space-y-1">
-                <h3 className="font-fredoka text-lg sm:text-2xl font-bold text-slate-900 dark:text-white leading-tight">
+                <h3 className="font-fredoka text-lg sm:text-xl font-bold text-slate-900 dark:text-white leading-tight">
                   Natijalar hisoblanmoqda
                 </h3>
-                <p className="text-xs sm:text-[13px] font-medium text-slate-500 dark:text-slate-400 leading-relaxed">
+                <p className="text-xs font-medium text-slate-500 dark:text-slate-400">
                   Javoblaringiz tekshirilmoqda, iltimos kuting...
                 </p>
               </div>
 
-              {/* Hairline Brand Gradient Progress */}
-              <div className="w-36 sm:w-44 h-1.5 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden mt-4 sm:mt-5">
+              {/* GPU-composited scaleX Progress Bar */}
+              <div className="w-full h-1.5 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden mt-4">
                 <motion.div
-                  className="h-full bg-gradient-to-r from-brand-blue via-sky-500 to-brand-orange rounded-full"
-                  initial={{ width: "0%" }}
-                  animate={{ width: "100%" }}
-                  transition={{ duration: 1.2, ease: [0.16, 1, 0.3, 1] }}
+                  className="h-full w-full origin-left bg-gradient-to-r from-brand-blue to-amber-500 rounded-full"
+                  initial={{ scaleX: 0 }}
+                  animate={{ scaleX: 1 }}
+                  transition={{ duration: 1.15, ease: [0.16, 1, 0.3, 1] }}
                 />
               </div>
             </motion.div>
