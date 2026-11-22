@@ -15,7 +15,7 @@ export default function DashboardReveal({ isLoading = false }: { isLoading?: boo
     if (!isLoading) {
       const timer = setTimeout(() => {
         setIsFinished(true);
-      }, 1400);
+      }, 680);
       return () => clearTimeout(timer);
     }
   }, [isLoading]);
@@ -26,6 +26,8 @@ export default function DashboardReveal({ isLoading = false }: { isLoading?: boo
     let rafId = 0;
     let startTs: number | null = null;
     const CYCLE_MS = 2400; // 0..0.78 draw, 0.78..0.90 hold, 0.90..1.00 fade & reset
+    let cachedLength = 0;
+    let endPt: DOMPoint | null = null;
 
     const easeInOutSine = (t: number) => -(Math.cos(Math.PI * t) - 1) / 2;
 
@@ -38,36 +40,38 @@ export default function DashboardReveal({ isLoading = false }: { isLoading?: boo
       const penEl = penRef.current;
 
       if (pathEl && penEl) {
-        const totalLength = pathEl.getTotalLength();
-        pathEl.style.strokeDasharray = `${totalLength}`;
+        if (cachedLength === 0) {
+          cachedLength = pathEl.getTotalLength();
+          pathEl.style.strokeDasharray = `${cachedLength}`;
+          endPt = pathEl.getPointAtLength(cachedLength);
+        }
 
         if (norm < 0.78) {
           // Drawing phase: pen nib stays locked 1:1 to exact leading point of the ink path
           const drawT = easeInOutSine(norm / 0.78);
-          const dist = drawT * totalLength;
+          const dist = drawT * cachedLength;
           const pt = pathEl.getPointAtLength(dist);
           const fadeIn = Math.min(1, norm / 0.08);
 
-          pathEl.style.strokeDashoffset = `${totalLength - dist}`;
+          pathEl.style.strokeDashoffset = `${(cachedLength - dist).toFixed(1)}`;
           pathEl.style.opacity = "1";
           penEl.setAttribute("transform", `translate(${pt.x.toFixed(2)}, ${pt.y.toFixed(2)})`);
-          penEl.style.opacity = `${fadeIn}`;
-        } else if (norm < 0.9) {
+          penEl.style.opacity = `${fadeIn.toFixed(2)}`;
+        } else if (norm < 0.9 && endPt) {
           // Hold completed line briefly, lift pen gently
           const holdT = (norm - 0.78) / 0.12;
-          const endPt = pathEl.getPointAtLength(totalLength);
           pathEl.style.strokeDashoffset = "0";
           pathEl.style.opacity = "1";
           penEl.setAttribute(
             "transform",
             `translate(${endPt.x.toFixed(2)}, ${(endPt.y - holdT * 6).toFixed(2)})`
           );
-          penEl.style.opacity = `${Math.max(0, 1 - holdT * 1.4)}`;
+          penEl.style.opacity = `${Math.max(0, 1 - holdT * 1.4).toFixed(2)}`;
         } else {
           // Smoothly fade out ink before next cycle
           const fadeOut = 1 - (norm - 0.9) / 0.1;
           pathEl.style.strokeDashoffset = "0";
-          pathEl.style.opacity = `${Math.max(0, fadeOut)}`;
+          pathEl.style.opacity = `${Math.max(0, fadeOut).toFixed(2)}`;
           penEl.style.opacity = "0";
         }
       }
@@ -93,23 +97,16 @@ export default function DashboardReveal({ isLoading = false }: { isLoading?: boo
             duration: 0.65,
             ease: [0.16, 1, 0.3, 1]
           }}
-          className="fixed inset-0 z-[100] flex items-center justify-center pointer-events-none select-none overflow-hidden bg-slate-50/95 dark:bg-[#060b16]/98 backdrop-blur-3xl"
+          className="fixed inset-0 z-[100] flex items-center justify-center pointer-events-none select-none overflow-hidden bg-slate-50 dark:bg-[#060b16]"
         >
-          {/* Subtle Ambient Radial Light Aura */}
-          <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-            <motion.div
-              animate={{
-                scale: [1, 1.1, 1],
-                opacity: [0.35, 0.55, 0.35],
-              }}
-              transition={{
-                duration: 3,
-                repeat: Infinity,
-                ease: "easeInOut"
-              }}
-              className="w-[32rem] h-[32rem] rounded-full bg-gradient-to-tr from-brand-blue/20 via-sky-400/15 to-brand-orange/20 blur-[110px]"
-            />
-          </div>
+          {/* Lightweight CSS radial aura (zero GPU blur filter) */}
+          <div
+            className="absolute inset-0 pointer-events-none"
+            style={{
+              background:
+                "radial-gradient(circle at 50% 45%, rgba(0,86,210,0.10) 0%, rgba(249,115,22,0.06) 35%, transparent 70%)",
+            }}
+          />
 
           {/* ── Main Creative Core ── */}
           <motion.div
@@ -143,7 +140,7 @@ export default function DashboardReveal({ isLoading = false }: { isLoading?: boo
             </motion.div>
 
             {/* ── Realistic Spiral Education Notebook (Daftar) ── */}
-            <div className="relative w-full max-w-[340px] bg-white/85 dark:bg-slate-900/85 backdrop-blur-2xl rounded-3xl p-5 sm:p-6 border border-white/90 dark:border-slate-800/90 shadow-[0_20px_50px_rgba(0,86,210,0.1)] dark:shadow-[0_20px_50px_rgba(0,0,0,0.6)] overflow-hidden">
+            <div className="relative w-full max-w-[340px] bg-white dark:bg-slate-900 rounded-3xl p-5 sm:p-6 border border-slate-200/80 dark:border-slate-800 shadow-[0_16px_40px_rgba(15,23,42,0.08)] dark:shadow-[0_20px_50px_rgba(0,0,0,0.5)] overflow-hidden">
               
               {/* Left Spiral Binder Rings (Daftar Spirallari) */}
               <div className="absolute left-2 top-0 bottom-0 flex flex-col justify-around py-3 z-20 pointer-events-none">

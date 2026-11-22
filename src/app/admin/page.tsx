@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import {
   Users,
@@ -24,17 +24,29 @@ const UZ_MONTHS = [
   "Yanvar", "Fevral", "Mart", "Aprel", "May", "Iyun",
   "Iyul", "Avgust", "Sentyabr", "Oktyabr", "Noyabr", "Dekabr"
 ];
+const UZ_SHORT_MONTHS = [
+  "Yan", "Fev", "Mar", "Apr", "May", "Iyun",
+  "Iyul", "Avg", "Sen", "Okt", "Noy", "Dek"
+];
 const UZ_WEEKDAYS = [
   "Yakshanba", "Dushanba", "Seshanba", "Chorshanba", "Payshanba", "Juma", "Shanba"
 ];
+
+function formatShortUzDate(value?: string | null): string {
+  if (!value) return "";
+  const d = new Date(value);
+  if (Number.isNaN(d.getTime())) return "";
+  return `${d.getDate()}-${UZ_SHORT_MONTHS[d.getMonth()]}`;
+}
 
 export default function AdminDashboardPage() {
   const { data: stats, isLoading: statsLoading } = useAdminStats();
   const { data: activity = [], isLoading: activityLoading } = useRecentActivity();
 
-  const todayDate = useMemo(() => {
+  const [todayDate, setTodayDate] = useState("");
+  useEffect(() => {
     const d = new Date();
-    return `${UZ_WEEKDAYS[d.getDay()]}, ${d.getDate()}-${UZ_MONTHS[d.getMonth()]} ${d.getFullYear()}`;
+    setTodayDate(`${UZ_WEEKDAYS[d.getDay()]}, ${d.getDate()}-${UZ_MONTHS[d.getMonth()]} ${d.getFullYear()}`);
   }, []);
 
   const safeStats = {
@@ -188,7 +200,7 @@ export default function AdminDashboardPage() {
                       </div>
                     </div>
                     <span className="text-xs font-semibold text-slate-400 shrink-0 ml-2">
-                      {new Date(act.date).toLocaleDateString('uz-UZ', { month: 'short', day: 'numeric' })}
+                      {formatShortUzDate(act.date)}
                     </span>
                   </div>
                 ))}
@@ -248,7 +260,7 @@ export default function AdminDashboardPage() {
                         </div>
                       </div>
                       <span className="text-xs font-semibold text-slate-400 shrink-0 ml-2">
-                        {new Date(res.date).toLocaleDateString('uz-UZ', { month: 'short', day: 'numeric' })}
+                        {formatShortUzDate(res.date)}
                       </span>
                     </div>
                   ))

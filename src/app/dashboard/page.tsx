@@ -80,6 +80,14 @@ export default function DashboardPage() {
 
   const { data: subjects = [], isLoading: subjectsLoading } = useStudentSubjects();
 
+  const UZ_SHORT_MONTHS = ["Yan", "Fev", "Mar", "Apr", "May", "Iyun", "Iyul", "Avg", "Sen", "Okt", "Noy", "Dek"];
+  const formatShortUzDate = (value?: string | null) => {
+    if (!value) return "";
+    const d = new Date(value);
+    if (Number.isNaN(d.getTime())) return "";
+    return `${d.getDate()}-${UZ_SHORT_MONTHS[d.getMonth()]}`;
+  };
+
   const activeBannerAnnouncements = useMemo(() => {
     if (dbAnnouncements && dbAnnouncements.length > 0) {
       return dbAnnouncements
@@ -90,7 +98,7 @@ export default function DashboardPage() {
           message: a.content || a.message || "",
           image: a.image_url || "",
           badge: a.badge || (a.type === 'error' ? "MOCK EXAM" : a.type === 'warning' ? "SPEAKING CLUB" : a.type === 'success' ? "YANGI KURS" : "KABINET E'LONI"),
-          date: a.created_at ? new Date(a.created_at).toLocaleDateString('uz-UZ', { month: 'short', day: 'numeric' }) : "",
+          date: formatShortUzDate(a.created_at),
           badgeBg: a.type === 'error' ? "bg-red-500/90 text-white" : a.type === 'warning' ? "bg-amber-500/90 text-white" : a.type === 'success' ? "bg-emerald-500/90 text-white" : "bg-blue-600/90 text-white"
         }));
     }
@@ -100,16 +108,15 @@ export default function DashboardPage() {
   const isLoading = !user || subjectsLoading;
 
   const firstName = profile?.full_name?.split(" ")[0] || user?.email?.split("@")[0] || "Student";
-  const hour = new Date().getHours();
-  const greeting = hour < 12 ? "Xayrli tong" : hour < 18 ? "Xayrli kun" : "Xayrli kech";
+  const [greeting, setGreeting] = useState("Xush kelibsiz");
+
+  useEffect(() => {
+    const hour = new Date().getHours();
+    setGreeting(hour < 12 ? "Xayrli tong" : hour < 18 ? "Xayrli kun" : "Xayrli kech");
+  }, []);
 
   return (
     <div className="relative text-slate-800 dark:text-white font-sans pb-4 w-full max-w-full min-w-0 overflow-x-hidden">
-      {/* Standard Ambient background matching all dashboard subpages */}
-      <div className="fixed inset-0 z-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] rounded-full bg-blue-300/20 dark:bg-blue-500/10 blur-[130px]" />
-        <div className="absolute bottom-[-15%] right-[-10%] w-[45%] h-[45%] rounded-full bg-violet-300/20 dark:bg-purple-500/10 blur-[130px]" />
-      </div>
 
       <div className="relative z-10 flex flex-col gap-6 max-w-[1600px] w-full min-w-0 mx-auto pt-1 sm:pt-2">
 

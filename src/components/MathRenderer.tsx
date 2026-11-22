@@ -48,7 +48,7 @@ function isMathExpression(str: string): boolean {
  * Parses text containing LaTeX expressions (e.g. $x^2 + y^2 = z^2$ or \frac{a}{b} or x^{2})
  * while safely preserving literal dollar signs ($100, $50, \$5) and normal text.
  */
-export default function MathRenderer({ content, className = "", inline = false }: MathRendererProps) {
+function MathRenderer({ content, className = "", inline = false }: MathRendererProps) {
   const renderedHtml = useMemo(() => {
     if (!content || typeof content !== 'string') return "";
 
@@ -188,3 +188,5 @@ export default function MathRenderer({ content, className = "", inline = false }
 
   return <span className={`math-content font-sans ${className}`}>{renderedHtml}</span>;
 }
+
+export default React.memo(MathRenderer);

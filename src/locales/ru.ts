@@ -299,7 +299,7 @@ export const ru = {
  "sidebar.shop": "Магазин",
  "sidebar.lessons": "Уроки",
  "sidebar.onlinetests": "Онлайн Тесты",
- "sidebar.results": "Пробный тест",
+ "sidebar.results": "Результаты",
  "sidebar.games": "Игры",
  "sidebar.settings": "Настройки",
  "sidebar.profile": "Профиль",

@@ -26,10 +26,15 @@ export default function StartTestConfirmSheet({
   heading = "Musobaqani boshlaysizmi?",
 }: StartTestConfirmSheetProps) {
   const [portalReady, setPortalReady] = useState(false);
+  const [confirming, setConfirming] = useState(false);
 
   useEffect(() => {
     setPortalReady(true);
   }, []);
+
+  useEffect(() => {
+    setConfirming(false);
+  }, [item]);
 
   // Close on Escape
   useEffect(() => {
@@ -131,11 +136,16 @@ export default function StartTestConfirmSheet({
               <div className="flex items-center gap-2 pt-1">
                 <button
                   type="button"
-                  onClick={() => onConfirm(item)}
-                  className="flex-1 py-3 px-4 bg-amber-500 hover:bg-amber-600 active:scale-95 text-white rounded-2xl text-xs sm:text-sm font-bold transition-all flex items-center justify-center gap-1.5 shadow-sm cursor-pointer"
+                  disabled={confirming}
+                  onClick={() => {
+                    if (confirming) return;
+                    setConfirming(true);
+                    onConfirm(item);
+                  }}
+                  className="flex-1 py-3 px-4 bg-amber-500 hover:bg-amber-600 active:scale-95 text-white rounded-2xl text-xs sm:text-sm font-bold transition-all flex items-center justify-center gap-1.5 shadow-sm cursor-pointer disabled:opacity-60"
                 >
                   <Play size={14} className="fill-white" />
-                  <span>Ha, boshlash</span>
+                  <span>{confirming ? "Boshlanmoqda..." : "Ha, boshlash"}</span>
                 </button>
                 <button
                   type="button"

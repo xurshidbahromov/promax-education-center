@@ -21,7 +21,7 @@ export default function AdminReveal({
     if (!isLoading) {
       const timer = setTimeout(() => {
         setIsFinished(true);
-      }, 900);
+      }, 520);
       return () => clearTimeout(timer);
     }
   }, [isLoading]);
@@ -32,6 +32,8 @@ export default function AdminReveal({
     let rafId = 0;
     let startTs: number | null = null;
     const CYCLE_MS = 2300;
+    let cachedLength = 0;
+    let endPt: DOMPoint | null = null;
 
     const easeInOutSine = (t: number) => -(Math.cos(Math.PI * t) - 1) / 2;
 
@@ -43,22 +45,24 @@ export default function AdminReveal({
       const penEl = penRef.current;
 
       if (pathEl && penEl) {
-        const totalLength = pathEl.getTotalLength();
-        pathEl.style.strokeDasharray = `${totalLength}`;
+        if (cachedLength === 0) {
+          cachedLength = pathEl.getTotalLength();
+          pathEl.style.strokeDasharray = `${cachedLength}`;
+          endPt = pathEl.getPointAtLength(cachedLength);
+        }
 
         if (norm < 0.78) {
           const drawT = easeInOutSine(norm / 0.78);
-          const dist = drawT * totalLength;
+          const dist = drawT * cachedLength;
           const pt = pathEl.getPointAtLength(dist);
           const fadeIn = Math.min(1, norm / 0.08);
 
-          pathEl.style.strokeDashoffset = `${(totalLength - dist).toFixed(1)}`;
+          pathEl.style.strokeDashoffset = `${(cachedLength - dist).toFixed(1)}`;
           pathEl.style.opacity = "1";
           penEl.setAttribute("transform", `translate(${pt.x.toFixed(1)}, ${pt.y.toFixed(1)})`);
           penEl.style.opacity = `${fadeIn.toFixed(2)}`;
-        } else if (norm < 0.9) {
+        } else if (norm < 0.9 && endPt) {
           const holdT = (norm - 0.78) / 0.12;
-          const endPt = pathEl.getPointAtLength(totalLength);
           pathEl.style.strokeDashoffset = "0";
           pathEl.style.opacity = "1";
           penEl.setAttribute(

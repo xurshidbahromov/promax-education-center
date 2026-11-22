@@ -363,7 +363,7 @@ export const uz = {
  "sidebar.shop": "Do'kon",
  "sidebar.lessons": "Darslar",
  "sidebar.onlinetests": "Online Testlar",
- "sidebar.results": "Test sinov imtihoni",
+ "sidebar.results": "Natijalar",
  "sidebar.games": "O'yinlar",
  "sidebar.settings": "Sozlamalar",
  "sidebar.profile": "Profil",

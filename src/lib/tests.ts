@@ -362,9 +362,12 @@ export async function completeTestAttempt(
     return false;
   }
 
-  // Already completed — avoid duplicate RLS errors
+  // Already completed or abandoned — avoid duplicate RLS errors
   if (attempt.status === 'completed') {
     return true;
+  }
+  if (attempt.status === 'abandoned') {
+    return false;
   }
 
   // 2 & 3. Fetch questions and saved responses in parallel
@@ -408,7 +411,7 @@ export async function completeTestAttempt(
   const updates = [];
 
   for (const question of questions) {
-    const pts = Number(question.points) || 1;
+    const pts = question.points != null ? Number(question.points) : 1;
     maxScore += pts;
     const rawAnswer = responseMap.get(question.id) ?? null;
     const normalizedStudent = (rawAnswer || '').trim().toLowerCase();
@@ -457,7 +460,8 @@ export async function completeTestAttempt(
   const { error: updateAttemptError } = await supabase
     .from('test_attempts')
     .update(updatePayload)
-    .eq('id', attemptId);
+    .eq('id', attemptId)
+    .eq('status', 'in_progress');
 
   if (updateAttemptError) {
     console.error('Error completing attempt:', JSON.stringify(updateAttemptError, null, 2));
@@ -521,13 +525,17 @@ export async function getAttemptResults(attemptId: string): Promise<{
 export async function getStudentTestHistory(studentId?: string, testId?: string): Promise<TestAttempt[]> {
  const supabase = createClient();
 
- const { data: { user } } = await supabase.auth.getUser();
- if (!user && !studentId) return [];
+ let targetStudentId = studentId;
+ if (!targetStudentId) {
+   const { data: { user } } = await supabase.auth.getUser();
+   if (!user) return [];
+   targetStudentId = user.id;
+ }
 
  let query = supabase
  .from('test_attempts')
  .select('*')
- .eq('student_id', studentId || user!.id)
+ .eq('student_id', targetStudentId)
  .eq('status', 'completed')
  .order('completed_at', { ascending: false });
 
@@ -617,6 +625,7 @@ export async function updateTest(
  test_type: testData.test_type,
  difficulty_level: testData.difficulty_level,
  duration_minutes: testData.duration_minutes,
+ ...(testData.passing_score !== undefined ? { passing_score: testData.passing_score } : {}),
  is_published: testData.is_published,
  total_questions: testData.questions.length,
  updated_at: new Date().toISOString()
@@ -628,10 +637,7 @@ export async function updateTest(
  return false;
  }
 
- // 2. Handle Questions
- // Identify questions to delete: IDs in DB but not in new List
- if (testData.questions.length > 0) {
- // Fetch existing question IDs
+ // 2. Handle Questions (always reconcile deletions even when emptied)
  const { data: existingQuestions } = await supabase
  .from('questions')
  .select('id')
@@ -641,18 +647,21 @@ export async function updateTest(
  const newIds = testData.questions.filter(q => q.id).map(q => q.id as string);
  const idsToDelete = existingIds.filter(id => !newIds.includes(id));
 
- // Delete removed questions
+ // Delete removed questions scoped to this test
  if (idsToDelete.length > 0) {
  const { error: deleteError } = await supabase
  .from('questions')
  .delete()
+ .eq('test_id', testId)
  .in('id', idsToDelete);
 
  if (deleteError) {
  console.error('Error deleting old questions:', deleteError);
- // Continue... potentially dangerous but we want to try to save the rest
+ return false;
  }
  }
+
+ if (testData.questions.length > 0) {
 
  // Separate existing questions (update) from new questions (insert without id so DB generates UUID)
  const toUpdate = testData.questions
@@ -962,7 +971,7 @@ export async function assignTestToGroup(
     .select('id')
     .eq('test_id', testId)
     .eq('group_id', groupId)
-    .single();
+    .maybeSingle();
   
   if (existing) {
     return { success: false, error: 'Bu test allaqachon ushbu guruhga biriktirilgan' };

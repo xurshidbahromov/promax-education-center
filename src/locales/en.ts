@@ -301,7 +301,7 @@ export const en = {
  "sidebar.shop": "Shop",
  "sidebar.lessons": "Lessons",
  "sidebar.onlinetests": "Online Tests",
- "sidebar.results": "Practice test",
+ "sidebar.results": "Results",
  "sidebar.games": "Game Zone",
  "sidebar.settings": "Settings",
  "sidebar.profile": "Profile",

@@ -241,7 +241,10 @@ export default function DashboardLayout({
  {/* Navigation */}
  <nav className="flex-1 p-4 space-y-1 overflow-y-auto">
  {menuItems.map((item) => {
- const isActive = pathname === item.href;
+ const isActive =
+ item.href === "/dashboard"
+ ? pathname === "/dashboard"
+ : pathname === item.href || pathname.startsWith(`${item.href}/`) || (item.href === "/dashboard/lessons" && pathname.startsWith("/dashboard/subjects"));
  return (
  <Link
  key={item.href}
@@ -281,7 +284,7 @@ export default function DashboardLayout({
   {!isTakeTestPage && (
   <div className="absolute top-3.5 sm:top-4 left-3.5 right-3.5 sm:left-4 sm:right-4 lg:left-auto lg:right-6 z-50 flex items-center justify-between gap-2 lg:justify-end pointer-events-none">
     {/* Mobile Logo Island */}
-    <Link href="/dashboard" className="lg:hidden h-10 sm:h-11 bg-white/85 dark:bg-slate-900/85 backdrop-blur-2xl border border-gray-200/60 dark:border-slate-800/60 rounded-full flex items-center justify-center gap-2 px-3 sm:px-4 shadow-lg shadow-brand-blue/5 pointer-events-auto shrink-0">
+    <Link href="/dashboard" className="lg:hidden h-10 sm:h-11 bg-white/95 dark:bg-slate-900/95 border border-gray-200/70 dark:border-slate-800/80 rounded-full flex items-center justify-center gap-2 px-3 sm:px-4 shadow-md shadow-brand-blue/5 pointer-events-auto shrink-0">
       <div className="relative w-5 h-5 flex-shrink-0">
         <Image src="/favicon.ico" alt="Logo" fill className="object-contain" />
       </div>
@@ -296,7 +299,7 @@ export default function DashboardLayout({
     </Link>
 
     {/* Unified Status Island (Streak, Test Rejimi, Sound & Notifications) */}
-    <div className="h-10 sm:h-11 lg:h-auto bg-white/85 dark:bg-slate-900/85 backdrop-blur-2xl border border-gray-200/60 dark:border-slate-800/60 rounded-full flex items-center justify-center gap-1 sm:gap-1.5 lg:gap-2.5 px-2 sm:px-3 lg:px-4 lg:py-2 shadow-lg lg:shadow-xl shadow-brand-blue/5 pointer-events-auto transition-all duration-300 shrink-0">
+    <div className="h-10 sm:h-11 lg:h-auto bg-white/95 dark:bg-slate-900/95 lg:bg-white/90 lg:dark:bg-slate-900/90 lg:backdrop-blur-md border border-gray-200/70 dark:border-slate-800/80 rounded-full flex items-center justify-center gap-1 sm:gap-1.5 lg:gap-2.5 px-2 sm:px-3 lg:px-4 lg:py-2 shadow-md lg:shadow-lg shadow-brand-blue/5 pointer-events-auto transition-all duration-300 shrink-0">
       <StreakPill />
       <div className="hidden lg:block w-px h-5 bg-slate-200 dark:bg-slate-800" />
       <SidebarBetaWidget variant="pill" />
@@ -321,7 +324,7 @@ export default function DashboardLayout({
  <div className="lg:hidden fixed bottom-3 left-3.5 right-3.5 z-50 flex justify-center pointer-events-none">
  <nav
  aria-label="Asosiy navigatsiya"
- className="bg-white/85 dark:bg-slate-900/85 backdrop-blur-2xl border border-slate-200/70 dark:border-slate-800/70 px-1.5 py-1.5 rounded-[1.75rem] shadow-[0_10px_28px_rgba(15,23,42,0.08)] dark:shadow-[0_10px_28px_rgba(0,0,0,0.4)] w-full max-w-md pointer-events-auto safe-area-pb"
+ className="bg-white/95 dark:bg-slate-900/95 border border-slate-200/80 dark:border-slate-800/80 px-1.5 py-1.5 rounded-[1.75rem] shadow-[0_10px_28px_rgba(15,23,42,0.08)] dark:shadow-[0_10px_28px_rgba(0,0,0,0.4)] w-full max-w-md pointer-events-auto safe-area-pb"
  >
  <div className="grid grid-cols-5 gap-0.5 relative">
  {mobileMenuItems.map((item) => {

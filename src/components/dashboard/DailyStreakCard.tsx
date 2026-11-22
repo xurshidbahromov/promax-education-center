@@ -7,28 +7,31 @@ import { Flame, Sparkles, Coins, Check, X } from "lucide-react";
 import {
   getCachedStreak,
   getCurrentWeekStatus,
-  checkAndUpdateDailyStreak,
   type StreakData,
 } from "@/lib/streak";
+
+const INITIAL_STREAK: StreakData = {
+  currentStreak: 1,
+  longestStreak: 1,
+  lastActiveDate: "",
+  activeDays: [],
+  todayAwarded: false,
+  rewardCoins: 0,
+};
 
 interface DailyStreakCardProps {
   userId?: string;
 }
 
 export default function DailyStreakCard({ userId }: DailyStreakCardProps) {
-  const [streak, setStreak] = useState<StreakData>(() => getCachedStreak(userId));
+  const [streak, setStreak] = useState<StreakData>(INITIAL_STREAK);
   const [expanded, setExpanded] = useState(false);
   const [mounted, setMounted] = useState(false);
   const popoverRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     setMounted(true);
-    if (userId) {
-      checkAndUpdateDailyStreak(userId).then((res) => {
-        setStreak(res.streak);
-        window.dispatchEvent(new CustomEvent("promax_streak_updated"));
-      });
-    }
+    setStreak(getCachedStreak(userId));
 
     const handleUpdate = () => {
       setStreak(getCachedStreak(userId));
@@ -40,17 +43,23 @@ export default function DailyStreakCard({ userId }: DailyStreakCardProps) {
     };
   }, [userId]);
 
-  // Click outside to close modal
+  // Click outside or Escape to close modal
   useEffect(() => {
+    if (!expanded) return;
     const handleClickOutside = (e: MouseEvent) => {
       if (popoverRef.current && !popoverRef.current.contains(e.target as Node)) {
         setExpanded(false);
       }
     };
-    if (expanded) {
-      document.addEventListener("mousedown", handleClickOutside);
-    }
-    return () => document.removeEventListener("mousedown", handleClickOutside);
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setExpanded(false);
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    document.addEventListener("keydown", handleKeyDown);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+      document.removeEventListener("keydown", handleKeyDown);
+    };
   }, [expanded]);
 
   const weekStatus = getCurrentWeekStatus(streak);

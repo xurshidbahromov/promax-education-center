@@ -132,12 +132,12 @@ export async function getAdminTournaments(): Promise<AdminTournament[]> {
     }
   }
 
-  // 3. Database fallback if available
+  // 3. Database fallback if available (lightweight columns without multi-MB base64 question images)
   try {
     const supabase = createClient();
     const { data, error } = await supabase
       .from('tournaments')
-      .select('*')
+      .select('id, title, subject, description, status, start_date, start_time, end_date, end_time, duration_minutes, total_questions, entry_coins, prize_pool, top_prizes, rules, participants_count, is_published, created_at')
       .eq('type', 'national')
       .order('created_at', { ascending: false });
     
@@ -153,19 +153,21 @@ export async function getAdminTournaments(): Promise<AdminTournament[]> {
         endDate: row.end_date || '',
         endTime: row.end_time || '20:00',
         durationMinutes: Number(row.duration_minutes) || 60,
-        totalQuestions: Number(row.total_questions) || (Array.isArray(row.questions) ? row.questions.length : 0),
+        totalQuestions: Number(row.total_questions) || 0,
         entryCoins: Number(row.entry_coins) || 0,
         prizePool: row.prize_pool || '',
         topPrizes: Array.isArray(row.top_prizes) ? row.top_prizes : [],
         rules: Array.isArray(row.rules) ? row.rules : [],
         participantsCount: Number(row.participants_count) || 0,
-        questions: Array.isArray(row.questions) ? row.questions : [],
+        questions: [],
         isPublished: row.is_published ?? true,
         created_at: row.created_at || new Date().toISOString()
       }));
 
       if (typeof window !== 'undefined') {
-        localStorage.setItem('promax_tournaments_v3', JSON.stringify(mapped));
+        try {
+          localStorage.setItem('promax_tournaments_v3', JSON.stringify(mapped));
+        } catch {}
       }
       return mapped;
     }
@@ -356,18 +358,7 @@ export async function registerForTournament(
     }
   }
 
-  // 3. Increment participant count
-  try {
-    const tournament = await getTournamentById(tournamentId);
-    if (tournament) {
-      await saveAdminTournament({
-        ...tournament,
-        participantsCount: (tournament.participantsCount || 0) + 1
-      });
-    }
-  } catch (e) {}
-
-  // 4. Send Telegram registration confirmation in background
+  // 3. Send Telegram registration confirmation in background (participant count is computed live from tournament_registrations)
   if (user.id) {
     try {
       fetch('/api/tournaments/reminders', {
@@ -656,6 +647,7 @@ export async function submitTournamentAttempt(params: {
   const assignedResult = updatedList.find(e => e.user_id === params.userId) || newEntry;
 
   // 1. Submit to server API (reliable backend persistence with admin/bot client)
+  let savedViaApi = false;
   try {
     const res = await fetch('/api/tournaments/leaderboard', {
       method: 'POST',
@@ -674,6 +666,7 @@ export async function submitTournamentAttempt(params: {
       })
     });
     if (res.ok) {
+      savedViaApi = true;
       const data = await res.json();
       if (data.result && Array.isArray(data.leaderboard)) {
         const cleanBoard = data.leaderboard.filter(
@@ -690,28 +683,32 @@ export async function submitTournamentAttempt(params: {
     console.warn('[Tournaments] Leaderboard API submit error:', apiErr);
   }
 
-  // 2. Direct Supabase save fallback
-  try {
-    const supabase = createClient();
-    await supabase.from('tournament_results').upsert({
-      id: attemptId,
-      tournament_id: params.tournamentId,
-      student_id: params.userId,
-      score: assignedResult.score,
-      max_score: assignedResult.max_score,
-      percentage: assignedResult.percentage,
-      time_spent_seconds: assignedResult.time_spent_seconds,
-      answers: params.answers,
-      rank: assignedResult.rank,
-      prize: assignedResult.prize || null,
-      completed_at: new Date().toISOString()
-    });
-  } catch (dbErr) {}
+  // 2. Direct Supabase save fallback ONLY if API submit failed (prevents duplicate DB rows)
+  if (!savedViaApi) {
+    try {
+      const supabase = createClient();
+      await supabase.from('tournament_results').upsert({
+        id: attemptId,
+        tournament_id: params.tournamentId,
+        student_id: params.userId,
+        score: assignedResult.score,
+        max_score: assignedResult.max_score,
+        percentage: assignedResult.percentage,
+        time_spent_seconds: assignedResult.time_spent_seconds,
+        answers: params.answers,
+        rank: assignedResult.rank,
+        prize: assignedResult.prize || null,
+        completed_at: new Date().toISOString()
+      });
+    } catch (dbErr) {}
+  }
 
-  // 3. Keep local cache synced
+  // 3. Keep local cache synced without clobbering fresh server leaderboard
   if (typeof window !== 'undefined') {
     try {
-      localStorage.setItem(`promax_leaderboard_${params.tournamentId}`, JSON.stringify(updatedList));
+      if (!savedViaApi) {
+        localStorage.setItem(`promax_leaderboard_${params.tournamentId}`, JSON.stringify(updatedList));
+      }
       const localKey = `promax_completed_tournaments_${params.userId || 'current'}`;
       const existing = localStorage.getItem(localKey);
       const list: string[] = existing ? JSON.parse(existing) : [];

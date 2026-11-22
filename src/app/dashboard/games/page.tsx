@@ -85,8 +85,8 @@ const UPCOMING_MODES = [
 export default function GameZonePage() {
   const { t } = useLanguage();
   const { data: user } = useCurrentUser();
-  const { data: profile, isLoading, refetch } = useUserProfile(user?.id);
-  const [coins, setCoins] = useState(0);
+  const { data: profile, isLoading } = useUserProfile(user?.id);
+  const [optimisticDelta, setOptimisticDelta] = useState(0);
   const [activeGameId, setActiveGameId] = useState<GameId | null>(null);
   const [bestScores, setBestScores] = useState<Record<GameId, number>>({
     math: 0,
@@ -94,11 +94,7 @@ export default function GameZonePage() {
     vocab: 0,
   });
 
-  useEffect(() => {
-    if (profile) {
-      setCoins(profile.coins || 0);
-    }
-  }, [profile]);
+  const coins = (profile?.coins || 0) + optimisticDelta;
 
   const refreshHighScores = () => {
     setBestScores({
@@ -109,16 +105,14 @@ export default function GameZonePage() {
   };
 
   useEffect(() => {
-    refreshHighScores();
+    const id = requestAnimationFrame(() => {
+      refreshHighScores();
+    });
+    return () => cancelAnimationFrame(id);
   }, []);
 
   return (
     <div className="relative text-slate-800 dark:text-white font-sans pb-8 select-none">
-      {/* Standard Ambient background matching all dashboard subpages */}
-      <div className="fixed inset-0 z-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] rounded-full bg-blue-300/20 dark:bg-blue-500/10 blur-[130px]" />
-        <div className="absolute bottom-[-15%] right-[-10%] w-[45%] h-[45%] rounded-full bg-violet-300/20 dark:bg-purple-500/10 blur-[130px]" />
-      </div>
 
       <div className="relative z-10 flex flex-col gap-6 max-w-[1400px] mx-auto pt-1 sm:pt-2">
         {/* ── HEADER (Shop aligned) ── */}
@@ -253,7 +247,7 @@ export default function GameZonePage() {
             {/* ── COMPACT UPCOMING MULTIPLAYER STRIP ── */}
             <section className="space-y-3 pt-1">
               <h2 className="text-[12px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest">
-                Yaqinlashayotgan rejmlar
+                Yaqinlashayotgan rejimlar
               </h2>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 {UPCOMING_MODES.map((mode) => {
@@ -295,11 +289,10 @@ export default function GameZonePage() {
         onClose={() => {
           setActiveGameId(null);
           refreshHighScores();
+          setOptimisticDelta(0);
         }}
         onCoinsEarned={(newCoins) => {
-          setCoins((prev) => prev + newCoins);
-          refetch();
-          window.dispatchEvent(new CustomEvent("promax_coins_updated"));
+          setOptimisticDelta((prev) => prev + newCoins);
         }}
       />
     </div>

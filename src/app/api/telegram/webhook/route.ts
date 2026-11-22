@@ -4,6 +4,7 @@ import {
   verifyWebhookSignature,
   sendMessage,
   answerCallbackQuery,
+  escapeTelegramHtml,
 } from '@/lib/telegram/bot';
 import {
   buildWelcomeMessage,
@@ -47,46 +48,56 @@ export async function POST(request: NextRequest) {
       const phoneClean = rawPhone.replace(/\D/g, '');
       const phoneWithPlus = phoneClean ? '+' + phoneClean : '';
 
+      // Security: strictly verify the contact belongs to the Telegram sender (prevents contact-card spoofing)
+      if (!telegramId || !msg.contact.user_id || msg.contact.user_id !== telegramId || phoneClean.length < 9) {
+        await sendMessage(
+          chatId,
+          `⚠️ Iltimos, faqat o'zingizning telefon raqamingizni pastdagi <b>"📱 Telefon raqamni ulashish"</b> tugmasi orqali yuboring.`,
+          { reply_markup: buildReplyKeyboard(false) }
+        );
+        return NextResponse.json({ ok: true });
+      }
+
       // 1. If the user shared their own contact and already has a profile linked via telegram_id,
       // save their verified phone number directly into profiles.phone so Admin CRM sees it!
       let ownProfileUpdated = false;
-      if (phoneWithPlus && telegramId && (!msg.contact.user_id || msg.contact.user_id === telegramId)) {
-        const { data: ownProfile } = await supabase
-          .from('profiles')
-          .select('id, full_name, phone')
-          .eq('telegram_id', telegramId)
-          .maybeSingle();
+      const { data: ownProfile } = await supabase
+        .from('profiles')
+        .select('id, full_name, phone')
+        .eq('telegram_id', telegramId)
+        .maybeSingle();
 
-        if (ownProfile) {
-          await supabase
-            .from('profiles')
-            .update({
-              phone: phoneWithPlus,
-              telegram_username: msg.from?.username || null,
-              updated_at: new Date().toISOString(),
-            })
-            .eq('id', ownProfile.id);
-          ownProfileUpdated = true;
-        }
+      if (ownProfile) {
+        await supabase
+          .from('profiles')
+          .update({
+            phone: phoneWithPlus,
+            telegram_username: msg.from?.username || null,
+            updated_at: new Date().toISOString(),
+          })
+          .eq('id', ownProfile.id);
+        ownProfileUpdated = true;
       }
 
       // 2. Also check parent_phone / student phone matches for parent linking
-      const { data: matchedStudents } = phoneClean
-        ? await supabase
-            .from('profiles')
-            .select('id, full_name, phone, parent_name, parent_phone')
-            .or(`parent_phone.ilike.%${phoneClean}%,phone.ilike.%${phoneClean}%`)
-        : { data: null };
+      const last9 = phoneClean.slice(-9);
+      const { data: matchedStudents } = await supabase
+        .from('profiles')
+        .select('id, full_name, phone, parent_name, parent_phone, telegram_id, role')
+        .or(`parent_phone.ilike.%${last9}%,phone.ilike.%${last9}%`);
 
       if (matchedStudents && matchedStudents.length > 0) {
         const parentMatches = matchedStudents.filter((s: any) => {
           const pClean = (s.parent_phone || '').replace(/\D/g, '');
-          return pClean && pClean === phoneClean;
+          return pClean.length >= 9 && pClean.slice(-9) === last9;
         });
 
         for (const student of matchedStudents) {
           const studentCleanPhone = (student.phone || '').replace(/\D/g, '');
-          if (studentCleanPhone && studentCleanPhone === phoneClean) {
+          const isPrivilegedRole = ['admin', 'superadmin', 'staff', 'teacher'].includes(student.role || '');
+          const alreadyLinkedToAnother = Boolean(student.telegram_id && student.telegram_id !== telegramId);
+
+          if (studentCleanPhone.length >= 9 && studentCleanPhone.slice(-9) === last9 && !alreadyLinkedToAnother && !isPrivilegedRole) {
             await supabase.from('profiles').update({
               telegram_id: telegramId,
               telegram_username: msg.from?.username || null,
@@ -107,8 +118,8 @@ export async function POST(request: NextRequest) {
         }
 
         if (parentMatches.length > 0) {
-          const studentNames = parentMatches.map((s: any) => s.full_name || "O'quvchi");
-          const parentName = msg.contact.first_name || 'Ota-ona';
+          const studentNames = parentMatches.map((s: any) => escapeTelegramHtml(s.full_name || "O'quvchi"));
+          const parentName = escapeTelegramHtml(msg.contact.first_name || 'Ota-ona');
           await sendMessage(chatId, buildParentLinkSuccessMessage(parentName, studentNames), {
             reply_markup: buildParentReplyKeyboard()
           });
@@ -207,7 +218,8 @@ export async function POST(request: NextRequest) {
           const { count: testsCompleted } = await supabase
             .from('test_attempts')
             .select('*', { count: 'exact', head: true })
-            .eq('student_id', profile.id);
+            .eq('student_id', profile.id)
+            .eq('status', 'completed');
 
           const { count: higherCoins } = await supabase
             .from('profiles')
@@ -229,7 +241,7 @@ export async function POST(request: NextRequest) {
       } else {
         const { data: tests } = await supabase
           .from('tests')
-          .select('id, title, time_limit, is_published')
+          .select('id, title, duration_minutes, is_published')
           .eq('is_published', true)
           .order('created_at', { ascending: false })
           .limit(5);
@@ -240,7 +252,7 @@ export async function POST(request: NextRequest) {
           });
         } else {
           const listText = tests.map((t: any, i: number) =>
-            `${i + 1}. 📝 <b>${t.title}</b> ${t.time_limit ? `(${t.time_limit} daqiqa)` : ''}`
+            `${i + 1}. 📝 <b>${escapeTelegramHtml(t.title || 'Test')}</b> ${t.duration_minutes ? `(${t.duration_minutes} daqiqa)` : ''}`
           ).join('\n');
           await sendMessage(
             chatId,
@@ -446,7 +458,7 @@ export async function POST(request: NextRequest) {
         const studentIds = parentLinks.map((p: any) => p.student_id);
         const { data: attempts } = await supabase
           .from('test_attempts')
-          .select('score, max_score, completed_at, student:profiles(full_name), test:tests(title)')
+          .select('score, max_score, completed_at, student:profiles!test_attempts_student_id_fkey(full_name), test:tests(title)')
           .in('student_id', studentIds)
           .eq('status', 'completed')
           .order('completed_at', { ascending: false })
@@ -458,7 +470,7 @@ export async function POST(request: NextRequest) {
           const listText = attempts.map((a: any) => {
             const pct = Math.round(((a.score || 0) / (a.max_score || 100)) * 100);
             const emoji = pct >= 80 ? '🏆' : pct >= 60 ? '✅' : '💪';
-            return `${emoji} <b>${(a.student as any)?.full_name}</b>\n   📝 ${(a.test as any)?.title}\n   📊 ${a.score}/${a.max_score} (${pct}%)`;
+            return `${emoji} <b>${escapeTelegramHtml((a.student as any)?.full_name || "O'quvchi")}</b>\n   📝 ${escapeTelegramHtml((a.test as any)?.title || 'Test')}\n   📊 ${a.score}/${a.max_score} (${pct}%)`;
           }).join('\n\n');
           await sendMessage(chatId, `📊 <b>Farzandingizning so'nggi natijalari:</b>\n\n${listText}`, {
             reply_markup: buildParentReplyKeyboard()
@@ -565,13 +577,15 @@ export async function POST(request: NextRequest) {
 
     if (data && deepLinks[data]) {
       await answerCallbackQuery(query.id, `${labels[data]} ochilmoqda...`);
-      await sendMessage(chatId, `${labels[data]} uchun Mini App ni oching:`, {
-        reply_markup: {
-          inline_keyboard: [
-            [{ text: '📱 Mini App ochish', web_app: { url: deepLinks[data] } }]
-          ]
-        }
-      });
+      if (chatId) {
+        await sendMessage(chatId, `${labels[data]} uchun Mini App ni oching:`, {
+          reply_markup: {
+            inline_keyboard: [
+              [{ text: '📱 Mini App ochish', web_app: { url: deepLinks[data] } }]
+            ]
+          }
+        });
+      }
     } else {
       await answerCallbackQuery(query.id);
     }

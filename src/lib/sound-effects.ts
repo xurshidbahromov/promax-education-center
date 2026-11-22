@@ -37,11 +37,12 @@ class PromaxSoundEngine {
     if (typeof window === "undefined") return null;
     try {
       if (!this.ctx) {
-        const AudioCtx = window.AudioContext || (window as any).webkitAudioContext;
+        const AudioCtx = window.AudioContext || (window as unknown as { webkitAudioContext?: typeof AudioContext }).webkitAudioContext;
         if (!AudioCtx) return null;
         this.ctx = new AudioCtx();
       }
-      if (this.ctx.state === "suspended") {
+      const state = this.ctx.state as string;
+      if (state === "suspended" || state === "interrupted") {
         this.ctx.resume().catch(() => {});
       }
       return this.ctx;
@@ -59,7 +60,7 @@ class PromaxSoundEngine {
     delay = 0
   ) {
     const ctx = this.getContext();
-    if (!ctx) return;
+    if (!ctx || ctx.state !== "running") return;
     try {
       const now = ctx.currentTime + delay;
       const osc = ctx.createOscillator();
@@ -74,6 +75,12 @@ class PromaxSoundEngine {
       gain.gain.exponentialRampToValueAtTime(0.0001, now + duration);
       osc.connect(gain);
       gain.connect(ctx.destination);
+      osc.onended = () => {
+        try {
+          osc.disconnect();
+          gain.disconnect();
+        } catch {}
+      };
       osc.start(now);
       osc.stop(now + duration + 0.01);
     } catch {}

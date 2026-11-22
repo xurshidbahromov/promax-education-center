@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { Phone, ShieldCheck, X, Loader2, Send } from "lucide-react";
@@ -13,6 +13,9 @@ const DISMISS_KEY = "promax_phone_prompt_dismissed_v1";
 
 function formatUzPhone(value: string): string {
   const cleaned = value.replace(/\D/g, "");
+  if (cleaned.length <= 3 && "998".startsWith(cleaned)) {
+    return "+998 ";
+  }
   let digits = cleaned.startsWith("998") ? cleaned : "998" + cleaned;
   digits = digits.slice(0, 12);
   let formatted = "+998";
@@ -36,21 +39,39 @@ export default function PhoneVerifyModal() {
   const [submitting, setSubmitting] = useState(false);
   const [waitingTelegram, setWaitingTelegram] = useState(false);
 
+  const pollIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const tgSafetyTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const clearTelegramTimers = () => {
+    if (pollIntervalRef.current) {
+      clearInterval(pollIntervalRef.current);
+      pollIntervalRef.current = null;
+    }
+    if (tgSafetyTimerRef.current) {
+      clearTimeout(tgSafetyTimerRef.current);
+      tgSafetyTimerRef.current = null;
+    }
+  };
+
   useEffect(() => {
     setMounted(true);
-    const tg = (window as any)?.Telegram?.WebApp;
-    const isInTelegram = Boolean(tg && tg.initData && typeof tg.requestContact === "function");
+    const tg = (window as unknown as { Telegram?: { WebApp?: { initData?: string; requestContact?: (cb: (shared: boolean) => void) => void; isVersionAtLeast?: (v: string) => boolean } } })?.Telegram?.WebApp;
+    const isSupportedVersion = typeof tg?.isVersionAtLeast === "function" ? tg.isVersionAtLeast("6.9") : true;
+    const isInTelegram = Boolean(tg && tg.initData && typeof tg.requestContact === "function" && isSupportedVersion);
     setHasTgRequestContact(isInTelegram);
     if (!isInTelegram) {
       setShowManualForm(true);
     }
+    return () => {
+      clearTelegramTimers();
+    };
   }, []);
 
   useEffect(() => {
     if (!mounted || isLoading || !profile || !user?.id) return;
 
-    const existingPhone = ((profile as any).phone || "").replace(/\D/g, "");
-    const role = (profile as any).role || "student";
+    const existingPhone = (profile.phone || "").replace(/\D/g, "");
+    const role = profile.role || "student";
     const isAdmin = ["admin", "staff", "superadmin", "teacher"].includes(role);
 
     if (existingPhone.length >= 9 || isAdmin) {
@@ -70,6 +91,8 @@ export default function PhoneVerifyModal() {
   }, [mounted, isLoading, profile, user?.id]);
 
   const handleDismiss = () => {
+    clearTelegramTimers();
+    setWaitingTelegram(false);
     setIsOpen(false);
     try {
       sessionStorage.setItem(DISMISS_KEY, "1");
@@ -77,15 +100,27 @@ export default function PhoneVerifyModal() {
   };
 
   const handleTelegramShare = () => {
-    const tg = (window as any)?.Telegram?.WebApp;
+    const tg = (window as unknown as { Telegram?: { WebApp?: { requestContact?: (cb: (shared: boolean) => void) => void } } })?.Telegram?.WebApp;
     if (!tg || typeof tg.requestContact !== "function") {
       setShowManualForm(true);
       return;
     }
 
+    clearTelegramTimers();
     setWaitingTelegram(true);
+
+    // Safety fallback if Telegram client never invokes callback (e.g. user swipes native sheet away)
+    tgSafetyTimerRef.current = setTimeout(() => {
+      setWaitingTelegram(false);
+      setShowManualForm(true);
+    }, 15000);
+
     try {
       tg.requestContact((shared: boolean) => {
+        if (tgSafetyTimerRef.current) {
+          clearTimeout(tgSafetyTimerRef.current);
+          tgSafetyTimerRef.current = null;
+        }
         if (!shared) {
           setWaitingTelegram(false);
           setShowManualForm(true);
@@ -94,19 +129,24 @@ export default function PhoneVerifyModal() {
 
         // Poll profile briefly while webhook saves the shared phone into Supabase
         let attempts = 0;
-        const poll = setInterval(async () => {
+        pollIntervalRef.current = setInterval(async () => {
           attempts++;
           const res = await refetch();
-          const savedPhone = ((res.data as any)?.phone || "").replace(/\D/g, "");
+          const savedPhone = (res.data?.phone || "").replace(/\D/g, "");
           if (savedPhone.length >= 9) {
-            clearInterval(poll);
+            clearTelegramTimers();
+            try { sessionStorage.setItem(DISMISS_KEY, "1"); } catch {}
+            if (user?.id) {
+              queryClient.invalidateQueries({ queryKey: ["fullUserProfile", user.id] });
+            }
             setWaitingTelegram(false);
             setIsOpen(false);
             soundFx.playSuccess();
             toast.success("Telefon raqamingiz tasdiqlandi!");
             window.dispatchEvent(new CustomEvent("promax_profile_updated"));
           } else if (attempts >= 6) {
-            clearInterval(poll);
+            clearTelegramTimers();
+            try { sessionStorage.setItem(DISMISS_KEY, "1"); } catch {}
             setWaitingTelegram(false);
             setIsOpen(false);
             toast.success("So'rov yuborildi — raqamingiz tez orada saqlanadi!");
@@ -114,6 +154,7 @@ export default function PhoneVerifyModal() {
         }, 900);
       });
     } catch {
+      clearTelegramTimers();
       setWaitingTelegram(false);
       setShowManualForm(true);
     }
@@ -140,8 +181,10 @@ export default function PhoneVerifyModal() {
         return;
       }
 
+      try { sessionStorage.setItem(DISMISS_KEY, "1"); } catch {}
       if (user?.id) {
         queryClient.invalidateQueries({ queryKey: ["userProfile", user.id] });
+        queryClient.invalidateQueries({ queryKey: ["fullUserProfile", user.id] });
       }
       window.dispatchEvent(new CustomEvent("promax_profile_updated"));
       soundFx.playSuccess();
@@ -154,10 +197,11 @@ export default function PhoneVerifyModal() {
     }
   };
 
-  if (!mounted || !isOpen) return null;
+  if (!mounted) return null;
 
   return createPortal(
     <AnimatePresence>
+      {isOpen && (
       <motion.div
         key="phone-verify-sheet"
         initial={{ opacity: 0 }}
@@ -277,6 +321,7 @@ export default function PhoneVerifyModal() {
           </div>
         </motion.div>
       </motion.div>
+      )}
     </AnimatePresence>,
     document.body
   );

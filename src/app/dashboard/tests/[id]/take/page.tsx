@@ -237,13 +237,9 @@ export default function TakeTestPage() {
  const [checkingStep, setCheckingStep] = useState(1);
  const [checkingProgress, setCheckingProgress] = useState(0);
  const [showDetailedResults, setShowDetailedResults] = useState(false);
-  const [isPracticeMode, setIsPracticeMode] = useState(() => {
-    if (typeof window !== "undefined") {
-      const params = new URLSearchParams(window.location.search);
-      return params.get("mode") === "practice" || params.get("retake") === "true";
-    }
-    return false;
-  });
+  const [isPracticeMode, setIsPracticeMode] = useState(
+    () => searchParams?.get("mode") === "practice" || searchParams?.get("retake") === "true"
+  );
   const [resultsFilter, setResultsFilter] = useState<"all" | "correct" | "wrong">("all");
   const [calculatedSummary, setCalculatedSummary] = useState<{
     totalScore: number;
@@ -259,10 +255,25 @@ export default function TakeTestPage() {
   const autoSaveInterval = useRef<NodeJS.Timeout | null>(null);
   const questionStartTime = useRef<number>(Date.now());
   const lastSavedAnswersRef = useRef<Record<string, string>>({});
+  const answersRef = useRef<Record<string, string>>({});
+  const isSubmittingRef = useRef<boolean>(false);
+  const autoSubmittedRef = useRef<boolean>(false);
+  const isMountedRef = useRef<boolean>(true);
   const tabSwitchesRef = useRef<number>(0);
   const allQuestionsRef = useRef<Question[]>([]);
   const [showCertificateModal, setShowCertificateModal] = useState(false);
   const [studentDisplayName, setStudentDisplayName] = useState("Promax O'quvchisi");
+
+  useEffect(() => {
+    answersRef.current = answers;
+  }, [answers]);
+
+  useEffect(() => {
+    isMountedRef.current = true;
+    return () => {
+      isMountedRef.current = false;
+    };
+  }, []);
 
   // Keep a backup of the full question set for full retakes after a mistakes-only session
   useEffect(() => {
@@ -278,6 +289,8 @@ export default function TakeTestPage() {
         if (zoomedImage) {
           setZoomedImage(null);
           setZoomScale(1);
+        } else if (showCertificateModal) {
+          setShowCertificateModal(false);
         } else if (showFormulaModal) {
           setShowFormulaModal(false);
         } else if (showConfirmModal) {
@@ -287,7 +300,7 @@ export default function TakeTestPage() {
       }
 
       // Disable question shortcuts if modals are open, results are showing, or user is typing in an input/textarea
-      if (zoomedImage || showFormulaModal || showConfirmModal || showDetailedResults || isCheckingResults || loading) {
+      if (zoomedImage || showCertificateModal || showFormulaModal || showConfirmModal || showDetailedResults || isCheckingResults || loading) {
         return;
       }
       const target = e.target as HTMLElement | null;
@@ -326,7 +339,7 @@ export default function TakeTestPage() {
     };
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [zoomedImage, showFormulaModal, showConfirmModal, showDetailedResults, isCheckingResults, loading, questions, currentQuestionIndex]);
+  }, [zoomedImage, showCertificateModal, showFormulaModal, showConfirmModal, showDetailedResults, isCheckingResults, loading, questions, currentQuestionIndex]);
 
   // Anti-cheat tab switch detector for official Olympiad / International competitions
   useEffect(() => {
@@ -336,7 +349,7 @@ export default function TakeTestPage() {
     const handleVisibilityChange = () => {
       if (document.hidden) {
         tabSwitchesRef.current += 1;
-        toast(`⚠️ Musobaqa vaqtida oynadan chiqish qayd etildi (${tabSwitchesRef.current}-marta). Diqqatni testda saqlang!`, {
+        toast(`Musobaqa vaqtida oynadan chiqish qayd etildi (${tabSwitchesRef.current}-marta). Diqqatni testda saqlang!`, {
           duration: 4000,
         });
       }
@@ -365,7 +378,7 @@ export default function TakeTestPage() {
           const completedIntl = await getUserCompletedInternationalTournamentIds(currentUser?.id);
           const isPractice = searchParams?.get("mode") === "practice" || searchParams?.get("retake") === "true";
           if (completedIntl.includes(testId) && !isPractice) {
-            toast.success("Siz ushbu xalqaro musobaqani allaqachon topshirgansiz! Natijangiz saqlangan.");
+            toast.success("Siz ushbu SAT imtihonini allaqachon topshirgansiz! Natijangiz saqlangan.");
             router.replace(`/dashboard/international?tab=leaderboard&id=${testId}`);
             return;
           }
@@ -380,7 +393,7 @@ export default function TakeTestPage() {
             const isFinishedIntl = intlData.status === "finished" || (intlData.endDate && new Date(`${intlData.endDate}T${intlData.endTime || '23:59'}`).getTime() < Date.now());
             if (isPractice || isFinishedIntl || completedIntl.includes(testId)) {
               setIsPracticeMode(true);
-              toast("Mashq rejimi: javoblaringiz rasmiy reytingga ta'sir qilmaydi.", { icon: "🎯", duration: 3500 });
+              toast("Mashq rejimi: javoblaringiz rasmiy reytingga ta'sir qilmaydi.", { duration: 3500 });
             }
 
             setTournamentData(intlData);
@@ -441,7 +454,7 @@ export default function TakeTestPage() {
             const isFinishedTourn = tData.status === "finished" || (tData.endDate && new Date(`${tData.endDate}T${tData.endTime || '23:59'}`).getTime() < Date.now());
             if (isPractice || isFinishedTourn || completedOlympiads.includes(testId)) {
               setIsPracticeMode(true);
-              toast("Mashq rejimi: javoblaringiz rasmiy reytingga ta'sir qilmaydi.", { icon: "🎯", duration: 3500 });
+              toast("Mashq rejimi: javoblaringiz rasmiy reytingga ta'sir qilmaydi.", { duration: 3500 });
             }
 
             setTournamentData(tData);
@@ -637,46 +650,53 @@ export default function TakeTestPage() {
  }
 
  loadTestAndStart();
- }, [testId, router, isOlympiadParam]);
+ }, [testId, router, isOlympiadParam, isInternationalParam]);
 
- // Timer countdown
+ const isTimerActive =
+   timeRemaining !== null &&
+   timeRemaining > 0 &&
+   !submitting &&
+   !isCheckingResults &&
+   !showDetailedResults;
+
+ // Timer countdown (single steady 1s interval; stops immediately when submitted or viewing results)
  useEffect(() => {
- if (timeRemaining === null || timeRemaining <= 0) return;
+   if (!isTimerActive) return;
 
- const interval = setInterval(() => {
- setTimeRemaining(prev => {
- if (prev === null || prev <= 0) {
- handleAutoSubmit();
- return 0;
- }
- return prev - 1;
- });
- }, 1000);
+   const interval = setInterval(() => {
+     setTimeRemaining((prev) => {
+       if (prev === null || prev <= 1) return 0;
+       return prev - 1;
+     });
+   }, 1000);
 
- return () => clearInterval(interval);
- }, [timeRemaining]);
+   return () => clearInterval(interval);
+ }, [isTimerActive]);
 
- // Auto-save answers
+ // Trigger auto-submit cleanly in a separate effect when timer hits 0
  useEffect(() => {
- if (!attemptId || submitting) return;
+   if (
+     timeRemaining === 0 &&
+     attemptId &&
+     !loading &&
+     !submitting &&
+     !isCheckingResults &&
+     !showDetailedResults &&
+     !autoSubmittedRef.current
+   ) {
+     autoSubmittedRef.current = true;
+     handleAutoSubmit();
+   }
+ // eslint-disable-next-line react-hooks/exhaustive-deps
+ }, [timeRemaining, attemptId, loading, submitting, isCheckingResults, showDetailedResults]);
 
- autoSaveInterval.current = setInterval(() => {
- saveAnswers();
- }, 5000); // Save every 5 seconds
-
- return () => {
- if (autoSaveInterval.current) {
- clearInterval(autoSaveInterval.current);
- }
- };
- }, [attemptId, answers, submitting]);
-
-  const saveAnswers = useCallback(async () => {
-    if (!attemptId || Object.keys(answers).length === 0) return;
+ const saveAnswers = useCallback(async () => {
+    const currentAnswers = answersRef.current;
+    if (!attemptId || Object.keys(currentAnswers).length === 0) return;
 
     // Compute only answers that changed since last save (prevents N+1 polling storm)
     const dirtyAnswers: Record<string, string> = {};
-    for (const [qId, ans] of Object.entries(answers)) {
+    for (const [qId, ans] of Object.entries(currentAnswers)) {
       if (lastSavedAnswersRef.current[qId] !== ans) {
         dirtyAnswers[qId] = ans;
       }
@@ -688,9 +708,11 @@ export default function TakeTestPage() {
     try {
       if (isOlympiad || isInternational || isPracticeMode) {
         if (typeof window !== 'undefined') {
-          localStorage.setItem(`promax_answers_${testId}`, JSON.stringify(answers));
+          try {
+            localStorage.setItem(`promax_answers_${testId}`, JSON.stringify(currentAnswers));
+          } catch {}
         }
-        lastSavedAnswersRef.current = { ...answers };
+        lastSavedAnswersRef.current = { ...currentAnswers };
       } else {
         const ok = await submitAnswersBatch(attemptId, dirtyAnswers);
         if (ok) {
@@ -700,9 +722,25 @@ export default function TakeTestPage() {
     } catch (error) {
       console.error("Error auto-saving:", error);
     } finally {
-      setAutoSaving(false);
+      if (isMountedRef.current) setAutoSaving(false);
     }
-  }, [attemptId, answers, isOlympiad, isInternational, isPracticeMode, testId]);
+  }, [attemptId, isOlympiad, isInternational, isPracticeMode, testId]);
+
+ // Auto-save answers every 5 seconds without resetting on every click/keystroke
+ useEffect(() => {
+   if (!attemptId || submitting || showDetailedResults) return;
+
+   autoSaveInterval.current = setInterval(() => {
+     saveAnswers();
+   }, 5000);
+
+   return () => {
+     if (autoSaveInterval.current) {
+       clearInterval(autoSaveInterval.current);
+       autoSaveInterval.current = null;
+     }
+   };
+ }, [attemptId, submitting, showDetailedResults, saveAnswers]);
 
   const handleAnswerChange = (questionId: string, answer: string) => {
   setAnswers(prev => ({
@@ -724,10 +762,14 @@ export default function TakeTestPage() {
   };
 
   const runEvaluationAndShowResults = async (timeSpent: number) => {
+    if (isSubmittingRef.current) return;
+    isSubmittingRef.current = true;
     setSubmitting(true);
     setIsCheckingResults(true);
     setCheckingStep(1);
     setCheckingProgress(25);
+
+    const latestAnswers = answersRef.current;
 
     try {
       await saveAnswers();
@@ -743,7 +785,7 @@ export default function TakeTestPage() {
     questions.forEach((q) => {
       const pts = Number(q.points) || (isInternational ? 10 : isOlympiad ? 3.1 : 1);
       maxScore += pts;
-      const studentAns = (answers[q.id] || "").trim().toLowerCase();
+      const studentAns = (latestAnswers[q.id] || "").trim().toLowerCase();
       const correctAns = (q.correct_answer || "").trim().toLowerCase();
 
       if (!studentAns) {
@@ -785,7 +827,7 @@ export default function TakeTestPage() {
 
       const studentName = profileData?.full_name || userData?.user?.user_metadata?.full_name || "O'quvchi";
       const studentAvatar = profileData?.avatar_url || userData?.user?.user_metadata?.avatar_url || null;
-      setStudentDisplayName(studentName);
+      if (isMountedRef.current) setStudentDisplayName(studentName);
 
       if (!isPracticeMode) {
         if (isInternational) {
@@ -804,11 +846,11 @@ export default function TakeTestPage() {
             userId: userData?.user?.id || `anon_${Date.now()}`,
             studentName,
             studentAvatar,
-            answers,
+            answers: latestAnswers,
             timeSpentSeconds: timeSpent
           });
         } else {
-          const ok = await completeTestAttempt(attemptId || `attempt_${testId}`, timeSpent, answers);
+          const ok = await completeTestAttempt(attemptId || `attempt_${testId}`, timeSpent, latestAnswers);
           if (ok && typeof window !== "undefined") {
             window.dispatchEvent(new CustomEvent("promax_coins_updated"));
           }
@@ -820,14 +862,15 @@ export default function TakeTestPage() {
 
     // Smooth, polished transition (1200ms)
     await new Promise((r) => setTimeout(r, 1200));
+    if (!isMountedRef.current) return;
     setIsCheckingResults(false);
     setShowDetailedResults(true);
     setSubmitting(false);
   };
 
   const handleAutoSubmit = async () => {
-    if (!attemptId || submitting || isCheckingResults || showDetailedResults) return;
-    toast("Vaqt tugadi! Natijalar tekshirilmoqda...", { icon: "⏱️" });
+    if (!attemptId || isSubmittingRef.current || submitting || isCheckingResults || showDetailedResults) return;
+    toast("Vaqt tugadi! Natijalar tekshirilmoqda...");
     const timeSpent = test?.duration_minutes ? test.duration_minutes * 60 : 0;
     await runEvaluationAndShowResults(timeSpent);
   };
@@ -837,19 +880,22 @@ export default function TakeTestPage() {
   };
 
   const handleConfirmSubmit = async () => {
-    if (!attemptId) return;
+    if (!attemptId || isSubmittingRef.current || submitting) return;
     setShowConfirmModal(false);
     const timeSpent = test?.duration_minutes ? (test.duration_minutes * 60 - (timeRemaining || 0)) : 0;
     await runEvaluationAndShowResults(timeSpent);
-    soundFx.playCelebrate();
+    if (isMountedRef.current) soundFx.playCelebrate();
   };
 
   const handlePracticeRetake = () => {
+    isSubmittingRef.current = false;
+    autoSubmittedRef.current = false;
     if (allQuestionsRef.current.length > 0) {
       setQuestions(allQuestionsRef.current);
     }
     setIsPracticeMode(true);
     setAnswers({});
+    answersRef.current = {};
     lastSavedAnswersRef.current = {};
     setMarkedForReview(new Set());
     setCurrentQuestionIndex(0);
@@ -859,7 +905,7 @@ export default function TakeTestPage() {
     if (typeof window !== "undefined") {
       window.scrollTo({ top: 0, behavior: "smooth" });
     }
-    toast.success("Mashq rejimi boshlandi! O'zingizni sinab ko'ring.", { icon: "🎯" });
+    toast.success("Mashq rejimi boshlandi! O'zingizni sinab ko'ring.");
   };
 
   const handleMistakesRetake = () => {
@@ -878,9 +924,12 @@ export default function TakeTestPage() {
       return;
     }
 
+    isSubmittingRef.current = false;
+    autoSubmittedRef.current = false;
     setQuestions(mistakeQs);
     setIsPracticeMode(true);
     setAnswers({});
+    answersRef.current = {};
     lastSavedAnswersRef.current = {};
     setMarkedForReview(new Set());
     setCurrentQuestionIndex(0);
@@ -890,7 +939,7 @@ export default function TakeTestPage() {
     if (typeof window !== "undefined") {
       window.scrollTo({ top: 0, behavior: "smooth" });
     }
-    toast.success(`Xatolar ustida ishlash (${mistakeQs.length} ta savol) boshlandi!`, { icon: "🧠" });
+    toast.success(`Xatolar ustida ishlash (${mistakeQs.length} ta savol) boshlandi!`);
   };
 
 
@@ -989,7 +1038,7 @@ export default function TakeTestPage() {
             <div className="flex-1 space-y-2.5 text-center md:text-left w-full">
               <div className="flex flex-wrap items-center justify-center md:justify-start gap-2">
                 <span className="text-[11px] font-extrabold uppercase tracking-widest text-slate-400 dark:text-slate-500">
-                  {isInternational ? (tournamentData?.categoryLabel || "Xalqaro Musobaqa") : isOlympiad ? (tournamentData?.subject || "Olimpiada") : "Test Natijasi"}
+                  {isInternational ? (tournamentData?.categoryLabel || "SAT") : isOlympiad ? (tournamentData?.subject || "Milliy sertifikat") : "Test Natijasi"}
                 </span>
                 <span className={`inline-flex items-center gap-1 text-[11px] font-bold px-2.5 py-0.5 rounded-full ${
                   isExcellent
@@ -1264,7 +1313,7 @@ export default function TakeTestPage() {
               <div
                 key={q.id}
                 id={`review-q-${q.id}`}
-                className={`bg-white/85 dark:bg-slate-900/85 backdrop-blur-xl rounded-[24px] sm:rounded-[28px] border border-white/80 dark:border-slate-800 border-l-4 ${
+                className={`bg-white/95 dark:bg-slate-900/95 rounded-[24px] sm:rounded-[28px] border border-slate-200/70 dark:border-slate-800 border-l-4 ${
                   isCorrect
                     ? "border-l-emerald-500"
                     : isWrong
@@ -1647,10 +1696,6 @@ export default function TakeTestPage() {
 
       {!loading && test && currentQuestion && (
     <div className="relative min-h-screen text-slate-800 dark:text-white font-sans bg-transparent pb-24 md:pb-0">
-      <div className="fixed inset-0 z-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] rounded-full bg-blue-300/20 dark:bg-blue-500/10 blur-[130px]" />
-        <div className="absolute bottom-[-15%] right-[-10%] w-[45%] h-[45%] rounded-full bg-violet-300/20 dark:bg-purple-500/10 blur-[130px]" />
-      </div>
 
       {showDetailedResults && calculatedSummary ? (
         renderDetailedResults()
@@ -2116,8 +2161,14 @@ export default function TakeTestPage() {
 
   {/* ── SAT / MATH FORMULA REFERENCE SHEET MODAL ── */}
   {showFormulaModal && (
-    <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-md flex items-center justify-center z-50 p-4">
-      <div className="bg-white dark:bg-slate-900 rounded-[28px] p-6 sm:p-7 max-w-lg w-full border border-white/80 dark:border-slate-800/80 shadow-2xl space-y-4 max-h-[85vh] overflow-y-auto">
+    <div
+      onClick={() => setShowFormulaModal(false)}
+      className="fixed inset-0 bg-slate-950/55 backdrop-blur-[3px] flex items-center justify-center z-[60] p-4"
+    >
+      <div
+        onClick={(e) => e.stopPropagation()}
+        className="bg-white dark:bg-slate-900 rounded-[28px] p-6 sm:p-7 max-w-lg w-full border border-slate-200/80 dark:border-slate-800 shadow-2xl space-y-4 max-h-[85vh] overflow-y-auto"
+      >
         <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-3">
           <div className="flex items-center gap-2.5">
             <span className="font-serif italic font-black text-sm bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400 w-8 h-8 rounded-xl border border-indigo-200/60 dark:border-indigo-800/60 flex items-center justify-center">

@@ -409,7 +409,7 @@ export async function getLeaderboard(limit: number = 1000) {
  return [];
  }
 
-  return (data as any[]).map((user, index) => ({
+  return ((data as any[]) || []).map((user) => ({
     id: user.id,
     name: user.full_name,
     points: user.coins,
@@ -623,6 +623,16 @@ export async function getSubjects(options?: { onlyWithLessons?: boolean }): Prom
     return [];
   }
 
+  if (lessonsRes.error) {
+    console.error('Error fetching lessons for subjects:', lessonsRes.error);
+    return (subjectsRes.data || []).map((s: any) => ({
+      ...s,
+      title: s.title || s.name || 'Nomsiz Fan',
+      name: s.name || s.title || 'Nomsiz Fan',
+      lesson_ids: [],
+    }));
+  }
+
   const lessonsBySubject = new Map<string, string[]>();
   for (const l of lessonsRes.data || []) {
     if (!l.subject_id || !l.id) continue;
@@ -800,6 +810,10 @@ export async function purchaseShopItem(studentId: string, item: ShopItem): Promi
     return { success: false, error: "Profil topilmadi" };
   }
 
+  if (typeof item.stock === 'number' && item.stock <= 0) {
+    return { success: false, error: "Ushbu sovg'a hozircha tugagan" };
+  }
+
   const currentCoins = profile.coins || 0;
   if (currentCoins < item.price_coins) {
     return { success: false, error: `Tangalaringiz yetarli emas! Sizda ${currentCoins} tanga bor, sovg'a narxi ${item.price_coins} tanga.` };
@@ -816,22 +830,24 @@ export async function purchaseShopItem(studentId: string, item: ShopItem): Promi
     return { success: false, error: "Tangani ayirishda xatolik" };
   }
 
-  // 3. Create order row (if table exists)
-  try {
-    await supabase.from('shop_orders').insert({
-      student_id: studentId,
-      item_id: item.id.startsWith('item-') ? null : item.id,
-      coins_spent: item.price_coins,
-      status: 'pending',
-      notes: `Sovg'a: ${item.title}`
-    });
+  // 3. Create order row and refund if insertion fails
+  const { error: orderErr } = await supabase.from('shop_orders').insert({
+    student_id: studentId,
+    item_id: item.id.startsWith('item-') ? null : item.id,
+    coins_spent: item.price_coins,
+    status: 'pending',
+    notes: `Sovg'a: ${item.title}`
+  });
 
-    // Reduce stock if DB item
-    if (!item.id.startsWith('item-')) {
-      await supabase.from('shop_items').update({ stock: Math.max(0, item.stock - 1) }).eq('id', item.id);
-    }
-  } catch (err) {
-    console.error("Order creation fallback:", err);
+  if (orderErr) {
+    console.error("Order creation error, refunding coins:", orderErr);
+    await supabase.from('profiles').update({ coins: currentCoins }).eq('id', studentId);
+    return { success: false, error: "Buyurtmani saqlashda xatolik yuz berdi, tangalaringiz qaytarildi" };
+  }
+
+  // Reduce stock if DB item
+  if (!item.id.startsWith('item-')) {
+    await supabase.from('shop_items').update({ stock: Math.max(0, item.stock - 1) }).eq('id', item.id);
   }
 
   return { success: true };

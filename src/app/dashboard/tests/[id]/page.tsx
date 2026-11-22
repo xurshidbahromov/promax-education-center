@@ -65,21 +65,19 @@ export default function TestDetailsPage() {
     }
   }, [testId, router]);
 
-  const { data, isLoading: loading } = useQuery({
-    queryKey: ["testDetail", testId, currentUser?.id],
-    queryFn: async () => {
-      const [testData, history] = await Promise.all([
-        getTestById(testId),
-        currentUser?.id ? getStudentTestHistory(currentUser.id, testId) : Promise.resolve([]),
-      ]);
-      return { test: testData, previousAttempts: history };
-    },
+  const { data: test = null, isLoading: loading } = useQuery({
+    queryKey: ["testDetail", testId],
+    queryFn: () => getTestById(testId),
     enabled: !!testId,
     staleTime: 2 * 60 * 1000,
   });
 
-  const test = data?.test || null;
-  const previousAttempts = data?.previousAttempts || [];
+  const { data: previousAttempts = [] } = useQuery({
+    queryKey: ["testHistory", testId, currentUser?.id],
+    queryFn: () => getStudentTestHistory(currentUser!.id, testId),
+    enabled: !!testId && !!currentUser?.id,
+    staleTime: 2 * 60 * 1000,
+  });
 
   if (loading) {
     return <TestDetailSkeleton />;
@@ -115,11 +113,6 @@ export default function TestDetailsPage() {
 
   return (
     <div className="relative min-h-screen text-slate-800 dark:text-white font-sans pb-10">
-      {/* Ambient background */}
-      <div className="fixed inset-0 z-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] rounded-full bg-blue-300/20 dark:bg-blue-500/10 blur-[130px]" />
-        <div className="absolute bottom-[-15%] right-[-10%] w-[45%] h-[45%] rounded-full bg-violet-300/20 dark:bg-purple-500/10 blur-[130px]" />
-      </div>
 
       <div className="relative z-10 flex flex-col gap-5 max-w-2xl mx-auto pt-1 sm:pt-3">
         {/* Back Pill */}

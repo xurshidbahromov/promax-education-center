@@ -101,22 +101,24 @@ export default function ArcadeGameModal({
   const scoreRef = useRef(0);
   const correctRef = useRef(0);
   const difficultyRef = useRef<GameDifficulty>("dtm");
+  const finishedRef = useRef(false);
+  const onCoinsEarnedRef = useRef(onCoinsEarned);
+
+  useEffect(() => {
+    onCoinsEarnedRef.current = onCoinsEarned;
+  }, [onCoinsEarned]);
 
   useEffect(() => {
     setMounted(true);
     setSoundEnabled(gameSfx.enabled);
     const onToggle = () => setSoundEnabled(gameSfx.enabled);
     window.addEventListener("promax_sound_toggled", onToggle);
-    return () => window.removeEventListener("promax_sound_toggled", onToggle);
+    return () => {
+      window.removeEventListener("promax_sound_toggled", onToggle);
+      if (timerRef.current) clearInterval(timerRef.current);
+      if (nextTimerRef.current) clearTimeout(nextTimerRef.current);
+    };
   }, []);
-
-  useEffect(() => {
-    scoreRef.current = score;
-  }, [score]);
-
-  useEffect(() => {
-    correctRef.current = correctCount;
-  }, [correctCount]);
 
   useEffect(() => {
     difficultyRef.current = difficulty;
@@ -125,6 +127,7 @@ export default function ArcadeGameModal({
   // Reset when modal opens for a game
   useEffect(() => {
     if (gameId) {
+      finishedRef.current = false;
       setPhase("lobby");
       setHighScore(getGameHighScore(gameId));
       setIsNewRecord(false);
@@ -142,9 +145,16 @@ export default function ArcadeGameModal({
   };
 
   const finishGame = useCallback(async () => {
-    if (!gameId) return;
-    if (timerRef.current) clearInterval(timerRef.current);
-    if (nextTimerRef.current) clearTimeout(nextTimerRef.current);
+    if (!gameId || finishedRef.current) return;
+    finishedRef.current = true;
+    if (timerRef.current) {
+      clearInterval(timerRef.current);
+      timerRef.current = null;
+    }
+    if (nextTimerRef.current) {
+      clearTimeout(nextTimerRef.current);
+      nextTimerRef.current = null;
+    }
 
     setPhase("gameover");
     gameSfx.playGameOver();
@@ -182,7 +192,7 @@ export default function ArcadeGameModal({
             .update({ coins: updatedCoins })
             .eq("id", user.id);
 
-          onCoinsEarned(calculatedCoins);
+          onCoinsEarnedRef.current(calculatedCoins);
           window.dispatchEvent(new CustomEvent("promax_coins_updated"));
         }
       } catch (err) {
@@ -191,10 +201,19 @@ export default function ArcadeGameModal({
         setSavingReward(false);
       }
     }
-  }, [gameId, onCoinsEarned]);
+  }, [gameId]);
 
   const startGame = useCallback(() => {
     if (!gameId) return;
+    if (timerRef.current) {
+      clearInterval(timerRef.current);
+      timerRef.current = null;
+    }
+    if (nextTimerRef.current) {
+      clearTimeout(nextTimerRef.current);
+      nextTimerRef.current = null;
+    }
+    finishedRef.current = false;
     const duration = GAME_CONFIG[gameId].duration;
     setTimeLeft(duration);
     setScore(0);
@@ -212,23 +231,27 @@ export default function ArcadeGameModal({
     setPhase("playing");
   }, [gameId, difficulty]);
 
-  // Countdown timer
+  // Countdown timer (pure updater, zero side effects inside setState)
   useEffect(() => {
     if (phase === "playing") {
       timerRef.current = setInterval(() => {
-        setTimeLeft((prev) => {
-          if (prev <= 1) {
-            finishGame();
-            return 0;
-          }
-          return prev - 1;
-        });
+        setTimeLeft((prev) => (prev <= 1 ? 0 : prev - 1));
       }, 1000);
     }
     return () => {
-      if (timerRef.current) clearInterval(timerRef.current);
+      if (timerRef.current) {
+        clearInterval(timerRef.current);
+        timerRef.current = null;
+      }
     };
-  }, [phase, finishGame]);
+  }, [phase]);
+
+  // Trigger finishGame cleanly once timer hits 0
+  useEffect(() => {
+    if (phase === "playing" && timeLeft === 0) {
+      finishGame();
+    }
+  }, [phase, timeLeft, finishGame]);
 
   const handleSelectOption = useCallback(
     (option: string) => {
@@ -241,12 +264,14 @@ export default function ArcadeGameModal({
         const newCombo = combo + 1;
         setCombo(newCombo);
         setMaxCombo((prev) => Math.max(prev, newCombo));
-        setCorrectCount((prev) => prev + 1);
+        correctRef.current += 1;
+        setCorrectCount(correctRef.current);
 
         const comboMult = newCombo >= 10 ? 3 : newCombo >= 6 ? 2 : newCombo >= 3 ? 1.5 : 1;
         const diffBonus = difficulty === "sat" ? 15 : difficulty === "dtm" ? 12 : 10;
         const gained = Math.round(diffBonus * comboMult);
-        setScore((prev) => prev + gained);
+        scoreRef.current += gained;
+        setScore(scoreRef.current);
 
         if (newCombo === 3 || newCombo === 6 || newCombo === 10) {
           gameSfx.playCombo();

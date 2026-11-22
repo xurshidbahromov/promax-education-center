@@ -40,7 +40,7 @@ export default function TestStartReveal({
       }
       const timer = setTimeout(() => {
         setIsFinished(true);
-      }, 900);
+      }, 520);
       return () => clearTimeout(timer);
     }
   }, [isLoading]);

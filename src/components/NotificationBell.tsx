@@ -125,7 +125,7 @@ export default function NotificationBell() {
             if (isOpenRef.current) {
               fetchNotifications(false);
             } else if (payload?.new?.title) {
-              toast(payload.new.title, { icon: "🔔", duration: 4000 });
+              toast(payload.new.title, { duration: 4000 });
             }
           }
         )
@@ -149,12 +149,22 @@ export default function NotificationBell() {
  }
  }, [isOpen]);
 
+ const pendingReadIdsRef = useRef<Set<string>>(new Set());
+
  const handleMarkAsRead = async (id: string) => {
- if (id.startsWith('announcement-')) return;
- await markNotificationAsRead(id);
- // Optimistic update
- setNotifications(prev => prev.map(n => n.id === id ? { ...n, is_read: true } : n));
- setUnreadCount(prev => Math.max(0, prev - 1));
+   if (id.startsWith('announcement-') || pendingReadIdsRef.current.has(id)) return;
+   const target = notifications.find((n) => n.id === id);
+   if (!target || target.is_read) return;
+
+   pendingReadIdsRef.current.add(id);
+   // Optimistic update immediately to prevent double-decrement on rapid clicks
+   setNotifications(prev => prev.map(n => n.id === id ? { ...n, is_read: true } : n));
+   setUnreadCount(prev => Math.max(0, prev - 1));
+   try {
+     await markNotificationAsRead(id);
+   } finally {
+     pendingReadIdsRef.current.delete(id);
+   }
  };
 
  const handleMarkAllRead = async () => {
@@ -316,7 +326,11 @@ export default function NotificationBell() {
                             {notification.message}
                           </p>
                           <p className="text-[10px] font-semibold text-slate-400 mt-2">
-                            {formatDistanceToNow(new Date(notification.created_at), { addSuffix: true, locale: getDateLocale() })}
+                            {(() => {
+                              const dt = notification.created_at ? new Date(notification.created_at) : null;
+                              if (!dt || Number.isNaN(dt.getTime())) return "Hozirgina";
+                              return formatDistanceToNow(dt, { addSuffix: true, locale: getDateLocale() });
+                            })()}
                           </p>
                         </div>
                       </div>

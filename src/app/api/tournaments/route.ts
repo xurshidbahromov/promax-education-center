@@ -299,34 +299,23 @@ export async function GET(request: NextRequest) {
       const { data, error } = tournRes as any;
       if (!error && data) {
         const liveCount = participantMap.get(data.id)?.size || 0;
-        const stored = Number(data.participants_count) || 0;
-        if (liveCount > stored) {
-          supabase.from('tournaments').update({ participants_count: liveCount }).eq('id', data.id).then(() => {}, () => {});
-        }
         const mapped = (data.type === 'international' || type === 'international') 
           ? mapDbToIntlTournament(data, liveCount) 
           : mapDbToTournament(data, liveCount);
         return NextResponse.json({ tournament: mapped }, { headers: NO_CACHE_HEADERS });
       }
+      if (!error && !data) {
+        return NextResponse.json({ tournament: null }, { headers: NO_CACHE_HEADERS });
+      }
     } else {
       const { data, error } = tournRes as any;
-      if (!error && data && data.length > 0) {
+      if (!error && Array.isArray(data)) {
         const mapped = data.map((row: any) => {
           const liveCount = participantMap.get(row.id)?.size || 0;
           return type === 'international'
             ? mapDbToIntlTournament(row, liveCount, includeQuestions)
             : mapDbToTournament(row, liveCount, includeQuestions);
         });
-
-        // Sync participant counts back to tournaments table in background if needed
-        for (const row of data) {
-          const live = participantMap.get(row.id)?.size || 0;
-          const stored = Number(row.participants_count) || 0;
-          if (live > stored) {
-            supabase.from('tournaments').update({ participants_count: live }).eq('id', row.id).then(() => {}, () => {});
-          }
-        }
-
         return NextResponse.json({ tournaments: mapped }, { headers: NO_CACHE_HEADERS });
       }
     }
@@ -334,7 +323,7 @@ export async function GET(request: NextRequest) {
     console.warn('[Tournaments API] Supabase query error, fallback to defaults:', dbErr);
   }
 
-  // If table was empty or not ready yet, return defaults
+  // Fallback to defaults only if Supabase query itself failed
   if (type === 'international') {
     const defaults = getDefaultIntlTournaments();
     if (id) {
@@ -352,9 +341,33 @@ export async function GET(request: NextRequest) {
   return NextResponse.json({ tournaments: defaults }, { headers: NO_CACHE_HEADERS });
 }
 
+async function verifyAdminSession() {
+  const sessionClient = await createClient();
+  const { data: { user } } = await sessionClient.auth.getUser();
+  if (!user) return { ok: false as const, status: 401, error: 'Avtorizatsiya talab qilinadi' };
+
+  const adminClient = await createTelegramBotClient();
+  const { data: profile } = await adminClient
+    .from('profiles')
+    .select('role')
+    .eq('id', user.id)
+    .maybeSingle();
+
+  const role = profile?.role || '';
+  if (!['admin', 'superadmin', 'teacher', 'staff'].includes(role)) {
+    return { ok: false as const, status: 403, error: 'Faqat adminlar ruxsatiga ega' };
+  }
+  return { ok: true as const, sessionClient };
+}
+
 // ── POST /api/tournaments ──
 export async function POST(request: NextRequest) {
   try {
+    const auth = await verifyAdminSession();
+    if (!auth.ok) {
+      return NextResponse.json({ success: false, error: auth.error }, { status: auth.status, headers: NO_CACHE_HEADERS });
+    }
+
     const body = await request.json();
     const type = body.type || (body.tournament?.category ? 'international' : 'national');
     const tournament = body.tournament || body;
@@ -451,6 +464,11 @@ export async function POST(request: NextRequest) {
 // ── DELETE /api/tournaments?id=...&type=national|international ──
 export async function DELETE(request: NextRequest) {
   try {
+    const auth = await verifyAdminSession();
+    if (!auth.ok) {
+      return NextResponse.json({ success: false, error: auth.error }, { status: auth.status, headers: NO_CACHE_HEADERS });
+    }
+
     const { searchParams } = new URL(request.url);
     const id = searchParams.get('id');
 

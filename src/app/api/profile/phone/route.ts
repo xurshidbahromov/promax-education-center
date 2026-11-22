@@ -3,8 +3,14 @@ import { createClient, createTelegramBotClient } from '@/utils/supabase/server';
 
 export async function POST(request: NextRequest) {
   try {
-    const { phone } = await request.json();
-    const digits = String(phone || '').replace(/\D/g, '');
+    let body: { phone?: unknown };
+    try {
+      body = await request.json();
+    } catch {
+      return NextResponse.json({ error: "Noto'g'ri so'rov formati" }, { status: 400 });
+    }
+
+    const digits = String(body?.phone || '').replace(/\D/g, '');
 
     if (digits.length < 9 || digits.length > 15) {
       return NextResponse.json(
@@ -25,22 +31,25 @@ export async function POST(request: NextRequest) {
     }
 
     const adminClient = await createTelegramBotClient();
-    const { error } = await adminClient
+    const { data: updated, error } = await adminClient
       .from('profiles')
       .update({
         phone: normalized,
         updated_at: new Date().toISOString(),
       })
-      .eq('id', user.id);
+      .eq('id', user.id)
+      .select('id')
+      .maybeSingle();
 
-    if (error) {
-      console.error('[API /api/profile/phone] Update error:', error.message);
-      return NextResponse.json({ error: 'Telefon raqamni saqlab bo\'lmadi' }, { status: 500 });
+    if (error || !updated) {
+      console.error('[API /api/profile/phone] Update error:', error?.message || 'Profile row not found');
+      return NextResponse.json({ error: "Telefon raqamni saqlab bo'lmadi" }, { status: 500 });
     }
 
     return NextResponse.json({ success: true, phone: normalized });
-  } catch (err: any) {
+  } catch (err: unknown) {
+    const message = err instanceof Error ? err.message : 'Server xatosi';
     console.error('[API /api/profile/phone] Exception:', err);
-    return NextResponse.json({ error: err?.message || 'Server xatosi' }, { status: 500 });
+    return NextResponse.json({ error: message }, { status: 500 });
   }
 }

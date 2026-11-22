@@ -134,7 +134,7 @@ export async function getInternationalTournaments(): Promise<InternationalTourna
     const supabase = createClient();
     const { data, error } = await supabase
       .from('tournaments')
-      .select('*')
+      .select('id, title, category, category_label, subject, description, badge, badge_bg, status, start_date, start_time, end_date, end_time, duration_minutes, total_questions, entry_coins, prize_pool, top_prizes, rules, participants_count, scoring_scale, is_published, created_at')
       .eq('is_published', true)
       .eq('type', 'international')
       .order('created_at', { ascending: false });
@@ -142,9 +142,9 @@ export async function getInternationalTournaments(): Promise<InternationalTourna
     if (!error && data && data.length > 0) {
       const mapped: InternationalTournament[] = data.map((row: any) => ({
         id: row.id,
-        title: row.title || 'Xalqaro Musobaqa',
+        title: row.title || 'SAT',
         category: row.category || 'sat',
-        categoryLabel: row.category_label || (row.category === 'sat' ? 'SAT Digital' : 'Xalqaro'),
+        categoryLabel: row.category_label || (row.category === 'sat' ? 'SAT Digital' : 'SAT'),
         subject: row.subject || 'SAT Math & Reading',
         description: row.description || '',
         badge: row.badge || '🔥 XALQARO ARENA',
@@ -155,20 +155,22 @@ export async function getInternationalTournaments(): Promise<InternationalTourna
         endDate: row.end_date || '',
         endTime: row.end_time || '20:00',
         durationMinutes: Number(row.duration_minutes) || 60,
-        totalQuestions: Number(row.total_questions) || (Array.isArray(row.questions) ? row.questions.length : 0),
+        totalQuestions: Number(row.total_questions) || 0,
         entryCoins: Number(row.entry_coins) || 0,
         prizePool: row.prize_pool || '',
         topPrizes: Array.isArray(row.top_prizes) ? row.top_prizes : [],
         rules: Array.isArray(row.rules) ? row.rules : [],
         participantsCount: Number(row.participants_count) || 0,
-        questions: Array.isArray(row.questions) ? row.questions : [],
+        questions: [],
         scoringScale: row.scoring_scale || (row.category === 'sat' ? '1600 Ballik SAT Shkalasi' : '100 Ballik Shkala'),
         isPublished: row.is_published ?? true,
         created_at: row.created_at || new Date().toISOString()
       }));
 
       if (typeof window !== 'undefined') {
-        localStorage.setItem(STORAGE_INTERNATIONAL_TOURNAMENTS, JSON.stringify(mapped));
+        try {
+          localStorage.setItem(STORAGE_INTERNATIONAL_TOURNAMENTS, JSON.stringify(mapped));
+        } catch {}
       }
       return mapped;
     }
@@ -522,7 +524,7 @@ export async function submitInternationalAttempt(
 
   let currentList = await getInternationalLeaderboard(tournamentId);
   currentList = currentList.filter(
-    e => !e.id?.startsWith('intl_bench_') && !e.id?.startsWith('bench_') && !e.user_id?.startsWith('bench_') && e.user_id !== userId && (userName ? e.student_name !== userName : true)
+    e => !e.id?.startsWith('intl_bench_') && !e.id?.startsWith('bench_') && !e.user_id?.startsWith('bench_') && e.user_id !== userId
   );
   currentList.push(newEntry);
 
@@ -542,6 +544,7 @@ export async function submitInternationalAttempt(
   const myPrize = myRank === 1 ? "1-O'rin" : myRank === 2 ? "2-O'rin" : myRank === 3 ? "3-O'rin" : null;
 
   // 1. Submit to server API (reliable backend persistence with admin/bot client)
+  let savedViaApi = false;
   try {
     const res = await fetch('/api/tournaments/leaderboard', {
       method: 'POST',
@@ -560,6 +563,7 @@ export async function submitInternationalAttempt(
       })
     });
     if (res.ok) {
+      savedViaApi = true;
       const data = await res.json();
       if (data.leaderboard && Array.isArray(data.leaderboard)) {
         const cleanBoard = data.leaderboard.filter(
@@ -579,35 +583,38 @@ export async function submitInternationalAttempt(
     console.warn('[International] Leaderboard API submit error:', apiErr);
   }
 
-  // 2. Save to Supabase tournament_results table fallback
-  try {
-    const supabase = createClient();
-    await supabase.from('tournament_results').upsert({
-      id: attemptId,
-      tournament_id: tournamentId,
-      student_id: userId,
-      score,
-      max_score: maxScore,
-      scaled_score: scaledScore,
-      percentage,
-      time_spent_seconds: timeSpentSeconds,
-      rank: myRank,
-      prize: myPrize,
-      completed_at: new Date().toISOString()
-    });
-  } catch (dbErr) {
-    console.warn('[International] DB attempt save error:', dbErr);
+  // 2. Save to Supabase tournament_results table fallback ONLY when API failed (prevents duplicate rows)
+  if (!savedViaApi) {
+    try {
+      const supabase = createClient();
+      await supabase.from('tournament_results').upsert({
+        id: attemptId,
+        tournament_id: tournamentId,
+        student_id: userId,
+        score,
+        max_score: maxScore,
+        scaled_score: scaledScore,
+        percentage,
+        time_spent_seconds: timeSpentSeconds,
+        rank: myRank,
+        prize: myPrize,
+        completed_at: new Date().toISOString()
+      });
+    } catch (dbErr) {
+      console.warn('[International] DB attempt save error:', dbErr);
+    }
   }
 
-  // 3. Keep local storage synced
+  // 3. Keep local storage synced without clobbering fresh server leaderboard
   if (typeof window !== 'undefined') {
-    const stored = localStorage.getItem(STORAGE_INTERNATIONAL_LEADERBOARDS);
-    let map: Record<string, InternationalLeaderboardEntry[]> = {};
-    if (stored) {
-      try { map = JSON.parse(stored); } catch (e) {}
+    if (!savedViaApi) {
+      try {
+        const stored = localStorage.getItem(STORAGE_INTERNATIONAL_LEADERBOARDS);
+        let map: Record<string, InternationalLeaderboardEntry[]> = stored ? JSON.parse(stored) : {};
+        map[tournamentId] = currentList;
+        localStorage.setItem(STORAGE_INTERNATIONAL_LEADERBOARDS, JSON.stringify(map));
+      } catch {}
     }
-    map[tournamentId] = currentList;
-    localStorage.setItem(STORAGE_INTERNATIONAL_LEADERBOARDS, JSON.stringify(map));
 
     const localKey = `promax_completed_intl_tournaments_${userId || 'current'}`;
     try {

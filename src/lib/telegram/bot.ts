@@ -219,5 +219,12 @@ export async function getMe() {
 
 export function verifyWebhookSignature(token: string): boolean {
  const secret = process.env.TELEGRAM_WEBHOOK_SECRET;
- return token === secret;
+ if (!secret || !token) return false;
+ if (token.length !== secret.length) return false;
+ try {
+   const crypto = require('crypto') as typeof import('crypto');
+   return crypto.timingSafeEqual(Buffer.from(token), Buffer.from(secret));
+ } catch {
+   return token === secret;
+ }
 }

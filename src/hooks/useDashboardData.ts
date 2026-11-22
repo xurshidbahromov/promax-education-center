@@ -25,7 +25,7 @@ export const useUserProfile = (userId: string | undefined) => {
       const supabase = createClient();
       const { data: profile } = await supabase
         .from('profiles')
-        .select('full_name, coins, role, avatar_url')
+        .select('full_name, coins, role, avatar_url, phone')
         .eq('id', userId)
         .single();
       return profile;
