@@ -15,7 +15,6 @@ export default function AdminReveal({
   const [isFinished, setIsFinished] = useState(false);
   const pathRef = useRef<SVGPathElement | null>(null);
   const penRef = useRef<SVGGElement | null>(null);
-  const progressBarRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
     if (!isLoading) {
@@ -75,13 +74,6 @@ export default function AdminReveal({
           pathEl.style.strokeDashoffset = "0";
           pathEl.style.opacity = `${Math.max(0, fadeOut).toFixed(2)}`;
           penEl.style.opacity = "0";
-        }
-
-        if (progressBarRef.current) {
-          const scale = norm < 0.78 ? Math.min(1, norm / 0.78) : 1;
-          progressBarRef.current.style.transform = `scaleX(${scale.toFixed(3)})`;
-          progressBarRef.current.style.opacity =
-            norm > 0.9 ? `${Math.max(0, 1 - (norm - 0.9) / 0.1).toFixed(2)}` : "1";
         }
       }
 
@@ -201,15 +193,6 @@ export default function AdminReveal({
                 </g>
               </g>
             </svg>
-          </div>
-
-          {/* Synced GPU Progress Bar */}
-          <div className="mt-1 ml-7 h-1 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
-            <div
-              ref={progressBarRef}
-              className="h-full w-full origin-left bg-gradient-to-r from-indigo-600 via-sky-500 to-emerald-500 rounded-full"
-              style={{ transform: "scaleX(0)" }}
-            />
           </div>
         </div>
 
