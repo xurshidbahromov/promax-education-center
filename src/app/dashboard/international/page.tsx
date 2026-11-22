@@ -54,6 +54,7 @@ import {
   LeaderboardSkeleton,
   CommentsSkeleton
 } from "@/components/ui/Skeleton";
+import TournamentLeaderboardView from "@/components/dashboard/TournamentLeaderboardView";
 
 interface CommentItem {
   id: string;
@@ -262,13 +263,14 @@ export default function InternationalCompetitionsPage() {
     }
   };
 
-  // Reactive leaderboard sync on activeTab or selectedTournamentId change
+  // Reactive leaderboard sync on activeTab or selectedTournamentId change (single fetch, proper loading state)
   useEffect(() => {
     if (!selectedTournamentId) return;
     let isMounted = true;
 
     const cached = getCachedInternationalLeaderboard(selectedTournamentId);
     setLeaderboard(cached);
+    if (cached.length === 0) setLeaderboardLoading(true);
 
     getInternationalLeaderboard(selectedTournamentId)
       .then((fresh) => {
@@ -276,25 +278,18 @@ export default function InternationalCompetitionsPage() {
           setLeaderboard(fresh);
         }
       })
-      .catch(() => {});
+      .catch(() => {})
+      .finally(() => {
+        if (isMounted) setLeaderboardLoading(false);
+      });
 
     return () => {
       isMounted = false;
     };
   }, [selectedTournamentId, activeTab]);
 
-  const handleTournamentSelectForLeaderboard = async (id: string) => {
+  const handleTournamentSelectForLeaderboard = (id: string) => {
     setSelectedTournamentId(id);
-    const cached = getCachedInternationalLeaderboard(id);
-    setLeaderboard(cached);
-    try {
-      const lb = await getInternationalLeaderboard(id);
-      if (Array.isArray(lb)) {
-        setLeaderboard(lb);
-      }
-    } catch (e) {
-      console.error("Error loading international leaderboard:", e);
-    }
   };
 
   const handleRegister = async (item: InternationalTournament) => {
@@ -406,24 +401,8 @@ export default function InternationalCompetitionsPage() {
     return unique.map((entry, idx) => ({ ...entry, rank: idx + 1 }));
   }, [leaderboard]);
 
-  const filteredLeaderboard = useMemo(() => {
-    return uniqueLeaderboard.filter((entry) =>
-      entry.student_name.toLowerCase().includes(leaderboardSearch.toLowerCase())
-    );
-  }, [uniqueLeaderboard, leaderboardSearch]);
-
-  // Bottom list only shows participants from 4th place onwards (top 3 are in the 3D podium above)
-  const subsequentLeaderboard = useMemo(() => {
-    return filteredLeaderboard.filter((entry) => entry.rank > 3);
-  }, [filteredLeaderboard]);
-
   return (
     <div className="relative text-slate-800 dark:text-white font-sans pb-20">
-      {/* Standard Ambient background matching all dashboard subpages */}
-      <div className="fixed inset-0 z-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] rounded-full bg-blue-300/20 dark:bg-blue-500/10 blur-[130px]" />
-        <div className="absolute bottom-[-15%] right-[-10%] w-[45%] h-[45%] rounded-full bg-violet-300/20 dark:bg-purple-500/10 blur-[130px]" />
-      </div>
 
       <div className="relative z-10 space-y-4 sm:space-y-5 w-full max-w-[1600px] mx-auto pt-1 sm:pt-2">
         
@@ -921,504 +900,27 @@ export default function InternationalCompetitionsPage() {
           (loading || leaderboardLoading) && leaderboard.length === 0 ? (
             <LeaderboardSkeleton />
           ) : (
-          <div className="space-y-4 sm:space-y-6">
-            
-            {/* Top Toolbar: Tournament Selector & Search */}
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white/60 dark:bg-slate-900/60 backdrop-blur-xl p-4 sm:p-5 rounded-[2rem] border border-white/60 dark:border-slate-800/60 shadow-none">
-              <div className="flex items-center gap-3.5">
-                <div className="w-11 h-11 rounded-2xl bg-amber-500/15 text-amber-600 dark:text-amber-400 flex items-center justify-center shrink-0 font-bold shadow-none">
-                  <Award size={22} />
-                </div>
-                <div>
-                  <h3 className="text-base sm:text-lg font-black font-fredoka text-slate-900 dark:text-white leading-tight">
-                    G'oliblar & Natijalar Reytingi
-                  </h3>
-                  <p className="text-xs text-slate-500 font-medium">
-                    SAT, AMC va xalqaro musobaqalar bo'yicha eng yuqori natijalar
-                  </p>
-                </div>
-              </div>
-
-              {/* Selector & Search Inputs */}
-              <div className="flex items-center gap-2.5 flex-wrap sm:flex-nowrap w-full sm:w-auto">
-                <select
-                  value={selectedTournamentId}
-                  onChange={(e) => handleTournamentSelectForLeaderboard(e.target.value)}
-                  className="flex-1 sm:flex-initial px-3.5 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs sm:text-sm font-bold text-slate-800 dark:text-slate-100 outline-none max-w-full sm:max-w-[240px] truncate"
-                >
-                  {tournaments.map((t) => (
-                    <option key={t.id} value={t.id}>
-                      {t.subject ? `[${t.subject}] ` : ""}{t.title}
-                    </option>
-                  ))}
-                </select>
-
-                <div className="relative flex-1 sm:flex-initial">
-                  <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
-                  <input
-                    type="text"
-                    value={leaderboardSearch}
-                    onChange={(e) => setLeaderboardSearch(e.target.value)}
-                    placeholder="Qidirish..."
-                    className="w-full sm:w-44 pl-8 pr-3 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-medium text-slate-800 dark:text-slate-100 outline-none"
-                  />
-                </div>
-
-                {selectedTournamentId && (
-                  <Link
-                    href={`/dashboard/tests/${selectedTournamentId}/take?type=international&international=true&mode=practice`}
-                    className="px-3.5 py-2.5 rounded-xl bg-brand-blue hover:bg-blue-600 text-white font-bold text-xs flex items-center justify-center gap-1.5 shadow-sm active:scale-95 transition-all whitespace-nowrap cursor-pointer"
-                  >
-                    <RotateCcw size={13} />
-                    <span>{completedIds.includes(selectedTournamentId) ? "Qayta yechish" : "Mashq qilish"}</span>
-                  </Link>
-                )}
-              </div>
-            </div>
-
-            {/* ── 3D ISOMETRIC OLYMPIC PODIUM (TOP 3) ── */}
-            {uniqueLeaderboard.length >= 1 && uniqueLeaderboard[0] && (
-              <div className="relative w-full bg-gradient-to-b from-white/70 via-slate-50/50 to-white/70 dark:from-slate-900/70 dark:via-slate-850/50 dark:to-slate-900/70 backdrop-blur-xl rounded-[2.5rem] p-5 sm:p-8 border border-white/60 dark:border-slate-800/60 shadow-none overflow-hidden">
-                
-                {/* Luminous Gold Halo behind Champion */}
-                <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[28rem] h-[28rem] bg-gradient-to-b from-amber-400/20 via-amber-300/10 to-transparent dark:from-amber-500/15 dark:via-amber-500/5 dark:to-transparent rounded-full blur-3xl pointer-events-none" />
-
-                {/* ── 3D STANDS CONTAINER ── */}
-                <div className="relative z-10 max-w-lg mx-auto pt-6 pb-2">
-                  <div className="grid grid-cols-3 items-end gap-2.5 sm:gap-4">
-                    
-                    {/* 🥈 2ND PLACE */}
-                    {(() => {
-                      const item = uniqueLeaderboard.find(e => e.rank === 2) || uniqueLeaderboard[1];
-                      if (!item) {
-                        return (
-                          <div className="flex flex-col items-center text-center group">
-                            {/* Floating Open Slot Info */}
-                            <div className="flex flex-col items-center space-y-1 mb-2.5">
-                              <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-full bg-gradient-to-b from-blue-50 via-indigo-50/60 to-blue-100/80 dark:from-blue-950/60 dark:via-slate-850 dark:to-indigo-950/60 border-2 border-dashed border-blue-400 dark:border-blue-500 flex flex-col items-center justify-center text-blue-600 dark:text-blue-400 shadow-none relative">
-                                <span className="text-xl sm:text-2xl select-none">🥈</span>
-                                <span className="text-[8px] sm:text-[9px] font-black uppercase tracking-wider text-blue-600 dark:text-blue-400 -mt-0.5">
-                                  Ochiq
-                                </span>
-                              </div>
-                              <div className="flex items-center justify-center gap-1">
-                                <h4 className="font-black text-xs sm:text-sm text-blue-700 dark:text-blue-300">
-                                  2-O'rin Bo'sh
-                                </h4>
-                              </div>
-                              <div className="text-[10px] font-bold text-blue-600/90 dark:text-blue-300/90 bg-blue-50 dark:bg-blue-950/60 px-2 py-0.5 rounded-full border border-blue-200/60 dark:border-blue-800/60">
-                                Sovrindor kutilmoqda
-                              </div>
-                              <div className="text-[10px] text-slate-400 font-medium">
-                                Bo'sh o'rin
-                              </div>
-                            </div>
-
-                            {/* 3D Glassy Isometric Stand 2 */}
-                            <div className="w-full">
-                              <div className="h-4 sm:h-5 w-full bg-gradient-to-r from-blue-200 via-indigo-200 to-sky-200 dark:from-blue-500 dark:via-indigo-400 dark:to-sky-400 rounded-t-2xl transform -skew-x-2 border-t border-x border-white/80 dark:border-white/30 shadow-none" />
-                              <div className="h-28 sm:h-36 w-full bg-gradient-to-b from-blue-500/80 via-indigo-600/80 to-indigo-700/80 dark:from-blue-600/80 dark:via-indigo-700/80 dark:to-indigo-800/80 backdrop-blur-xl rounded-b-2xl shadow-none flex flex-col items-center justify-center text-white relative overflow-hidden">
-                                <span className="text-4xl sm:text-5xl font-black font-fredoka tracking-tighter drop-shadow-md">
-                                  2
-                                </span>
-                                <span className="text-[9px] font-extrabold uppercase tracking-wider text-blue-200/90 -mt-1">
-                                  Kutilmoqda
-                                </span>
-                              </div>
-                            </div>
-                          </div>
-                        );
-                      }
-                      const isSelf = user?.id && item.user_id === user.id;
-                      const avatar = isSelf ? (profile?.avatar_url || item.student_avatar) : item.student_avatar;
-                      const hasAvatar = avatar && !avatar.includes('dicebear');
-
-                      return (
-                        <div className="flex flex-col items-center text-center">
-                          <div className="flex flex-col items-center space-y-1 mb-2.5">
-                            {hasAvatar ? (
-                              <img
-                                src={avatar}
-                                alt={item.student_name}
-                                className="w-14 h-14 sm:w-16 sm:h-16 rounded-full bg-slate-100 dark:bg-slate-800 border-2 border-blue-300 dark:border-blue-500 shadow-none object-cover"
-                              />
-                            ) : (
-                              <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-full bg-blue-100 dark:bg-blue-900/40 text-brand-blue dark:text-blue-300 font-bold text-lg sm:text-xl flex items-center justify-center border-2 border-blue-300 dark:border-blue-500 shadow-none uppercase select-none">
-                                {(item.student_name || "O")[0]}
-                              </div>
-                            )}
-
-                            <div className="flex items-center justify-center gap-1 max-w-[90px] sm:max-w-[120px]">
-                              <h4 className="font-bold text-xs sm:text-sm text-slate-900 dark:text-white truncate">
-                                {item.student_name}
-                              </h4>
-                              {isSelf && (
-                                <span className="px-1 py-0.2 rounded bg-brand-blue text-white text-[8px] font-black uppercase shrink-0 shadow-none">
-                                  Siz
-                                </span>
-                              )}
-                            </div>
-
-                            <div className="text-xs font-bold text-brand-blue dark:text-blue-400">
-                              <span>{item.scaled_score || `${item.score} ball`}</span>
-                              <span className="text-[10px] font-semibold opacity-75 ml-1">({item.percentage}%)</span>
-                            </div>
-                            <div className="flex items-center justify-center gap-1 text-[10px] text-slate-400 font-medium">
-                              <Clock size={10} />
-                              <span>{Math.floor((item.time_spent_seconds || 0) / 60)} daq</span>
-                            </div>
-                          </div>
-
-                          <div className="w-full">
-                            <div className="h-4 sm:h-5 w-full bg-gradient-to-r from-blue-200 via-indigo-200 to-sky-200 dark:from-blue-500 dark:via-indigo-400 dark:to-sky-400 rounded-t-2xl transform -skew-x-2 border-t border-x border-white/80 dark:border-white/30 shadow-none" />
-                            <div className="h-28 sm:h-36 w-full bg-gradient-to-b from-blue-400 via-indigo-500 to-indigo-600 dark:from-blue-600 dark:via-indigo-700 dark:to-indigo-800 backdrop-blur-xl rounded-b-2xl shadow-none flex items-center justify-center text-white relative overflow-hidden">
-                              <span className="text-4xl sm:text-5xl font-black font-fredoka tracking-tighter drop-shadow-md">
-                                2
-                              </span>
-                            </div>
-                          </div>
-                        </div>
-                      );
-                    })()}
-
-                    {/* 🥇 1ST PLACE */}
-                    {(() => {
-                      const item = uniqueLeaderboard.find(e => e.rank === 1) || uniqueLeaderboard[0];
-                      const isSelf = user?.id && item.user_id === user.id;
-                      const avatar = isSelf ? (profile?.avatar_url || item.student_avatar) : item.student_avatar;
-                      const hasAvatar = avatar && !avatar.includes('dicebear');
-
-                      return (
-                        <div className="flex flex-col items-center text-center -mt-6 sm:-mt-8 z-20">
-                          <div className="flex flex-col items-center space-y-1 mb-2.5">
-                            <div className="relative">
-                              {hasAvatar ? (
-                                <img
-                                  src={avatar}
-                                  alt={item.student_name}
-                                  className="w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-slate-100 dark:bg-slate-800 border-4 border-amber-400 shadow-none object-cover ring-4 ring-amber-400/30"
-                                />
-                              ) : (
-                                <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-amber-100 dark:bg-amber-900/40 text-amber-600 dark:text-amber-300 font-black text-xl sm:text-2xl flex items-center justify-center border-4 border-amber-400 ring-4 ring-amber-400/30 uppercase select-none">
-                                  {(item.student_name || "O")[0]}
-                                </div>
-                              )}
-                              <span className="absolute -top-3.5 left-1/2 -translate-x-1/2 p-1.5 bg-gradient-to-b from-amber-400 to-amber-600 text-white rounded-full shadow-none border border-amber-200">
-                                <Crown size={15} className="fill-white" />
-                              </span>
-                            </div>
-
-                            <div className="flex items-center justify-center gap-1 max-w-[100px] sm:max-w-[140px]">
-                              <h4 className="font-black text-sm sm:text-base text-slate-900 dark:text-white truncate">
-                                {item.student_name}
-                              </h4>
-                              {isSelf && (
-                                <span className="px-1.5 py-0.2 rounded bg-brand-blue text-white text-[9px] font-black uppercase shrink-0 shadow-none">
-                                  Siz
-                                </span>
-                              )}
-                            </div>
-
-                            <div className="text-xs sm:text-sm font-black text-amber-600 dark:text-amber-400">
-                              <span>{item.scaled_score || `${item.score} ball`}</span>
-                              <span className="text-[10px] font-bold bg-amber-500/15 text-amber-700 dark:text-amber-300 px-1 py-0.2 rounded ml-1">
-                                {item.percentage}%
-                              </span>
-                            </div>
-                            <div className="flex items-center justify-center gap-1 text-[10px] sm:text-[11px] text-slate-400 font-medium">
-                              <Clock size={10} />
-                              <span>{Math.floor((item.time_spent_seconds || 0) / 60)} daq {(item.time_spent_seconds || 0) % 60} son</span>
-                            </div>
-                          </div>
-
-                          <div className="w-full">
-                            <div className="h-5 sm:h-6 w-full bg-gradient-to-r from-amber-200 via-amber-300 to-yellow-200 dark:from-amber-400 dark:via-amber-300 dark:to-yellow-300 rounded-t-2xl transform -skew-x-2 border-t border-x border-white/90 dark:border-white/40 shadow-none" />
-                            <div className="h-38 sm:h-48 w-full bg-gradient-to-b from-amber-400 via-amber-500 to-amber-600 dark:from-amber-500 dark:via-amber-600 dark:to-amber-700 backdrop-blur-xl rounded-b-2xl shadow-none flex items-center justify-center text-white relative overflow-hidden">
-                              <span className="text-5xl sm:text-6xl font-black font-fredoka tracking-tighter drop-shadow-lg">
-                                1
-                              </span>
-                            </div>
-                          </div>
-                        </div>
-                      );
-                    })()}
-
-                    {/* 🥉 3RD PLACE */}
-                    {(() => {
-                      const item = uniqueLeaderboard.find(e => e.rank === 3) || uniqueLeaderboard[2];
-                      if (!item) {
-                        return (
-                          <div className="flex flex-col items-center text-center group">
-                            {/* Floating Open Slot Info */}
-                            <div className="flex flex-col items-center space-y-1 mb-2.5">
-                              <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-full bg-gradient-to-b from-orange-50 via-amber-50/60 to-orange-100/80 dark:from-orange-950/60 dark:via-slate-850 dark:to-amber-950/60 border-2 border-dashed border-orange-400 dark:border-orange-500 flex flex-col items-center justify-center text-orange-600 dark:text-orange-400 shadow-none relative">
-                                <span className="text-xl sm:text-2xl select-none">🥉</span>
-                                <span className="text-[8px] sm:text-[9px] font-black uppercase tracking-wider text-orange-600 dark:text-orange-400 -mt-0.5">
-                                  Ochiq
-                                </span>
-                              </div>
-                              <div className="flex items-center justify-center gap-1">
-                                <h4 className="font-black text-xs sm:text-sm text-orange-700 dark:text-orange-300">
-                                  3-O'rin Bo'sh
-                                </h4>
-                              </div>
-                              <div className="text-[10px] font-bold text-orange-600/90 dark:text-orange-300/90 bg-orange-50 dark:bg-orange-950/60 px-2 py-0.5 rounded-full border border-orange-200/60 dark:border-orange-800/60">
-                                Sovrindor kutilmoqda
-                              </div>
-                              <div className="text-[10px] text-slate-400 font-medium">
-                                Bo'sh o'rin
-                              </div>
-                            </div>
-
-                            {/* 3D Glassy Isometric Stand 3 */}
-                            <div className="w-full">
-                              <div className="h-4 sm:h-5 w-full bg-gradient-to-r from-orange-200 via-amber-200 to-rose-200 dark:from-orange-500 dark:via-amber-400 dark:to-rose-400 rounded-t-2xl transform -skew-x-2 border-t border-x border-white/80 dark:border-white/30 shadow-none" />
-                              <div className="h-24 sm:h-30 w-full bg-gradient-to-b from-orange-500/80 via-orange-600/80 to-amber-700/80 dark:from-orange-600/80 dark:via-orange-700/80 dark:to-amber-800 backdrop-blur-xl rounded-b-2xl shadow-none flex flex-col items-center justify-center text-white relative overflow-hidden">
-                                <span className="text-4xl sm:text-5xl font-black font-fredoka tracking-tighter drop-shadow-md">
-                                  3
-                                </span>
-                                <span className="text-[9px] font-extrabold uppercase tracking-wider text-amber-200/90 -mt-1">
-                                  Kutilmoqda
-                                </span>
-                              </div>
-                            </div>
-                          </div>
-                        );
-                      }
-                      const isSelf = user?.id && item.user_id === user.id;
-                      const avatar = isSelf ? (profile?.avatar_url || item.student_avatar) : item.student_avatar;
-                      const hasAvatar = avatar && !avatar.includes('dicebear');
-
-                      return (
-                        <div className="flex flex-col items-center text-center">
-                          <div className="flex flex-col items-center space-y-1 mb-2.5">
-                            {hasAvatar ? (
-                              <img
-                                src={avatar}
-                                alt={item.student_name}
-                                className="w-14 h-14 sm:w-16 sm:h-16 rounded-full bg-slate-100 dark:bg-slate-800 border-2 border-orange-400 dark:border-orange-500 shadow-none object-cover"
-                              />
-                            ) : (
-                              <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-full bg-orange-100 dark:bg-orange-900/40 text-orange-600 dark:text-orange-300 font-bold text-lg sm:text-xl flex items-center justify-center border-2 border-orange-400 dark:border-orange-500 shadow-none uppercase select-none">
-                                {(item.student_name || "O")[0]}
-                              </div>
-                            )}
-
-                            <div className="flex items-center justify-center gap-1 max-w-[90px] sm:max-w-[120px]">
-                              <h4 className="font-bold text-xs sm:text-sm text-slate-900 dark:text-white truncate">
-                                {item.student_name}
-                              </h4>
-                              {isSelf && (
-                                <span className="px-1 py-0.2 rounded bg-brand-blue text-white text-[8px] font-black uppercase shrink-0 shadow-none">
-                                  Siz
-                                </span>
-                              )}
-                            </div>
-
-                            <div className="text-xs font-bold text-orange-600 dark:text-orange-400">
-                              <span>{item.scaled_score || `${item.score} ball`}</span>
-                              <span className="text-[10px] font-semibold opacity-75 ml-1">({item.percentage}%)</span>
-                            </div>
-                            <div className="flex items-center justify-center gap-1 text-[10px] text-slate-400 font-medium">
-                              <Clock size={10} />
-                              <span>{Math.floor((item.time_spent_seconds || 0) / 60)} daq</span>
-                            </div>
-                          </div>
-
-                          <div className="w-full">
-                            <div className="h-4 sm:h-5 w-full bg-gradient-to-r from-orange-200 via-amber-200 to-rose-200 dark:from-orange-500 dark:via-amber-400 dark:to-rose-400 rounded-t-2xl transform -skew-x-2 border-t border-x border-white/80 dark:border-white/30 shadow-none" />
-                            <div className="h-24 sm:h-30 w-full bg-gradient-to-b from-orange-400 via-orange-500 to-amber-600 dark:from-orange-600 dark:via-orange-700 dark:to-amber-800 backdrop-blur-xl rounded-b-2xl shadow-none flex items-center justify-center text-white relative overflow-hidden">
-                              <span className="text-4xl sm:text-5xl font-black font-fredoka tracking-tighter drop-shadow-md">
-                                3
-                              </span>
-                            </div>
-                          </div>
-                        </div>
-                      );
-                    })()}
-
-                  </div>
-                </div>
-
-                {/* Sub-Podium Update Pill */}
-                <div className="text-center pt-3">
-                  {uniqueLeaderboard.length === 1 ? (
-                    <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-amber-500/10 dark:bg-amber-500/15 border border-amber-500/25 text-[11px] font-bold text-amber-700 dark:text-amber-300">
-                      <span>🏆 1-o'rin egallandi • 2- va 3-o'rinlar ochiq! Musobaqada qatnashing va sovrindor bo'ling</span>
-                    </div>
-                  ) : uniqueLeaderboard.length === 2 ? (
-                    <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-blue-500/10 dark:bg-blue-500/15 border border-blue-500/25 text-[11px] font-bold text-blue-700 dark:text-blue-300">
-                      <span>🎯 Shoxsupada faqat 1 ta o'rin qoldi! 3-o'rinni egallash uchun sinovdan o'ting</span>
-                    </div>
-                  ) : (
-                    <p className="inline-flex items-center gap-1.5 text-[11px] text-slate-400 font-medium">
-                      <Clock size={12} />
-                      <span>Reyting real-vaqt rejimida yangilanadi • Jami: {uniqueLeaderboard.length} ishtirokchi</span>
-                    </p>
-                  )}
-                </div>
-
-              </div>
-            )}
-
-            {/* ── RANKED LIST ── */}
-            <div className="bg-white/60 dark:bg-slate-900/60 backdrop-blur-xl rounded-[2rem] p-4 sm:p-6 border border-white/60 dark:border-slate-800/60 space-y-3 shadow-none">
-              <div className="flex items-center justify-between pb-2 border-b border-slate-100 dark:border-slate-800">
-                <div className="flex items-center gap-2">
-                  <h4 className="font-black font-fredoka text-sm sm:text-base text-slate-900 dark:text-white">
-                    Ishtirokchilar Natijalari
-                  </h4>
-                  {uniqueLeaderboard.length > 3 && (
-                    <span className="px-2 py-0.5 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 text-[10px] font-bold">
-                      4-o'rindan boshlab
-                    </span>
-                  )}
-                </div>
-                <span className="text-xs text-slate-400 font-medium">
-                  {uniqueLeaderboard.length > 3
-                    ? `${subsequentLeaderboard.length} ta ishtirokchi`
-                    : `${uniqueLeaderboard.length} ta ishtirokchi`}
-                </span>
-              </div>
-
-              {uniqueLeaderboard.length === 0 ? (
-                <div className="text-center py-10 space-y-2">
-                  <Award className="mx-auto text-slate-300 dark:text-slate-700" size={40} />
-                  <p className="font-bold text-slate-700 dark:text-slate-200 text-sm">
-                    Ushbu musobaqa bo'yicha hali natijalar mavjud emas
-                  </p>
-                  <p className="text-xs text-slate-400">
-                    Musobaqada qatnashing va birinchi bo'lib reytingga kiring!
-                  </p>
-                </div>
-              ) : subsequentLeaderboard.length === 0 ? (
-                <div className="text-center py-8 px-4 rounded-2xl bg-slate-50/50 dark:bg-slate-800/30 border border-dashed border-slate-200 dark:border-slate-800 space-y-1.5">
-                  <div className="w-10 h-10 rounded-2xl bg-amber-500/10 dark:bg-amber-500/20 text-amber-500 flex items-center justify-center mx-auto text-lg">
-                    🏆
-                  </div>
-                  <p className="font-bold text-slate-700 dark:text-slate-200 text-xs sm:text-sm">
-                    {leaderboardSearch.trim()
-                      ? "Qidiruv bo'yicha 4-o'rindan boshlab ishtirokchi topilmadi"
-                      : "Barcha sovrindorlar (Top 3) yuqoridagi 3D shoxsupada!"}
-                  </p>
-                  <p className="text-[11px] text-slate-400 max-w-md mx-auto">
-                    {leaderboardSearch.trim()
-                      ? "Dastlabki 3 ta o'rin egalari yuqoridagi 3D shoxsupada ko'rsatilgan."
-                      : "Keyingi topshirgan barcha ishtirokchilar natijalari 4-o'rindan boshlab ushbu ro'yxatda aks etadi."}
-                  </p>
-                </div>
-              ) : (
-                <div className="space-y-2">
-                  {subsequentLeaderboard.map((entry) => {
-                    const isSelf = user?.id && entry.user_id === user.id;
-                    const avatar = isSelf ? (profile?.avatar_url || entry.student_avatar) : entry.student_avatar;
-                    const hasAvatar = avatar && !avatar.includes('dicebear');
-
-                    return (
-                      <div
-                        key={entry.id}
-                        className={`p-3 sm:p-3.5 rounded-2xl border flex items-center justify-between gap-3 transition-all ${
-                          isSelf
-                            ? "bg-blue-50/80 dark:bg-blue-950/30 border-brand-blue/40 shadow-none"
-                            : "bg-white/40 dark:bg-slate-800/30 hover:bg-white/70 dark:hover:bg-slate-800/60 border-slate-100/60 dark:border-slate-800/60"
-                        }`}
-                      >
-                        <div className="flex items-center gap-3 min-w-0">
-                          <span className="w-8 h-8 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 font-black text-xs inline-flex items-center justify-center shrink-0">
-                            #{entry.rank}
-                          </span>
-
-                          {hasAvatar ? (
-                            <img
-                              src={avatar}
-                              alt={entry.student_name}
-                              className="w-10 h-10 rounded-full bg-slate-200 dark:bg-slate-700 shrink-0 object-cover border border-slate-200/60 dark:border-slate-700"
-                            />
-                          ) : (
-                            <div className="w-10 h-10 rounded-full bg-brand-blue/10 dark:bg-brand-blue/20 text-brand-blue dark:text-blue-400 font-bold text-xs flex items-center justify-center border border-brand-blue/20 shrink-0 select-none uppercase">
-                              {(entry.student_name || "O")[0]}
-                            </div>
-                          )}
-
-                          <div className="min-w-0">
-                            <div className="flex items-center gap-1.5">
-                              <p className="font-bold text-slate-900 dark:text-white text-xs sm:text-sm truncate">
-                                {entry.student_name}
-                              </p>
-                              {isSelf && (
-                                <span className="px-1.5 py-0.2 rounded bg-brand-blue text-white text-[9px] font-black uppercase shrink-0">
-                                  Siz
-                                </span>
-                              )}
-                            </div>
-                            <p className="text-[11px] text-slate-400 truncate">
-                              Topshirildi: {entry.completed_at}
-                            </p>
-                          </div>
-                        </div>
-
-                        <div className="flex items-center gap-2 sm:gap-4 shrink-0">
-                          {entry.prize && (
-                            <span className="hidden sm:inline-flex items-center gap-1 px-2.5 py-0.5 rounded-lg bg-amber-500/15 text-amber-700 dark:text-amber-300 font-bold text-[11px]">
-                              <Gift size={12} className="text-amber-500" />
-                              <span>{entry.prize}</span>
-                            </span>
-                          )}
-
-                          <div className="text-right">
-                            <div className="inline-flex items-center gap-1 text-xs sm:text-sm font-black text-slate-900 dark:text-white">
-                              <span className="text-brand-blue dark:text-blue-400 font-black">
-                                {entry.scaled_score || `${entry.score} ball`}
-                              </span>
-                              <span className="ml-1 text-[10px] font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/40 px-1 py-0.2 rounded">
-                                {entry.percentage}%
-                              </span>
-                            </div>
-                            <p className="flex items-center justify-end gap-1 text-[10px] text-slate-400 font-medium">
-                              <Clock size={10} />
-                              <span>{Math.floor(entry.time_spent_seconds / 60)} daq {entry.time_spent_seconds % 60} son</span>
-                            </p>
-                          </div>
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-              )}
-
-              {/* Encouragement card if podium has open slots */}
-              {uniqueLeaderboard.length < 3 && (
-                <div className="p-3.5 sm:p-4 rounded-2xl border border-dashed border-brand-blue/30 bg-gradient-to-r from-blue-50/50 via-indigo-50/30 to-amber-50/30 dark:from-blue-950/20 dark:via-indigo-950/15 dark:to-amber-950/15 flex items-center justify-between gap-3 mt-2">
-                  <div className="flex items-center gap-3">
-                    <span className="text-2xl select-none">🎯</span>
-                    <div>
-                      <p className="text-xs sm:text-sm font-bold text-slate-800 dark:text-slate-200">
-                        Shoxsupada yana {3 - uniqueLeaderboard.length} ta sovrinli o'rin ochiq!
-                      </p>
-                      <p className="text-[11px] text-slate-500 dark:text-slate-400">
-                        Musobaqada qatnashib, yuqoridagi 3D g'oliblar shoxsupasidan o'z o'rningizni egallang.
-                      </p>
-                    </div>
-                  </div>
-                  <button
-                    onClick={() => {
-                      const currentTourney = tournaments.find((t) => t.id === selectedTournamentId);
-                      if (currentTourney && currentTourney.status !== "finished") {
-                        setConfirmStartItem(currentTourney);
-                      } else {
-                        setActiveTab("tournaments");
-                      }
-                    }}
-                    className="px-3.5 py-2 rounded-xl bg-brand-blue hover:bg-brand-blue/90 text-white text-xs font-bold shrink-0 transition-all shadow-none flex items-center gap-1.5 cursor-pointer"
-                  >
-                    <Play size={12} className="fill-white" />
-                    <span>Qatnashish</span>
-                  </button>
-                </div>
-              )}
-            </div>
-
-          </div>
+            <TournamentLeaderboardView
+              mode="international"
+              subtitle="SAT imtihonlari bo'yicha eng yuqori natijalar"
+              tournaments={tournaments}
+              selectedTournamentId={selectedTournamentId}
+              onSelectTournament={handleTournamentSelectForLeaderboard}
+              searchQuery={leaderboardSearch}
+              onSearchChange={setLeaderboardSearch}
+              entries={uniqueLeaderboard}
+              completedIds={completedIds}
+              currentUserId={user?.id}
+              currentUserAvatar={profile?.avatar_url}
+              onStartParticipate={() => {
+                const currentTourney = tournaments.find((t) => t.id === selectedTournamentId);
+                if (currentTourney && currentTourney.status !== "finished") {
+                  setConfirmStartItem(currentTourney);
+                } else {
+                  setActiveTab("tournaments");
+                }
+              }}
+            />
           )
         )}
 

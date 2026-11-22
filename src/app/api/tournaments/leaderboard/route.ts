@@ -4,6 +4,25 @@ import { createTelegramBotClient } from '@/utils/supabase/server';
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
 
+const NO_CACHE_HEADERS = {
+  'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate',
+  Pragma: 'no-cache',
+  Expires: '0',
+};
+
+const UZ_SHORT_MONTHS = ['Yan', 'Fev', 'Mar', 'Apr', 'May', 'Iyun', 'Iyul', 'Avg', 'Sen', 'Okt', 'Noy', 'Dek'];
+
+function formatUzDateTime(value?: string | null): string {
+  if (!value) return 'Yaqinda';
+  const d = new Date(value);
+  if (Number.isNaN(d.getTime())) return 'Yaqinda';
+  // Convert to Tashkent (UTC+5) consistently on server
+  const uz = new Date(d.getTime() + 5 * 60 * 60 * 1000);
+  const hh = String(uz.getUTCHours()).padStart(2, '0');
+  const mm = String(uz.getUTCMinutes()).padStart(2, '0');
+  return `${uz.getUTCDate()}-${UZ_SHORT_MONTHS[uz.getUTCMonth()]}, ${hh}:${mm}`;
+}
+
 export interface LeaderboardEntryDTO {
   id: string;
   tournament_id: string;
@@ -142,14 +161,7 @@ export async function GET(request: NextRequest) {
           time_spent_seconds: Number(d.time_spent_seconds) || 0,
           rank: Number(d.rank) || 1,
           prize: d.prize || undefined,
-          completed_at: d.completed_at
-            ? new Date(d.completed_at).toLocaleString('uz-UZ', {
-                month: 'short',
-                day: 'numeric',
-                hour: '2-digit',
-                minute: '2-digit'
-              })
-            : 'Yaqinda'
+          completed_at: formatUzDateTime(d.completed_at)
         };
       });
     }
@@ -165,7 +177,7 @@ export async function GET(request: NextRequest) {
     tournamentId,
     type,
     leaderboard: finalEntries
-  });
+  }, { headers: NO_CACHE_HEADERS });
 }
 
 // ── POST: Submit Attempt & Recalculate Leaderboard ──
@@ -206,7 +218,7 @@ export async function POST(request: NextRequest) {
       percentage: Number(percentage) || Math.round((Number(score) / (Number(maxScore) || 1)) * 100),
       time_spent_seconds: Number(timeSpentSeconds) || 0,
       rank: 1,
-      completed_at: 'Hozirginagina'
+      completed_at: 'Hozirgina'
     };
 
     let supabase: any = null;
@@ -296,14 +308,7 @@ export async function POST(request: NextRequest) {
               percentage: Number(d.percentage) || Math.round((Number(d.score) / (Number(d.max_score) || 1)) * 100),
               time_spent_seconds: Number(d.time_spent_seconds) || 0,
               rank: 1,
-              completed_at: d.completed_at
-                ? new Date(d.completed_at).toLocaleString('uz-UZ', {
-                    month: 'short',
-                    day: 'numeric',
-                    hour: '2-digit',
-                    minute: '2-digit'
-                  })
-                : 'Yaqinda'
+              completed_at: formatUzDateTime(d.completed_at)
             };
           });
         }
@@ -323,7 +328,7 @@ export async function POST(request: NextRequest) {
       success: true,
       result: myResult,
       leaderboard: rankedLeaderboard
-    });
+    }, { headers: NO_CACHE_HEADERS });
   } catch (err: any) {
     console.error('[Leaderboard API] POST error:', err);
     return NextResponse.json({ error: err?.message || 'Server error' }, { status: 500 });
