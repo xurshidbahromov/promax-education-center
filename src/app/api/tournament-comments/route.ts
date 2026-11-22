@@ -1,10 +1,28 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createTelegramBotClient } from '@/utils/supabase/server';
+import { createClient, createTelegramBotClient } from '@/utils/supabase/server';
 import fs from 'fs';
 import path from 'path';
 
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
+
+const UZ_SHORT_MONTHS = ['Yan', 'Fev', 'Mar', 'Apr', 'May', 'Iyun', 'Iyul', 'Avg', 'Sen', 'Okt', 'Noy', 'Dek'];
+
+function formatRelativeUzTime(iso?: string | null): string {
+  if (!iso) return 'Yaqinda';
+  const d = new Date(iso);
+  if (Number.isNaN(d.getTime())) return 'Yaqinda';
+  const diffSec = Math.floor((Date.now() - d.getTime()) / 1000);
+  if (diffSec < 60) return 'Hozirgina';
+  const diffMin = Math.floor(diffSec / 60);
+  if (diffMin < 60) return `${diffMin} daq oldin`;
+  const diffHr = Math.floor(diffMin / 60);
+  if (diffHr < 24) return `${diffHr} soat oldin`;
+  const diffDay = Math.floor(diffHr / 24);
+  if (diffDay < 7) return `${diffDay} kun oldin`;
+  const uz = new Date(d.getTime() + 5 * 60 * 60 * 1000);
+  return `${uz.getUTCDate()}-${UZ_SHORT_MONTHS[uz.getUTCMonth()]}`;
+}
 
 export interface TournamentComment {
   id: string;
@@ -83,9 +101,12 @@ export async function GET(request: NextRequest) {
 
     const { data, error } = await query;
     if (!error && data) {
-      // If supabase table exists and responded
+      const normalized = data.map((row: any) => ({
+        ...row,
+        time: formatRelativeUzTime(row.created_at),
+      }));
       return NextResponse.json(
-        { comments: data },
+        { comments: normalized },
         {
           headers: {
             'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate',
@@ -124,7 +145,8 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     const { category = 'olympiad', tournament_id, author, avatar, role = "O'quvchi", text, user_id } = body;
 
-    if (!text || !text.trim() || !author) {
+    const cleanText = String(text || '').trim().slice(0, 500);
+    if (!cleanText || !author) {
       return NextResponse.json({ error: 'Text and author are required' }, { status: 400 });
     }
 
@@ -132,11 +154,11 @@ export async function POST(request: NextRequest) {
       id: `comm_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`,
       category: category as 'olympiad' | 'international',
       tournament_id: tournament_id || undefined,
-      author: author.trim(),
+      author: String(author).trim().slice(0, 80),
       avatar: avatar || null,
       role: role || "O'quvchi",
       time: "Hozirgina",
-      text: text.trim(),
+      text: cleanText,
       likes: 0,
       user_id: user_id || undefined,
       created_at: new Date().toISOString()
@@ -163,12 +185,13 @@ export async function POST(request: NextRequest) {
         .single();
 
       if (!error && data) {
+        const formatted = { ...data, time: 'Hozirgina' };
         // Also keep local cache in sync
         const all = loadAllComments();
-        all.unshift(data);
+        all.unshift(formatted);
         persistComments(all);
 
-        return NextResponse.json({ comment: data });
+        return NextResponse.json({ comment: formatted });
       }
     } catch (e) {}
 
@@ -187,7 +210,8 @@ export async function POST(request: NextRequest) {
 export async function PATCH(request: NextRequest) {
   try {
     const body = await request.json();
-    const { commentId, delta = 1 } = body;
+    const { commentId } = body;
+    const delta = Number(body.delta) < 0 ? -1 : 1;
 
     if (!commentId) {
       return NextResponse.json({ error: 'commentId is required' }, { status: 400 });
@@ -244,8 +268,27 @@ export async function DELETE(request: NextRequest) {
     return NextResponse.json({ error: 'id is required' }, { status: 400 });
   }
 
+  // Verify caller is authenticated and either comment owner or admin/staff/teacher
+  const sessionClient = await createClient();
+  const { data: { user } } = await sessionClient.auth.getUser();
+  if (!user) {
+    return NextResponse.json({ error: 'Avtorizatsiya talab qilinadi' }, { status: 401 });
+  }
+
   try {
     const supabase = await createTelegramBotClient();
+    const [{ data: profile }, { data: target }] = await Promise.all([
+      supabase.from('profiles').select('role').eq('id', user.id).maybeSingle(),
+      supabase.from('tournament_comments').select('id, user_id').eq('id', id).maybeSingle(),
+    ]);
+
+    const isPrivileged = ['admin', 'superadmin', 'staff', 'teacher'].includes(profile?.role || '');
+    const isOwner = Boolean(target?.user_id && target.user_id === user.id);
+
+    if (target && !isPrivileged && !isOwner) {
+      return NextResponse.json({ error: "Faqat o'z izohingizni o'chira olasiz" }, { status: 403 });
+    }
+
     await supabase.from('tournament_comments').delete().eq('id', id);
   } catch (e) {}
 
