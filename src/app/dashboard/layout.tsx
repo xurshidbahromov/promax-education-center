@@ -27,6 +27,7 @@ import NotificationBell from "@/components/NotificationBell";
 import DashboardReveal from "@/components/ui/DashboardReveal";
 import StreakPill from "@/components/dashboard/StreakPill";
 import SoundToggle from "@/components/ui/SoundToggle";
+import PhoneVerifyModal from "@/components/dashboard/PhoneVerifyModal";
 import { checkAndUpdateDailyStreak } from "@/lib/streak";
 import { soundFx } from "@/lib/sound-effects";
 import toast from "react-hot-toast";
@@ -202,6 +203,7 @@ export default function DashboardLayout({
     <>
       {/* Seamless Reveal & Loading Animation */}
       <DashboardReveal isLoading={loading} />
+      {!loading && <PhoneVerifyModal />}
 
       {!loading && (
         <div className="min-h-screen bg-transparent flex relative overflow-hidden">

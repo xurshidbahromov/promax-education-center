@@ -41,27 +41,50 @@ export async function POST(request: NextRequest) {
     const firstName = msg.from?.first_name || 'Foydalanuvchi';
     const text = msg.text || '';
 
-    // ── Contact sharing (ota-ona) ──────────────────────────────────────────
+    // ── Contact sharing (o'quvchi telefonini tasdiqlash + ota-ona bog'lash) ──
     if (msg.contact) {
       const rawPhone = msg.contact.phone_number || '';
       const phoneClean = rawPhone.replace(/\D/g, '');
-      const phoneWithPlus = '+' + phoneClean;
+      const phoneWithPlus = phoneClean ? '+' + phoneClean : '';
 
-      const { data: matchedStudents } = await supabase
-        .from('profiles')
-        .select('id, full_name, phone, parent_name, parent_phone')
-        .or(`parent_phone.ilike.%${phoneClean}%,phone.ilike.%${phoneClean}%`);
+      // 1. If the user shared their own contact and already has a profile linked via telegram_id,
+      // save their verified phone number directly into profiles.phone so Admin CRM sees it!
+      let ownProfileUpdated = false;
+      if (phoneWithPlus && telegramId && (!msg.contact.user_id || msg.contact.user_id === telegramId)) {
+        const { data: ownProfile } = await supabase
+          .from('profiles')
+          .select('id, full_name, phone')
+          .eq('telegram_id', telegramId)
+          .maybeSingle();
+
+        if (ownProfile) {
+          await supabase
+            .from('profiles')
+            .update({
+              phone: phoneWithPlus,
+              telegram_username: msg.from?.username || null,
+              updated_at: new Date().toISOString(),
+            })
+            .eq('id', ownProfile.id);
+          ownProfileUpdated = true;
+        }
+      }
+
+      // 2. Also check parent_phone / student phone matches for parent linking
+      const { data: matchedStudents } = phoneClean
+        ? await supabase
+            .from('profiles')
+            .select('id, full_name, phone, parent_name, parent_phone')
+            .or(`parent_phone.ilike.%${phoneClean}%,phone.ilike.%${phoneClean}%`)
+        : { data: null };
 
       if (matchedStudents && matchedStudents.length > 0) {
-        for (const student of matchedStudents) {
-          await supabase.from('parent_students').upsert({
-            parent_telegram_id: telegramId,
-            parent_phone: phoneWithPlus,
-            parent_name: msg.contact.first_name || 'Ota-ona',
-            student_id: student.id,
-          }, { onConflict: 'parent_telegram_id,student_id' });
+        const parentMatches = matchedStudents.filter((s: any) => {
+          const pClean = (s.parent_phone || '').replace(/\D/g, '');
+          return pClean && pClean === phoneClean;
+        });
 
-          // If the student's own phone matches, also link their profile telegram_id
+        for (const student of matchedStudents) {
           const studentCleanPhone = (student.phone || '').replace(/\D/g, '');
           if (studentCleanPhone && studentCleanPhone === phoneClean) {
             await supabase.from('profiles').update({
@@ -70,13 +93,35 @@ export async function POST(request: NextRequest) {
               phone: phoneWithPlus,
               updated_at: new Date().toISOString()
             }).eq('id', student.id);
+            ownProfileUpdated = true;
+          }
+
+          if (parentMatches.some((pm: any) => pm.id === student.id)) {
+            await supabase.from('parent_students').upsert({
+              parent_telegram_id: telegramId,
+              parent_phone: phoneWithPlus,
+              parent_name: msg.contact.first_name || 'Ota-ona',
+              student_id: student.id,
+            }, { onConflict: 'parent_telegram_id,student_id' });
           }
         }
-        const studentNames = matchedStudents.map((s: any) => s.full_name || "O'quvchi");
-        const parentName = msg.contact.first_name || 'Ota-ona';
-        await sendMessage(chatId, buildParentLinkSuccessMessage(parentName, studentNames), {
-          reply_markup: buildParentReplyKeyboard()
-        });
+
+        if (parentMatches.length > 0) {
+          const studentNames = parentMatches.map((s: any) => s.full_name || "O'quvchi");
+          const parentName = msg.contact.first_name || 'Ota-ona';
+          await sendMessage(chatId, buildParentLinkSuccessMessage(parentName, studentNames), {
+            reply_markup: buildParentReplyKeyboard()
+          });
+          return NextResponse.json({ ok: true });
+        }
+      }
+
+      if (ownProfileUpdated) {
+        await sendMessage(
+          chatId,
+          `✅ <b>Telefon raqamingiz tasdiqlandi!</b>\n\n📱 Raqam: <b>${phoneWithPlus}</b>\n\nEndi platformadan to'liq foydalanishingiz mumkin.`,
+          { reply_markup: buildReplyKeyboard(true) }
+        );
       } else {
         await sendMessage(
           chatId,
