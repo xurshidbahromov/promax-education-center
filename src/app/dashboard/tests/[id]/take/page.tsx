@@ -911,9 +911,9 @@ export default function TakeTestPage() {
   };
 
   const revealModeLabel = isInternational
-    ? "XALQARO TITUL"
+    ? "SAT TITULI"
     : isOlympiad
-    ? "OLIMPIADA TITULI"
+    ? "MILLIY SERTIFIKAT"
     : "TITUL VARAQASI";
 
   if (!loading && (!test || questions.length === 0)) {
@@ -932,7 +932,7 @@ export default function TakeTestPage() {
           href={isInternational ? "/dashboard/international" : isOlympiad ? "/dashboard/olympiads" : "/dashboard/tests"}
           className="px-5 py-2.5 rounded-2xl bg-brand-blue hover:bg-blue-600 text-white font-bold text-sm shadow-sm transition-all cursor-pointer"
         >
-          {isInternational ? "Xalqaro musobaqalarga qaytish" : isOlympiad ? "Musobaqalarga qaytish" : t('tests.take.back_to_list')}
+          {isInternational ? "SAT sinovlariga qaytish" : isOlympiad ? "Milliy sertifikatga qaytish" : t('tests.take.back_to_list')}
         </Link>
       </div>
     );
@@ -970,7 +970,7 @@ export default function TakeTestPage() {
             <span className="w-8 h-8 rounded-full bg-white/80 dark:bg-slate-900/80 border border-slate-200/70 dark:border-slate-800 flex items-center justify-center shrink-0">
               <ArrowLeft size={15} className="group-hover:-translate-x-0.5 transition-transform" />
             </span>
-            <span className="truncate">{isInternational ? "Xalqaro musobaqalar" : isOlympiad ? "Musobaqalar" : "Testlar ro'yxati"}</span>
+            <span className="truncate">{isInternational ? "SAT" : isOlympiad ? "Milliy sertifikat" : "Testlar ro'yxati"}</span>
           </button>
 
           <button
@@ -1458,7 +1458,7 @@ export default function TakeTestPage() {
             className="flex-1 sm:flex-initial py-3 px-5 rounded-2xl bg-white/85 dark:bg-slate-900/85 hover:bg-white dark:hover:bg-slate-800 border border-slate-200/70 dark:border-slate-800 text-slate-700 dark:text-slate-200 text-xs sm:text-sm font-bold flex items-center justify-center gap-1.5 transition-colors active:scale-95 cursor-pointer"
           >
             <ArrowLeft size={15} />
-            <span>{isInternational ? "Xalqaro musobaqalar" : isOlympiad ? "Musobaqalar" : "Testlarga qaytish"}</span>
+            <span>{isInternational ? "SAT" : isOlympiad ? "Milliy sertifikat" : "Testlarga qaytish"}</span>
           </button>
           <button
             type="button"

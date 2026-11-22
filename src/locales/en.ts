@@ -585,11 +585,11 @@ export const en = {
  "admin.announcements.toast.status_error": "Error changing status",
 
  // Olympiads & Tournaments
- "olympiad.banner_title": "National Subject Competitions",
+ "olympiad.banner_title": "National Certificate",
  "olympiad.banner_subtitle": "Test your knowledge and win valuable prizes",
  "olympiad.shelf_title": "Knowledge test",
  "international.shelf_title": "Global test",
- "international.banner_title": "International Competitions",
+ "international.banner_title": "SAT",
  "international.banner_subtitle": "SAT 1600 scale, AMC & global certificates",
  "olympiad.participants_count": "{count} participants",
  "olympiad.top_prizes": "Prizes for top ranks",

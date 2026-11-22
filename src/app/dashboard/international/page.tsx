@@ -445,7 +445,7 @@ export default function InternationalCompetitionsPage() {
           <div className="bg-white/60 dark:bg-slate-900/60 backdrop-blur-xl rounded-[2rem] p-6 sm:p-7 border border-white/60 dark:border-slate-800/60 shadow-none space-y-3">
             <div className="space-y-1">
               <h1 className="text-xl sm:text-2xl font-bold font-fredoka text-slate-800 dark:text-slate-100 leading-tight">
-                Xalqaro musobaqalar
+                SAT
               </h1>
               <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 font-medium">
                 SAT, AMC, IELTS va xalqaro olimpiadalarda bilimingizni sinang
@@ -637,7 +637,7 @@ export default function InternationalCompetitionsPage() {
                       ? "Hozircha kutilayotgan xalqaro musobaqalar yo'q"
                       : statusFilter === "finished"
                       ? "Hali yakunlangan xalqaro musobaqalar mavjud emas"
-                      : "Xalqaro musobaqalar topilmadi"}
+                      : "SAT sinovlari topilmadi"}
                   </h4>
                   <p className="text-xs text-slate-500 max-w-sm">
                     {statusFilter === "live"

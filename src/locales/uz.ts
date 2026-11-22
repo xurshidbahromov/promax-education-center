@@ -672,11 +672,11 @@ export const uz = {
  "admin.announcements.toast.status_error": "Status o'zgartirishda xatolik",
 
  // Olympiads & Tournaments
- "olympiad.banner_title": "Milliy fan musobaqalari",
+ "olympiad.banner_title": "Milliy sertifikat",
  "olympiad.banner_subtitle": "Bilimingizni sinang va mukofotlarni qo'lga kiriting",
  "olympiad.shelf_title": "Bilim sinovi",
  "international.shelf_title": "Jahon sinovi",
- "international.banner_title": "Xalqaro musobaqalar",
+ "international.banner_title": "SAT",
  "international.banner_subtitle": "SAT 1600 shkalasi, AMC va xalqaro sertifikatlar",
  "olympiad.participants_count": "{count} nafar qatnashuvchi",
  "olympiad.top_prizes": "Top o'rinlar uchun mukofotlar",
