@@ -130,7 +130,7 @@ export default function DashboardPage() {
               <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 font-medium">
                 {greeting}, <span className="font-semibold text-slate-700 dark:text-slate-200">{firstName}!</span>
               </p>
-              <h1 className="text-2xl sm:text-3xl font-bold font-fredoka text-slate-800 dark:text-slate-100 leading-tight">
+              <h1 className="text-2xl sm:text-3xl font-sans font-semibold text-slate-900 dark:text-white leading-tight tracking-tight">
                 Bugun nima o'rganamiz?
               </h1>
             </div>

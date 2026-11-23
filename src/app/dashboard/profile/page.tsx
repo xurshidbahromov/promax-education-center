@@ -340,7 +340,7 @@ export default function ProfilePage() {
         <ArrowLeft size={18} className="text-slate-600 dark:text-slate-300" />
       </button>
       <div className="min-w-0">
-        <h2 className="text-xl sm:text-2xl font-bold text-slate-900 dark:text-white font-fredoka leading-tight truncate">
+        <h2 className="text-xl sm:text-2xl font-sans font-semibold text-slate-900 dark:text-white leading-tight tracking-tight truncate">
           {title}
         </h2>
         {subtitle && (
@@ -448,7 +448,7 @@ export default function ProfilePage() {
             />
           </div>
 
-          <h1 className="text-2xl font-bold text-slate-900 dark:text-white font-fredoka leading-tight">
+          <h1 className="text-2xl font-sans font-semibold text-slate-900 dark:text-white leading-tight tracking-tight">
             {profile?.full_name || "O'quvchi"}
           </h1>
 

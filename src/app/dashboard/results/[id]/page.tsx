@@ -112,7 +112,7 @@ export default function ResultDetailPage() {
                 </span>
               </div>
 
-              <h1 className="text-2xl sm:text-3xl font-bold text-slate-800 dark:text-slate-100 leading-snug">
+              <h1 className="text-2xl sm:text-3xl font-sans font-semibold text-slate-900 dark:text-white leading-snug tracking-tight">
                 {result.exam?.title || "Imtihon natijasi"}
               </h1>
 

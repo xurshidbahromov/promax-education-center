@@ -216,7 +216,7 @@ export default function TournamentLeaderboardView({
             <div
               className={`${standHeight} w-full bg-gradient-to-b ${standGradient} rounded-b-2xl flex flex-col items-center justify-center text-white relative overflow-hidden`}
             >
-              <span className="text-4xl sm:text-5xl font-black font-fredoka tracking-tighter">
+              <span className="text-4xl sm:text-5xl font-semibold font-sans tracking-tight tracking-tighter">
                 {rank}
               </span>
               <span className="text-[9px] font-extrabold uppercase tracking-wider text-white/80 -mt-1">
@@ -316,7 +316,7 @@ export default function TournamentLeaderboardView({
             <span
               className={`${
                 isFirst ? "text-5xl sm:text-6xl" : "text-4xl sm:text-5xl"
-              } font-black font-fredoka tracking-tighter`}
+              } font-semibold font-sans tracking-tight tracking-tighter`}
             >
               {rank}
             </span>
@@ -335,7 +335,7 @@ export default function TournamentLeaderboardView({
             <Trophy size={21} />
           </div>
           <div className="min-w-0">
-            <h3 className="text-base sm:text-lg font-extrabold font-fredoka text-slate-900 dark:text-white leading-tight truncate">
+            <h3 className="text-base sm:text-lg font-semibold font-sans tracking-tight text-slate-900 dark:text-white leading-tight truncate">
               {title}
             </h3>
             <p className="text-xs text-slate-500 dark:text-slate-400 font-medium truncate">
@@ -439,7 +439,7 @@ export default function TournamentLeaderboardView({
       <div className="bg-white/90 dark:bg-slate-900/90 rounded-[28px] border border-slate-200/70 dark:border-slate-800 p-4 sm:p-6 space-y-3">
         <div className="flex items-center justify-between pb-2.5 border-b border-slate-100 dark:border-slate-800">
           <div className="flex items-center gap-2">
-            <h4 className="font-extrabold font-fredoka text-sm sm:text-base text-slate-900 dark:text-white">
+            <h4 className="font-semibold font-sans tracking-tight text-sm sm:text-base text-slate-900 dark:text-white">
               {isSearching ? "Qidiruv natijalari" : "Ishtirokchilar ro'yxati"}
             </h4>
             {!isSearching && entries.length > 3 && (

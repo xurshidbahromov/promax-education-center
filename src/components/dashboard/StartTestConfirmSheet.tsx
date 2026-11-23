@@ -79,7 +79,7 @@ export default function StartTestConfirmSheet({
                     <Trophy size={18} />
                   </div>
                   <div className="min-w-0">
-                    <h3 className="font-extrabold text-slate-900 dark:text-slate-100 text-base font-fredoka leading-tight">
+                    <h3 className="font-extrabold text-slate-900 dark:text-slate-100 text-base font-sans tracking-tight leading-tight">
                       {heading}
                     </h3>
                     <p className="text-[11px] text-slate-500 dark:text-slate-400 font-medium truncate">
@@ -107,7 +107,7 @@ export default function StartTestConfirmSheet({
                     <Clock size={11} />
                     Vaqti
                   </span>
-                  <p className="text-xl font-black font-fredoka text-slate-900 dark:text-white mt-0.5 tabular-nums">
+                  <p className="text-xl font-semibold font-sans tracking-tight text-slate-900 dark:text-white mt-0.5 tabular-nums">
                     {item.durationMinutes || 60}{" "}
                     <span className="text-xs font-bold text-amber-500">daqiqa</span>
                   </p>
@@ -117,7 +117,7 @@ export default function StartTestConfirmSheet({
                     <FileText size={11} />
                     Savollar
                   </span>
-                  <p className="text-xl font-black font-fredoka text-slate-900 dark:text-white mt-0.5 tabular-nums">
+                  <p className="text-xl font-semibold font-sans tracking-tight text-slate-900 dark:text-white mt-0.5 tabular-nums">
                     {item.totalQuestions || 30}{" "}
                     <span className="text-xs font-bold text-slate-400">ta</span>
                   </p>

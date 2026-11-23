@@ -79,7 +79,7 @@ export default function OnlineTestsPage() {
             <p className="text-[12px] text-slate-500 dark:text-slate-400 font-medium uppercase tracking-widest">
               {t("tests.subtitle")}
             </p>
-            <h1 className="text-2xl sm:text-3xl font-bold font-fredoka text-slate-800 dark:text-slate-100 leading-tight">
+            <h1 className="text-2xl sm:text-3xl font-sans font-semibold text-slate-900 dark:text-white leading-tight tracking-tight">
               {t("tests.title")}
             </h1>
           </div>
@@ -213,7 +213,7 @@ export default function OnlineTestsPage() {
                     <div className="w-11 h-11 rounded-2xl bg-amber-500/10 dark:bg-amber-500/15 text-amber-600 dark:text-amber-400 flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform duration-200">
                       <FileCheck size={21} />
                     </div>
-                    <h3 className="font-bold text-slate-800 dark:text-slate-100 text-[15px] leading-snug line-clamp-2 font-fredoka flex-1 min-w-0">
+                    <h3 className="font-semibold text-slate-900 dark:text-white text-[15px] leading-snug line-clamp-2 font-sans tracking-tight flex-1 min-w-0">
                       {test.title}
                     </h3>
                   </div>

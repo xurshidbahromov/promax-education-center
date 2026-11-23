@@ -298,7 +298,7 @@ export default function LessonDetailPage() {
           )}
         </div>
 
-        <h1 className="text-xl sm:text-2xl font-bold text-slate-900 dark:text-white font-fredoka leading-snug flex items-start gap-2.5">
+        <h1 className="text-xl sm:text-2xl font-sans font-semibold text-slate-900 dark:text-white leading-snug tracking-tight flex items-start gap-2.5">
           <PlayCircle className="text-amber-500 shrink-0 mt-0.5" size={24} />
           <span>{lesson.title}</span>
         </h1>

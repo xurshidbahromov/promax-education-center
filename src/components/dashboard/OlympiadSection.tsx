@@ -85,7 +85,7 @@ export function OlympiadBannerTeaser() {
             href="/dashboard/olympiads"
             className="w-[37%] sm:w-[32%] bg-transparent backdrop-blur-none px-2.5 sm:px-6 py-2.5 sm:py-3.5 border-none flex items-center shrink-0 z-10 cursor-pointer group/step"
           >
-            <h3 className="text-sm sm:text-2xl font-medium font-fredoka text-slate-800 dark:text-slate-100 leading-tight flex items-center gap-1 sm:gap-2 min-w-0">
+            <h3 className="text-sm sm:text-2xl font-medium font-sans tracking-tight text-slate-800 dark:text-slate-100 leading-tight flex items-center gap-1 sm:gap-2 min-w-0">
               <span className="truncate">{t("olympiad.shelf_title")}</span>
               <motion.span
                 animate={{ x: [0, 3, 0], y: [0, 3, 0] }}
@@ -114,7 +114,7 @@ export function OlympiadBannerTeaser() {
           
           {/* Left Text Content Area */}
           <div className="relative z-10 space-y-1 min-w-0 flex-1 w-full xs:w-auto">
-            <h4 className="text-base sm:text-xl font-bold font-fredoka text-slate-800 dark:text-slate-100 leading-tight truncate tracking-tight">
+            <h4 className="text-base sm:text-xl font-semibold font-sans tracking-tight text-slate-800 dark:text-slate-100 leading-tight truncate tracking-tight">
               {t("olympiad.banner_title")}
             </h4>
 
@@ -183,7 +183,7 @@ export function OlympiadSection() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-base sm:text-lg font-bold font-fredoka text-slate-900 dark:text-white tracking-wide flex items-center gap-2">
+          <h2 className="text-base sm:text-lg font-semibold font-sans tracking-tight text-slate-900 dark:text-white tracking-wide flex items-center gap-2">
             <Trophy className="text-amber-500 w-5 h-5 animate-pulse" />
             <span>Onlayn Olimpiadalar & Musobaqalar</span>
           </h2>
@@ -223,7 +223,7 @@ export function OlympiadSection() {
               </span>
             </div>
 
-            <h3 className="text-xl sm:text-2xl lg:text-3xl font-black font-fredoka leading-snug tracking-wide text-white drop-shadow-md">
+            <h3 className="text-xl sm:text-2xl lg:text-3xl font-semibold font-sans tracking-tight leading-snug tracking-wide text-white drop-shadow-md">
               {heroItem.title}
             </h3>
 
@@ -385,7 +385,7 @@ export function OlympiadSection() {
                 </div>
 
                 <div>
-                  <h4 className="text-base font-bold font-fredoka text-slate-900 dark:text-white leading-snug line-clamp-1 group-hover:text-brand-blue transition-colors">
+                  <h4 className="text-base font-semibold font-sans tracking-tight text-slate-900 dark:text-white leading-snug line-clamp-1 group-hover:text-brand-blue transition-colors">
                     {item.title}
                   </h4>
                   <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 line-clamp-2 font-medium">
@@ -457,7 +457,7 @@ export function OlympiadSection() {
                 <span className="text-[10px] font-black bg-white/20 backdrop-blur-md px-3 py-1 rounded-full uppercase tracking-wider text-white inline-block mb-2">
                   {selectedOlympiad.subject} Olimpiadasi
                 </span>
-                <h3 className="text-xl sm:text-2xl font-bold font-fredoka leading-snug">
+                <h3 className="text-xl sm:text-2xl font-semibold font-sans tracking-tight leading-snug">
                   {selectedOlympiad.title}
                 </h3>
               </div>

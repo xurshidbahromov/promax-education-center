@@ -119,7 +119,7 @@ export default function TestResultsPage() {
                 {isExcellent ? <Award size={14} /> : isGood ? <Star size={14} /> : <Target size={14} />}
                 {percentage.toFixed(0)}% O'zlashtirish
               </div>
-              <h1 className="text-3xl sm:text-4xl font-bold font-fredoka leading-tight">
+              <h1 className="text-3xl sm:text-4xl font-sans font-semibold text-slate-900 dark:text-white leading-tight tracking-tight">
                 {performance.text}
               </h1>
               <p className="text-slate-500 dark:text-slate-400 text-lg font-medium">

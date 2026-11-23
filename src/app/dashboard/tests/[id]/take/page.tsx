@@ -1058,7 +1058,7 @@ export default function TakeTestPage() {
                 )}
               </div>
 
-              <h1 className="text-xl sm:text-2xl md:text-3xl font-bold font-fredoka text-slate-900 dark:text-white leading-tight">
+              <h1 className="text-xl sm:text-2xl md:text-3xl font-sans font-semibold text-slate-900 dark:text-white leading-tight tracking-tight">
                 {test.title}
               </h1>
 

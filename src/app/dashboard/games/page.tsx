@@ -121,7 +121,7 @@ export default function GameZonePage() {
             <p className="text-[12px] text-slate-500 dark:text-slate-400 font-medium uppercase tracking-widest">
               Abituriyent &amp; SAT Intellektual Arena
             </p>
-            <h1 className="text-2xl sm:text-3xl font-bold font-fredoka text-slate-800 dark:text-slate-100 leading-tight">
+            <h1 className="text-2xl sm:text-3xl font-sans font-semibold text-slate-900 dark:text-white leading-tight tracking-tight">
               {t("games.title") || "O'yin maydoni"}
             </h1>
           </div>
@@ -135,7 +135,7 @@ export default function GameZonePage() {
               <span className="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider block">
                 Sizning Balansingiz
               </span>
-              <span className="text-xl font-black font-fredoka text-slate-800 dark:text-white tabular-nums">
+              <span className="text-xl font-semibold font-sans tracking-tight text-slate-800 dark:text-white tabular-nums">
                 {coins} <span className="text-xs font-bold text-amber-500">tanga</span>
               </span>
             </div>
@@ -161,7 +161,7 @@ export default function GameZonePage() {
                         onClick={() => setActiveGameId(game.id)}
                         className="w-[40%] sm:w-[30%] bg-transparent px-2.5 sm:px-6 py-2.5 sm:py-3 flex items-center shrink-0 z-10 cursor-pointer text-left group/step"
                       >
-                        <h3 className="text-sm sm:text-xl font-medium font-fredoka text-slate-800 dark:text-slate-100 leading-tight flex items-center gap-1 sm:gap-2 min-w-0">
+                        <h3 className="text-sm sm:text-xl font-medium font-sans tracking-tight text-slate-800 dark:text-slate-100 leading-tight flex items-center gap-1 sm:gap-2 min-w-0">
                           <span className="truncate">{game.category}</span>
                           <ArrowDownRight
                             size={18}
@@ -199,7 +199,7 @@ export default function GameZonePage() {
 
                         <div className="min-w-0 flex-1 space-y-1">
                           <div className="flex items-center gap-2 flex-wrap">
-                            <h4 className="text-base sm:text-xl font-bold font-fredoka text-slate-800 dark:text-slate-100 leading-tight tracking-tight">
+                            <h4 className="text-base sm:text-xl font-semibold font-sans tracking-tight text-slate-800 dark:text-slate-100 leading-tight tracking-tight">
                               {game.title}
                             </h4>
                             <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400">

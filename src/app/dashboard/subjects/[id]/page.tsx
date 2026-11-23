@@ -168,7 +168,7 @@ export default function SubjectDetailPage() {
               <span className="text-[11px] font-extrabold uppercase tracking-widest text-brand-blue dark:text-blue-400">
                 O&apos;quv kursi
               </span>
-              <h1 className="text-2xl sm:text-3xl font-bold text-slate-900 dark:text-white font-fredoka leading-tight">
+              <h1 className="text-2xl sm:text-3xl font-sans font-semibold text-slate-900 dark:text-white leading-tight tracking-tight">
                 {subject.title}
               </h1>
               {subject.description && (

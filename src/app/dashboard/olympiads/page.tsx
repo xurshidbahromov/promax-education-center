@@ -445,7 +445,7 @@ export default function OlympiadsPage() {
         ) : (
           <div className="bg-white/60 dark:bg-slate-900/60 backdrop-blur-xl rounded-[2rem] p-6 sm:p-7 border border-white/60 dark:border-slate-800/60 shadow-none space-y-3">
             <div className="space-y-1">
-              <h1 className="text-xl sm:text-2xl font-bold font-fredoka text-slate-800 dark:text-slate-100 leading-tight">
+              <h1 className="text-xl sm:text-2xl font-sans font-semibold text-slate-900 dark:text-white leading-tight tracking-tight">
                 Milliy sertifikat
               </h1>
               <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 font-medium">
@@ -735,7 +735,7 @@ export default function OlympiadsPage() {
                         <div className="p-5 sm:p-6 flex flex-col justify-between gap-5 flex-1">
                           <div className="space-y-3.5">
                             {/* Title */}
-                            <h3 className="text-lg sm:text-xl font-black font-fredoka text-slate-900 dark:text-white leading-tight">
+                            <h3 className="text-lg sm:text-xl font-semibold font-sans tracking-tight text-slate-900 dark:text-white leading-tight">
                               {item.title}
                             </h3>
 
@@ -989,7 +989,7 @@ export default function OlympiadsPage() {
                 <span className="text-xs font-bold text-brand-blue uppercase tracking-wider">
                   {selectedItem.subject}
                 </span>
-                <h3 className="text-lg font-black font-fredoka text-slate-900 dark:text-white leading-tight">
+                <h3 className="text-lg font-semibold font-sans tracking-tight text-slate-900 dark:text-white leading-tight">
                   {selectedItem.title}
                 </h3>
               </div>

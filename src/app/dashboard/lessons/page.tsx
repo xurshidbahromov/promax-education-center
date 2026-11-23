@@ -143,7 +143,7 @@ export default function LessonsPage() {
             <p className="text-[12px] text-slate-500 dark:text-slate-400 font-medium uppercase tracking-widest">
               O&apos;quv materiali
             </p>
-            <h1 className="text-2xl sm:text-3xl font-bold font-fredoka text-slate-800 dark:text-slate-100 leading-tight">
+            <h1 className="text-2xl sm:text-3xl font-sans font-semibold text-slate-900 dark:text-white leading-tight tracking-tight">
               Darslar
             </h1>
           </div>
@@ -195,7 +195,7 @@ export default function LessonsPage() {
               <span className="inline-block text-[11px] font-extrabold uppercase tracking-widest text-amber-600 dark:text-amber-400">
                 Tez kunda tayyor bo&apos;ladi
               </span>
-              <h2 className="text-xl sm:text-2xl font-bold font-fredoka text-slate-900 dark:text-white">
+              <h2 className="text-xl sm:text-2xl font-semibold font-sans tracking-tight text-slate-900 dark:text-white">
                 Video darslar hozirda tayyorlanmoqda
               </h2>
               <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 font-medium leading-relaxed">
@@ -240,7 +240,7 @@ export default function LessonsPage() {
                       href={`/dashboard/subjects/${subject.id}`}
                       className="w-[42%] sm:w-[32%] bg-transparent px-2.5 sm:px-6 py-2.5 sm:py-3 flex items-center shrink-0 z-10 cursor-pointer text-left group/step"
                     >
-                      <h3 className="text-sm sm:text-xl font-medium font-fredoka text-slate-800 dark:text-slate-100 leading-tight flex items-center gap-1 sm:gap-2 min-w-0">
+                      <h3 className="text-sm sm:text-xl font-medium font-sans tracking-tight text-slate-800 dark:text-slate-100 leading-tight flex items-center gap-1 sm:gap-2 min-w-0">
                         <span className="truncate">{subject.title}</span>
                         <ArrowDownRight
                           size={18}
@@ -290,7 +290,7 @@ export default function LessonsPage() {
                       )}
 
                       <div className="min-w-0 flex-1 space-y-1.5">
-                        <h4 className="text-base sm:text-xl font-bold font-fredoka text-slate-800 dark:text-slate-100 leading-tight tracking-tight truncate">
+                        <h4 className="text-base sm:text-xl font-semibold font-sans tracking-tight text-slate-800 dark:text-slate-100 leading-tight tracking-tight truncate">
                           {subject.title}
                         </h4>
                         <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-300 font-medium line-clamp-1">

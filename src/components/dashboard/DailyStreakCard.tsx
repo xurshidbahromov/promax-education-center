@@ -96,7 +96,7 @@ export default function DailyStreakCard({ userId }: DailyStreakCardProps) {
                     <Flame size={18} />
                   </div>
                   <div>
-                    <h4 className="font-extrabold text-slate-900 dark:text-slate-100 text-base font-fredoka leading-tight">
+                    <h4 className="font-extrabold text-slate-900 dark:text-slate-100 text-base font-sans tracking-tight leading-tight">
                       Kunlik Faollik
                     </h4>
                     <p className="text-[11px] text-slate-500 dark:text-slate-400 font-medium">
@@ -123,7 +123,7 @@ export default function DailyStreakCard({ userId }: DailyStreakCardProps) {
                   <span className="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider block">
                     Joriy Zanjir
                   </span>
-                  <p className="text-2xl font-black font-fredoka text-slate-900 dark:text-white mt-0.5 tabular-nums">
+                  <p className="text-2xl font-semibold font-sans tracking-tight text-slate-900 dark:text-white mt-0.5 tabular-nums">
                     {current} <span className="text-xs font-bold text-amber-500">kun</span>
                   </p>
                 </div>
@@ -131,7 +131,7 @@ export default function DailyStreakCard({ userId }: DailyStreakCardProps) {
                   <span className="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider block">
                     Eng Yaxshi
                   </span>
-                  <p className="text-2xl font-black font-fredoka text-slate-700 dark:text-slate-200 mt-0.5 tabular-nums">
+                  <p className="text-2xl font-semibold font-sans tracking-tight text-slate-700 dark:text-slate-200 mt-0.5 tabular-nums">
                     {longest} <span className="text-xs font-bold text-slate-400">kun</span>
                   </p>
                 </div>
@@ -225,7 +225,7 @@ export default function DailyStreakCard({ userId }: DailyStreakCardProps) {
             <span className="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider hidden sm:block mb-0.5">
               Kunlik Faollik
             </span>
-            <span className="text-base sm:text-lg font-black font-fredoka text-slate-800 dark:text-white whitespace-nowrap tabular-nums leading-none">
+            <span className="text-base sm:text-lg font-semibold font-sans tracking-tight text-slate-800 dark:text-white whitespace-nowrap tabular-nums leading-none">
               {current} <span className="text-xs font-bold text-amber-500">kun</span>
             </span>
           </div>

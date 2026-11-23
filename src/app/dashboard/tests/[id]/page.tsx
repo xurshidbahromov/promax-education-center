@@ -144,7 +144,7 @@ export default function TestDetailsPage() {
               )}
             </div>
 
-            <h1 className="text-2xl sm:text-3xl font-bold font-fredoka text-slate-900 dark:text-white leading-tight">
+            <h1 className="text-2xl sm:text-3xl font-sans font-semibold text-slate-900 dark:text-white leading-tight tracking-tight">
               {test.title}
             </h1>
 

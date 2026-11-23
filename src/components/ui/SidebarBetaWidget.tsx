@@ -67,7 +67,7 @@ export default function SidebarBetaWidget({ variant = "card" }: { variant?: "car
                     <Sparkles size={18} />
                   </div>
                   <div>
-                    <h4 className="font-extrabold text-slate-900 dark:text-slate-100 text-base font-fredoka leading-tight">
+                    <h4 className="font-extrabold text-slate-900 dark:text-slate-100 text-base font-sans tracking-tight leading-tight">
                       {t("beta.title") || "Platforma Test Rejimida"}
                     </h4>
                     <div className="flex items-center gap-1.5 mt-0.5">
@@ -165,7 +165,7 @@ export default function SidebarBetaWidget({ variant = "card" }: { variant?: "car
         <button
           type="button"
           onClick={() => setExpanded(!expanded)}
-          className="h-7 sm:h-8 px-2.5 sm:px-3 bg-amber-500/10 hover:bg-amber-500/15 border border-amber-500/20 rounded-full flex items-center gap-1.5 text-xs font-bold font-fredoka transition-colors active:scale-95 cursor-pointer shrink-0 shadow-none"
+          className="h-7 sm:h-8 px-2.5 sm:px-3 bg-amber-500/10 hover:bg-amber-500/15 border border-amber-500/20 rounded-full flex items-center gap-1.5 text-xs font-semibold font-sans tracking-tight transition-colors active:scale-95 cursor-pointer shrink-0 shadow-none"
           title="Tizim test rejimida ishlamoqda"
         >
           <Sparkles size={13} className="text-amber-500 shrink-0" />
@@ -189,7 +189,7 @@ export default function SidebarBetaWidget({ variant = "card" }: { variant?: "car
           <span className="text-[10px] text-slate-400 font-bold">v2.5</span>
         </div>
 
-        <h4 className="text-xs font-bold font-fredoka text-slate-900 dark:text-white">
+        <h4 className="text-xs font-semibold font-sans tracking-tight text-slate-900 dark:text-white">
           {t("beta.title") || "Test Rejimi"}
         </h4>
 

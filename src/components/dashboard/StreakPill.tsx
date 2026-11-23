@@ -68,7 +68,7 @@ export default function StreakPill() {
                     <Flame size={18} />
                   </div>
                   <div>
-                    <h4 className="font-extrabold text-slate-900 dark:text-slate-100 text-base font-fredoka leading-tight">
+                    <h4 className="font-extrabold text-slate-900 dark:text-slate-100 text-base font-sans tracking-tight leading-tight">
                       Kunlik Faollik
                     </h4>
                     <p className="text-[11px] text-slate-500 dark:text-slate-400 font-medium">
@@ -97,7 +97,7 @@ export default function StreakPill() {
                     Joriy zanjir
                   </span>
                   <div className="flex items-baseline gap-1 mt-1">
-                    <span className="text-2xl font-black font-fredoka text-slate-900 dark:text-white tabular-nums">
+                    <span className="text-2xl font-semibold font-sans tracking-tight text-slate-900 dark:text-white tabular-nums">
                       {streak.currentStreak}
                     </span>
                     <span className="text-xs font-bold text-amber-500">kun</span>
@@ -108,7 +108,7 @@ export default function StreakPill() {
                     Rekord
                   </span>
                   <div className="flex items-baseline gap-1 mt-1">
-                    <span className="text-2xl font-black font-fredoka text-slate-700 dark:text-slate-200 tabular-nums">
+                    <span className="text-2xl font-semibold font-sans tracking-tight text-slate-700 dark:text-slate-200 tabular-nums">
                       {streak.longestStreak}
                     </span>
                     <span className="text-xs font-bold text-slate-400">kun</span>
@@ -188,7 +188,7 @@ export default function StreakPill() {
       <button
         type="button"
         onClick={() => setExpanded(!expanded)}
-        className="h-7 sm:h-8 px-2.5 sm:px-3 bg-amber-500/10 hover:bg-amber-500/15 border border-amber-500/20 rounded-full flex items-center gap-1 sm:gap-1.5 text-amber-600 dark:text-amber-400 text-xs font-bold font-fredoka transition-colors active:scale-95 cursor-pointer shrink-0 shadow-none"
+        className="h-7 sm:h-8 px-2.5 sm:px-3 bg-amber-500/10 hover:bg-amber-500/15 border border-amber-500/20 rounded-full flex items-center gap-1 sm:gap-1.5 text-amber-600 dark:text-amber-400 text-xs font-semibold font-sans tracking-tight transition-colors active:scale-95 cursor-pointer shrink-0 shadow-none"
         title="Kunlik faollik zanjiri"
       >
         <Flame size={14} className="text-amber-500 shrink-0" />

@@ -107,7 +107,7 @@ export default function TournamentCommentsView({
             </div>
             <div className="min-w-0">
               <div className="flex items-center gap-2">
-                <h3 className="text-base sm:text-lg font-extrabold font-fredoka text-slate-900 dark:text-white leading-tight truncate">
+                <h3 className="text-base sm:text-lg font-semibold font-sans tracking-tight text-slate-900 dark:text-white leading-tight truncate">
                   {title}
                 </h3>
                 <span className="px-2 py-0.5 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 text-[11px] font-bold tabular-nums shrink-0">

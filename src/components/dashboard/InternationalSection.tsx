@@ -48,7 +48,7 @@ export function InternationalBannerTeaser() {
             href="/dashboard/international"
             className="w-[37%] sm:w-[32%] bg-transparent backdrop-blur-none px-2.5 sm:px-6 py-2.5 sm:py-3.5 border-none flex items-center shrink-0 z-10 cursor-pointer group/step"
           >
-            <h3 className="text-sm sm:text-2xl font-medium font-fredoka text-slate-800 dark:text-slate-100 leading-tight flex items-center gap-1 sm:gap-2 min-w-0">
+            <h3 className="text-sm sm:text-2xl font-medium font-sans tracking-tight text-slate-800 dark:text-slate-100 leading-tight flex items-center gap-1 sm:gap-2 min-w-0">
               <span className="truncate">{t("international.shelf_title") || "Jahon sinovi"}</span>
               <motion.span
                 animate={{ x: [0, 3, 0], y: [0, 3, 0] }}
@@ -77,7 +77,7 @@ export function InternationalBannerTeaser() {
           
           {/* Left Text Content Area */}
           <div className="relative z-10 space-y-1 min-w-0 flex-1 w-full xs:w-auto">
-            <h4 className="text-base sm:text-xl font-bold font-fredoka text-slate-800 dark:text-slate-100 leading-tight truncate tracking-tight">
+            <h4 className="text-base sm:text-xl font-semibold font-sans tracking-tight text-slate-800 dark:text-slate-100 leading-tight truncate tracking-tight">
               {t("international.banner_title") || "SAT"}
             </h4>
 
