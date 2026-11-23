@@ -10,6 +10,7 @@ import { soundFx } from "@/lib/sound-effects";
 import toast from "react-hot-toast";
 
 const DISMISS_KEY = "promax_phone_prompt_dismissed_v1";
+const getSavedKey = (userId: string) => `promax_phone_saved_${userId}`;
 
 function formatUzPhone(value: string): string {
   const cleaned = value.replace(/\D/g, "");
@@ -70,16 +71,22 @@ export default function PhoneVerifyModal() {
   useEffect(() => {
     if (!mounted || isLoading || !profile || !user?.id) return;
 
-    const existingPhone = (profile.phone || "").replace(/\D/g, "");
+    const existingPhone = (profile.phone || user.phone || "").replace(/\D/g, "");
     const role = profile.role || "student";
     const isAdmin = ["admin", "staff", "superadmin", "teacher"].includes(role);
 
     if (existingPhone.length >= 9 || isAdmin) {
       setIsOpen(false);
+      if (existingPhone.length >= 9) {
+        try { localStorage.setItem(getSavedKey(user.id), "1"); } catch {}
+      }
       return;
     }
 
     try {
+      // If user already saved their phone on this device, never ask again
+      if (localStorage.getItem(getSavedKey(user.id)) === "1") return;
+      // If dismissed ("Keyinroq"), don't nag again in the same session
       if (sessionStorage.getItem(DISMISS_KEY) === "1") return;
     } catch {}
 
@@ -88,7 +95,24 @@ export default function PhoneVerifyModal() {
       setIsOpen(true);
     }, 1200);
     return () => clearTimeout(timer);
-  }, [mounted, isLoading, profile, user?.id]);
+  }, [mounted, isLoading, profile, user?.id, user?.phone]);
+
+  const markPhoneSaved = (normalizedPhone?: string) => {
+    try {
+      sessionStorage.setItem(DISMISS_KEY, "1");
+      if (user?.id) localStorage.setItem(getSavedKey(user.id), "1");
+    } catch {}
+    if (user?.id) {
+      if (normalizedPhone) {
+        queryClient.setQueryData(["userProfile", user.id], (old: Record<string, unknown> | null | undefined) =>
+          old ? { ...old, phone: normalizedPhone } : old
+        );
+      }
+      queryClient.invalidateQueries({ queryKey: ["userProfile", user.id] });
+      queryClient.invalidateQueries({ queryKey: ["fullUserProfile", user.id] });
+    }
+    window.dispatchEvent(new CustomEvent("promax_profile_updated"));
+  };
 
   const handleDismiss = () => {
     clearTelegramTimers();
@@ -100,7 +124,13 @@ export default function PhoneVerifyModal() {
   };
 
   const handleTelegramShare = () => {
-    const tg = (window as unknown as { Telegram?: { WebApp?: { requestContact?: (cb: (shared: boolean) => void) => void } } })?.Telegram?.WebApp;
+    const tg = (window as unknown as {
+      Telegram?: {
+        WebApp?: {
+          requestContact?: (cb: (shared: boolean, eventData?: { responseUnsafe?: { contact?: { phone_number?: string } } }) => void) => void;
+        };
+      };
+    })?.Telegram?.WebApp;
     if (!tg || typeof tg.requestContact !== "function") {
       setShowManualForm(true);
       return;
@@ -116,7 +146,7 @@ export default function PhoneVerifyModal() {
     }, 15000);
 
     try {
-      tg.requestContact((shared: boolean) => {
+      tg.requestContact(async (shared, eventData) => {
         if (tgSafetyTimerRef.current) {
           clearTimeout(tgSafetyTimerRef.current);
           tgSafetyTimerRef.current = null;
@@ -127,7 +157,30 @@ export default function PhoneVerifyModal() {
           return;
         }
 
-        // Poll profile briefly while webhook saves the shared phone into Supabase
+        // Fast path: if Telegram WebApp returned the contact phone directly, persist via API immediately
+        const directPhone = eventData?.responseUnsafe?.contact?.phone_number;
+        const directDigits = (directPhone || "").replace(/\D/g, "");
+        if (directDigits.length >= 9) {
+          try {
+            const res = await fetch("/api/profile/phone", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ phone: directDigits }),
+            });
+            const json = await res.json();
+            if (res.ok && json.success) {
+              clearTelegramTimers();
+              markPhoneSaved(json.phone);
+              setWaitingTelegram(false);
+              setIsOpen(false);
+              soundFx.playSuccess();
+              toast.success("Telefon raqamingiz tasdiqlandi!");
+              return;
+            }
+          } catch {}
+        }
+
+        // Fallback: poll profile briefly while Telegram bot webhook saves the shared phone into Supabase
         let attempts = 0;
         pollIntervalRef.current = setInterval(async () => {
           attempts++;
@@ -135,21 +188,17 @@ export default function PhoneVerifyModal() {
           const savedPhone = (res.data?.phone || "").replace(/\D/g, "");
           if (savedPhone.length >= 9) {
             clearTelegramTimers();
-            try { sessionStorage.setItem(DISMISS_KEY, "1"); } catch {}
-            if (user?.id) {
-              queryClient.invalidateQueries({ queryKey: ["fullUserProfile", user.id] });
-            }
+            markPhoneSaved(res.data?.phone || undefined);
             setWaitingTelegram(false);
             setIsOpen(false);
             soundFx.playSuccess();
             toast.success("Telefon raqamingiz tasdiqlandi!");
-            window.dispatchEvent(new CustomEvent("promax_profile_updated"));
           } else if (attempts >= 6) {
             clearTelegramTimers();
             try { sessionStorage.setItem(DISMISS_KEY, "1"); } catch {}
             setWaitingTelegram(false);
-            setIsOpen(false);
-            toast.success("So'rov yuborildi — raqamingiz tez orada saqlanadi!");
+            setShowManualForm(true);
+            toast("Raqamingizni qo'lda tasdiqlab saqlang");
           }
         }, 900);
       });
@@ -181,12 +230,7 @@ export default function PhoneVerifyModal() {
         return;
       }
 
-      try { sessionStorage.setItem(DISMISS_KEY, "1"); } catch {}
-      if (user?.id) {
-        queryClient.invalidateQueries({ queryKey: ["userProfile", user.id] });
-        queryClient.invalidateQueries({ queryKey: ["fullUserProfile", user.id] });
-      }
-      window.dispatchEvent(new CustomEvent("promax_profile_updated"));
+      markPhoneSaved(json.phone);
       soundFx.playSuccess();
       toast.success("Telefon raqamingiz saqlandi!");
       setIsOpen(false);

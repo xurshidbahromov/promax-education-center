@@ -30,20 +30,39 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Avtorizatsiya talab qilinadi' }, { status: 401 });
     }
 
-    const adminClient = await createTelegramBotClient();
-    const { data: updated, error } = await adminClient
-      .from('profiles')
-      .update({
-        phone: normalized,
-        updated_at: new Date().toISOString(),
-      })
-      .eq('id', user.id)
-      .select('id')
-      .maybeSingle();
+    let saved = false;
+    try {
+      const adminClient = await createTelegramBotClient();
+      const { data: updated, error } = await adminClient
+        .from('profiles')
+        .update({
+          phone: normalized,
+          updated_at: new Date().toISOString(),
+        })
+        .eq('id', user.id)
+        .select('id')
+        .maybeSingle();
 
-    if (error || !updated) {
-      console.error('[API /api/profile/phone] Update error:', error?.message || 'Profile row not found');
-      return NextResponse.json({ error: "Telefon raqamni saqlab bo'lmadi" }, { status: 500 });
+      if (!error && updated) {
+        saved = true;
+      }
+    } catch {}
+
+    if (!saved) {
+      const { data: updated, error } = await sessionClient
+        .from('profiles')
+        .update({
+          phone: normalized,
+          updated_at: new Date().toISOString(),
+        })
+        .eq('id', user.id)
+        .select('id')
+        .maybeSingle();
+
+      if (error || !updated) {
+        console.error('[API /api/profile/phone] Update error:', error?.message || 'Profile row not found');
+        return NextResponse.json({ error: "Telefon raqamni saqlab bo'lmadi" }, { status: 500 });
+      }
     }
 
     return NextResponse.json({ success: true, phone: normalized });
