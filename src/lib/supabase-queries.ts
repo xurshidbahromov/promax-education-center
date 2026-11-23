@@ -188,17 +188,22 @@ export async function getDashboardStats(studentId: string): Promise<DashboardSta
   const [
     { data: results, error },
     { data: attempts, error: attemptsError },
+    { data: tournResults },
     { data: profile }
   ] = await Promise.all([
     supabase
       .from('results')
-      .select('total_score')
+      .select('total_score, exam:exams(max_score)')
       .eq('student_id', studentId),
     supabase
       .from('test_attempts')
-      .select('score')
+      .select('score, max_score, percentage')
       .eq('student_id', studentId)
       .eq('status', 'completed'),
+    supabase
+      .from('tournament_results')
+      .select('score, max_score, percentage')
+      .eq('student_id', studentId),
     supabase
       .from('profiles')
       .select('coins')
@@ -206,101 +211,173 @@ export async function getDashboardStats(studentId: string): Promise<DashboardSta
       .maybeSingle()
   ]);
 
-  if (error && attemptsError) {
+  const totalCoins = profile?.coins || 0;
+
+  if (error && attemptsError && !tournResults) {
     return {
       totalTests: 0,
       averageScore: 0,
       bestScore: 0,
-      totalCoins: profile?.coins || 0
+      totalCoins
     };
   }
 
-  const resultScores = results?.map(r => r.total_score) || [];
-  const attemptScores = attempts?.map(a => a.score) || [];
-  const allScores = [...resultScores, ...attemptScores];
+  const allPercentages: number[] = [];
 
-  if (allScores.length === 0) {
+  for (const r of (results as any[]) || []) {
+    const examObj = Array.isArray(r.exam) ? r.exam[0] : r.exam;
+    const maxS = Number(examObj?.max_score) || 189;
+    const pct = Math.min(100, Math.max(0, Math.round((Number(r.total_score || 0) / maxS) * 100)));
+    allPercentages.push(pct);
+  }
+
+  for (const a of (attempts as any[]) || []) {
+    const pct =
+      a.percentage !== null && a.percentage !== undefined
+        ? Math.min(100, Math.max(0, Math.round(Number(a.percentage))))
+        : Number(a.max_score) > 0
+        ? Math.min(100, Math.max(0, Math.round((Number(a.score || 0) / Number(a.max_score)) * 100)))
+        : 0;
+    allPercentages.push(pct);
+  }
+
+  for (const tr of (tournResults as any[]) || []) {
+    const pct =
+      tr.percentage !== null && tr.percentage !== undefined
+        ? Math.min(100, Math.max(0, Math.round(Number(tr.percentage))))
+        : Number(tr.max_score) > 0
+        ? Math.min(100, Math.max(0, Math.round((Number(tr.score || 0) / Number(tr.max_score)) * 100)))
+        : 0;
+    allPercentages.push(pct);
+  }
+
+  if (allPercentages.length === 0) {
     return {
       totalTests: 0,
       averageScore: 0,
       bestScore: 0,
-      totalCoins: profile?.coins || 0
+      totalCoins
     };
   }
 
-  const totalTests = allScores.length;
-  const averageScore = allScores.reduce((a, b) => a + b, 0) / totalTests;
-  const bestScore = Math.max(...allScores);
-
-  // Coins from profile or calculated
-  const totalCoins = profile?.coins !== undefined && profile?.coins !== null
-    ? profile.coins
-    : Math.floor(allScores.reduce((a, b) => a + b, 0) / 10);
+  const totalTests = allPercentages.length;
+  const averageScore = Math.round(
+    allPercentages.reduce((sum, v) => sum + v, 0) / totalTests
+  );
+  const bestScore = Math.max(...allPercentages);
 
   return {
     totalTests,
-    averageScore: Math.round(averageScore * 10) / 10,
+    averageScore,
     bestScore,
     totalCoins
   };
 }
 
 /**
- * Get recent 5 results for chart
+ * Get recent 6 results for chart (normalized to 0–100% across DTM, Online Tests, and Competitions)
  */
 export async function getRecentResultsForChart(studentId: string) {
- const supabase = createClient();
+  const supabase = createClient();
 
- // Fetch DTM results
- const { data: results } = await supabase
- .from('results')
- .select(`
- total_score,
- created_at,
- exam:exams (title)
- `)
- .eq('student_id', studentId)
- .order('created_at', { ascending: false })
- .limit(5);
+  const [{ data: results }, { data: attempts }, { data: tournResults }] = await Promise.all([
+    supabase
+      .from('results')
+      .select('total_score, created_at, exam:exams (title, max_score)')
+      .eq('student_id', studentId)
+      .order('created_at', { ascending: false })
+      .limit(6),
+    supabase
+      .from('test_attempts')
+      .select('score, max_score, percentage, completed_at, test:tests (title)')
+      .eq('student_id', studentId)
+      .eq('status', 'completed')
+      .order('completed_at', { ascending: false })
+      .limit(6),
+    supabase
+      .from('tournament_results')
+      .select('score, max_score, percentage, completed_at, tournament_id')
+      .eq('student_id', studentId)
+      .order('completed_at', { ascending: false })
+      .limit(6),
+  ]);
 
- // Fetch Online Test attempts
- const { data: attempts } = await supabase
- .from('test_attempts')
- .select(`
- score,
- completed_at,
- test:tests (title)
- `)
- .eq('student_id', studentId)
- .eq('status', 'completed')
- .order('completed_at', { ascending: false })
- .limit(5);
+  const combined: {
+    score: number;
+    maxScore: number;
+    percentage: number;
+    date: Date;
+    title: string;
+  }[] = [];
 
- // Combine and sort
- const combined = [
- ...((results as any[])?.map(r => ({
- score: r.total_score,
- date: new Date(r.created_at),
- title: Array.isArray(r.exam) ? r.exam[0]?.title : r.exam?.title
- })) || []),
- ...((attempts as any[])?.map(a => ({
- score: a.score,
- date: new Date(a.completed_at),
- title: Array.isArray(a.test) ? a.test[0]?.title : a.test?.title
- })) || [])
- ].sort((a, b) => b.date.getTime() - a.date.getTime()).slice(0, 5);
+  for (const r of (results as any[]) || []) {
+    const dt = r.created_at ? new Date(r.created_at) : null;
+    if (!dt || Number.isNaN(dt.getTime())) continue;
+    const examObj = Array.isArray(r.exam) ? r.exam[0] : r.exam;
+    const maxScore = Number(examObj?.max_score) || 189;
+    const score = Number(r.total_score || 0);
+    combined.push({
+      score,
+      maxScore,
+      percentage: Math.min(100, Math.max(0, Math.round((score / maxScore) * 100))),
+      date: dt,
+      title: examObj?.title || 'Imtihon',
+    });
+  }
 
- // Reverse to show oldest to newest in chart
- return combined.reverse().map((result: any) => {
- const day = result.date.getDate().toString().padStart(2, '0');
- const month = (result.date.getMonth()+ 1).toString().padStart(2, '0');
+  for (const a of (attempts as any[]) || []) {
+    const dt = a.completed_at ? new Date(a.completed_at) : null;
+    if (!dt || Number.isNaN(dt.getTime())) continue;
+    const testObj = Array.isArray(a.test) ? a.test[0] : a.test;
+    const score = Number(a.score || 0);
+    const maxScore = Number(a.max_score) || 100;
+    const percentage =
+      a.percentage !== null && a.percentage !== undefined
+        ? Math.min(100, Math.max(0, Math.round(Number(a.percentage))))
+        : Math.min(100, Math.max(0, Math.round((score / maxScore) * 100)));
+    combined.push({
+      score,
+      maxScore,
+      percentage,
+      date: dt,
+      title: testObj?.title || 'Online Test',
+    });
+  }
 
- return {
- date: `${day}.${month}`,
- score: result.score,
- examTitle: result.title || 'Unknown'
- };
- });
+  for (const tr of (tournResults as any[]) || []) {
+    const dt = tr.completed_at ? new Date(tr.completed_at) : null;
+    if (!dt || Number.isNaN(dt.getTime())) continue;
+    const score = Number(tr.score || 0);
+    const maxScore = Number(tr.max_score) || 100;
+    const percentage =
+      tr.percentage !== null && tr.percentage !== undefined
+        ? Math.min(100, Math.max(0, Math.round(Number(tr.percentage))))
+        : Math.min(100, Math.max(0, Math.round((score / maxScore) * 100)));
+    combined.push({
+      score,
+      maxScore,
+      percentage,
+      date: dt,
+      title: tr.tournament_id?.startsWith('intl') ? 'SAT Imtihoni' : 'Milliy sertifikat',
+    });
+  }
+
+  const recent = combined
+    .sort((a, b) => b.date.getTime() - a.date.getTime())
+    .slice(0, 6)
+    .reverse();
+
+  return recent.map((item) => {
+    const day = item.date.getDate().toString().padStart(2, '0');
+    const month = (item.date.getMonth() + 1).toString().padStart(2, '0');
+    return {
+      date: `${day}.${month}`,
+      score: item.score,
+      maxScore: item.maxScore,
+      percentage: item.percentage,
+      examTitle: item.title,
+    };
+  });
 }
 
 /**

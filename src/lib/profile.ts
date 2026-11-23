@@ -103,39 +103,58 @@ export async function updateUserProfile(data: UpdateProfileData): Promise<{ succ
 }
 
 /**
- * Update specific settings
+ * Update specific settings (merges with existing settings so completed_lessons & other keys are preserved)
  */
-export async function updateUserSettings(settings: any): Promise<{ success: boolean; error?: any }> {
- return updateUserProfile({ settings });
+export async function updateUserSettings(settings: Record<string, any>): Promise<{ success: boolean; error?: any }> {
+  const supabase = createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return { success: false, error: 'User not found' };
+
+  const { data: existing } = await supabase
+    .from('profiles')
+    .select('settings')
+    .eq('id', user.id)
+    .maybeSingle();
+
+  const merged = {
+    ...(existing?.settings && typeof existing.settings === 'object' ? existing.settings : {}),
+    ...settings,
+  };
+
+  return updateUserProfile({ settings: merged });
 }
 
 /**
  * Upload avatar image
  */
 export async function uploadAvatar(file: File): Promise<string | null> {
- const supabase = createClient();
- const { data: { user } } = await supabase.auth.getUser();
+  if (!file.type.startsWith('image/') || file.size > 5 * 1024 * 1024) {
+    return null;
+  }
 
- if (!user) return null;
+  const supabase = createClient();
+  const { data: { user } } = await supabase.auth.getUser();
 
- const fileExt = file.name.split('.').pop();
- const fileName = `${Math.random()}.${fileExt}`;
- const filePath = `${user.id}/${fileName}`;
+  if (!user) return null;
 
- const { error: uploadError } = await supabase.storage
- .from('avatars')
- .upload(filePath, file);
+  const fileExt = (file.name.split('.').pop() || 'png').toLowerCase().replace(/[^a-z0-9]/g, '') || 'png';
+  const fileName = `${Date.now()}_${Math.random().toString(36).slice(2, 8)}.${fileExt}`;
+  const filePath = `${user.id}/${fileName}`;
 
- if (uploadError) {
- console.error('Error uploading avatar:', uploadError);
- return null;
- }
+  const { error: uploadError } = await supabase.storage
+    .from('avatars')
+    .upload(filePath, file);
 
- const { data } = supabase.storage
- .from('avatars')
- .getPublicUrl(filePath);
+  if (uploadError) {
+    console.error('Error uploading avatar:', uploadError);
+    return null;
+  }
 
- return data.publicUrl;
+  const { data } = supabase.storage
+    .from('avatars')
+    .getPublicUrl(filePath);
+
+  return data.publicUrl;
 }
 
 /**
