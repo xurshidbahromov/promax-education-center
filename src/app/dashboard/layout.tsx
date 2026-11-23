@@ -360,19 +360,19 @@ export default function DashboardLayout({
  href={item.href}
  className={`relative flex flex-col items-center justify-center gap-0.5 py-1.5 rounded-[1.25rem] transition-colors duration-200 active:scale-95 ${
  isActive
- ? "text-brand-blue dark:text-blue-400"
- : "text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200"
+ ? "text-white dark:text-slate-900"
+ : "text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200"
  }`}
  >
  {isActive && (
  <motion.div
  layoutId="mobile-nav-active-pill"
- className="absolute inset-0 bg-brand-blue/[0.09] dark:bg-brand-blue/20 rounded-[1.25rem]"
+ className="absolute inset-0 bg-slate-900 dark:bg-white rounded-[1.25rem] shadow-xs"
  transition={{ type: "spring", stiffness: 420, damping: 32 }}
  />
  )}
- <item.icon size={19} className={`relative z-10 ${isActive ? "stroke-[2.3]" : "stroke-[1.85]"}`} />
- <span className={`relative z-10 text-[10px] leading-none tracking-tight truncate max-w-full px-0.5 ${isActive ? "font-bold" : "font-medium"}`}>
+ <item.icon size={19} className={`relative z-10 ${isActive ? "stroke-[2.2]" : "stroke-[1.85]"}`} />
+ <span className={`relative z-10 text-[10px] leading-none tracking-tight truncate max-w-full px-0.5 ${isActive ? "font-semibold" : "font-medium"}`}>
  {item.shortName}
  </span>
  </Link>
