@@ -5,7 +5,7 @@ export const en = {
  "contact.form.success": "Your message has been sent successfully!",
  "cta.title": "Build Your Future With Us",
  "beta.pill": "Test Mode",
- "beta.badge": "PROMAX v2.5",
+ "beta.badge": "PROMAX v2.6",
  "beta.title": "Platform in Beta Testing",
  "beta.desc": "Our platform is currently in beta testing. We are constantly improving and adding new features.",
  "beta.feature1_title": "Continuous Updates",

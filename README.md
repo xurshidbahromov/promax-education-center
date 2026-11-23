@@ -2,7 +2,7 @@
 
 <div align="center">
 
-[![Release](https://img.shields.io/badge/Version-v2.5-f59e0b?style=for-the-badge)](./README.md#-whats-new-in-v25)
+[![Release](https://img.shields.io/badge/Version-v2.6-f59e0b?style=for-the-badge)](./README.md#-whats-new-in-v26)
 [![Next.js](https://img.shields.io/badge/Next.js-16.1_(Turbopack)-black?style=for-the-badge&logo=next.js&logoColor=white)](https://nextjs.org/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.0+-007ACC?style=for-the-badge&logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
 [![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-3.4+-38B2AC?style=for-the-badge&logo=tailwind-css&logoColor=white)](https://tailwindcss.com/)
@@ -24,7 +24,17 @@
 
 ---
 
-## 🆕 What's New in `v2.5`
+## 🆕 What's New in `v2.6`
+
+- **🎨 Unified Design & Typography System:** Switched the entire dashboard to smooth **DM Sans** with a bold rounded **Nunito** `PROMAX` wordmark, iOS-style progressive blur navbars, and a monochrome bottom navigation dock.
+- **📝 Complete Test, Results & Certificate Redesign:** Upgraded the pre-test briefing, active test-taking interface, OMR optical grading scanner, full results review, and official printable PDF certificate.
+- **🏆 Milliy Sertifikat & SAT Hub:** Renamed competition tracks to **Milliy sertifikat** and **SAT**, unified the 3D Top-3 Podium Leaderboard (fixed search, real UTC+5 timestamps, zero duplicate fetches), and upgraded the Comments section with sorting and moderation.
+- **📚 Redesigned Darslar, Online Testlar & Profile:** Signature notched-tab subject cards, bespoke 60fps floating-book SVG empty-state animation, 0ms instant test filtering, minimalist Profile hub, and real 0–100% normalized Statistics across DTM, Online Tests, and Competitions.
+- **🛡️ Full Security, Audio & Performance Audit:** Fixed Telegram phone sync (1-tap save, asks once), webhook contact-spoofing & auth checks, timed-test auto-submit, iOS Safari audio recovery, and eliminated stacked GPU blur layers.
+
+---
+
+## 📦 Previous Release (`v2.5`)
 
 - **⚡ Speed & Data Architecture Upgrade:** Migrated 100% of client caching to `@tanstack/react-query` (removed `swr`), eliminated background polling, parallelized Supabase queries, and fixed N+1 fetches.
 - **🎨 Unified Modern UI/UX:** Redesigned the Student Dashboard layout, Daily Streak, Notifications, and Beta sheets with a clean bottom-sheet system and a labeled 5-tab mobile navigation bar.

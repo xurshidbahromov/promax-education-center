@@ -63,7 +63,7 @@ export const uz = {
  "cta.title": "Kelajagingizni biz bilan quring",
  "cta.subtitle": "Bizning tajribali o'qituvchilarimiz va zamonaviy ta'lim dasturlarimiz orqali o'z maqsadingizga erishing.",
  "beta.pill": "Test Rejimi",
- "beta.badge": "PROMAX v2.5",
+ "beta.badge": "PROMAX v2.6",
  "beta.title": "Platforma Test Rejimida",
  "beta.desc": "Platformamiz sinov va takomillashtirish bosqichida. Biz har kuni yangi imkoniyatlar va qulayliklar qo'shib bormoqdamiz.",
  "beta.feature1_title": "Doimiy Yangilanishlar",
