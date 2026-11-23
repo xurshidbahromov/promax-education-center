@@ -220,7 +220,7 @@ export default function AdminLayout({
               </div>
               <div className="flex flex-col">
                 <div className="flex items-center gap-1.5">
-                  <span className="text-sm font-black tracking-wider text-white uppercase font-sans-pro">
+                  <span className="text-[15px] font-black tracking-[0.11em] text-white uppercase font-brand">
                     Promax
                   </span>
                   <span className="text-[10px] font-extrabold px-1.5 py-0.2 rounded-md bg-brand-blue/20 text-brand-blue border border-brand-blue/30 uppercase tracking-wider">

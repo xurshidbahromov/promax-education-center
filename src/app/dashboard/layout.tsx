@@ -228,10 +228,10 @@ export default function DashboardLayout({
  />
  </div>
  <div className="flex flex-col">
- <span className="text-2xl font-black text-slate-800 dark:text-slate-100 font-sans-pro uppercase tracking-wider leading-none">
+ <span className="text-[21px] font-black text-slate-900 dark:text-white font-brand uppercase tracking-[0.12em] leading-none">
  Promax
  </span>
- <span className="text-[9px] font-semibold text-brand-orange dark:text-brand-orange tracking-[0.35em] uppercase leading-none mt-1.5 pl-[1px]">
+ <span className="text-[8.5px] font-semibold text-brand-orange tracking-[0.34em] uppercase leading-none mt-1.5 pl-[1px] font-sans">
  Education
  </span>
  </div>
@@ -289,10 +289,10 @@ export default function DashboardLayout({
         <Image src="/favicon.ico" alt="Logo" fill className="object-contain" />
       </div>
       <div className="flex flex-col">
-        <span className="font-sans-pro font-black text-[13px] sm:text-sm text-slate-800 dark:text-slate-100 uppercase tracking-wider leading-none">
+        <span className="font-brand font-black text-[13.5px] sm:text-[14.5px] text-slate-900 dark:text-white uppercase tracking-[0.11em] leading-none">
           Promax
         </span>
-        <span className="text-[6px] font-semibold text-brand-orange dark:text-brand-orange tracking-[0.2em] uppercase leading-none mt-0.5 pl-[0.5px]">
+        <span className="text-[6.5px] font-semibold text-brand-orange tracking-[0.26em] uppercase leading-none mt-0.5 pl-[0.5px] font-sans">
           Education
         </span>
       </div>

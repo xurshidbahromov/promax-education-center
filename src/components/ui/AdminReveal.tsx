@@ -198,7 +198,7 @@ export default function AdminReveal({
 
         {/* Brand Typography */}
         <div className="flex flex-col items-center gap-1 text-center">
-          <h1 className="text-xl sm:text-2xl font-black text-slate-800 dark:text-slate-100 font-sans-pro tracking-[0.25em] uppercase leading-none">
+          <h1 className="text-xl sm:text-2xl font-black text-slate-900 dark:text-white font-brand tracking-[0.16em] uppercase leading-none">
             Promax
           </h1>
           <p className="text-[11px] font-bold tracking-[0.22em] uppercase text-slate-500 dark:text-slate-400 mt-0.5">

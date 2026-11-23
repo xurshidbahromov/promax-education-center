@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Atkinson_Hyperlegible, Inter, Fredoka, DM_Sans } from "next/font/google";
+import { Atkinson_Hyperlegible, Inter, Fredoka, DM_Sans, Nunito } from "next/font/google";
 import "./globals.css";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
@@ -43,6 +43,13 @@ const fredoka = Fredoka({
   preload: true,
 });
 
+const nunito = Nunito({
+  variable: "--font-nunito",
+  subsets: ["latin"],
+  weight: ["700", "800", "900"],
+  display: "swap",
+});
+
 export const metadata: Metadata = {
  title: "Promax Education Center | Zamonaviy Ta'lim Markazi",
  description: "Toshkent Chilonzor shahridagi eng zamonaviy o'quv markazi. OTM larga, IELTS, SAT va Xalqaro Universitetlarga tayyorlov.",
@@ -70,7 +77,7 @@ export default function RootLayout({
  return (
  <html lang="en" className="scroll-smooth" suppressHydrationWarning>
  <body
- className={`${dmSans.variable} ${atkinson.variable} ${inter.variable} ${fredoka.variable} antialiased text-slate-800 dark:text-slate-50 min-h-screen flex flex-col font-sans selection:bg-brand-blue/20 transition-colors duration-300`}
+ className={`${dmSans.variable} ${atkinson.variable} ${inter.variable} ${fredoka.variable} ${nunito.variable} antialiased text-slate-800 dark:text-slate-50 min-h-screen flex flex-col font-sans selection:bg-brand-blue/20 transition-colors duration-300`}
  >
  <Script src="https://telegram.org/js/telegram-web-app.js" strategy="beforeInteractive" />
  <NextTopLoader color="#F97316" height={3} showSpinner={false} />
