@@ -282,33 +282,45 @@ export default function DashboardLayout({
  <div className="flex-1 flex flex-col min-w-0 relative z-10 h-screen overflow-hidden">
   {/* Unified Responsive Top Bar (mounts NotificationBell & StreakPill only ONCE) */}
   {!isTakeTestPage && (
-  <div className="absolute top-3.5 sm:top-4 left-3.5 right-3.5 sm:left-4 sm:right-4 lg:left-auto lg:right-6 z-50 flex items-center justify-between gap-2 lg:justify-end pointer-events-none">
-    {/* Mobile Logo Island */}
-    <Link href="/dashboard" className="lg:hidden h-10 sm:h-11 bg-white/95 dark:bg-slate-900/95 border border-gray-200/70 dark:border-slate-800/80 rounded-full flex items-center justify-center gap-2 px-3 sm:px-4 shadow-md shadow-brand-blue/5 pointer-events-auto shrink-0">
-      <div className="relative w-5 h-5 flex-shrink-0">
-        <Image src="/favicon.ico" alt="Logo" fill className="object-contain" />
-      </div>
-      <div className="flex flex-col">
-        <span className="font-brand font-black text-[13.5px] sm:text-[14.5px] text-slate-900 dark:text-white uppercase tracking-[0.11em] leading-none">
-          Promax
-        </span>
-        <span className="text-[6.5px] font-semibold text-brand-orange tracking-[0.26em] uppercase leading-none mt-0.5 pl-[0.5px] font-sans">
-          Education
-        </span>
-      </div>
-    </Link>
+  <>
+    {/* Smooth Progressive Top Edge Blur (iOS-style glass fade behind floating top bar) */}
+    <div
+      aria-hidden="true"
+      className="pointer-events-none absolute top-0 left-0 right-0 h-20 z-40 backdrop-blur-md bg-gradient-to-b from-white/55 via-white/25 to-transparent dark:from-slate-950/65 dark:via-slate-950/30 dark:to-transparent"
+      style={{
+        maskImage: "linear-gradient(to bottom, black 50%, transparent 100%)",
+        WebkitMaskImage: "linear-gradient(to bottom, black 50%, transparent 100%)",
+      }}
+    />
 
-    {/* Unified Status Island (Streak, Test Rejimi, Sound & Notifications) */}
-    <div className="h-10 sm:h-11 lg:h-auto bg-white/95 dark:bg-slate-900/95 lg:bg-white/90 lg:dark:bg-slate-900/90 lg:backdrop-blur-md border border-gray-200/70 dark:border-slate-800/80 rounded-full flex items-center justify-center gap-1 sm:gap-1.5 lg:gap-2.5 px-2 sm:px-3 lg:px-4 lg:py-2 shadow-md lg:shadow-lg shadow-brand-blue/5 pointer-events-auto transition-all duration-300 shrink-0">
-      <StreakPill />
-      <div className="hidden lg:block w-px h-5 bg-slate-200 dark:bg-slate-800" />
-      <SidebarBetaWidget variant="pill" />
-      <div className="hidden lg:block w-px h-5 bg-slate-200 dark:bg-slate-800" />
-      <SoundToggle />
-      <div className="hidden lg:block w-px h-5 bg-slate-200 dark:bg-slate-800" />
-      <NotificationBell />
+    <div className="absolute top-3.5 sm:top-4 left-3.5 right-3.5 sm:left-4 sm:right-4 lg:left-auto lg:right-6 z-50 flex items-center justify-between gap-2 lg:justify-end pointer-events-none">
+      {/* Mobile Logo Island */}
+      <Link href="/dashboard" className="lg:hidden h-10 sm:h-11 bg-white/75 dark:bg-slate-900/75 backdrop-blur-md backdrop-saturate-150 border border-white/70 dark:border-slate-800/80 rounded-full flex items-center justify-center gap-2 px-3 sm:px-4 shadow-md shadow-brand-blue/5 pointer-events-auto shrink-0">
+        <div className="relative w-5 h-5 flex-shrink-0">
+          <Image src="/favicon.ico" alt="Logo" fill className="object-contain" />
+        </div>
+        <div className="flex flex-col">
+          <span className="font-brand font-black text-[13.5px] sm:text-[14.5px] text-slate-900 dark:text-white uppercase tracking-[0.11em] leading-none">
+            Promax
+          </span>
+          <span className="text-[6.5px] font-semibold text-brand-orange tracking-[0.26em] uppercase leading-none mt-0.5 pl-[0.5px] font-sans">
+            Education
+          </span>
+        </div>
+      </Link>
+
+      {/* Unified Status Island (Streak, Test Rejimi, Sound & Notifications) */}
+      <div className="h-10 sm:h-11 lg:h-auto bg-white/75 dark:bg-slate-900/75 backdrop-blur-md backdrop-saturate-150 border border-white/70 dark:border-slate-800/80 rounded-full flex items-center justify-center gap-1 sm:gap-1.5 lg:gap-2.5 px-2 sm:px-3 lg:px-4 lg:py-2 shadow-md lg:shadow-lg shadow-brand-blue/5 pointer-events-auto transition-all duration-300 shrink-0">
+        <StreakPill />
+        <div className="hidden lg:block w-px h-5 bg-slate-200 dark:bg-slate-800" />
+        <SidebarBetaWidget variant="pill" />
+        <div className="hidden lg:block w-px h-5 bg-slate-200 dark:bg-slate-800" />
+        <SoundToggle />
+        <div className="hidden lg:block w-px h-5 bg-slate-200 dark:bg-slate-800" />
+        <NotificationBell />
+      </div>
     </div>
-  </div>
+  </>
   )}
 
  {/* Page Content */}
@@ -321,10 +333,20 @@ export default function DashboardLayout({
 
  {/* Mobile Bottom Navigation (5 Primary Labeled Tabs) */}
  {!isTakeTestPage && (
+ <>
+ {/* Smooth Progressive Bottom Edge Blur (iOS-style glass fade behind bottom dock) */}
+ <div
+   aria-hidden="true"
+   className="lg:hidden pointer-events-none fixed bottom-0 left-0 right-0 h-24 z-40 backdrop-blur-md bg-gradient-to-t from-white/60 via-white/25 to-transparent dark:from-slate-950/70 dark:via-slate-950/30 dark:to-transparent"
+   style={{
+     maskImage: "linear-gradient(to top, black 50%, transparent 100%)",
+     WebkitMaskImage: "linear-gradient(to top, black 50%, transparent 100%)",
+   }}
+ />
  <div className="lg:hidden fixed bottom-3 left-3.5 right-3.5 z-50 flex justify-center pointer-events-none">
  <nav
  aria-label="Asosiy navigatsiya"
- className="bg-white/95 dark:bg-slate-900/95 border border-slate-200/80 dark:border-slate-800/80 px-1.5 py-1.5 rounded-[1.75rem] shadow-[0_10px_28px_rgba(15,23,42,0.08)] dark:shadow-[0_10px_28px_rgba(0,0,0,0.4)] w-full max-w-md pointer-events-auto safe-area-pb"
+ className="bg-white/75 dark:bg-slate-900/75 backdrop-blur-md backdrop-saturate-150 border border-white/70 dark:border-slate-800/80 px-1.5 py-1.5 rounded-[1.75rem] shadow-[0_10px_28px_rgba(15,23,42,0.08)] dark:shadow-[0_10px_28px_rgba(0,0,0,0.4)] w-full max-w-md pointer-events-auto safe-area-pb"
  >
  <div className="grid grid-cols-5 gap-0.5 relative">
  {mobileMenuItems.map((item) => {
@@ -359,6 +381,7 @@ export default function DashboardLayout({
  </div>
  </nav>
  </div>
+ </>
  )}
  </div>
  )}
