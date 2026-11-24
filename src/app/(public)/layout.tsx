@@ -11,7 +11,7 @@ export default function PublicLayout({
  <>
  <Background />
  <Navbar />
- <main className="flex-grow pt-16">
+ <main className="flex-grow pt-14 sm:pt-16">
  {children}
  </main>
  <Footer />

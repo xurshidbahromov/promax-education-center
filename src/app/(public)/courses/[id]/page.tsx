@@ -1,202 +1,204 @@
 "use client";
 
-import { useLanguage } from '@/context/LanguageContext';
-import { courses } from '@/data/courses';
-import { courseDetails } from '@/data/course-details';
-import { motion } from 'framer-motion';
-import { ArrowLeft, BookOpen, CheckCircle2 } from 'lucide-react';
-import Link from 'next/link';
-import Image from 'next/image';
-import { notFound, useParams } from 'next/navigation';
+import { useLanguage } from "@/context/LanguageContext";
+import { courses } from "@/data/courses";
+import { courseDetails } from "@/data/course-details";
+import { ArrowLeft, ArrowRight, BookOpen, CheckCircle2, Phone } from "lucide-react";
+import Link from "next/link";
+import Image from "next/image";
+import { notFound, useParams } from "next/navigation";
 
 export default function CourseDetailPage() {
- const { t } = useLanguage();
- const params = useParams();
- const id = params?.id as string;
+  const { t } = useLanguage();
+  const params = useParams();
+  const id = params?.id as string;
 
- const course = courses.find((c) => c.id === id);
+  const course = courses.find((c) => c.id === id);
 
- if (!course) {
- return notFound();
- }
+  if (!course) {
+    return notFound();
+  }
 
- return (
- <div className="-mt-16 w-full pb-20 transition-colors duration-300 relative">
- 
- {/* Ambient Background Glows (Original) */}
- <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-brand-orange/10 rounded-full blur-[120px] pointer-events-none -z-10" />
- <div className="absolute bottom-0 left-0 w-[600px] h-[600px] bg-brand-blue/10 rounded-full blur-[150px] pointer-events-none -z-10" />
+  const Icon = course.icon;
+  const categoryLabel =
+    course.type === "general"
+      ? t("courses.categories.general")
+      : course.type === "certificate"
+      ? t("courses.cert.title")
+      : t("courses.prep.title");
 
- {/* Hero Image Banner - Normal document flow! Takes space and sits behind navbar */}
- <div className="relative w-full h-[300px] md:h-[450px] rounded-b-[3rem] md:rounded-b-[4rem] overflow-hidden shadow-xl z-0">
- <Image 
- src={course.image} 
- alt={t(`courses.${course.id}`)} 
- fill 
- className="object-cover" 
- priority 
- />
- <div className="absolute inset-0 bg-gradient-to-b from-black/70 via-black/20 to-transparent" />
- 
- {/* Back Button (Floating inside the banner) */}
- <div className="absolute top-24 md:top-32 left-4 sm:left-6 lg:left-8 z-10 max-w-7xl mx-auto w-full">
- <Link
- href="/courses"
- className="inline-flex items-center text-white/90 hover:text-white active:text-white transition-colors bg-white/10 hover:bg-white/20 active:bg-white/20 px-5 py-2.5 rounded-full backdrop-blur-md text-sm font-medium border border-white/20 shadow-lg"
- >
- <ArrowLeft className="w-5 h-5 mr-2" />
- {t('nav.courses')}
- </Link>
- </div>
- </div>
+  return (
+    <div className="w-full pt-8 sm:pt-12 pb-20 px-4 sm:px-6 lg:px-8">
+      <div className="max-w-7xl mx-auto w-full space-y-8">
+        {/* Back Link */}
+        <Link
+          href="/courses"
+          className="inline-flex items-center gap-2 text-xs sm:text-sm font-semibold text-slate-600 hover:text-slate-900 dark:text-slate-300 dark:hover:text-white transition-colors"
+        >
+          <ArrowLeft size={16} />
+          <span>{t("nav.courses")}</span>
+        </Link>
 
- <div className="px-4 sm:px-6 lg:px-8">
- <div className="max-w-7xl mx-auto w-full relative z-10">
- 
- {/* Hero Section (LinkedIn Profile Style Header) */}
- {/* -mt-16 to -mt-24 pulls this container UP so it overlaps the banner */}
- <div className="flex flex-col md:flex-row gap-6 md:gap-8 items-start mb-16 -mt-16 md:-mt-24">
- 
- {/* Overlapping Floating Icon */}
- {/* Size: 192px on md. 96px overlaps banner, 96px hangs below */}
- <motion.div
- initial={{ opacity: 0, y: 20 }}
- animate={{ opacity: 1, y: 0 }}
- className={`w-32 h-32 md:w-48 md:h-48 rounded-[2rem] md:rounded-[2.5rem] ${course.bg} flex items-center justify-center flex-shrink-0 shadow-2xl border-[6px] border-white dark:border-slate-950 bg-white dark:bg-slate-900 relative z-20`}
- >
- <course.icon className={`w-16 h-16 md:w-24 md:h-24 ${course.color}`} />
- </motion.div>
+        {/* Clean Editorial Split Hero Card */}
+        <div className="bg-white dark:bg-slate-900 rounded-[28px] border border-slate-200/80 dark:border-slate-800 overflow-hidden grid grid-cols-1 lg:grid-cols-12">
+          <div className="lg:col-span-5 relative min-h-[220px] sm:min-h-[280px] lg:min-h-full bg-slate-100 dark:bg-slate-800">
+            <Image
+              src={course.image}
+              alt={t(`courses.${course.id}`)}
+              fill
+              priority
+              sizes="(max-width: 1024px) 100vw, 42vw"
+              className="object-cover"
+            />
+          </div>
 
- {/* Course Title and Description */}
- {/* pt pushes the text down so it clears the banner and sits on the page background */}
- <div className="pt-4 md:pt-28 flex-grow">
- <motion.h1
- initial={{ opacity: 0, y: 20 }}
- animate={{ opacity: 1, y: 0 }}
- className="text-4xl md:text-5xl lg:text-6xl font-semibold text-slate-800 dark:text-slate-100 mb-4 tracking-tighter uppercase font-fredoka"
- >
- {t(`courses.${course.id}`)}
- </motion.h1>
- <motion.p
- initial={{ opacity: 0, y: 20 }}
- animate={{ opacity: 1, y: 0 }}
- transition={{ delay: 0.1 }}
- className="text-lg md:text-xl text-gray-600 dark:text-gray-400 max-w-4xl leading-relaxed"
- >
- {t(`courses.${course.id}.long_desc`)}
- </motion.p>
- </div>
- </div>
+          <div className="lg:col-span-7 p-6 sm:p-8 md:p-10 flex flex-col justify-between gap-6">
+            <div className="space-y-4">
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-200 text-xs font-semibold">
+                <Icon size={14} className="text-brand-blue dark:text-blue-400" />
+                <span>{categoryLabel}</span>
+              </div>
 
- <div className="max-w-7xl mx-auto">
- <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+              <h1 className="text-2xl sm:text-4xl font-semibold font-sans tracking-tight text-slate-900 dark:text-white leading-[1.12]">
+                {t(`courses.${course.id}`)}
+              </h1>
 
- {/* Main Content (Left) */}
- <div className="lg:col-span-2 space-y-8">
- {/* Methodology Section / Detailed Programs */}
- {courseDetails[id] ? (
- <div className="space-y-8">
- {courseDetails[id].programs.map((program, index) => (
- <motion.section
- key={index}
- initial={{ opacity: 0, y: 20 }}
- whileInView={{ opacity: 1, y: 0 }}
- viewport={{ once: true }}
- transition={{ delay: index * 0.1 }}
- className="bg-white dark:bg-slate-900 rounded-3xl p-8 shadow-sm border border-gray-100 dark:border-slate-800"
- >
- <h2 className="text-2xl md:text-3xl font-medium text-slate-800 dark:text-slate-100 mb-8 flex items-start gap-4 tracking-tighter uppercase font-fredoka">
- <span className={`p-3 rounded-xl ${course.bg} ${course.color} mt-1 shadow-sm`}>
- <CheckCircle2 size={28} />
- </span>
- <span className="leading-tight">{t(program.titleKey)}</span>
- </h2>
+              <p className="text-sm sm:text-base text-slate-600 dark:text-slate-300 leading-relaxed font-medium">
+                {t(`courses.${course.id}.long_desc`)}
+              </p>
+            </div>
 
- <ul className="space-y-5 mb-8">
- {t(program.featuresKey).split('|').map((feature, fIndex) => (
- <li key={fIndex} className="flex items-start gap-4">
- <div className={`mt-2 w-2.5 h-2.5 rounded-full ${course.color.replace('text-', 'bg-')} flex-shrink-0 shadow-sm`} />
- <span className="text-gray-600 dark:text-gray-300 text-lg leading-relaxed">
- {feature.trim()}
- </span>
- </li>
- ))}
- </ul>
+            <div className="flex flex-wrap items-center gap-3 pt-2">
+              <Link
+                href="/register"
+                className="px-6 py-3 rounded-full bg-amber-500 hover:bg-amber-600 text-white text-sm font-semibold inline-flex items-center gap-2 active:scale-[0.97] transition-all"
+              >
+                <span>{t("hero.cta.primary")}</span>
+                <ArrowRight size={15} />
+              </Link>
+              <a
+                href="tel:+998955137776"
+                className="px-5 py-3 rounded-full bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-100 text-sm font-semibold inline-flex items-center gap-2 transition-colors tabular-nums"
+              >
+                <Phone size={15} className="text-brand-blue dark:text-blue-400" />
+                <span>+998 95 513 77 76</span>
+              </a>
+            </div>
+          </div>
+        </div>
 
- {program.priceKey && (
- <div className="mt-8 pt-8 border-t border-gray-100 dark:border-slate-800 flex items-center justify-between flex-wrap gap-4">
- <span className="text-gray-500 dark:text-gray-400 font-medium text-lg">
- Kurs narxi:
- </span>
- <span className={`text-2xl font-medium ${course.color}`}>
- {t(program.priceKey)}
- </span>
- </div>
- )}
- </motion.section>
- ))}
- </div>
- ) : (
- <motion.section
- initial={{ opacity: 0, y: 20 }}
- whileInView={{ opacity: 1, y: 0 }}
- viewport={{ once: true }}
- className="bg-white dark:bg-slate-900 rounded-3xl p-8 md:p-10 shadow-sm border border-gray-100 dark:border-slate-800"
- >
- <h2 className="text-3xl font-medium text-slate-800 dark:text-slate-100 mb-8 flex items-center gap-4 tracking-tighter uppercase font-fredoka">
- <span className={`p-3 rounded-xl ${course.bg} ${course.color} shadow-sm`}>
- <CheckCircle2 size={28} />
- </span>
- {t('course.methodology')}
- </h2>
- <p className="text-gray-600 dark:text-gray-300 text-xl leading-relaxed mb-10">
- {t('course.methodology.desc')}
- </p>
- <ul className="grid grid-cols-1 md:grid-cols-2 gap-6">
- {[1, 2, 3, 4].map((step) => (
- <li key={step} className="flex items-start gap-4 bg-gray-50 dark:bg-slate-800/50 p-6 rounded-2xl border border-gray-100 dark:border-slate-700/50 hover:shadow-md transition-shadow">
- <div className={`mt-1 w-8 h-8 rounded-full ${course.color.replace('text-', 'bg-')} text-white flex items-center justify-center text-sm font-medium flex-shrink-0 shadow-sm`}>
- {step}
- </div>
- <div>
- <h4 className="font-medium text-slate-800 dark:text-slate-100 text-lg mb-2">
- {t(`methodology.step${step}.title`)}
- </h4>
- <p className="text-sm text-gray-500 dark:text-gray-400 leading-relaxed">
- {t(`methodology.step${step}.desc`)}
- </p>
- </div>
- </li>
- ))}
- </ul>
- </motion.section>
- )}
- </div>
+        {/* Main Content Grid */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          {/* Left: Programs / Methodology */}
+          <div className="lg:col-span-2 space-y-6">
+            {courseDetails[id] ? (
+              courseDetails[id].programs.map((program, index) => (
+                <section
+                  key={index}
+                  className="bg-white dark:bg-slate-900 rounded-[26px] p-6 sm:p-8 border border-slate-200/80 dark:border-slate-800"
+                >
+                  <div className="flex items-start gap-3.5 mb-6">
+                    <div className="w-10 h-10 rounded-xl bg-brand-blue/10 text-brand-blue dark:text-blue-400 flex items-center justify-center shrink-0 mt-0.5">
+                      <CheckCircle2 size={20} />
+                    </div>
+                    <h2 className="text-xl sm:text-2xl font-semibold font-sans tracking-tight text-slate-900 dark:text-white leading-snug">
+                      {t(program.titleKey)}
+                    </h2>
+                  </div>
 
- {/* Sidebar (Right) - Materials */}
- <div className="lg:col-span-1">
- <motion.section
- initial={{ opacity: 0, x: 20 }}
- whileInView={{ opacity: 1, x: 0 }}
- viewport={{ once: true }}
- className="bg-white dark:bg-slate-900 rounded-3xl p-8 shadow-sm border border-gray-100 dark:border-slate-800 sticky top-32"
- >
- <h2 className="text-2xl font-medium text-slate-800 dark:text-slate-100 mb-6 flex items-center gap-4 tracking-tighter uppercase font-fredoka">
- <span className={`p-3 rounded-xl ${course.bg} ${course.color} shadow-sm`}>
- <BookOpen size={28} />
- </span>
- {t('course.materials')}
- </h2>
- <p className="text-gray-600 dark:text-gray-300 text-lg leading-relaxed">
- {t(`courses.${course.id}.materials`)}
- </p>
- </motion.section>
- </div>
+                  <ul className="space-y-3.5">
+                    {t(program.featuresKey)
+                      .split("|")
+                      .map((feature, fIndex) => (
+                        <li key={fIndex} className="flex items-start gap-3">
+                          <span className="mt-2 w-1.5 h-1.5 rounded-full bg-amber-500 flex-shrink-0" />
+                          <span className="text-slate-600 dark:text-slate-300 text-sm sm:text-base leading-relaxed font-medium">
+                            {feature.trim()}
+                          </span>
+                        </li>
+                      ))}
+                  </ul>
 
- </div>
- </div>
- </div>
- </div>
- </div>
- );
+                  {program.priceKey && (
+                    <div className="mt-6 pt-5 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between flex-wrap gap-3">
+                      <span className="text-slate-500 dark:text-slate-400 font-medium text-sm">
+                        Kurs narxi:
+                      </span>
+                      <span className="text-lg sm:text-xl font-semibold text-slate-900 dark:text-white tabular-nums">
+                        {t(program.priceKey)}
+                      </span>
+                    </div>
+                  )}
+                </section>
+              ))
+            ) : (
+              <section className="bg-white dark:bg-slate-900 rounded-[26px] p-6 sm:p-8 border border-slate-200/80 dark:border-slate-800">
+                <div className="flex items-center gap-3.5 mb-5">
+                  <div className="w-10 h-10 rounded-xl bg-brand-blue/10 text-brand-blue dark:text-blue-400 flex items-center justify-center shrink-0">
+                    <CheckCircle2 size={20} />
+                  </div>
+                  <h2 className="text-xl sm:text-2xl font-semibold font-sans tracking-tight text-slate-900 dark:text-white">
+                    {t("course.methodology")}
+                  </h2>
+                </div>
+
+                <p className="text-slate-600 dark:text-slate-300 text-sm sm:text-base leading-relaxed font-medium mb-6">
+                  {t("course.methodology.desc")}
+                </p>
+
+                <ul className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  {[1, 2, 3, 4].map((step) => (
+                    <li
+                      key={step}
+                      className="flex items-start gap-3.5 bg-slate-50 dark:bg-slate-800/60 p-5 rounded-2xl border border-slate-200/70 dark:border-slate-800"
+                    >
+                      <div className="w-7 h-7 rounded-full bg-slate-900 dark:bg-white text-white dark:text-slate-900 flex items-center justify-center text-xs font-bold flex-shrink-0 tabular-nums">
+                        0{step}
+                      </div>
+                      <div>
+                        <h3 className="font-semibold text-slate-900 dark:text-white text-sm sm:text-base mb-1">
+                          {t(`methodology.step${step}.title`)}
+                        </h3>
+                        <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 leading-relaxed">
+                          {t(`methodology.step${step}.desc`)}
+                        </p>
+                      </div>
+                    </li>
+                  ))}
+                </ul>
+              </section>
+            )}
+          </div>
+
+          {/* Right Sidebar: Materials */}
+          <div className="lg:col-span-1">
+            <section className="bg-white dark:bg-slate-900 rounded-[26px] p-6 sm:p-7 border border-slate-200/80 dark:border-slate-800 sticky top-20 space-y-5">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-amber-500/10 text-amber-500 flex items-center justify-center shrink-0">
+                  <BookOpen size={20} />
+                </div>
+                <h2 className="text-lg sm:text-xl font-semibold font-sans tracking-tight text-slate-900 dark:text-white">
+                  {t("course.materials")}
+                </h2>
+              </div>
+
+              <p className="text-slate-600 dark:text-slate-300 text-sm sm:text-[15px] leading-relaxed font-medium">
+                {t(`courses.${course.id}.materials`)}
+              </p>
+
+              <div className="pt-4 border-t border-slate-100 dark:border-slate-800">
+                <Link
+                  href="/register"
+                  className="w-full py-3 rounded-2xl bg-amber-500 hover:bg-amber-600 text-white text-sm font-semibold flex items-center justify-center gap-2 transition-colors"
+                >
+                  <span>{t("cta.button.primary")}</span>
+                  <ArrowRight size={15} />
+                </Link>
+              </div>
+            </section>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
 }

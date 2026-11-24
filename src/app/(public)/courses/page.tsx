@@ -1,88 +1,85 @@
 "use client";
 
-import { useLanguage } from '@/context/LanguageContext';
-import { motion } from 'framer-motion';
-import { ArrowDownRight } from 'lucide-react';
-import Link from 'next/link';
-import Image from 'next/image';
-import { courses, Course } from '@/data/courses';
+import { useState } from "react";
+import { useLanguage } from "@/context/LanguageContext";
+import { motion } from "framer-motion";
+import { ArrowRight } from "lucide-react";
+import Link from "next/link";
+import Image from "next/image";
+import { courses, Course } from "@/data/courses";
+
+type CategoryFilter = "all" | "general" | "certificate" | "prep";
 
 const CourseCard = ({ course, index }: { course: Course; index: number }) => {
   const { t } = useLanguage();
+  const Icon = course.icon;
+
+  const badgeText =
+    course.type === "general"
+      ? t("courses.categories.general")
+      : course.type === "certificate"
+      ? t("courses.cert.title")
+      : t("courses.prep.title");
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: 30 }}
+      initial={{ opacity: 0, y: 18 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true }}
-      transition={{ delay: index * 0.05, duration: 0.5 }}
+      transition={{ delay: Math.min(index * 0.04, 0.24), duration: 0.35 }}
       className="h-full"
     >
       <Link
         href={`/courses/${course.id}`}
-        className="group flex flex-col rounded-[2rem] overflow-hidden shadow-sm hover:shadow-xl border border-slate-200/80 dark:border-slate-800 transition-all duration-300 h-full bg-white dark:bg-slate-900"
+        className="group flex flex-col rounded-[24px] overflow-hidden border border-slate-200/80 dark:border-slate-800 hover:border-amber-500/45 active:scale-[0.99] transition-all duration-200 h-full bg-white dark:bg-slate-900"
       >
-        {/* ── 1. TOP BANNER IMAGE (Chuqurroq tushirilgan rasm) ── */}
-        <div className="relative w-full h-52 sm:h-56 overflow-hidden shrink-0 bg-slate-900">
+        {/* Clean 16:10 Image */}
+        <div className="relative aspect-[16/10] w-full overflow-hidden shrink-0 bg-slate-100 dark:bg-slate-800">
           <Image
             src={course.image}
             alt={t(`courses.${course.id}`)}
             fill
+            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
             className="object-cover object-center transition-transform duration-500 group-hover:scale-105"
           />
-          <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-black/20 pointer-events-none" />
-          
-          {/* Top Left Floating Pill Badge on Image */}
-          <div className="absolute top-3.5 left-3.5 z-10">
-            <div className={`px-3 py-1 rounded-full ${course.bg} backdrop-blur-md border border-white/60 dark:border-white/20 text-xs font-semibold flex items-center gap-1.5 shadow-sm`}>
-              <course.icon className={`w-3.5 h-3.5 ${course.color}`} />
-              <span className="text-slate-800 dark:text-slate-100 font-fredoka">{t(`courses.${course.id}`)}</span>
-            </div>
-          </div>
+          <div className="absolute inset-0 bg-gradient-to-t from-slate-950/45 via-transparent to-transparent pointer-events-none" />
+
+          {/* Single subtle category pill */}
+          <span className="absolute top-3 left-3 px-2.5 py-1 rounded-full bg-slate-900/75 backdrop-blur-md text-white text-[11px] font-semibold">
+            {badgeText}
+          </span>
         </div>
 
-        {/* ── 2. SEAMLESS SOLID NOTCHED CARD SHAPE ── */}
-        <div className="relative -mt-8 z-20 flex flex-col flex-grow">
-          
-          {/* Top Row: Left "Batafsil ↘" + Right Solid Raised Tab */}
-          <div className="flex items-end justify-between relative z-10">
-            {/* Left Shelf: Batafsil Link */}
-            <div className="pl-5 pb-2.5 flex items-center shrink-0">
-              <span className="text-xs sm:text-sm font-semibold text-white drop-shadow-[0_2px_4px_rgba(0,0,0,0.9)] flex items-center gap-1 group-hover:text-brand-orange transition-colors">
-                <span>Batafsil</span>
-                <ArrowDownRight size={14} className="text-brand-orange shrink-0" />
-              </span>
-            </div>
-
-            {/* Right Solid Tab with Inverted Curve connector */}
-            <div className="bg-white dark:bg-slate-900 text-slate-800 dark:text-white px-5 py-2.5 rounded-t-2xl flex items-center gap-2 relative shadow-none">
-              {/* Inverted concave curve connecting shelf to tab */}
-              <svg className="absolute bottom-0 -left-4 w-4 h-4 fill-white dark:fill-slate-900 pointer-events-none" viewBox="0 0 16 16">
-                <path d="M16,0 C16,8.836556 8.836556,16 0,16 L16,16 L16,0 Z" />
-              </svg>
-              <span className="w-2 h-2 rounded-full bg-brand-orange shrink-0 animate-pulse" />
-              <span className="text-xs font-bold text-slate-700 dark:text-slate-300 truncate">
-                {course.type === 'general' ? 'Offline Darslar' : course.type === 'certificate' ? 'Xalqaro Sertifikat' : 'OTM Tayyorlov'}
-              </span>
-            </div>
-          </div>
-
-          {/* Main Solid Body (100% Solid white/slate-900) */}
-          <div className="bg-white dark:bg-slate-900 rounded-b-[2rem] rounded-tl-[1.8rem] p-5 sm:p-6 text-slate-800 dark:text-white flex flex-col justify-between flex-grow">
-            
-            {/* Title and Description */}
-            <div className="space-y-2">
-              <h3 className="text-lg sm:text-xl font-bold font-fredoka text-slate-800 dark:text-slate-100 leading-tight">
+        {/* Clean Solid Body */}
+        <div className="p-5 flex flex-col justify-between gap-4 flex-1">
+          <div className="space-y-2.5">
+            <div className="flex items-center gap-2.5">
+              <div className="w-8 h-8 rounded-xl bg-slate-100 dark:bg-slate-800 text-brand-blue dark:text-blue-400 flex items-center justify-center shrink-0">
+                <Icon className="w-4 h-4" />
+              </div>
+              <h3 className="text-base sm:text-[17px] font-semibold font-sans tracking-tight text-slate-900 dark:text-white leading-snug group-hover:text-brand-blue dark:group-hover:text-blue-400 transition-colors">
                 {t(`courses.${course.id}`)}
               </h3>
-
-              <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 font-medium leading-relaxed line-clamp-3">
-                {t(`courses.${course.id}.desc`)}
-              </p>
             </div>
 
+            <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 font-medium leading-relaxed line-clamp-2">
+              {t(`courses.${course.id}.desc`)}
+            </p>
           </div>
 
+          <div className="pt-3 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between text-xs font-semibold">
+            <span className="text-slate-500 dark:text-slate-400">
+              {course.type === "general"
+                ? "Offline"
+                : course.type === "certificate"
+                ? "Sertifikat"
+                : "OTM"}
+            </span>
+            <span className="inline-flex items-center gap-1 text-amber-600 dark:text-amber-400 group-hover:translate-x-0.5 transition-transform">
+              <span>{t("courses.more")}</span>
+              <ArrowRight size={13} />
+            </span>
+          </div>
         </div>
       </Link>
     </motion.div>
@@ -91,86 +88,109 @@ const CourseCard = ({ course, index }: { course: Course; index: number }) => {
 
 export default function CoursesPage() {
   const { t } = useLanguage();
+  const [activeFilter, setActiveFilter] = useState<CategoryFilter>("all");
 
-  const generalCourses = courses.filter(c => c.type === 'general');
-  const certCourses = courses.filter(c => c.type === 'certificate');
-  const prepCourses = courses.filter(c => c.type === 'prep');
+  const generalCourses = courses.filter((c) => c.type === "general");
+  const certCourses = courses.filter((c) => c.type === "certificate");
+  const prepCourses = courses.filter((c) => c.type === "prep");
+
+  const sections: { key: Exclude<CategoryFilter, "all">; title: string; items: Course[]; cols: string }[] = [
+    {
+      key: "general",
+      title: t("courses.categories.general"),
+      items: generalCourses,
+      cols: "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3",
+    },
+    {
+      key: "certificate",
+      title: t("courses.cert.title"),
+      items: certCourses,
+      cols: "grid-cols-1 sm:grid-cols-2 lg:grid-cols-4",
+    },
+    {
+      key: "prep",
+      title: t("courses.prep.title"),
+      items: prepCourses,
+      cols: "grid-cols-1 sm:grid-cols-2 lg:grid-cols-4",
+    },
+  ];
+
+  const visibleSections =
+    activeFilter === "all"
+      ? sections
+      : sections.filter((s) => s.key === activeFilter);
+
+  const filterTabs: { id: CategoryFilter; label: string; count: number }[] = [
+    { id: "all", label: t("courses.title"), count: courses.length },
+    { id: "general", label: t("courses.categories.general"), count: generalCourses.length },
+    { id: "certificate", label: t("courses.cert.title"), count: certCourses.length },
+    { id: "prep", label: t("courses.prep.title"), count: prepCourses.length },
+  ];
 
   return (
-    <div className="w-full pt-28 sm:pt-36 lg:pt-40 pb-20 px-4 sm:px-6 lg:px-8 transition-colors duration-300 relative overflow-hidden">
-      
-      {/* Ambient Background Glows */}
-      <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-brand-orange/10 rounded-full blur-[120px] pointer-events-none -z-10" />
-      <div className="absolute bottom-0 left-0 w-[600px] h-[600px] bg-brand-blue/10 rounded-full blur-[150px] pointer-events-none -z-10" />
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-4xl h-[400px] bg-purple-500/5 rounded-full blur-[150px] pointer-events-none -z-10" />
-
-      <div className="max-w-7xl mx-auto w-full relative z-10">
-
-        {/* Left Aligned Header */}
-        <div className="mb-16 relative mt-4">
-          <motion.h1
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="text-4xl md:text-6xl font-semibold text-slate-800 dark:text-slate-100 mb-6 tracking-tighter uppercase font-fredoka"
-          >
-            {t('courses.title')}
-          </motion.h1>
-          
-          <motion.p
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.1 }}
-            className="text-lg md:text-xl text-slate-600 dark:text-slate-300 max-w-3xl leading-relaxed font-medium"
-          >
-            {t('courses.subtitle')}
-          </motion.p>
+    <div className="w-full pt-10 sm:pt-14 pb-20 px-4 sm:px-6 lg:px-8">
+      <div className="max-w-7xl mx-auto w-full">
+        {/* Clean Editorial Header */}
+        <div className="mb-8 sm:mb-10 max-w-2xl">
+          <h1 className="text-3xl sm:text-4xl md:text-5xl font-semibold font-sans tracking-tight text-slate-900 dark:text-white leading-[1.1] mb-3">
+            {t("courses.title")}
+          </h1>
+          <p className="text-base sm:text-lg text-slate-600 dark:text-slate-300 leading-relaxed font-medium">
+            {t("courses.subtitle")}
+          </p>
         </div>
 
-        {/* General Subjects */}
-        <div className="mb-24">
-          <div className="flex flex-col md:flex-row md:items-center gap-4 mb-12">
-            <div className="w-16 h-1.5 bg-gradient-to-r from-brand-blue to-blue-400 rounded-full" />
-            <h2 className="text-3xl md:text-4xl font-semibold text-slate-800 dark:text-slate-100 tracking-tighter uppercase font-fredoka">
-              {t('courses.categories.general')}
-            </h2>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {generalCourses.map((course, index) => (
-              <CourseCard key={course.id} course={course} index={index} />
-            ))}
-          </div>
+        {/* Clean Category Switcher */}
+        <div className="flex items-center gap-2 overflow-x-auto no-scrollbar pb-2 mb-10">
+          {filterTabs.map((tab) => {
+            const active = activeFilter === tab.id;
+            return (
+              <button
+                type="button"
+                key={tab.id}
+                onClick={() => setActiveFilter(tab.id)}
+                className={`px-4 py-2 rounded-full text-xs sm:text-sm font-semibold whitespace-nowrap transition-all flex items-center gap-2 cursor-pointer border ${
+                  active
+                    ? "bg-slate-900 text-white border-slate-900 dark:bg-white dark:text-slate-900 dark:border-white"
+                    : "bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-300 border-slate-200/80 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700"
+                }`}
+              >
+                <span>{tab.label}</span>
+                <span
+                  className={`text-[11px] px-1.5 py-0.5 rounded-full tabular-nums ${
+                    active
+                      ? "bg-white/20 text-white dark:bg-slate-900/15 dark:text-slate-900"
+                      : "bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400"
+                  }`}
+                >
+                  {tab.count}
+                </span>
+              </button>
+            );
+          })}
         </div>
 
-        {/* Certificate Prep */}
-        <div className="mb-24">
-          <div className="flex flex-col md:flex-row md:items-center gap-4 mb-12">
-            <div className="w-16 h-1.5 bg-gradient-to-r from-purple-600 to-purple-400 rounded-full" />
-            <h2 className="text-3xl md:text-4xl font-semibold text-slate-800 dark:text-slate-100 tracking-tighter uppercase font-fredoka">
-              {t('courses.cert.title')}
-            </h2>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {certCourses.map((course, index) => (
-              <CourseCard key={course.id} course={course} index={index} />
-            ))}
-          </div>
-        </div>
+        {/* Clean Sections */}
+        <div className="space-y-14">
+          {visibleSections.map((section) => (
+            <section key={section.key}>
+              <div className="flex items-center justify-between gap-4 mb-6">
+                <h2 className="text-xl sm:text-2xl font-semibold font-sans tracking-tight text-slate-900 dark:text-white">
+                  {section.title}
+                </h2>
+                <span className="text-xs font-semibold text-slate-500 dark:text-slate-400 tabular-nums">
+                  {section.items.length} ta kurs
+                </span>
+              </div>
 
-        {/* University Prep */}
-        <div className="mb-20">
-          <div className="flex flex-col md:flex-row md:items-center gap-4 mb-12">
-            <div className="w-16 h-1.5 bg-gradient-to-r from-brand-orange to-orange-400 rounded-full" />
-            <h2 className="text-3xl md:text-4xl font-semibold text-slate-800 dark:text-slate-100 tracking-tighter uppercase font-fredoka">
-              {t('courses.prep.title')}
-            </h2>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            {prepCourses.map((course, index) => (
-              <CourseCard key={course.id} course={course} index={index} />
-            ))}
-          </div>
+              <div className={`grid ${section.cols} gap-5`}>
+                {section.items.map((course, index) => (
+                  <CourseCard key={course.id} course={course} index={index} />
+                ))}
+              </div>
+            </section>
+          ))}
         </div>
-
       </div>
     </div>
   );
