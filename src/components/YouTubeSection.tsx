@@ -123,7 +123,7 @@ const YouTubeSection = () => {
 
                 {/* Text Info */}
                 <div className="p-5 sm:p-6 border-t border-slate-100 dark:border-slate-800">
-                  <h3 className="text-base sm:text-lg font-semibold font-sans tracking-tight text-slate-900 dark:text-white leading-snug line-clamp-2 group-hover:text-red-600 dark:group-hover:text-red-400 transition-colors">
+                  <h3 className="text-base sm:text-lg font-semibold font-sans tracking-tight text-slate-900 dark:text-white leading-snug line-clamp-2">
                     {t(playlist.titleKey)}
                   </h3>
                   <p className="text-xs font-medium text-slate-500 dark:text-slate-400 mt-2.5 flex items-center gap-2">

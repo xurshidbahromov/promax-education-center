@@ -385,7 +385,7 @@ export function OlympiadSection() {
                 </div>
 
                 <div>
-                  <h4 className="text-base font-semibold font-sans tracking-tight text-slate-900 dark:text-white leading-snug line-clamp-1 group-hover:text-brand-blue transition-colors">
+                  <h4 className="text-base font-semibold font-sans tracking-tight text-slate-900 dark:text-white leading-snug line-clamp-1">
                     {item.title}
                   </h4>
                   <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 line-clamp-2 font-medium">

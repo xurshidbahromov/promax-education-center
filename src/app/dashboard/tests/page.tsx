@@ -272,7 +272,7 @@ export default function OnlineTestsPage() {
                   {/* ── COMPACT SOLID BODY ── */}
                   <div className="p-4.5 sm:p-5 flex flex-col justify-between gap-4 flex-1">
                     <div className="space-y-3">
-                      <h3 className="text-base sm:text-[17px] font-semibold font-sans tracking-tight text-slate-900 dark:text-white leading-snug line-clamp-2 group-hover:text-brand-blue dark:group-hover:text-blue-400 transition-colors">
+                      <h3 className="text-base sm:text-[17px] font-semibold font-sans tracking-tight text-slate-900 dark:text-white leading-snug line-clamp-2">
                         {test.title}
                       </h3>
 

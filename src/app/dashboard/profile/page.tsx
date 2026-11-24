@@ -1166,7 +1166,7 @@ export default function ProfilePage() {
                   <Icon size={19} />
                 </div>
                 <div className="flex-1 min-w-0">
-                  <h4 className="font-bold text-sm text-slate-900 dark:text-white group-hover:text-brand-blue transition-colors truncate">
+                  <h4 className="font-bold text-sm text-slate-900 dark:text-white truncate">
                     {item.title}
                   </h4>
                   <p className="text-xs font-medium text-slate-500 dark:text-slate-400 mt-0.5 truncate">

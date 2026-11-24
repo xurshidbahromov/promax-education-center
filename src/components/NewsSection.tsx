@@ -199,7 +199,7 @@ export const NewsSection = () => {
                       <span>{item.date}</span>
                     </div>
 
-                    <h3 className="font-semibold font-sans tracking-tight text-slate-900 dark:text-white text-base sm:text-[17px] leading-snug mb-2 line-clamp-2 group-hover:text-brand-blue dark:group-hover:text-blue-400 transition-colors">
+                    <h3 className="font-semibold font-sans tracking-tight text-slate-900 dark:text-white text-base sm:text-[17px] leading-snug mb-2 line-clamp-2">
                       {item.title}
                     </h3>
 

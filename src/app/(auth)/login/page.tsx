@@ -396,7 +396,7 @@ export default function LoginPage() {
               <GraduationCap className="text-brand-blue relative z-10 drop-shadow-[0_4px_12px_rgba(0,86,210,0.2)]" size={38} />
             </div>
             <div className="text-center">
-              <div className="font-fredoka text-lg font-medium text-slate-800 dark:text-slate-100 group-hover:text-brand-blue transition-colors duration-300">
+              <div className="font-fredoka text-lg font-medium text-slate-800 dark:text-slate-100">
                 O'quvchi
               </div>
               <div className="text-xs text-gray-400 dark:text-gray-500 font-medium mt-0.5">
@@ -441,7 +441,7 @@ export default function LoginPage() {
               <Users className="text-brand-orange relative z-10 drop-shadow-[0_4px_12px_rgba(249,115,22,0.2)]" size={38} />
             </div>
             <div className="text-center">
-              <div className="font-fredoka text-lg font-medium text-slate-800 dark:text-slate-100 group-hover:text-brand-orange transition-colors duration-300">
+              <div className="font-fredoka text-lg font-medium text-slate-800 dark:text-slate-100">
                 O'qituvchi
               </div>
               <div className="text-xs text-gray-400 dark:text-gray-500 font-medium mt-0.5">

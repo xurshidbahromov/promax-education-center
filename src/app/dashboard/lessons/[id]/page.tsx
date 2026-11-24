@@ -197,7 +197,7 @@ export default function LessonDetailPage() {
                 <FileDown size={19} />
               </div>
               <div className="min-w-0">
-                <span className="font-bold text-sm text-slate-900 dark:text-white group-hover:text-brand-blue transition-colors block truncate">
+                <span className="font-bold text-sm text-slate-900 dark:text-white block truncate">
                   {material.title}
                 </span>
                 <span className="text-[11px] font-semibold text-slate-400">
@@ -224,7 +224,7 @@ export default function LessonDetailPage() {
                 <LinkIcon size={19} />
               </div>
               <div className="min-w-0">
-                <span className="font-bold text-sm text-slate-900 dark:text-white group-hover:text-brand-blue transition-colors block truncate">
+                <span className="font-bold text-sm text-slate-900 dark:text-white block truncate">
                   {material.title}
                 </span>
                 <span className="text-[11px] font-semibold text-slate-400">

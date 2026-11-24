@@ -347,7 +347,7 @@ export default function SubjectDetailPage() {
 
                   <div className="flex-1 min-w-0">
                     <div className="flex flex-wrap items-center gap-2">
-                      <h3 className="text-sm sm:text-base font-bold text-slate-900 dark:text-white group-hover:text-brand-blue transition-colors line-clamp-2 sm:line-clamp-1">
+                      <h3 className="text-sm sm:text-base font-bold text-slate-900 dark:text-white line-clamp-2 sm:line-clamp-1">
                         {lesson.title}
                       </h3>
                       {isDone && (

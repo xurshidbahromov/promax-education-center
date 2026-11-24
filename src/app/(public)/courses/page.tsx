@@ -57,7 +57,7 @@ const CourseCard = ({ course, index }: { course: Course; index: number }) => {
               <div className="w-8 h-8 rounded-xl bg-slate-100 dark:bg-slate-800 text-brand-blue dark:text-blue-400 flex items-center justify-center shrink-0">
                 <Icon className="w-4 h-4" />
               </div>
-              <h3 className="text-base sm:text-[17px] font-semibold font-sans tracking-tight text-slate-900 dark:text-white leading-snug group-hover:text-brand-blue dark:group-hover:text-blue-400 transition-colors">
+              <h3 className="text-base sm:text-[17px] font-semibold font-sans tracking-tight text-slate-900 dark:text-white leading-snug">
                 {t(`courses.${course.id}`)}
               </h3>
             </div>
