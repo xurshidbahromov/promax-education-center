@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef, useMemo } from "react";
 import StartTestConfirmSheet from "@/components/dashboard/StartTestConfirmSheet";
+import PromaxEmptyState from "@/components/ui/PromaxEmptyState";
 import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -627,33 +628,35 @@ export default function OlympiadsPage() {
 
               {/* Grid or Empty State */}
               {filteredTournaments.length === 0 ? (
-                <div className="bg-white/60 dark:bg-slate-900/60 backdrop-blur-xl rounded-[2rem] p-10 text-center border border-white/60 dark:border-slate-800/60 flex flex-col items-center justify-center gap-3">
-                  <div className="w-16 h-16 rounded-2xl bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-400">
-                    <Trophy size={28} />
-                  </div>
-                  <h4 className="text-base font-bold text-slate-800 dark:text-white">
-                    {statusFilter === "live"
+                <PromaxEmptyState
+                  variant="trophy"
+                  compact
+                  title={
+                    statusFilter === "live"
                       ? "Hozirda faol musobaqa mavjud emas"
                       : statusFilter === "upcoming"
                       ? "Hozircha kutilayotgan musobaqalar yo'q"
                       : statusFilter === "finished"
                       ? "Hali yakunlangan musobaqalar mavjud emas"
-                      : "Musobaqalar topilmadi"}
-                  </h4>
-                  <p className="text-xs text-slate-500 max-w-sm">
-                    {statusFilter === "live"
+                      : "Musobaqalar topilmadi"
+                  }
+                  description={
+                    statusFilter === "live"
                       ? "Yaqinda boshlanadigan musobaqalarga ro'yxatdan o'tib, tayyorgarlik ko'rishingiz mumkin."
-                      : "Yangi musobaqalar muntazam e'lon qilib boriladi."}
-                  </p>
-                  {statusFilter !== "all" && (
-                    <button
-                      onClick={() => setStatusFilter("all")}
-                      className="mt-2 px-4 py-2 rounded-xl bg-brand-blue text-white text-xs font-bold hover:bg-blue-600 transition-colors cursor-pointer"
-                    >
-                      Barcha musobaqalarni ko'rish
-                    </button>
-                  )}
-                </div>
+                      : "Yangi musobaqalar muntazam e'lon qilib boriladi."
+                  }
+                  actions={
+                    statusFilter !== "all" && (
+                      <button
+                        type="button"
+                        onClick={() => setStatusFilter("all")}
+                        className="px-5 py-2.5 rounded-full bg-amber-500 hover:bg-amber-600 text-white text-xs sm:text-sm font-bold transition-colors active:scale-95 cursor-pointer"
+                      >
+                        Barcha musobaqalarni ko&apos;rish
+                      </button>
+                    )
+                  }
+                />
               ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5">
                   {filteredTournaments.map((item) => {

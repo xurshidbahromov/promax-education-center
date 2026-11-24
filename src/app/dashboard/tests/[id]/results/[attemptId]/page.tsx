@@ -13,6 +13,7 @@ import {
 import { getAttemptResults } from "@/lib/tests";
 import MathRenderer from "@/components/MathRenderer";
 import { AttemptResultSkeleton } from "@/components/ui/Skeleton";
+import PromaxEmptyState from "@/components/ui/PromaxEmptyState";
 
 export default function TestResultsPage() {
   const params = useParams();
@@ -49,17 +50,22 @@ export default function TestResultsPage() {
 
   if (!results) {
     return (
-      <div className="relative min-h-[70vh] flex items-center justify-center">
-        <div className="text-center">
-          <div className="w-24 h-24 rounded-full bg-red-50 dark:bg-red-900/20 flex items-center justify-center mx-auto mb-6 shadow-sm">
-            <AlertCircle className="w-12 h-12 text-red-500" />
-          </div>
-          <h2 className="text-2xl font-bold text-slate-800 dark:text-slate-100 mb-2">{t('tests.result.not_found') || "Natija topilmadi"}</h2>
-          <Link href="/dashboard/tests" className="inline-flex items-center gap-2 mt-4 px-6 py-3 bg-brand-blue text-white rounded-xl font-medium hover:bg-blue-600 transition-colors">
-            <ArrowLeft size={18} />
-            {t('tests.result.back') || "Ortga qaytish"}
-          </Link>
-        </div>
+      <div className="relative min-h-[70vh] flex items-center justify-center p-4 sm:p-6">
+        <PromaxEmptyState
+          variant="results"
+          className="w-full max-w-md"
+          title={t('tests.result.not_found') || "Natija topilmadi"}
+          description="Bu urinish natijasi mavjud emas yoki o'chirilgan bo'lishi mumkin."
+          actions={
+            <Link
+              href="/dashboard/tests"
+              className="px-5 py-2.5 rounded-full bg-amber-500 hover:bg-amber-600 text-white text-xs sm:text-sm font-bold inline-flex items-center gap-1.5 active:scale-95 transition-all"
+            >
+              <ArrowLeft size={15} />
+              <span>{t('tests.result.back') || "Ortga qaytish"}</span>
+            </Link>
+          }
+        />
       </div>
     );
   }

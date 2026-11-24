@@ -28,6 +28,7 @@ import {
 import Image from "next/image";
 import toast from "react-hot-toast";
 import { soundFx } from "@/lib/sound-effects";
+import PromaxEmptyState from "@/components/ui/PromaxEmptyState";
 import {
   getShopItems,
   purchaseShopItem,
@@ -312,10 +313,23 @@ export default function StudentShopPage() {
             {itemsLoading ? (
               <ShopPageSkeleton />
             ) : filteredItems.length === 0 ? (
-              <div className="py-16 text-center bg-white/60 dark:bg-slate-900/60 backdrop-blur-xl rounded-3xl border border-dashed border-slate-200 dark:border-slate-800">
-                <Gift size={40} className="mx-auto mb-3 text-slate-400 opacity-50" />
-                <p className="text-sm font-semibold text-slate-500">Ushbu kategoriyada sovg'alar topilmadi</p>
-              </div>
+              <PromaxEmptyState
+                variant="shop"
+                compact
+                title="Ushbu kategoriyada sovg'alar topilmadi"
+                description="Boshqa kategoriyalarni ko'rib chiqing yoki tez kunda qo'shiladigan yangi sovg'alarni kuting."
+                actions={
+                  selectedCategory !== "all" && (
+                    <button
+                      type="button"
+                      onClick={() => setSelectedCategory("all")}
+                      className="px-5 py-2.5 rounded-full bg-amber-500 hover:bg-amber-600 text-white text-xs sm:text-sm font-bold transition-colors active:scale-95 cursor-pointer"
+                    >
+                      Barcha sovg&apos;alarni ko&apos;rish
+                    </button>
+                  )
+                }
+              />
             ) : (
               <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 gap-6">
                 {filteredItems.map((item) => {
@@ -706,10 +720,21 @@ export default function StudentShopPage() {
             {ordersLoading ? (
               <div className="py-12 text-center text-slate-400 text-xs">Yuklanmoqda...</div>
             ) : myOrders.length === 0 ? (
-              <div className="py-16 text-center bg-white/60 dark:bg-slate-900/60 backdrop-blur-xl rounded-3xl border border-dashed border-slate-200 dark:border-slate-800">
-                <PackageCheck size={40} className="mx-auto mb-3 text-slate-400 opacity-50" />
-                <p className="text-sm font-semibold text-slate-500">Siz hali hech qanday sovg'a xarid qilmadingiz</p>
-              </div>
+              <PromaxEmptyState
+                variant="shop"
+                compact
+                title="Siz hali hech qanday sovg'a xarid qilmadingiz"
+                description="Testlar va musobaqalarda tanga yig'ib, do'kondagi sovg'alarga almashtiring."
+                actions={
+                  <button
+                    type="button"
+                    onClick={() => setActiveTab("shop")}
+                    className="px-5 py-2.5 rounded-full bg-amber-500 hover:bg-amber-600 text-white text-xs sm:text-sm font-bold transition-colors active:scale-95 cursor-pointer"
+                  >
+                    Sovg&apos;alarni ko&apos;rish
+                  </button>
+                }
+              />
             ) : (
               <div className="space-y-3">
                 {myOrders.map((order) => {

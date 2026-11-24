@@ -5,6 +5,7 @@ import { useParams, useRouter, useSearchParams } from "next/navigation";
 import { useLanguage } from "@/context/LanguageContext";
 import Link from "next/link";
 import Image from "next/image";
+import PromaxEmptyState from "@/components/ui/PromaxEmptyState";
 import {
   ArrowLeft,
   ArrowRight,
@@ -967,22 +968,24 @@ export default function TakeTestPage() {
 
   if (!loading && (!test || questions.length === 0)) {
     return (
-      <div className="min-h-[70vh] flex flex-col items-center justify-center p-6 text-center space-y-4">
-        <div className="w-16 h-16 rounded-2xl bg-amber-500/10 text-amber-600 dark:text-amber-400 flex items-center justify-center">
-          <AlertCircle size={32} />
-        </div>
-        <h2 className="text-xl sm:text-2xl font-bold font-fredoka text-slate-800 dark:text-slate-100">
-          Savollar topilmadi
-        </h2>
-        <p className="text-sm text-slate-500 max-w-md">
-          Ushbu musobaqa uchun hali savollar kiritilmagan yoki test faol emas.
-        </p>
-        <Link
-          href={isInternational ? "/dashboard/international" : isOlympiad ? "/dashboard/olympiads" : "/dashboard/tests"}
-          className="px-5 py-2.5 rounded-2xl bg-brand-blue hover:bg-blue-600 text-white font-bold text-sm shadow-sm transition-all cursor-pointer"
-        >
-          {isInternational ? "SAT sinovlariga qaytish" : isOlympiad ? "Milliy sertifikatga qaytish" : t('tests.take.back_to_list')}
-        </Link>
+      <div className="min-h-[70vh] flex items-center justify-center p-4 sm:p-6">
+        <PromaxEmptyState
+          variant={isInternational ? "international" : isOlympiad ? "trophy" : "tests"}
+          className="w-full max-w-md"
+          title="Savollar topilmadi"
+          description="Ushbu test uchun hali savollar kiritilmagan yoki test faol emas."
+          actions={
+            <Link
+              href={isInternational ? "/dashboard/international" : isOlympiad ? "/dashboard/olympiads" : "/dashboard/tests"}
+              className="px-5 py-2.5 rounded-full bg-amber-500 hover:bg-amber-600 text-white font-bold text-xs sm:text-sm inline-flex items-center gap-1.5 active:scale-95 transition-all"
+            >
+              <ArrowLeft size={15} />
+              <span>
+                {isInternational ? "SAT sinovlariga qaytish" : isOlympiad ? "Milliy sertifikatga qaytish" : t('tests.take.back_to_list')}
+              </span>
+            </Link>
+          }
+        />
       </div>
     );
   }

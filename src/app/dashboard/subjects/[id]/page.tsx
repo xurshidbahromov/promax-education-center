@@ -21,6 +21,7 @@ import {
 import Link from "next/link";
 import Image from "next/image";
 import LessonsComingSoonEmblem from "@/components/ui/LessonsComingSoonEmblem";
+import PromaxEmptyState from "@/components/ui/PromaxEmptyState";
 
 export default function SubjectDetailPage() {
   const params = useParams();
@@ -114,19 +115,22 @@ export default function SubjectDetailPage() {
 
   if (!subject) {
     return (
-      <div className="min-h-[60vh] flex flex-col items-center justify-center text-center gap-3 p-6">
-        <div className="w-14 h-14 rounded-2xl bg-slate-100 dark:bg-slate-800 text-slate-400 flex items-center justify-center">
-          <BookOpen size={26} />
-        </div>
-        <h2 className="text-xl font-bold font-fredoka text-slate-800 dark:text-slate-100">
-          Fan topilmadi
-        </h2>
-        <Link
-          href="/dashboard/lessons"
-          className="px-5 py-2.5 rounded-2xl bg-amber-500 hover:bg-amber-600 text-white text-xs font-bold transition-colors"
-        >
-          Fanlar ro&apos;yxatiga qaytish
-        </Link>
+      <div className="min-h-[65vh] flex items-center justify-center p-4 sm:p-6">
+        <PromaxEmptyState
+          variant="not-found"
+          className="w-full max-w-md"
+          title="Fan topilmadi"
+          description="Bu fan o'chirilgan yoki mavjud emas."
+          actions={
+            <Link
+              href="/dashboard/lessons"
+              className="px-5 py-2.5 rounded-full bg-amber-500 hover:bg-amber-600 text-white text-xs sm:text-sm font-bold inline-flex items-center gap-1.5 active:scale-95 transition-all"
+            >
+              <ArrowLeft size={15} />
+              <span>Fanlar ro&apos;yxatiga qaytish</span>
+            </Link>
+          }
+        />
       </div>
     );
   }
@@ -288,7 +292,7 @@ export default function SubjectDetailPage() {
           <div className="bg-white/70 dark:bg-slate-900/70 backdrop-blur-xl rounded-[28px] border border-white/70 dark:border-slate-800/70 p-8 sm:p-10 flex flex-col items-center text-center gap-3.5">
             <LessonsComingSoonEmblem />
             <div className="space-y-1 max-w-sm">
-              <h3 className="text-base sm:text-lg font-bold font-fredoka text-slate-900 dark:text-white">
+              <h3 className="text-base sm:text-lg font-semibold font-sans tracking-tight text-slate-900 dark:text-white">
                 Bu fanga darslar tez kunda yuklanadi
               </h3>
               <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 font-medium">
@@ -311,14 +315,12 @@ export default function SubjectDetailPage() {
             </div>
           </div>
         ) : filteredLessons.length === 0 ? (
-          <div className="bg-white/90 dark:bg-slate-900/90 rounded-[24px] border border-slate-200/70 dark:border-slate-800 p-8 text-center space-y-1">
-            <p className="text-sm font-bold text-slate-700 dark:text-slate-200">
-              Mos darslar topilmadi
-            </p>
-            <p className="text-xs text-slate-400">
-              Filtr yoki qidiruv so&apos;zini o&apos;zgartirib ko&apos;ring.
-            </p>
-          </div>
+          <PromaxEmptyState
+            variant="not-found"
+            compact
+            title="Mos darslar topilmadi"
+            description="Filtr yoki qidiruv so'zini o'zgartirib qayta urinib ko'ring."
+          />
         ) : (
           <div className="space-y-2.5">
             {filteredLessons.map(({ lesson, order }) => {

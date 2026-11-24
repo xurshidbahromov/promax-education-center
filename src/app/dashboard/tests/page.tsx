@@ -17,6 +17,7 @@ import {
   X,
 } from "lucide-react";
 import { getPublishedTests, type Subject, type TestType } from "@/lib/tests";
+import PromaxEmptyState from "@/components/ui/PromaxEmptyState";
 
 const SUBJECT_LABELS: Record<Subject, string> = {
   math: "Matematika",
@@ -193,27 +194,32 @@ export default function OnlineTestsPage() {
               </div>
             ))
           ) : tests.length === 0 ? (
-            <div className="col-span-1 md:col-span-2 lg:col-span-3 bg-white dark:bg-slate-900 rounded-[26px] p-10 border border-slate-200/80 dark:border-slate-800 flex flex-col items-center gap-3 text-center mt-2">
-              <div className="w-14 h-14 rounded-2xl bg-amber-500/10 text-amber-500 flex items-center justify-center">
-                <FileCheck size={26} />
-              </div>
-              <h2 className="text-base sm:text-lg font-semibold text-slate-800 dark:text-slate-100">
-                {t("tests.list.no_tests")}
-              </h2>
-              {(selectedSubject !== "all" || selectedType !== "all" || searchQuery.trim()) && (
-                <button
-                  type="button"
-                  onClick={() => {
-                    setSearchQuery("");
-                    setSelectedSubject("all");
-                    setSelectedType("all");
-                  }}
-                  className="px-4 py-2 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 text-xs font-bold hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors cursor-pointer"
-                >
-                  Filtrlarni tozalash
-                </button>
-              )}
-            </div>
+            <PromaxEmptyState
+              variant="tests"
+              compact
+              className="col-span-1 md:col-span-2 lg:col-span-3 mt-2 !bg-white dark:!bg-slate-900"
+              title={t("tests.list.no_tests")}
+              description={
+                selectedSubject !== "all" || selectedType !== "all" || searchQuery.trim()
+                  ? "Qidiruv yoki tanlangan filtrlarga mos test topilmadi. Filtrlarni tozalab qayta urinib ko'ring."
+                  : "Hozircha online testlar joylanmoqda. Tez orada yangi testlar qo'shiladi."
+              }
+              actions={
+                (selectedSubject !== "all" || selectedType !== "all" || searchQuery.trim()) && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setSearchQuery("");
+                      setSelectedSubject("all");
+                      setSelectedType("all");
+                    }}
+                    className="px-5 py-2.5 rounded-full bg-amber-500 hover:bg-amber-600 text-white text-xs sm:text-sm font-bold transition-colors active:scale-95 cursor-pointer"
+                  >
+                    Filtrlarni tozalash
+                  </button>
+                )
+              }
+            />
           ) : (
             tests.map((test) => {
               const subjectName = SUBJECT_LABELS[test.subject] || test.subject;

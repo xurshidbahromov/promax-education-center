@@ -20,6 +20,7 @@ import { createClient } from "@/utils/supabase/client";
 import { getStudentResults, type ExamResult } from "@/lib/supabase-queries";
 import Link from "next/link";
 import { ResultRowSkeleton } from "@/components/ui/Skeleton";
+import PromaxEmptyState from "@/components/ui/PromaxEmptyState";
 
 export default function ResultsPage() {
  const { t } = useLanguage();
@@ -62,14 +63,14 @@ export default function ResultsPage() {
  return matchesSearch && matchesSubject && matchesTestType && matchesStatus;
  });
 
+  const hasActiveFilter =
+    searchQuery.trim().length > 0 ||
+    filterSubject !== "all" ||
+    filterTestType !== "all" ||
+    filterStatus !== "all";
+
   return (
     <div className="relative text-slate-800 dark:text-white font-sans pb-12">
-      {/* Standard Ambient background matching all dashboard subpages */}
-      <div className="fixed inset-0 z-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] rounded-full bg-blue-300/20 dark:bg-blue-500/10 blur-[130px]" />
-        <div className="absolute bottom-[-15%] right-[-10%] w-[45%] h-[45%] rounded-full bg-violet-300/20 dark:bg-purple-500/10 blur-[130px]" />
-      </div>
-
       <div className="relative z-10 flex flex-col gap-6 max-w-[1600px] mx-auto pt-1 sm:pt-2">
 
         {/* ── PAGE HEADER & SEARCH ── */}
@@ -155,12 +156,44 @@ export default function ResultsPage() {
               {[1, 2, 3, 4].map(i => <ResultRowSkeleton key={i} />)}
             </div>
           ) : filteredResults.length === 0 ? (
-            <div className="bg-white/60 dark:bg-slate-900/60 backdrop-blur-xl rounded-[2rem] border border-white/60 dark:border-slate-800/60 p-12 flex flex-col items-center gap-4 text-center mt-4 shadow-none">
-              <div className="w-16 h-16 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center">
-                <FileCheck size={28} className="text-slate-400" />
-              </div>
-              <p className="text-lg font-bold text-slate-700 dark:text-slate-200">{t('dashboard.no_results')}</p>
-            </div>
+            <PromaxEmptyState
+              variant="results"
+              className="mt-2"
+              title={
+                hasActiveFilter
+                  ? "Mos natijalar topilmadi"
+                  : t('dashboard.no_results') || "Hozircha natijalar mavjud emas"
+              }
+              description={
+                hasActiveFilter
+                  ? "Tanlangan filtrlar yoki qidiruv bo'yicha natija topilmadi. Filtrlarni tozalab qayta urinib ko'ring."
+                  : "Online test yoki musobaqalarda qatnashib ilk natijangizni qayd eting!"
+              }
+              actions={
+                hasActiveFilter ? (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setSearchQuery("");
+                      setFilterSubject("all");
+                      setFilterTestType("all");
+                      setFilterStatus("all");
+                    }}
+                    className="px-5 py-2.5 rounded-full bg-amber-500 hover:bg-amber-600 text-white text-xs sm:text-sm font-bold transition-colors active:scale-95 cursor-pointer"
+                  >
+                    Filtrlarni tozalash
+                  </button>
+                ) : (
+                  <Link
+                    href="/dashboard/tests"
+                    className="px-5 py-2.5 rounded-full bg-amber-500 hover:bg-amber-600 text-white font-bold text-xs sm:text-sm inline-flex items-center gap-1.5 active:scale-95 transition-all"
+                  >
+                    <FileCheck size={15} />
+                    <span>Online testlarga o&apos;tish</span>
+                  </Link>
+                )
+              }
+            />
           ) : (
             filteredResults.map((result) => {
               const examDate = new Date(result.created_at).toLocaleDateString('uz-UZ', {

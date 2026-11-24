@@ -10,6 +10,7 @@ import {
   CheckCircle2, XCircle, TrendingUp, Star, Medal, BarChart3
 } from "lucide-react";
 import Link from "next/link";
+import PromaxEmptyState from "@/components/ui/PromaxEmptyState";
 
 export default function ResultDetailPage() {
   const { t } = useLanguage();
@@ -37,21 +38,22 @@ export default function ResultDetailPage() {
 
   if (!result) {
     return (
-      <div className="flex items-center justify-center py-24">
-        <div className="text-center">
-          <div className="w-24 h-24 rounded-full bg-red-50 dark:bg-red-900/20 flex items-center justify-center mx-auto mb-6">
-            <AlertCircle className="w-12 h-12 text-red-500" />
-          </div>
-          <h2 className="text-2xl font-bold text-slate-800 dark:text-slate-100 mb-2">Natija topilmadi</h2>
-          <p className="text-slate-500 dark:text-slate-400 mb-6">Bu natija mavjud emas yoki o'chirilgan</p>
-          <Link
-            href="/dashboard/results"
-            className="inline-flex items-center gap-2 px-5 py-2.5 bg-brand-blue text-white rounded-xl font-medium transition-colors hover:bg-blue-600"
-          >
-            <ArrowLeft size={16} />
-            Natijalar ro'yxatiga qaytish
-          </Link>
-        </div>
+      <div className="min-h-[65vh] flex items-center justify-center p-4 sm:p-6">
+        <PromaxEmptyState
+          variant="results"
+          className="w-full max-w-md"
+          title="Natija topilmadi"
+          description="Bu natija mavjud emas yoki o'chirilgan bo'lishi mumkin."
+          actions={
+            <Link
+              href="/dashboard/results"
+              className="px-5 py-2.5 rounded-full bg-amber-500 hover:bg-amber-600 text-white text-xs sm:text-sm font-bold inline-flex items-center gap-1.5 active:scale-95 transition-all"
+            >
+              <ArrowLeft size={15} />
+              <span>Natijalar ro&apos;yxatiga qaytish</span>
+            </Link>
+          }
+        />
       </div>
     );
   }

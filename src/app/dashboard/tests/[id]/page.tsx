@@ -19,6 +19,7 @@ import {
 } from "lucide-react";
 import { getTestById, getStudentTestHistory } from "@/lib/tests";
 import { TestDetailSkeleton } from "@/components/ui/Skeleton";
+import PromaxEmptyState from "@/components/ui/PromaxEmptyState";
 
 const UZ_SHORT_MONTHS = ["Yan", "Fev", "Mar", "Apr", "May", "Iyn", "Iyl", "Avg", "Sen", "Okt", "Noy", "Dek"];
 
@@ -85,19 +86,22 @@ export default function TestDetailsPage() {
 
   if (!test) {
     return (
-      <div className="min-h-[65vh] flex flex-col items-center justify-center p-6 text-center space-y-3">
-        <div className="w-14 h-14 rounded-2xl bg-slate-100 dark:bg-slate-800 text-slate-400 flex items-center justify-center">
-          <AlertCircle size={28} />
-        </div>
-        <h2 className="text-xl font-bold font-fredoka text-slate-800 dark:text-slate-100">
-          Test topilmadi
-        </h2>
-        <Link
-          href="/dashboard/tests"
-          className="px-5 py-2.5 rounded-2xl bg-amber-500 hover:bg-amber-600 text-white text-xs font-bold transition-colors"
-        >
-          Testlar ro&apos;yxatiga qaytish
-        </Link>
+      <div className="min-h-[65vh] flex items-center justify-center p-4 sm:p-6">
+        <PromaxEmptyState
+          variant="tests"
+          className="w-full max-w-md"
+          title="Test topilmadi"
+          description="Bu test o'chirilgan yoki vaqtincha yopilgan bo'lishi mumkin."
+          actions={
+            <Link
+              href="/dashboard/tests"
+              className="px-5 py-2.5 rounded-full bg-amber-500 hover:bg-amber-600 text-white text-xs sm:text-sm font-bold inline-flex items-center gap-1.5 active:scale-95 transition-all"
+            >
+              <ArrowLeft size={15} />
+              <span>Testlar ro&apos;yxatiga qaytish</span>
+            </Link>
+          }
+        />
       </div>
     );
   }

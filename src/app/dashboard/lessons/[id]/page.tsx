@@ -28,6 +28,7 @@ import {
 import Link from "next/link";
 import toast from "react-hot-toast";
 import { soundFx } from "@/lib/sound-effects";
+import PromaxEmptyState from "@/components/ui/PromaxEmptyState";
 
 function getEmbedVideoUrl(rawUrl: string): string {
   const url = (rawUrl || "").trim();
@@ -146,20 +147,23 @@ export default function LessonDetailPage() {
 
   if (!lesson) {
     return (
-      <div className="min-h-[60vh] flex flex-col items-center justify-center text-center gap-3 p-6">
-        <div className="w-14 h-14 rounded-2xl bg-slate-100 dark:bg-slate-800 text-slate-400 flex items-center justify-center">
-          <FileText size={26} />
-        </div>
-        <h2 className="text-xl font-bold font-fredoka text-slate-800 dark:text-slate-100">
-          Dars topilmadi
-        </h2>
-        <button
-          type="button"
-          onClick={() => router.push("/dashboard/lessons")}
-          className="px-5 py-2.5 rounded-2xl bg-amber-500 hover:bg-amber-600 text-white text-xs font-bold transition-colors cursor-pointer"
-        >
-          Darslar ro&apos;yxatiga qaytish
-        </button>
+      <div className="min-h-[65vh] flex items-center justify-center p-4 sm:p-6">
+        <PromaxEmptyState
+          variant="not-found"
+          className="w-full max-w-md"
+          title="Dars topilmadi"
+          description="Bu dars o'chirilgan yoki vaqtincha yashirilgan bo'lishi mumkin."
+          actions={
+            <button
+              type="button"
+              onClick={() => router.push("/dashboard/lessons")}
+              className="px-5 py-2.5 rounded-full bg-amber-500 hover:bg-amber-600 text-white text-xs sm:text-sm font-bold inline-flex items-center gap-1.5 active:scale-95 transition-all cursor-pointer"
+            >
+              <ArrowLeft size={15} />
+              <span>Darslar ro&apos;yxatiga qaytish</span>
+            </button>
+          }
+        />
       </div>
     );
   }
