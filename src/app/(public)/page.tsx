@@ -3,6 +3,7 @@ import Hero from "@/components/Hero";
 
 // Dynamic Code-Splitting for Below-the-Fold components
 const NewsSection = dynamic(() => import("@/components/NewsSection"));
+const PlatformShowcase = dynamic(() => import("@/components/PlatformShowcase"));
 const CoursesPreview = dynamic(() => import("@/components/CoursesPreview"));
 const Methodology = dynamic(() => import("@/components/Methodology"));
 const ResultsStats = dynamic(() => import("@/components/ResultsStats"));
@@ -37,6 +38,7 @@ export default function Home() {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
       <Hero />
+      <PlatformShowcase />
       <NewsSection />
       <div className="relative overflow-hidden bg-white/30 dark:bg-slate-900/35 border-y border-gray-200/30 dark:border-white/5 backdrop-blur-[4px] transition-colors duration-300">
         <CoursesPreview />

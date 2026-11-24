@@ -28,47 +28,42 @@ const Methodology = () => {
 
   return (
     <section className="py-16 md:py-24 relative z-10 px-4 sm:px-6 lg:px-8">
-
-      {/* Soft ambient glows */}
-      <div className="pointer-events-none absolute -top-40 left-1/3 w-[40rem] h-[40rem] rounded-full bg-amber-400/10 dark:bg-amber-500/5 blur-[140px]" />
-      <div className="pointer-events-none absolute -bottom-40 right-1/3 w-[40rem] h-[40rem] rounded-full bg-brand-blue/10 dark:bg-brand-blue/5 blur-[140px]" />
-
       <div className="max-w-7xl mx-auto w-full relative z-10">
 
         {/* ── Header ── */}
-        <div className="flex flex-col md:flex-row items-center text-center md:items-end md:text-left justify-between mb-16 lg:mb-24 gap-8">
+        <div className="flex flex-col md:flex-row items-center text-center md:items-end md:text-left justify-between mb-16 lg:mb-24 gap-6">
           <div className="max-w-2xl">
             <motion.h2
-              initial={{ opacity: 0, y: 20 }}
+              initial={{ opacity: 0, y: 16 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
-              className="text-4xl md:text-5xl lg:text-6xl font-semibold text-slate-800 dark:text-slate-100 mb-5 uppercase tracking-tighter font-fredoka"
+              className="text-3xl sm:text-4xl md:text-5xl font-semibold font-sans tracking-tight text-slate-900 dark:text-white mb-3.5 leading-[1.1]"
             >
               {t('methodology.title')}
             </motion.h2>
             <motion.p
-              initial={{ opacity: 0, y: 20 }}
+              initial={{ opacity: 0, y: 16 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
-              transition={{ delay: 0.1 }}
-              className="text-lg md:text-xl text-slate-600 dark:text-slate-300 font-medium max-w-prose"
+              transition={{ delay: 0.08 }}
+              className="text-base sm:text-lg text-slate-600 dark:text-slate-300 font-medium max-w-prose"
             >
               {t('methodology.subtitle')}
             </motion.p>
           </div>
 
           <motion.div
-            initial={{ opacity: 0, x: 20 }}
+            initial={{ opacity: 0, x: 16 }}
             whileInView={{ opacity: 1, x: 0 }}
             viewport={{ once: true }}
-            className="whitespace-nowrap pb-2 md:pb-4"
+            className="whitespace-nowrap pb-1 md:pb-2"
           >
             <Link
               href="/methodology"
-              className="inline-flex items-center gap-2 font-medium uppercase tracking-wider text-brand-blue dark:text-blue-400 hover:text-blue-700 active:text-blue-700 dark:hover:text-blue-300 active:text-blue-300 transition-colors group"
+              className="inline-flex items-center gap-2 font-semibold text-sm text-brand-blue dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 transition-colors group"
             >
               {t('methodology.home.cta')}
-              <ArrowRight className="w-5 h-5 group-hover:translate-x-1 active:scale-95 transition-transform duration-300 ease-out" />
+              <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform duration-200" />
             </Link>
           </motion.div>
         </div>
@@ -178,11 +173,11 @@ function MobileZigZag({ steps, t }: { steps: StepItem[]; t: (k: string) => strin
                 <div className="w-8 h-8 rounded-full bg-orange-500/10 dark:bg-orange-500/20 flex items-center justify-center text-brand-orange">
                   <Icon size={18} strokeWidth={2} />
                 </div>
-                <span className="text-5xl font-black text-slate-200 dark:text-slate-700 leading-none select-none font-fredoka">
+                <span className="text-5xl font-bold tabular-nums text-slate-200 dark:text-slate-700 leading-none select-none font-sans">
                   {step.num}
                 </span>
               </div>
-              <h3 className="text-base sm:text-lg font-semibold text-slate-800 dark:text-slate-100 uppercase tracking-tight px-4 mb-1.5 leading-tight font-fredoka">
+              <h3 className="text-base sm:text-lg font-semibold text-slate-900 dark:text-white tracking-tight px-4 mb-1.5 leading-tight font-sans">
                 {t(`methodology.${step.id}.title`)}
               </h3>
               <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 leading-relaxed px-5 line-clamp-3 font-medium">
@@ -288,13 +283,13 @@ function DesktopZigZag({ steps, t }: { steps: StepItem[]; t: (k: string) => stri
                 <div className="w-9 h-9 rounded-full bg-orange-500/10 dark:bg-orange-500/20 flex items-center justify-center text-brand-orange">
                   <Icon size={18} strokeWidth={2} />
                 </div>
-                <span className="text-6xl font-black text-slate-200 dark:text-slate-700 leading-none select-none font-fredoka">
+                <span className="text-6xl font-bold tabular-nums text-slate-200 dark:text-slate-700 leading-none select-none font-sans">
                   {step.num}
                 </span>
               </div>
 
               {/* Title */}
-              <h3 className="text-lg font-semibold text-slate-800 dark:text-slate-100 uppercase tracking-tight px-6 mb-2 leading-tight font-fredoka">
+              <h3 className="text-lg font-semibold text-slate-900 dark:text-white tracking-tight px-6 mb-2 leading-tight font-sans">
                 {t(`methodology.${step.id}.title`)}
               </h3>
 
