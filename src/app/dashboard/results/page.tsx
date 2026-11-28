@@ -5,6 +5,7 @@ import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useCurrentUser } from "@/hooks/useDashboardData";
 import {
+ ArrowLeft,
  Search,
  Filter,
  CheckCircle2,
@@ -75,6 +76,14 @@ export default function ResultsPage() {
 
         {/* ── PAGE HEADER & SEARCH ── */}
         <div className="flex flex-col gap-4">
+          <Link
+            href="/dashboard"
+            className="inline-flex items-center gap-2 text-xs sm:text-sm font-semibold text-slate-600 hover:text-slate-900 dark:text-slate-300 dark:hover:text-white transition-colors w-fit"
+          >
+            <ArrowLeft size={16} />
+            <span>Orqaga</span>
+          </Link>
+
           <div className="flex flex-col gap-1">
             <p className="text-[12px] text-slate-500 dark:text-slate-400 font-medium uppercase tracking-widest">
               {t('results.subtitle')}

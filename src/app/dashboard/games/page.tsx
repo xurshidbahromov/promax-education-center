@@ -2,8 +2,10 @@
 
 import { useLanguage } from "@/context/LanguageContext";
 import { useState, useEffect } from "react";
+import Link from "next/link";
 import { useCurrentUser, useUserProfile } from "@/hooks/useDashboardData";
 import {
+  ArrowLeft,
   BrainCircuit,
   Zap,
   Languages,
@@ -115,6 +117,14 @@ export default function GameZonePage() {
     <div className="relative text-slate-800 dark:text-white font-sans pb-8 select-none">
 
       <div className="relative z-10 flex flex-col gap-6 max-w-[1400px] mx-auto pt-1 sm:pt-2">
+        <Link
+          href="/dashboard"
+          className="inline-flex items-center gap-2 text-xs sm:text-sm font-semibold text-slate-600 hover:text-slate-900 dark:text-slate-300 dark:hover:text-white transition-colors w-fit -mb-2"
+        >
+          <ArrowLeft size={16} />
+          <span>Orqaga</span>
+        </Link>
+
         {/* ── HEADER (Shop aligned) ── */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div className="flex flex-col gap-1 text-left">
