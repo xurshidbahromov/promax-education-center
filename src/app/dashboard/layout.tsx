@@ -210,14 +210,26 @@ export default function DashboardLayout({
           {/* Landing Page Background */}
           <Background />
 
+          {/* Full-Width Seamless Progressive Top Edge Blur (zero vertical seam between sidebar & content) */}
+          {!isTakeTestPage && (
+            <div
+              aria-hidden="true"
+              className="pointer-events-none fixed top-0 left-0 right-0 h-20 z-30 backdrop-blur-md bg-gradient-to-b from-white/55 via-white/20 to-transparent dark:from-slate-950/65 dark:via-slate-950/25 dark:to-transparent"
+              style={{
+                maskImage: "linear-gradient(to bottom, black 45%, transparent 100%)",
+                WebkitMaskImage: "linear-gradient(to bottom, black 45%, transparent 100%)",
+              }}
+            />
+          )}
+
  {/* Desktop Sidebar */}
  {!isTakeTestPage && (
  <aside
- className="hidden lg:flex flex-col sticky top-4 h-[calc(100vh-2rem)] z-50 w-64 ml-4 bg-white/80 dark:bg-slate-900/80 backdrop-blur-2xl border border-gray-200/50 dark:border-slate-800/50 rounded-3xl shadow-2xl shadow-brand-blue/5"
+ className="hidden lg:flex flex-col sticky top-4 h-[calc(100vh-2rem)] z-40 w-64 ml-4 bg-white/85 dark:bg-slate-900/85 backdrop-blur-xl border border-white/80 dark:border-slate-800/80 rounded-[1.75rem] shadow-[0_10px_28px_rgba(15,23,42,0.06)] dark:shadow-[0_10px_28px_rgba(0,0,0,0.35)]"
  >
  <div className="h-full flex flex-col">
  {/* Logo */}
- <div className="h-20 flex items-center px-6 border-b border-gray-200/50 dark:border-slate-800/50">
+ <div className="h-20 flex items-center px-6 border-b border-slate-200/60 dark:border-slate-800/60">
  <Link href="/" className="flex items-center gap-3">
  <div className="relative w-10 h-10 flex-shrink-0">
  <Image
@@ -239,7 +251,7 @@ export default function DashboardLayout({
  </div>
 
  {/* Navigation */}
- <nav className="flex-1 p-4 space-y-1 overflow-y-auto">
+ <nav className="flex-1 p-3.5 space-y-1 overflow-y-auto">
  {menuItems.map((item) => {
  const isActive =
  item.href === "/dashboard"
@@ -250,28 +262,28 @@ export default function DashboardLayout({
  key={item.href}
  href={item.href}
  className={`
- flex items-center gap-3 px-4 py-3.5 rounded-[1.25rem] transition-all duration-300 group relative overflow-hidden
+ flex items-center gap-3 px-4 py-3 rounded-2xl transition-all duration-200 group relative overflow-hidden
  ${isActive
- ? "text-brand-blue bg-brand-blue/10 dark:bg-brand-blue/20 shadow-sm border border-brand-blue/20"
- : "text-slate-500 dark:text-slate-400 active:bg-slate-100/60 dark:active:bg-slate-800/60 active:text-slate-800 dark:active:text-slate-200"
+ ? "bg-slate-900 text-white dark:bg-white dark:text-slate-900 shadow-sm font-semibold"
+ : "text-slate-600 dark:text-slate-400 hover:bg-slate-100/80 dark:hover:bg-slate-800/70 hover:text-slate-900 dark:hover:text-white font-medium"
  }
  `}
  >
- <item.icon size={20} className={isActive ? "" : "group-active:scale-95 transition-transform"} />
- <span className="font-medium">{item.name}</span>
+ <item.icon size={19} strokeWidth={isActive ? 2.2 : 1.9} className={isActive ? "" : "group-active:scale-95 transition-transform"} />
+ <span className="text-[14px]">{item.name}</span>
  </Link>
  );
  })}
  </nav>
 
  {/* User Profile & Logout */}
- <div className="p-4 border-t border-gray-200/50 dark:border-slate-800/50">
+ <div className="p-3.5 border-t border-slate-200/60 dark:border-slate-800/60">
  <button
  onClick={handleLogout}
- className="flex items-center gap-3 px-4 py-3 text-red-500 active:bg-red-50 dark:active:bg-red-900/10 rounded-xl w-full transition-colors"
+ className="flex items-center gap-3 px-4 py-3 text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-950/30 rounded-2xl w-full transition-colors cursor-pointer"
  >
- <LogOut size={20} />
- <span className="font-medium">{t('sidebar.logout')}</span>
+ <LogOut size={19} />
+ <span className="text-[14px] font-semibold">{t('sidebar.logout')}</span>
  </button>
  </div>
  </div>
@@ -279,20 +291,10 @@ export default function DashboardLayout({
  )}
 
  {/* Main Content */}
- <div className="flex-1 flex flex-col min-w-0 relative z-10 h-screen overflow-hidden">
+ <div className="flex-1 flex flex-col min-w-0 relative h-screen overflow-hidden">
   {/* Unified Responsive Top Bar (mounts NotificationBell & StreakPill only ONCE) */}
   {!isTakeTestPage && (
   <>
-    {/* Smooth Progressive Top Edge Blur (iOS-style glass fade behind floating top bar) */}
-    <div
-      aria-hidden="true"
-      className="pointer-events-none absolute top-0 left-0 right-0 h-20 z-40 backdrop-blur-md bg-gradient-to-b from-white/55 via-white/25 to-transparent dark:from-slate-950/65 dark:via-slate-950/30 dark:to-transparent"
-      style={{
-        maskImage: "linear-gradient(to bottom, black 50%, transparent 100%)",
-        WebkitMaskImage: "linear-gradient(to bottom, black 50%, transparent 100%)",
-      }}
-    />
-
     <div className="absolute top-3.5 sm:top-4 left-3.5 right-3.5 sm:left-4 sm:right-4 lg:left-auto lg:right-6 z-50 flex items-center justify-between gap-2 lg:justify-end pointer-events-none">
       {/* Mobile Logo Island */}
       <Link href="/dashboard" className="lg:hidden h-10 sm:h-11 bg-white/75 dark:bg-slate-900/75 backdrop-blur-md backdrop-saturate-150 border border-white/70 dark:border-slate-800/80 rounded-full flex items-center justify-center gap-2 px-3 sm:px-4 shadow-md shadow-brand-blue/5 pointer-events-auto shrink-0">
