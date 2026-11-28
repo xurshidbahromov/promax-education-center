@@ -444,7 +444,7 @@ export default function InternationalCompetitionsPage() {
           <div className="bg-white/60 dark:bg-slate-900/60 backdrop-blur-xl rounded-[2rem] p-6 sm:p-7 border border-white/60 dark:border-slate-800/60 shadow-none space-y-3">
             <div className="space-y-1">
               <h1 className="text-xl sm:text-2xl font-sans font-semibold text-slate-900 dark:text-white leading-tight tracking-tight">
-                SAT
+                Xalqaro imtihonlar
               </h1>
               <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 font-medium">
                 SAT, AMC, IELTS va xalqaro olimpiadalarda bilimingizni sinang
@@ -635,7 +635,7 @@ export default function InternationalCompetitionsPage() {
                       ? "Hozircha kutilayotgan xalqaro musobaqalar yo'q"
                       : statusFilter === "finished"
                       ? "Hali yakunlangan xalqaro musobaqalar mavjud emas"
-                      : "SAT sinovlari topilmadi"
+                      : "Xalqaro imtihonlar topilmadi"
                   }
                   description={
                     statusFilter === "live"
@@ -924,7 +924,7 @@ export default function InternationalCompetitionsPage() {
           ) : (
             <TournamentLeaderboardView
               mode="international"
-              subtitle="SAT imtihonlari bo'yicha eng yuqori natijalar"
+              subtitle="Xalqaro imtihonlar bo'yicha eng yuqori natijalar"
               tournaments={tournaments}
               selectedTournamentId={selectedTournamentId}
               onSelectTournament={handleTournamentSelectForLeaderboard}
@@ -954,7 +954,7 @@ export default function InternationalCompetitionsPage() {
             <CommentsSkeleton />
           ) : (
             <TournamentCommentsView
-              subtitle="SAT imtihonlari bo'yicha savollar va fikr-mulohazalar"
+              subtitle="Xalqaro imtihonlar bo'yicha savollar va fikr-mulohazalar"
               comments={comments}
               likedCommentIds={likedCommentIds}
               currentUserId={user?.id}

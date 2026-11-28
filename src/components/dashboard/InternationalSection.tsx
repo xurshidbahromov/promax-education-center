@@ -78,7 +78,7 @@ export function InternationalBannerTeaser() {
           {/* Left Text Content Area */}
           <div className="relative z-10 space-y-1 min-w-0 flex-1 w-full xs:w-auto">
             <h4 className="text-base sm:text-xl font-semibold font-sans tracking-tight text-slate-800 dark:text-slate-100 leading-tight truncate tracking-tight">
-              {t("international.banner_title") || "SAT"}
+              {t("international.banner_title") || "Xalqaro imtihonlar"}
             </h4>
 
             <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-300 font-medium flex items-center gap-1.5 truncate">

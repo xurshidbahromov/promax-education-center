@@ -672,11 +672,11 @@ export const uz = {
  "admin.announcements.toast.status_error": "Status o'zgartirishda xatolik",
 
  // Olympiads & Tournaments
- "olympiad.banner_title": "Milliy sertifikat",
+ "olympiad.banner_title": "Milliy imtihonlar",
  "olympiad.banner_subtitle": "Bilimingizni sinang va mukofotlarni qo'lga kiriting",
  "olympiad.shelf_title": "Bilim sinovi",
  "international.shelf_title": "Jahon sinovi",
- "international.banner_title": "SAT",
+ "international.banner_title": "Xalqaro imtihonlar",
  "international.banner_subtitle": "SAT 1600 shkalasi, AMC va xalqaro sertifikatlar",
  "olympiad.participants_count": "{count} nafar qatnashuvchi",
  "olympiad.top_prizes": "Top o'rinlar uchun mukofotlar",
@@ -762,7 +762,7 @@ export const uz = {
  "platform.tests.title": "Online Testlar",
  "platform.tests.desc": "Matematika, Ingliz tili, Fizika va boshqa fanlardan DTM hamda mavzuli sinovlar, tezkor natija va xatolar tahlili.",
  "platform.tests.meta": "Fan testlari va Mock",
- "platform.competitions.title": "Milliy Sertifikat & SAT Musobaqalari",
+ "platform.competitions.title": "Milliy va Xalqaro imtihonlar",
  "platform.competitions.desc": "Jonli reyting, 3D podium, vaqt chegarasi va sovrinli haftalik online olimpiadalar.",
  "platform.competitions.meta": "Jonli reyting & Podium",
  "platform.lessons.title": "Video Darslar va Progress",

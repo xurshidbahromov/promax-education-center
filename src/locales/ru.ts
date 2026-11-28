@@ -585,11 +585,11 @@ export const ru = {
  "admin.announcements.toast.status_error": "Ошибка при изменении статуса",
 
   // Olympiads & Tournaments
-  "olympiad.banner_title": "Национальный сертификат",
+  "olympiad.banner_title": "Национальные экзамены",
   "olympiad.banner_subtitle": "Проверьте свои знания и выиграйте ценные призы",
   "olympiad.shelf_title": "Тест знаний",
   "international.shelf_title": "Мировой тест",
-  "international.banner_title": "SAT",
+  "international.banner_title": "Международные экзамены",
   "international.banner_subtitle": "Шкала SAT 1600, AMC и международные сертификаты",
   "olympiad.participants_count": "{count} участников",
   "olympiad.top_prizes": "Призы для призеров",
@@ -675,7 +675,7 @@ export const ru = {
   "platform.tests.title": "Онлайн-тесты",
   "platform.tests.desc": "Предметные и пробные тесты по математике, английскому, физике и другим предметам с мгновенным разбором ошибок.",
   "platform.tests.meta": "Тесты и пробные экзамены",
-  "platform.competitions.title": "Нац. Сертификат и SAT Соревнования",
+  "platform.competitions.title": "Национальные и Международные экзамены",
   "platform.competitions.desc": "Еженедельные онлайн-олимпиады с живым рейтингом, подиумом лидеров, таймером и призами.",
   "platform.competitions.meta": "Живой рейтинг и Подиум",
   "platform.lessons.title": "Видеоуроки и Прогресс",

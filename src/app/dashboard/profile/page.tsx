@@ -1033,7 +1033,7 @@ export default function ProfilePage() {
           "Platformadan qanday foydalanaman?",
         a:
           t("profile.view.help.faq1.a") ||
-          "Fanlar bo'yicha video darslarni ko'ring, Online Testlar hamda Milliy sertifikat va SAT sinovlarini yeching va rasmiy sertifikat oling.",
+          "Fanlar bo'yicha video darslarni ko'ring, Online Testlar hamda Milliy va Xalqaro imtihonlarni yeching va rasmiy sertifikat oling.",
       },
       {
         q:

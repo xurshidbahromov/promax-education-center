@@ -447,7 +447,7 @@ export default function OlympiadsPage() {
           <div className="bg-white/60 dark:bg-slate-900/60 backdrop-blur-xl rounded-[2rem] p-6 sm:p-7 border border-white/60 dark:border-slate-800/60 shadow-none space-y-3">
             <div className="space-y-1">
               <h1 className="text-xl sm:text-2xl font-sans font-semibold text-slate-900 dark:text-white leading-tight tracking-tight">
-                Milliy sertifikat
+                Milliy imtihonlar
               </h1>
               <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 font-medium">
                 Bilimingizni sinang va mukofotlarni qo'lga kiriting
@@ -927,7 +927,7 @@ export default function OlympiadsPage() {
           ) : (
             <TournamentLeaderboardView
               mode="national"
-              subtitle="Milliy sertifikat imtihonlari bo'yicha eng yuqori natijalar"
+              subtitle="Milliy imtihonlar bo'yicha eng yuqori natijalar"
               tournaments={tournaments}
               selectedTournamentId={selectedTournamentId}
               onSelectTournament={handleTournamentSelectForLeaderboard}
@@ -957,7 +957,7 @@ export default function OlympiadsPage() {
             <CommentsSkeleton />
           ) : (
             <TournamentCommentsView
-              subtitle="Milliy sertifikat imtihonlari bo'yicha savollar va fikr-mulohazalar"
+              subtitle="Milliy imtihonlar bo'yicha savollar va fikr-mulohazalar"
               comments={comments}
               likedCommentIds={likedCommentIds}
               currentUserId={user?.id}

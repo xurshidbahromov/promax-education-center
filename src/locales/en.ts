@@ -585,11 +585,11 @@ export const en = {
  "admin.announcements.toast.status_error": "Error changing status",
 
  // Olympiads & Tournaments
- "olympiad.banner_title": "National Certificate",
+ "olympiad.banner_title": "National Exams",
  "olympiad.banner_subtitle": "Test your knowledge and win valuable prizes",
  "olympiad.shelf_title": "Knowledge test",
  "international.shelf_title": "Global test",
- "international.banner_title": "SAT",
+ "international.banner_title": "International Exams",
  "international.banner_subtitle": "SAT 1600 scale, AMC & global certificates",
  "olympiad.participants_count": "{count} participants",
  "olympiad.top_prizes": "Prizes for top ranks",
@@ -675,7 +675,7 @@ export const en = {
  "platform.tests.title": "Online Tests",
  "platform.tests.desc": "Topic quizzes and full mock exams across Math, English, Physics, and more with instant scoring and detailed error review.",
  "platform.tests.meta": "Subject & Mock Tests",
- "platform.competitions.title": "National Certificate & SAT Arenas",
+ "platform.competitions.title": "National & International Exams",
  "platform.competitions.desc": "Weekly timed online competitions featuring live leaderboards, top-3 podiums, and scholarship prizes.",
  "platform.competitions.meta": "Live Leaderboard & Podium",
  "platform.lessons.title": "Video Lessons & Progress",
